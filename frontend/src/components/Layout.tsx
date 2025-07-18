@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import DraggableFAB from './DraggableFAB';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -178,6 +179,7 @@ const Layout: React.FC = () => {
           </div>
         </main>
       </div>
+      <DraggableFAB />
     </>
   );
 };
