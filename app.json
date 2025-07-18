@@ -1,0 +1,41 @@
+{
+  "name": "CRM Killer",
+  "description": "A lightweight, user-owned CRM system - stop renting, start owning",
+  "keywords": ["crm", "customer-management", "business-tools", "node", "react", "postgresql"],
+  "website": "https://github.com/yourusername/crm-killer",
+  "repository": "https://github.com/yourusername/crm-killer",
+  "logo": "https://raw.githubusercontent.com/yourusername/crm-killer/main/logo.png",
+  "success_url": "/dashboard",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token generation",
+      "generator": "secret"
+    },
+    "SESSION_SECRET": {
+      "description": "Secret key for session management",
+      "generator": "secret"
+    },
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "NPM_CONFIG_PRODUCTION": {
+      "value": "false"
+    }
+  }
+}
