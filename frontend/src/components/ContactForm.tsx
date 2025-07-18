@@ -142,7 +142,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               rows={3}
               value={value}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                 error ? 'border-red-300' : 'border-gray-300'
               } focus:border-indigo-500 focus:ring-indigo-500`}
             />
@@ -161,7 +161,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               name={`custom_${field.name}`}
               value={value}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                 error ? 'border-red-300' : 'border-gray-300'
               } focus:border-indigo-500 focus:ring-indigo-500`}
             >
@@ -208,7 +208,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'url' ? 'url' : 'text'}
               value={value}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                 error ? 'border-red-300' : 'border-gray-300'
               } focus:border-indigo-500 focus:ring-indigo-500`}
             />
@@ -246,7 +246,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 id="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.firstName ? 'border-red-300' : 'border-gray-300'
                 } focus:border-indigo-500 focus:ring-indigo-500`}
               />
@@ -263,7 +263,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 id="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.lastName ? 'border-red-300' : 'border-gray-300'
                 } focus:border-indigo-500 focus:ring-indigo-500`}
               />
@@ -280,7 +280,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 id="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 } focus:border-indigo-500 focus:ring-indigo-500`}
               />
@@ -297,7 +297,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 id="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
             
@@ -312,7 +312,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 value={formData.tags}
                 onChange={handleChange}
                 placeholder="customer, vip, lead"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
             
@@ -326,7 +326,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 rows={3}
                 value={formData.notes}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               />
             </div>
             
@@ -351,7 +351,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Saving...' : contact ? 'Update' : 'Create'}
             </button>
