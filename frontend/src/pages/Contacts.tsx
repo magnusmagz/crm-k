@@ -67,7 +67,7 @@ const Contacts: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowNewContact(true)}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 sm:w-auto"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Add contact
@@ -84,7 +84,7 @@ const Contacts: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
             placeholder="Search contacts..."
           />
         </div>
@@ -105,7 +105,7 @@ const Contacts: React.FC = () => {
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               {isLoading ? (
                 <div className="flex items-center justify-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
                 </div>
               ) : contacts.length === 0 ? (
                 <div className="text-center py-12">
@@ -140,7 +140,7 @@ const Contacts: React.FC = () => {
                     {contacts.map((contact) => (
                       <tr key={contact.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          <Link to={`/contacts/${contact.id}`} className="hover:text-indigo-600">
+                          <Link to={`/contacts/${contact.id}`} className="hover:text-gray-800">
                             {contact.firstName} {contact.lastName}
                           </Link>
                         </td>
@@ -165,7 +165,7 @@ const Contacts: React.FC = () => {
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <Link
                             to={`/contacts/${contact.id}`}
-                            className="text-indigo-600 hover:text-indigo-900 mr-4"
+                            className="text-gray-800 hover:text-gray-900 mr-4"
                           >
                             Edit
                           </Link>

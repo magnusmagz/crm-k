@@ -38,7 +38,8 @@ router.get('/', authMiddleware, async (req, res) => {
         { lastName: { [Op.iLike]: `%${search}%` } },
         { email: { [Op.iLike]: `%${search}%` } },
         { phone: { [Op.iLike]: `%${search}%` } },
-        { notes: { [Op.iLike]: `%${search}%` } }
+        { notes: { [Op.iLike]: `%${search}%` } },
+        { tags: { [Op.contains]: [search] } }
       ];
     }
 

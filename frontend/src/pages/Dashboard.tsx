@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="bg-gray-50 px-5 py-3">
             <div className="text-sm">
-              <Link to="/contacts" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link to="/contacts" className="font-medium text-gray-800 hover:text-gray-700">
                 View all
               </Link>
             </div>
@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="bg-gray-50 px-5 py-3">
             <div className="text-sm">
-              <Link to="/contacts?new=true" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link to="/contacts?new=true" className="font-medium text-gray-800 hover:text-gray-700">
                 Create new
               </Link>
             </div>
@@ -101,7 +101,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="bg-gray-50 px-5 py-3">
             <div className="text-sm">
-              <Link to="/custom-fields" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link to="/custom-fields" className="font-medium text-gray-800 hover:text-gray-700">
                 Manage fields
               </Link>
             </div>

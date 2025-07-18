@@ -144,7 +144,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               onChange={handleChange}
               className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } focus:border-indigo-500 focus:ring-indigo-500`}
+              } focus:border-gray-800 focus:ring-gray-800`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -163,7 +163,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               onChange={handleChange}
               className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } focus:border-indigo-500 focus:ring-indigo-500`}
+              } focus:border-gray-800 focus:ring-gray-800`}
             >
               <option value="">Select...</option>
               {field.options?.map(option => (
@@ -184,7 +184,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 type="checkbox"
                 checked={value || false}
                 onChange={handleChange}
-                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                className="focus:ring-gray-800 h-4 w-4 text-gray-800 border-gray-300 rounded"
               />
             </div>
             <div className="ml-3 text-sm">
@@ -210,7 +210,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               onChange={handleChange}
               className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } focus:border-indigo-500 focus:ring-indigo-500`}
+              } focus:border-gray-800 focus:ring-gray-800`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -248,7 +248,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 onChange={handleChange}
                 className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.firstName ? 'border-red-300' : 'border-gray-300'
-                } focus:border-indigo-500 focus:ring-indigo-500`}
+                } focus:border-gray-800 focus:ring-gray-800`}
               />
               {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
             </div>
@@ -265,7 +265,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 onChange={handleChange}
                 className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.lastName ? 'border-red-300' : 'border-gray-300'
-                } focus:border-indigo-500 focus:ring-indigo-500`}
+                } focus:border-gray-800 focus:ring-gray-800`}
               />
               {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
             </div>
@@ -282,7 +282,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 onChange={handleChange}
                 className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
-                } focus:border-indigo-500 focus:ring-indigo-500`}
+                } focus:border-gray-800 focus:ring-gray-800`}
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
@@ -297,7 +297,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 id="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
               />
             </div>
             
@@ -312,7 +312,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 value={formData.tags}
                 onChange={handleChange}
                 placeholder="customer, vip, lead"
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
               />
             </div>
             
@@ -326,7 +326,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 rows={3}
                 value={formData.notes}
                 onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
               />
             </div>
             
@@ -351,7 +351,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-gray-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Saving...' : contact ? 'Update' : 'Create'}
             </button>

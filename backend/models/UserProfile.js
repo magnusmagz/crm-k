@@ -61,6 +61,16 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         isUrl: true
       }
+    },
+    profilePhoto: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Base64 encoded profile photo'
+    },
+    companyLogo: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Base64 encoded company logo'
     }
   }, {
     tableName: 'user_profiles',

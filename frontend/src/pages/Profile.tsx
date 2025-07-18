@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid';
+import { PhotoIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 
 const Profile: React.FC = () => {
   const { profile, updateProfile } = useAuth();
@@ -20,7 +21,11 @@ const Profile: React.FC = () => {
       state: profile?.address?.state || '',
       zipCode: profile?.address?.zipCode || '',
     },
+    profilePhoto: profile?.profilePhoto || '',
+    companyLogo: profile?.companyLogo || '',
   });
+  const profilePhotoRef = useRef<HTMLInputElement>(null);
+  const companyLogoRef = useRef<HTMLInputElement>(null);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -45,6 +50,32 @@ const Profile: React.FC = () => {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'profilePhoto' | 'companyLogo') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setMessage({ type: 'error', text: 'Image must be less than 5MB' });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          [type]: reader.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = (type: 'profilePhoto' | 'companyLogo') => {
+    setFormData(prev => ({
+      ...prev,
+      [type]: ''
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,6 +162,94 @@ const Profile: React.FC = () => {
               <div className="shadow sm:overflow-hidden sm:rounded-md">
                 <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
                   <div className="grid grid-cols-6 gap-6">
+                    <div className="col-span-6">
+                      <div className="flex gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Profile Photo</label>
+                          <div className="mt-1 flex items-center">
+                            {formData.profilePhoto ? (
+                              <img
+                                src={formData.profilePhoto}
+                                alt="Profile"
+                                className="h-24 w-24 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
+                                <PhotoIcon className="h-12 w-12 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="ml-5">
+                              <button
+                                type="button"
+                                onClick={() => profilePhotoRef.current?.click()}
+                                className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                              >
+                                Change
+                              </button>
+                              {formData.profilePhoto && (
+                                <button
+                                  type="button"
+                                  onClick={() => removePhoto('profilePhoto')}
+                                  className="ml-3 text-sm text-red-600 hover:text-red-500"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                              <input
+                                ref={profilePhotoRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handlePhotoUpload(e, 'profilePhoto')}
+                                className="hidden"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Company Logo</label>
+                          <div className="mt-1 flex items-center">
+                            {formData.companyLogo ? (
+                              <img
+                                src={formData.companyLogo}
+                                alt="Company Logo"
+                                className="h-24 w-24 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <div className="h-24 w-24 rounded-lg bg-gray-200 flex items-center justify-center">
+                                <BuildingOfficeIcon className="h-12 w-12 text-gray-400" />
+                              </div>
+                            )}
+                            <div className="ml-5">
+                              <button
+                                type="button"
+                                onClick={() => companyLogoRef.current?.click()}
+                                className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                              >
+                                Change
+                              </button>
+                              {formData.companyLogo && (
+                                <button
+                                  type="button"
+                                  onClick={() => removePhoto('companyLogo')}
+                                  className="ml-3 text-sm text-red-600 hover:text-red-500"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                              <input
+                                ref={companyLogoRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handlePhotoUpload(e, 'companyLogo')}
+                                className="hidden"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <div className="col-span-6 sm:col-span-3">
                       <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
                         First name
@@ -142,7 +261,7 @@ const Profile: React.FC = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -157,7 +276,7 @@ const Profile: React.FC = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -171,7 +290,7 @@ const Profile: React.FC = () => {
                         id="companyName"
                         value={formData.companyName}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -185,7 +304,7 @@ const Profile: React.FC = () => {
                         id="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -199,7 +318,7 @@ const Profile: React.FC = () => {
                         id="website"
                         value={formData.website}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -213,7 +332,7 @@ const Profile: React.FC = () => {
                         id="address.street"
                         value={formData.address.street}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -227,7 +346,7 @@ const Profile: React.FC = () => {
                         id="address.city"
                         value={formData.address.city}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -241,7 +360,7 @@ const Profile: React.FC = () => {
                         id="address.state"
                         value={formData.address.state}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -255,7 +374,7 @@ const Profile: React.FC = () => {
                         id="address.zipCode"
                         value={formData.address.zipCode}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                     </div>
                   </div>
@@ -264,13 +383,13 @@ const Profile: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="mr-3 inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="mr-3 inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-800 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
                   >
                     Save
                   </button>
@@ -280,6 +399,26 @@ const Profile: React.FC = () => {
           ) : (
             <div className="shadow sm:rounded-md sm:overflow-hidden">
               <div className="bg-white px-4 py-5 sm:p-6">
+                <div className="flex items-center space-x-6 mb-6">
+                  {profile?.profilePhoto ? (
+                    <img
+                      src={profile.profilePhoto}
+                      alt="Profile"
+                      className="h-24 w-24 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
+                      <PhotoIcon className="h-12 w-12 text-gray-400" />
+                    </div>
+                  )}
+                  {profile?.companyLogo && (
+                    <img
+                      src={profile.companyLogo}
+                      alt="Company Logo"
+                      className="h-24 w-24 rounded-lg object-contain"
+                    />
+                  )}
+                </div>
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Name</dt>
@@ -322,7 +461,7 @@ const Profile: React.FC = () => {
                 <div className="mt-6">
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-800 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
                   >
                     Edit Profile
                   </button>
@@ -366,7 +505,7 @@ const Profile: React.FC = () => {
                           value={passwordData.currentPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                         />
                       </div>
 
@@ -381,7 +520,7 @@ const Profile: React.FC = () => {
                           value={passwordData.newPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                         />
                       </div>
 
@@ -396,7 +535,7 @@ const Profile: React.FC = () => {
                           value={passwordData.confirmPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                         />
                       </div>
                     </div>
@@ -408,13 +547,13 @@ const Profile: React.FC = () => {
                         setIsChangingPassword(false);
                         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                       }}
-                      className="mr-3 inline-flex justify-center rounded-md border border-gray-300 shadow-sm py-2 px-4 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="mr-3 inline-flex justify-center rounded-md border border-gray-300 shadow-sm py-2 px-4 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
                     >
                       Change Password
                     </button>
@@ -426,7 +565,7 @@ const Profile: React.FC = () => {
                 <div className="px-4 py-5 bg-white sm:p-6">
                   <button
                     onClick={() => setIsChangingPassword(true)}
-                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
                   >
                     Change Password
                   </button>

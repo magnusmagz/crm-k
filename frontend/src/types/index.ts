@@ -21,6 +21,8 @@ export interface UserProfile {
     zipCode?: string;
   };
   website?: string;
+  profilePhoto?: string;
+  companyLogo?: string;
   createdAt: Date;
   updatedAt: Date;
 }
