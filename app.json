@@ -2,9 +2,9 @@
   "name": "CRM Killer",
   "description": "A lightweight, user-owned CRM system - stop renting, start owning",
   "keywords": ["crm", "customer-management", "business-tools", "node", "react", "postgresql"],
-  "website": "https://github.com/yourusername/crm-killer",
-  "repository": "https://github.com/yourusername/crm-killer",
-  "logo": "https://raw.githubusercontent.com/yourusername/crm-killer/main/logo.png",
+  "website": "https://github.com/magnusmagz/crm-k",
+  "repository": "https://github.com/magnusmagz/crm-k",
+  "logo": "https://raw.githubusercontent.com/magnusmagz/crm-k/main/logo.png",
   "success_url": "/dashboard",
   "formation": {
     "web": {

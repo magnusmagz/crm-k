@@ -1,6 +1,6 @@
 # CRM Killer - Own Your Customer Data
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/magnusmagz/crm-k)
 
 Stop paying monthly fees for a CRM you'll never own. Build your own custom CRM system with modern tools and take control of your customer data.
 
