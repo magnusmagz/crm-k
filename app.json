@@ -14,7 +14,7 @@
   },
   "addons": [
     {
-      "plan": "heroku-postgresql:mini"
+      "plan": "heroku-postgresql:essential"
     }
   ],
   "buildpacks": [
