@@ -87,7 +87,7 @@ const DraggableFAB: React.FC = () => {
     <>
       <div
         ref={fabRef}
-        className={`fixed z-50 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center cursor-move transition-colors ${
+        className={`fixed z-50 w-14 h-14 bg-gray-800 hover:bg-gray-900 text-white rounded-md shadow-lg flex items-center justify-center cursor-move transition-colors ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={{
