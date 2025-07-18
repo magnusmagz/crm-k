@@ -12,11 +12,7 @@
       "size": "free"
     }
   },
-  "addons": [
-    {
-      "plan": "heroku-postgresql:essential"
-    }
-  ],
+  "addons": [],
   "buildpacks": [
     {
       "url": "heroku/nodejs"
