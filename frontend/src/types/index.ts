@@ -34,6 +34,8 @@ export interface Contact {
   lastName: string;
   email?: string;
   phone?: string;
+  company?: string;
+  position?: string;
   tags: string[];
   notes?: string;
   customFields: Record<string, any>;

@@ -16,6 +16,8 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
     lastName: contact?.lastName || '',
     email: contact?.email || '',
     phone: contact?.phone || '',
+    company: contact?.company || '',
+    position: contact?.position || '',
     tags: contact?.tags?.join(', ') || '',
     notes: contact?.notes || '',
     customFields: contact?.customFields || {},
@@ -296,6 +298,34 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 name="phone"
                 id="phone"
                 value={formData.phone}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                Company
+              </label>
+              <input
+                type="text"
+                name="company"
+                id="company"
+                value={formData.company}
+                onChange={handleChange}
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="position" className="block text-sm font-medium text-gray-700">
+                Position
+              </label>
+              <input
+                type="text"
+                name="position"
+                id="position"
+                value={formData.position}
                 onChange={handleChange}
                 className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
               />

@@ -129,7 +129,13 @@ const Contacts: React.FC = () => {
                         Phone
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Company
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Tags
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Notes
                       </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span className="sr-only">Actions</span>
@@ -150,6 +156,9 @@ const Contacts: React.FC = () => {
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {contact.phone}
                         </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {contact.company || '-'}
+                        </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
                           <div className="flex flex-wrap gap-1">
                             {contact.tags.map((tag, index) => (
@@ -160,6 +169,11 @@ const Contacts: React.FC = () => {
                                 {tag}
                               </span>
                             ))}
+                          </div>
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          <div className="max-w-xs truncate" title={contact.notes || ''}>
+                            {contact.notes || '-'}
                           </div>
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

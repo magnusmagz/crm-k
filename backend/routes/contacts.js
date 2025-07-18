@@ -12,6 +12,8 @@ const validateContact = [
   body('lastName').notEmpty().trim(),
   body('email').optional().isEmail().normalizeEmail(),
   body('phone').optional().matches(/^[\d\s\-\+\(\)]+$/),
+  body('company').optional().trim(),
+  body('position').optional().trim(),
   body('tags').optional().isArray(),
   body('notes').optional().trim(),
   body('customFields').optional().isObject()
@@ -38,6 +40,8 @@ router.get('/', authMiddleware, async (req, res) => {
         { lastName: { [Op.iLike]: `%${search}%` } },
         { email: { [Op.iLike]: `%${search}%` } },
         { phone: { [Op.iLike]: `%${search}%` } },
+        { company: { [Op.iLike]: `%${search}%` } },
+        { position: { [Op.iLike]: `%${search}%` } },
         { notes: { [Op.iLike]: `%${search}%` } },
         { tags: { [Op.contains]: [search] } }
       ];

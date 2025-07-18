@@ -46,6 +46,14 @@ module.exports = (sequelize, DataTypes) => {
         is: /^[\d\s\-\+\(\)]+$/i
       }
     },
+    company: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    position: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     tags: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       defaultValue: [],
