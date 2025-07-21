@@ -11,12 +11,15 @@ class AutomationEngineV2 {
 
   // Initialize the engine and start processing
   initialize() {
-    // Process pending enrollments every minute
-    this.cronJob = cron.schedule('* * * * *', () => {
+    // Process pending enrollments every 10 seconds for faster response
+    this.cronJob = cron.schedule('*/10 * * * * *', () => {
       this.processPendingEnrollments();
     });
 
-    console.log('AutomationEngineV2 initialized');
+    // Also process immediately on startup
+    this.processPendingEnrollments();
+
+    console.log('AutomationEngineV2 initialized - processing enrollments every 10 seconds');
   }
 
   // Process enrollments that are ready for their next step
@@ -36,9 +39,11 @@ class AutomationEngineV2 {
         include: [{
           model: Automation,
           where: { isActive: true },
+          required: true,
           include: [{
             model: AutomationStep,
-            as: 'steps'
+            as: 'steps',
+            required: false
           }]
         }]
       });
@@ -118,10 +123,20 @@ class AutomationEngineV2 {
         if (!automation.actions || automation.actions.length === 0) {
           // Reload automation with full data
           const fullAutomation = await Automation.findByPk(automation.id);
-          automation.actions = fullAutomation.actions;
-          automation.conditions = fullAutomation.conditions;
-          automation.trigger = fullAutomation.trigger;
+          if (!fullAutomation) {
+            throw new Error(`Automation ${automation.id} not found when reloading`);
+          }
+          // Use the fully loaded automation
+          automation = fullAutomation;
         }
+        
+        automationDebugger.log(debugSessionId, 'LEGACY_AUTOMATION_CHECK', {
+          automationId: automation.id,
+          hasActions: !!automation.actions,
+          actionsLength: automation.actions?.length || 0,
+          actions: automation.actions
+        });
+        
         await this.executeLegacyAutomation(automation, enrollment);
       }
     } catch (error) {
@@ -159,13 +174,27 @@ class AutomationEngineV2 {
     const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
     
     try {
+      // Validate actions array
+      if (!actions || !Array.isArray(actions)) {
+        throw new Error(`Invalid actions: expected array, got ${typeof actions}`);
+      }
+      
+      if (actions.length === 0) {
+        automationDebugger.log(debugSessionId, 'NO_ACTIONS_TO_EXECUTE', {
+          enrollmentId: enrollment.id,
+          warning: 'No actions to execute'
+        }, 'warn');
+        return { success: true };
+      }
+      
       const entity = await this.getEntity(enrollment);
       
       automationDebugger.log(debugSessionId, 'ACTION_EXECUTION_START', {
         enrollmentId: enrollment.id,
         entityType: enrollment.entityType,
         entityId: enrollment.entityId,
-        actionsCount: actions.length
+        actionsCount: actions.length,
+        actions: actions
       });
       
       for (const action of actions) {

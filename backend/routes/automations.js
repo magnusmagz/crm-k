@@ -490,6 +490,59 @@ router.get('/:id/debug', authMiddleware, async (req, res) => {
   }
 });
 
+// Force process a specific enrollment (for debugging)
+router.post('/enrollment/:enrollmentId/process', authMiddleware, async (req, res) => {
+  try {
+    const { enrollmentId } = req.params;
+    
+    // Find the enrollment
+    const enrollment = await AutomationEnrollment.findOne({
+      where: {
+        id: enrollmentId,
+        userId: req.user.id
+      },
+      include: [{
+        model: Automation,
+        include: [{
+          model: AutomationStep,
+          as: 'steps'
+        }]
+      }]
+    });
+    
+    if (!enrollment) {
+      return res.status(404).json({ error: 'Enrollment not found' });
+    }
+    
+    const automationEngineV2 = require('../services/automationEngineV2');
+    const automationDebugger = require('../services/automationDebugger');
+    
+    // Enable debug mode temporarily
+    const originalDebugMode = automationDebugger.isDebugMode;
+    automationDebugger.isDebugMode = true;
+    
+    try {
+      // Process the enrollment
+      await automationEngineV2.processEnrollmentStep(enrollment);
+      
+      // Get debug logs
+      const logs = automationDebugger.getAutomationLogs(enrollment.automationId, 50);
+      
+      res.json({
+        message: 'Enrollment processed',
+        enrollment: enrollment.toJSON(),
+        debugLogs: logs
+      });
+    } finally {
+      // Restore debug mode
+      automationDebugger.isDebugMode = originalDebugMode;
+    }
+  } catch (error) {
+    console.error('Process enrollment error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get debug logs for a specific entity
 router.get('/debug/entity/:entityType/:entityId', authMiddleware, async (req, res) => {
   try {
@@ -578,6 +631,82 @@ router.post('/:id/process-enrollment', authMiddleware, async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to process enrollment',
       details: error.message 
+    });
+  }
+});
+
+// Process enrollment by ID directly (for debugging)
+router.post('/enrollment/:enrollmentId/process', authMiddleware, async (req, res) => {
+  try {
+    const { enrollmentId } = req.params;
+    
+    const enrollment = await AutomationEnrollment.findOne({
+      where: {
+        id: enrollmentId,
+        userId: req.user.id
+      },
+      include: [{
+        model: Automation,
+        include: [{
+          model: require('../models').AutomationStep,
+          as: 'steps'
+        }]
+      }]
+    });
+    
+    if (!enrollment) {
+      return res.status(404).json({ error: 'Enrollment not found' });
+    }
+    
+    const automationEngineV2 = require('../services/automationEngineV2');
+    const automationDebugger = require('../services/automationDebugger');
+    
+    // Enable debug mode
+    automationDebugger.setDebugMode(true);
+    
+    console.log('Processing enrollment:', {
+      id: enrollment.id,
+      automationId: enrollment.automationId,
+      status: enrollment.status,
+      hasAutomation: !!enrollment.Automation,
+      automationName: enrollment.Automation?.name,
+      automationActions: enrollment.Automation?.actions
+    });
+    
+    // Process the enrollment
+    await automationEngineV2.processEnrollmentStep(enrollment);
+    
+    // Reload enrollment to get updated status
+    await enrollment.reload();
+    
+    // Get debug logs
+    const logs = automationDebugger.getEntityLogs(enrollment.entityType, enrollment.entityId, 50);
+    
+    res.json({ 
+      message: 'Enrollment processed',
+      enrollment: {
+        id: enrollment.id,
+        automationId: enrollment.automationId,
+        status: enrollment.status,
+        currentStepIndex: enrollment.currentStepIndex,
+        nextStepAt: enrollment.nextStepAt,
+        completedAt: enrollment.completedAt,
+        metadata: enrollment.metadata
+      },
+      automation: {
+        id: enrollment.Automation?.id,
+        name: enrollment.Automation?.name,
+        actions: enrollment.Automation?.actions,
+        conditions: enrollment.Automation?.conditions
+      },
+      debugLogs: logs
+    });
+  } catch (error) {
+    console.error('Process enrollment error:', error);
+    res.status(500).json({ 
+      error: 'Failed to process enrollment',
+      details: error.message,
+      stack: error.stack
     });
   }
 });
