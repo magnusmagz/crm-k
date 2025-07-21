@@ -188,11 +188,31 @@ class AutomationEngineV2 {
         }
       }
       
-      await this.logExecution(enrollment, 'success', { actions });
+      // Try to log execution, but don't fail if logging fails
+      try {
+        await this.logExecution(enrollment, 'success', { actions });
+      } catch (logError) {
+        automationDebugger.log(debugSessionId, 'LOG_EXECUTION_ERROR', {
+          error: logError.message,
+          originalStatus: 'success'
+        }, 'error');
+      }
+      
       return { success: true };
     } catch (error) {
       automationDebugger.logActionExecution(debugSessionId, { type: 'unknown' }, {}, false, error);
-      await this.logExecution(enrollment, 'failed', { error: error.message });
+      
+      // Try to log execution, but don't fail if logging fails
+      try {
+        await this.logExecution(enrollment, 'failed', { error: error.message });
+      } catch (logError) {
+        automationDebugger.log(debugSessionId, 'LOG_EXECUTION_ERROR', {
+          error: logError.message,
+          originalStatus: 'failed',
+          originalError: error.message
+        }, 'error');
+      }
+      
       return { success: false, error: error.message };
     }
   }
@@ -628,8 +648,9 @@ class AutomationEngineV2 {
         entityId: enrollment.entityId
       },
       status,
-      conditionsEvaluated: details.conditions,
-      actionsExecuted: details.actions,
+      conditionsMet: status === 'success', // Required field
+      conditionsEvaluated: details.conditions || [],
+      actionsExecuted: details.actions || [],
       error: details.error,
       executedAt: new Date()
     });
@@ -690,7 +711,8 @@ class AutomationEngineV2 {
       
       await enrollment.update({
         status: result.success ? 'completed' : 'failed',
-        completedAt: new Date()
+        completedAt: new Date(),
+        metadata: result.success ? enrollment.metadata : { ...enrollment.metadata, error: result.error }
       });
       
       await automation.increment(result.success ? 'completedEnrollments' : 'failedEnrollments');
