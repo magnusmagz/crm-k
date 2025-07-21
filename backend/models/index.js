@@ -19,6 +19,8 @@ const Contact = require('./Contact')(sequelize, Sequelize.DataTypes);
 const CustomField = require('./CustomField')(sequelize, Sequelize.DataTypes);
 const Deal = require('./Deal')(sequelize, Sequelize.DataTypes);
 const Stage = require('./Stage')(sequelize, Sequelize.DataTypes);
+const Automation = require('./Automation')(sequelize, Sequelize.DataTypes);
+const AutomationLog = require('./AutomationLog')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
@@ -42,6 +44,15 @@ Deal.belongsTo(Contact, { foreignKey: 'contact_id' });
 Stage.hasMany(Deal, { foreignKey: 'stage_id', as: 'deals' });
 Deal.belongsTo(Stage, { foreignKey: 'stage_id' });
 
+User.hasMany(Automation, { foreignKey: 'user_id', as: 'automations' });
+Automation.belongsTo(User, { foreignKey: 'user_id' });
+
+Automation.hasMany(AutomationLog, { foreignKey: 'automation_id', as: 'logs' });
+AutomationLog.belongsTo(Automation, { foreignKey: 'automation_id' });
+
+User.hasMany(AutomationLog, { foreignKey: 'user_id', as: 'automationLogs' });
+AutomationLog.belongsTo(User, { foreignKey: 'user_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -49,5 +60,7 @@ module.exports = {
   Contact,
   CustomField,
   Deal,
-  Stage
+  Stage,
+  Automation,
+  AutomationLog
 };

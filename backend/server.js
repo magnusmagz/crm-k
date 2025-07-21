@@ -13,6 +13,8 @@ const contactRoutes = require('./routes/contacts');
 const customFieldRoutes = require('./routes/customFields');
 const stageRoutes = require('./routes/stages');
 const dealRoutes = require('./routes/deals');
+const automationRoutes = require('./routes/automations');
+const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -46,6 +48,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/custom-fields', customFieldRoutes);
 app.use('/api/stages', stageRoutes);
 app.use('/api/deals', dealRoutes);
+app.use('/api/automations', automationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -78,6 +81,9 @@ async function startServer() {
     // Sync database models
     await sequelize.sync({ alter: true });
     console.log('Database synced successfully.');
+    
+    // Initialize automation system
+    initializeAutomations();
     
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

@@ -3,6 +3,7 @@ const { body, query, validationResult } = require('express-validator');
 const { Contact, CustomField, Deal } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
+const automationEmitter = require('../services/eventEmitter');
 
 const router = express.Router();
 
@@ -173,6 +174,9 @@ router.post('/', authMiddleware, validateContact, async (req, res) => {
       userId: req.user.id
     });
 
+    // Emit event for automations
+    automationEmitter.emitContactCreated(req.user.id, contact.toJSON());
+
     res.status(201).json({
       message: 'Contact created successfully',
       contact
@@ -261,7 +265,13 @@ router.put('/:id', authMiddleware, validateContact, async (req, res) => {
       }
     }
 
+    // Track changed fields
+    const changedFields = Object.keys(req.body);
+    
     await contact.update(req.body);
+
+    // Emit event for automations
+    automationEmitter.emitContactUpdated(req.user.id, contact.toJSON(), changedFields);
 
     res.json({
       message: 'Contact updated successfully',

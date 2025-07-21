@@ -3,6 +3,7 @@ const { body, query, validationResult } = require('express-validator');
 const { Deal, Contact, Stage } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
+const automationEmitter = require('../services/eventEmitter');
 
 const router = express.Router();
 
@@ -194,6 +195,9 @@ router.post('/', authMiddleware, validateDeal, async (req, res) => {
       ]
     });
 
+    // Emit event for automations
+    automationEmitter.emitDealCreated(req.user.id, dealWithAssociations.toJSON());
+
     res.status(201).json({ deal: dealWithAssociations });
   } catch (error) {
     console.error('Create deal error:', error);
@@ -243,6 +247,10 @@ router.put('/:id', authMiddleware, validateDeal, async (req, res) => {
       }
     }
 
+    // Track if stage is changing
+    const previousStageId = deal.stageId;
+    const changedFields = Object.keys(req.body);
+
     await deal.update(req.body);
 
     // Fetch with associations
@@ -252,6 +260,19 @@ router.put('/:id', authMiddleware, validateDeal, async (req, res) => {
         { model: Stage }
       ]
     });
+
+    // Emit events for automations
+    if (req.body.stageId && req.body.stageId !== previousStageId) {
+      const previousStage = await Stage.findByPk(previousStageId);
+      automationEmitter.emitDealStageChanged(
+        req.user.id, 
+        updatedDeal.toJSON(), 
+        previousStage?.toJSON(), 
+        updatedDeal.Stage.toJSON()
+      );
+    } else {
+      automationEmitter.emitDealUpdated(req.user.id, updatedDeal.toJSON(), changedFields);
+    }
 
     res.json({ deal: updatedDeal });
   } catch (error) {
@@ -293,7 +314,25 @@ router.patch('/:id/stage', authMiddleware, [
       return res.status(400).json({ error: 'Invalid stage' });
     }
 
+    const previousStageId = deal.stageId;
     await deal.update({ stageId: req.body.stageId });
+
+    // Fetch updated deal with associations
+    const updatedDeal = await Deal.findByPk(deal.id, {
+      include: [
+        { model: Contact },
+        { model: Stage }
+      ]
+    });
+
+    // Emit stage change event
+    const previousStage = await Stage.findByPk(previousStageId);
+    automationEmitter.emitDealStageChanged(
+      req.user.id,
+      updatedDeal.toJSON(),
+      previousStage?.toJSON(),
+      updatedDeal.Stage.toJSON()
+    );
 
     res.json({ message: 'Deal stage updated successfully' });
   } catch (error) {

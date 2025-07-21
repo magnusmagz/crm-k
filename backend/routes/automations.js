@@ -1,0 +1,313 @@
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Automation, AutomationLog, Contact, Deal } = require('../models');
+const { authMiddleware } = require('../middleware/auth');
+const { Op } = require('sequelize');
+
+const router = express.Router();
+
+// Get all automations for the user
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const automations = await Automation.findAll({
+      where: { userId: req.user.id },
+      order: [['createdAt', 'DESC']],
+      attributes: {
+        include: [
+          [Automation.sequelize.literal(
+            `(SELECT COUNT(*) FROM automation_logs WHERE automation_logs.automation_id = "Automation".id)`
+          ), 'totalExecutions'],
+          [Automation.sequelize.literal(
+            `(SELECT COUNT(*) FROM automation_logs WHERE automation_logs.automation_id = "Automation".id AND status = 'success')`
+          ), 'successfulExecutions']
+        ]
+      }
+    });
+
+    res.json({ automations });
+  } catch (error) {
+    console.error('Get automations error:', error);
+    res.status(500).json({ error: 'Failed to get automations' });
+  }
+});
+
+// Get single automation with logs
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      },
+      include: [{
+        model: AutomationLog,
+        as: 'logs',
+        limit: 50,
+        order: [['executedAt', 'DESC']]
+      }]
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    res.json({ automation });
+  } catch (error) {
+    console.error('Get automation error:', error);
+    res.status(500).json({ error: 'Failed to get automation' });
+  }
+});
+
+// Create new automation
+router.post('/', authMiddleware, [
+  body('name').notEmpty().trim(),
+  body('trigger.type').isIn([
+    'contact_created',
+    'contact_updated',
+    'deal_created',
+    'deal_updated',
+    'deal_stage_changed'
+  ]),
+  body('actions').isArray({ min: 1 }),
+  body('conditions').optional().isArray()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const automation = await Automation.create({
+      ...req.body,
+      userId: req.user.id
+    });
+
+    res.status(201).json({ automation });
+  } catch (error) {
+    console.error('Create automation error:', error);
+    res.status(500).json({ error: 'Failed to create automation' });
+  }
+});
+
+// Update automation
+router.put('/:id', authMiddleware, [
+  body('name').optional().notEmpty().trim(),
+  body('isActive').optional().isBoolean(),
+  body('trigger').optional().isObject(),
+  body('conditions').optional().isArray(),
+  body('actions').optional().isArray({ min: 1 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    await automation.update(req.body);
+    res.json({ automation });
+  } catch (error) {
+    console.error('Update automation error:', error);
+    res.status(500).json({ error: 'Failed to update automation' });
+  }
+});
+
+// Toggle automation active state
+router.patch('/:id/toggle', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    await automation.update({ isActive: !automation.isActive });
+    res.json({ automation });
+  } catch (error) {
+    console.error('Toggle automation error:', error);
+    res.status(500).json({ error: 'Failed to toggle automation' });
+  }
+});
+
+// Delete automation
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    await automation.destroy();
+    res.json({ message: 'Automation deleted successfully' });
+  } catch (error) {
+    console.error('Delete automation error:', error);
+    res.status(500).json({ error: 'Failed to delete automation' });
+  }
+});
+
+// Get automation logs
+router.get('/:id/logs', authMiddleware, async (req, res) => {
+  try {
+    const { limit = 100, offset = 0 } = req.query;
+
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    const logs = await AutomationLog.findAndCountAll({
+      where: { automationId: req.params.id },
+      order: [['executedAt', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    res.json({
+      logs: logs.rows,
+      total: logs.count,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    console.error('Get automation logs error:', error);
+    res.status(500).json({ error: 'Failed to get automation logs' });
+  }
+});
+
+// Test automation with sample data
+router.post('/:id/test', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    // Create test data based on trigger type
+    const testData = req.body.testData || await generateTestData(automation.trigger.type, req.user.id);
+
+    // Import the engine to test
+    const automationEngine = require('../services/automationEngine');
+    
+    // Test the automation
+    const testEvent = {
+      type: automation.trigger.type,
+      userId: req.user.id,
+      data: testData
+    };
+
+    // Process in test mode (would need to modify engine to support this)
+    const result = await automationEngine.executeAutomation(automation, testEvent);
+
+    res.json({ 
+      message: 'Test completed',
+      testData,
+      result 
+    });
+  } catch (error) {
+    console.error('Test automation error:', error);
+    res.status(500).json({ error: 'Failed to test automation' });
+  }
+});
+
+// Helper function to generate test data
+async function generateTestData(triggerType, userId) {
+  switch (triggerType) {
+    case 'contact_created':
+    case 'contact_updated':
+      return {
+        contact: {
+          id: 'test-contact-id',
+          firstName: 'Test',
+          lastName: 'Contact',
+          email: 'test@example.com',
+          phone: '555-0123',
+          company: 'Test Company',
+          tags: ['test', 'sample'],
+          notes: 'This is a test contact'
+        },
+        changedFields: ['email', 'phone']
+      };
+
+    case 'deal_created':
+    case 'deal_updated':
+      return {
+        deal: {
+          id: 'test-deal-id',
+          name: 'Test Deal',
+          value: 10000,
+          status: 'open',
+          stageId: 'test-stage-id',
+          Stage: {
+            id: 'test-stage-id',
+            name: 'Qualified'
+          },
+          Contact: {
+            id: 'test-contact-id',
+            firstName: 'Test',
+            lastName: 'Contact'
+          }
+        },
+        changedFields: ['value', 'stageId']
+      };
+
+    case 'deal_stage_changed':
+      return {
+        deal: {
+          id: 'test-deal-id',
+          name: 'Test Deal',
+          value: 10000,
+          stageId: 'new-stage-id',
+          Stage: {
+            id: 'new-stage-id',
+            name: 'Proposal'
+          }
+        },
+        previousStage: {
+          id: 'old-stage-id',
+          name: 'Qualified'
+        },
+        newStage: {
+          id: 'new-stage-id',
+          name: 'Proposal'
+        }
+      };
+
+    default:
+      return {};
+  }
+}
+
+module.exports = router;
