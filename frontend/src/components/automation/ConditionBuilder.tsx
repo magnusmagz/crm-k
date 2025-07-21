@@ -97,7 +97,6 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
           value={condition.field}
           onChange={(e) => onChange({ ...condition, field: e.target.value, operator: 'equals', value: '' })}
           className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-          placeholder="Select field"
         >
           <option value="">Select field</option>
           {fieldOptions.map((option) => (
