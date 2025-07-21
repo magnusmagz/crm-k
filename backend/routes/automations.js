@@ -225,6 +225,11 @@ router.post('/:id/test', authMiddleware, async (req, res) => {
 
     // Create test data based on trigger type
     const testData = req.body.testData || await generateTestData(automation.trigger.type, req.user.id);
+    
+    // Validate that we have required data
+    if (!testData || Object.keys(testData).length === 0) {
+      return res.status(400).json({ error: 'Invalid test data generated' });
+    }
 
     // Import the engine to test
     const automationEngine = require('../services/automationEngine');
@@ -236,14 +241,57 @@ router.post('/:id/test', authMiddleware, async (req, res) => {
       data: testData
     };
 
-    // Process in test mode (would need to modify engine to support this)
-    const result = await automationEngine.executeAutomation(automation, testEvent);
-
-    res.json({ 
-      message: 'Test completed',
-      testData,
-      result 
-    });
+    // For new multi-step automations, use the enrollment service
+    if (automation.isMultiStep) {
+      const automationEnrollmentService = require('../services/automationEnrollmentService');
+      const automationEngineV2 = require('../services/automationEngineV2');
+      
+      // Create a test entity based on trigger type
+      let testEntity;
+      if (automation.trigger.type.includes('contact')) {
+        testEntity = { id: 'test-contact-' + Date.now(), ...testData.contact };
+      } else {
+        testEntity = { id: 'test-deal-' + Date.now(), ...testData.deal };
+      }
+      
+      // Check if it would be enrolled
+      const wouldEnroll = await automationEnrollmentService.checkEnrollmentCriteria(
+        automation, 
+        testEntity, 
+        automation.trigger.type, 
+        testData
+      );
+      
+      res.json({ 
+        message: 'Test completed',
+        testData,
+        wouldEnroll,
+        automationType: 'multi-step'
+      });
+    } else {
+      // Legacy single-step automation test
+      await automationEngine.executeAutomation(automation, testEvent);
+      
+      // Check the latest log to see if it succeeded
+      const latestLog = await AutomationLog.findOne({
+        where: { 
+          automationId: automation.id,
+          triggerType: testEvent.type
+        },
+        order: [['executedAt', 'DESC']]
+      });
+      
+      res.json({ 
+        message: 'Test completed',
+        testData,
+        result: {
+          status: latestLog?.status || 'unknown',
+          conditionsMet: latestLog?.conditionsMet,
+          actionsExecuted: latestLog?.actionsExecuted,
+          error: latestLog?.error
+        }
+      });
+    }
   } catch (error) {
     console.error('Test automation error:', error);
     res.status(500).json({ error: 'Failed to test automation' });
