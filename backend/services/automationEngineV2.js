@@ -201,7 +201,7 @@ class AutomationEngineV2 {
         automationDebugger.log(debugSessionId, 'ACTION_BEFORE_EXECUTE', {
           actionType: action.type,
           actionConfig: action.config,
-          entityState: entity
+          entityState: entity ? entity.toJSON() : null
         });
         
         try {

@@ -30,7 +30,15 @@ class AutomationDebugger {
     };
 
     if (this.isDebugMode) {
-      console.log(`[AUTOMATION_DEBUG] ${event}:`, JSON.stringify(data, null, 2));
+      try {
+        console.log(`[AUTOMATION_DEBUG] ${event}:`, JSON.stringify(data, null, 2));
+      } catch (err) {
+        // If JSON.stringify fails due to circular reference, log a simplified version
+        console.log(`[AUTOMATION_DEBUG] ${event}:`, {
+          ...data,
+          _note: 'Data simplified due to circular reference'
+        });
+      }
     }
 
     this.debugLogs.push(logEntry);
@@ -245,10 +253,16 @@ class AutomationDebugger {
 
   // Sanitize entity data for logging
   sanitizeEntity(entity) {
-    const sanitized = { ...entity };
+    if (!entity) return null;
+    
+    // Convert Sequelize model to plain object
+    const plainEntity = entity.toJSON ? entity.toJSON() : entity;
+    
     // Remove sensitive fields if needed
+    const sanitized = { ...plainEntity };
     delete sanitized.password;
     delete sanitized.token;
+    
     return sanitized;
   }
 
