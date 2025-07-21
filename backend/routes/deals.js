@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Deal, Contact, Stage } = require('../models');
+const { Deal, Contact, Stage, CustomField } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
@@ -182,6 +182,70 @@ router.post('/', authMiddleware, validateDeal, async (req, res) => {
       }
     }
 
+    // Validate custom fields if provided
+    if (req.body.customFields) {
+      const customFields = await CustomField.findAll({
+        where: { 
+          userId: req.user.id,
+          entityType: 'deal'
+        }
+      });
+
+      for (const field of customFields) {
+        const value = req.body.customFields[field.name];
+        
+        // Check required fields
+        if (field.required && !value) {
+          return res.status(400).json({ 
+            error: `Custom field '${field.label}' is required` 
+          });
+        }
+
+        // Validate field types
+        if (value) {
+          switch (field.type) {
+            case 'number':
+              if (isNaN(value)) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a number` 
+                });
+              }
+              break;
+            case 'date':
+              if (isNaN(Date.parse(value))) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a valid date` 
+                });
+              }
+              break;
+            case 'url':
+              try {
+                new URL(value);
+              } catch {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a valid URL` 
+                });
+              }
+              break;
+            case 'select':
+              if (!field.options.includes(value)) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be one of: ${field.options.join(', ')}` 
+                });
+              }
+              break;
+            case 'checkbox':
+              if (typeof value !== 'boolean') {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be true or false` 
+                });
+              }
+              break;
+          }
+        }
+      }
+    }
+
     const deal = await Deal.create({
       ...req.body,
       userId: req.user.id
@@ -244,6 +308,70 @@ router.put('/:id', authMiddleware, validateDeal, async (req, res) => {
         req.body.closedAt = new Date();
       } else {
         req.body.closedAt = null;
+      }
+    }
+
+    // Validate custom fields if provided
+    if (req.body.customFields) {
+      const customFields = await CustomField.findAll({
+        where: { 
+          userId: req.user.id,
+          entityType: 'deal'
+        }
+      });
+
+      for (const field of customFields) {
+        const value = req.body.customFields[field.name];
+        
+        // Check required fields
+        if (field.required && !value) {
+          return res.status(400).json({ 
+            error: `Custom field '${field.label}' is required` 
+          });
+        }
+
+        // Validate field types
+        if (value) {
+          switch (field.type) {
+            case 'number':
+              if (isNaN(value)) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a number` 
+                });
+              }
+              break;
+            case 'date':
+              if (isNaN(Date.parse(value))) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a valid date` 
+                });
+              }
+              break;
+            case 'url':
+              try {
+                new URL(value);
+              } catch {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a valid URL` 
+                });
+              }
+              break;
+            case 'select':
+              if (!field.options.includes(value)) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be one of: ${field.options.join(', ')}` 
+                });
+              }
+              break;
+            case 'checkbox':
+              if (typeof value !== 'boolean') {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be true or false` 
+                });
+              }
+              break;
+          }
+        }
       }
     }
 

@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    entityType: {
+      type: DataTypes.ENUM('contact', 'deal'),
+      allowNull: false,
+      defaultValue: 'contact'
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -64,10 +69,11 @@ module.exports = (sequelize, DataTypes) => {
     indexes: [
       {
         unique: true,
-        fields: ['user_id', 'name']
+        fields: ['user_id', 'entity_type', 'name'],
+        name: 'custom_fields_user_entity_name_unique'
       },
       {
-        fields: ['user_id', 'order']
+        fields: ['user_id', 'entity_type', 'order']
       }
     ]
   });

@@ -145,6 +145,15 @@ export const dealsAPI = {
   delete: (id: string) => api.delete(`/deals/${id}`),
 };
 
+// Deal Custom Fields API
+export const dealCustomFieldsAPI = {
+  getAll: () => api.get('/deal-custom-fields'),
+  create: (data: any) => api.post('/deal-custom-fields', data),
+  update: (id: string, data: any) => api.put(`/deal-custom-fields/${id}`, data),
+  delete: (id: string) => api.delete(`/deal-custom-fields/${id}`),
+  reorder: (fieldIds: string[]) => api.post('/deal-custom-fields/reorder', { fieldIds })
+};
+
 // Automations API
 export const automationsAPI = {
   getAll: () => api.get('/automations'),

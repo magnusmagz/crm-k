@@ -60,6 +60,11 @@ module.exports = (sequelize, DataTypes) => {
     expectedCloseDate: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    customFields: {
+      type: DataTypes.JSONB,
+      defaultValue: {},
+      allowNull: false
     }
   }, {
     tableName: 'deals',

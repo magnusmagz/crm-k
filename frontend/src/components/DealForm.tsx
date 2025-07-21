@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Deal, Stage, Contact } from '../types';
-import { contactsAPI } from '../services/api';
+import { Deal, Stage, Contact, CustomField } from '../types';
+import { contactsAPI, dealCustomFieldsAPI } from '../services/api';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import CustomFieldInput from './CustomFieldInput';
 
 interface DealFormProps {
   deal?: Deal | null;
@@ -12,6 +13,7 @@ interface DealFormProps {
 
 const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [formData, setFormData] = useState({
     name: deal?.name || '',
     value: deal?.value || 0,
@@ -21,13 +23,15 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) 
     expectedCloseDate: deal?.expectedCloseDate 
       ? new Date(deal.expectedCloseDate).toISOString().split('T')[0] 
       : '',
-    status: deal?.status || 'open'
+    status: deal?.status || 'open',
+    customFields: deal?.customFields || {}
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchContacts();
+    fetchCustomFields();
   }, []);
 
   const fetchContacts = async () => {
@@ -39,6 +43,15 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) 
     }
   };
 
+  const fetchCustomFields = async () => {
+    try {
+      const response = await dealCustomFieldsAPI.getAll();
+      setCustomFields(response.data.customFields);
+    } catch (error) {
+      console.error('Failed to fetch custom fields:', error);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -46,6 +59,16 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) 
       [name]: name === 'value' ? parseFloat(value) || 0 : value
     }));
     setErrors(prev => ({ ...prev, [name]: '' }));
+  };
+
+  const handleCustomFieldChange = (fieldName: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: {
+        ...prev.customFields,
+        [fieldName]: value
+      }
+    }));
   };
 
   const validate = () => {
@@ -60,6 +83,14 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) 
     if (formData.value < 0) {
       newErrors.value = 'Value cannot be negative';
     }
+
+    // Validate custom fields
+    customFields.forEach(field => {
+      const value = formData.customFields[field.name];
+      if (field.required && !value) {
+        newErrors[`customField_${field.name}`] = `${field.label} is required`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -237,6 +268,23 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) 
             className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
           />
         </div>
+
+        {/* Custom Fields */}
+        {customFields.length > 0 && (
+          <div className="space-y-4 pt-4 border-t">
+            <h4 className="font-medium text-gray-900">Additional Information</h4>
+            {customFields.map(field => (
+              <div key={field.id}>
+                <CustomFieldInput
+                  field={field}
+                  value={formData.customFields[field.name]}
+                  onChange={(value) => handleCustomFieldChange(field.name, value)}
+                  error={errors[`customField_${field.name}`]}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="flex gap-3 pt-4">
           <button

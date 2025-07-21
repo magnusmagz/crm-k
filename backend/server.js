@@ -49,6 +49,7 @@ app.use('/api/custom-fields', customFieldRoutes);
 app.use('/api/stages', stageRoutes);
 app.use('/api/deals', dealRoutes);
 app.use('/api/automations', automationRoutes);
+app.use('/api/deal-custom-fields', require('./routes/dealCustomFields'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

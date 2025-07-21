@@ -54,6 +54,7 @@ export interface Contact {
 export interface CustomField {
   id: string;
   userId: string;
+  entityType: 'contact' | 'deal';
   name: string;
   label: string;
   type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'url';
@@ -89,6 +90,7 @@ export interface Deal {
   notes?: string;
   closedAt?: Date;
   expectedCloseDate?: Date;
+  customFields?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
   Contact?: Contact;
