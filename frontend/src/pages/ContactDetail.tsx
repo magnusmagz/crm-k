@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Contact } from '../types';
-import { contactsAPI } from '../services/api';
+import { Contact, Deal } from '../types';
+import { contactsAPI, dealsAPI } from '../services/api';
 import ContactForm from '../components/ContactForm';
-import { PencilIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import DealForm from '../components/DealForm';
+import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import toast, { Toaster } from 'react-hot-toast';
 
 const ContactDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [contact, setContact] = useState<Contact | null>(null);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [stages, setStages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDealForm, setShowDealForm] = useState(false);
+  const [totalDealValue, setTotalDealValue] = useState(0);
 
   useEffect(() => {
     if (id) {
       fetchContact();
+      fetchContactDeals();
+      fetchStages();
     }
   }, [id]);
 
@@ -27,6 +35,31 @@ const ContactDetail: React.FC = () => {
       navigate('/contacts');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchContactDeals = async () => {
+    try {
+      const response = await dealsAPI.getAll({ contactId: id });
+      const contactDeals = response.data.deals;
+      setDeals(contactDeals);
+      
+      // Calculate total value of open deals
+      const total = contactDeals
+        .filter((deal: Deal) => deal.status === 'open')
+        .reduce((sum: number, deal: Deal) => sum + (deal.value || 0), 0);
+      setTotalDealValue(total);
+    } catch (error) {
+      console.error('Failed to fetch deals:', error);
+    }
+  };
+
+  const fetchStages = async () => {
+    try {
+      const response = await import('../services/api').then(m => m.stagesAPI.getAll());
+      setStages(response.data.stages);
+    } catch (error) {
+      console.error('Failed to fetch stages:', error);
     }
   };
 
@@ -47,6 +80,26 @@ const ContactDetail: React.FC = () => {
       console.error('Failed to delete contact:', error);
       alert('Failed to delete contact');
     }
+  };
+
+  const handleDealCreate = async (dealData: any) => {
+    try {
+      await dealsAPI.create({ ...dealData, contactId: contact?.id });
+      toast.success('Deal created successfully');
+      setShowDealForm(false);
+      fetchContactDeals();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to create deal');
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
   };
 
   if (isLoading) {
@@ -178,6 +231,105 @@ const ContactDetail: React.FC = () => {
           </dl>
         </div>
       </div>
+
+      {/* Deals Section */}
+      <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Deals
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Total Pipeline Value: <span className="font-semibold text-gray-900">{formatCurrency(totalDealValue)}</span>
+            </p>
+          </div>
+          <button
+            onClick={() => setShowDealForm(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+          >
+            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+            New Deal
+          </button>
+        </div>
+        
+        <div className="border-t border-gray-200">
+          {deals.length === 0 ? (
+            <div className="text-center py-12">
+              <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No deals</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Create a deal to start tracking opportunities with this contact.
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowDealForm(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900"
+                >
+                  <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+                  Create Deal
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {deals.map((deal) => (
+                <div key={deal.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {deal.name}
+                        </p>
+                        <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          deal.status === 'won' ? 'bg-green-100 text-green-800' :
+                          deal.status === 'lost' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {deal.status}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center text-sm text-gray-500">
+                        <span>{deal.Stage?.name}</span>
+                        <span className="mx-2">•</span>
+                        <span>{formatCurrency(deal.value || 0)}</span>
+                        {deal.expectedCloseDate && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>Close: {new Date(deal.expectedCloseDate).toLocaleDateString()}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => navigate(`/pipeline?deal=${deal.id}`)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <ArrowLeftIcon className="h-5 w-5 transform rotate-180" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Deal Form Modal */}
+      {showDealForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <DealForm
+              stages={stages}
+              onSubmit={handleDealCreate}
+              onClose={() => setShowDealForm(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      <Toaster position="top-right" />
     </div>
   );
 };

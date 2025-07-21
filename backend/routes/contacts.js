@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Contact, CustomField } = require('../models');
+const { Contact, CustomField, Deal } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 
@@ -55,6 +55,12 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const contacts = await Contact.findAndCountAll({
       where,
+      include: [{
+        model: Deal,
+        as: 'deals',
+        attributes: ['id', 'value', 'status'],
+        required: false
+      }],
       order: [[sortBy, sortOrder]],
       limit: parseInt(limit),
       offset: parseInt(offset)

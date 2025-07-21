@@ -41,6 +41,7 @@ export interface Contact {
   customFields: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  deals?: Deal[];
 }
 
 export interface CustomField {

@@ -137,6 +137,9 @@ const Contacts: React.FC = () => {
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Notes
                       </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Deals
+                      </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span className="sr-only">Actions</span>
                       </th>
@@ -175,6 +178,18 @@ const Contacts: React.FC = () => {
                           <div className="max-w-xs truncate" title={contact.notes || ''}>
                             {contact.notes || '-'}
                           </div>
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          {contact.deals && contact.deals.length > 0 ? (
+                            <div>
+                              <span className="font-medium">{contact.deals.filter(d => d.status === 'open').length}</span> open
+                              <div className="text-xs text-gray-400">
+                                ${contact.deals.filter(d => d.status === 'open').reduce((sum, d) => sum + (d.value || 0), 0).toLocaleString()}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <Link
