@@ -256,6 +256,23 @@ class AutomationEngineV2 {
               field: action.config.field,
               value: action.config.value
             });
+          } else if (enrollment.entityType === 'deal' && entity.Contact) {
+            // For deals, update the associated contact
+            if (!action.config.field || action.config.value === undefined) {
+              throw new Error('Invalid update_contact_field config: missing field or value');
+            }
+            await entity.Contact.update({ [action.config.field]: action.config.value });
+            automationDebugger.log(debugSessionId, 'CONTACT_FIELD_UPDATED_FROM_DEAL', {
+              contactId: entity.Contact.id,
+              field: action.config.field,
+              value: action.config.value
+            });
+          } else if (enrollment.entityType === 'deal' && !entity.Contact) {
+            automationDebugger.log(debugSessionId, 'NO_CONTACT_FOR_DEAL', {
+              dealId: entity.id,
+              dealName: entity.name,
+              message: 'Cannot update contact field - deal has no associated contact'
+            }, 'warn');
           }
           break;
         
@@ -282,6 +299,37 @@ class AutomationEngineV2 {
                 updatedTags: updatedTags
               });
             }
+          } else if (enrollment.entityType === 'deal' && entity.Contact) {
+            // For deals, add tag to the associated contact
+            if (!action.config.tag) {
+              throw new Error('Invalid add_contact_tag config: missing tag');
+            }
+            
+            const currentTags = entity.Contact.tags || [];
+            const newTag = action.config.tag;
+            
+            automationDebugger.log(debugSessionId, 'ADD_TAG_TO_DEAL_CONTACT', {
+              contactId: entity.Contact.id,
+              currentTags,
+              newTag,
+              tagExists: currentTags.includes(newTag)
+            });
+            
+            if (!currentTags.includes(newTag)) {
+              const updatedTags = [...currentTags, newTag];
+              await entity.Contact.update({ tags: updatedTags });
+              
+              automationDebugger.log(debugSessionId, 'TAG_ADDED_TO_DEAL_CONTACT', {
+                contactId: entity.Contact.id,
+                updatedTags: updatedTags
+              });
+            }
+          } else if (enrollment.entityType === 'deal' && !entity.Contact) {
+            automationDebugger.log(debugSessionId, 'NO_CONTACT_FOR_DEAL_TAG', {
+              dealId: entity.id,
+              dealName: entity.name,
+              message: 'Cannot add contact tag - deal has no associated contact'
+            }, 'warn');
           }
           break;
       
@@ -715,7 +763,11 @@ class AutomationEngineV2 {
         metadata: result.success ? enrollment.metadata : { ...enrollment.metadata, error: result.error }
       });
       
-      await automation.increment(result.success ? 'completedEnrollments' : 'failedEnrollments');
+      // Only increment completedEnrollments for successful executions
+      if (result.success) {
+        await automation.increment('completedEnrollments');
+      }
+      // For failures, we just track in the enrollment status
       
     } catch (error) {
       automationDebugger.log(debugSessionId, 'LEGACY_AUTOMATION_ERROR', {
