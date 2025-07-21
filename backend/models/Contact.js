@@ -75,14 +75,23 @@ module.exports = (sequelize, DataTypes) => {
         fields: ['user_id']
       },
       {
+        fields: ['user_id', 'created_at']
+      },
+      {
         fields: ['email']
       },
       {
         fields: ['first_name', 'last_name']
       },
       {
-        type: 'FULLTEXT',
-        fields: ['first_name', 'last_name', 'email', 'notes']
+        fields: ['tags'],
+        using: 'gin'
+      },
+      {
+        fields: ['company']
+      },
+      {
+        fields: ['position']
       }
     ]
   });

@@ -4,7 +4,8 @@ import { Contact, Deal } from '../types';
 import { contactsAPI, dealsAPI } from '../services/api';
 import ContactForm from '../components/ContactForm';
 import DealForm from '../components/DealForm';
-import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import EntityDebugView from '../components/automation/EntityDebugView';
+import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
 const ContactDetail: React.FC = () => {
@@ -17,6 +18,7 @@ const ContactDetail: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showDealForm, setShowDealForm] = useState(false);
   const [totalDealValue, setTotalDealValue] = useState(0);
+  const [showDebugView, setShowDebugView] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -314,6 +316,26 @@ const ContactDetail: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Automation Debug Section */}
+      <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:px-6 flex justify-between items-center cursor-pointer" onClick={() => setShowDebugView(!showDebugView)}>
+          <div className="flex items-center">
+            <CpuChipIcon className="h-5 w-5 mr-2 text-gray-500" />
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Automation Debug Info
+            </h3>
+          </div>
+          <button className="text-gray-400 hover:text-gray-600">
+            <ArrowLeftIcon className={`h-5 w-5 transform transition-transform ${showDebugView ? '-rotate-90' : 'rotate-180'}`} />
+          </button>
+        </div>
+        {showDebugView && (
+          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <EntityDebugView entityType="contact" entityId={id!} />
+          </div>
+        )}
       </div>
 
       {/* Deal Form Modal */}

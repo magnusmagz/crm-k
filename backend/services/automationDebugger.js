@@ -147,6 +147,16 @@ class AutomationDebugger {
       .slice(-limit);
   }
 
+  // Get debug logs for a specific entity
+  getEntityLogs(entityType, entityId, limit = 100) {
+    return this.debugLogs
+      .filter(log => 
+        log.data.entityType === entityType && 
+        log.data.entityId === entityId
+      )
+      .slice(-limit);
+  }
+
   // Create a detailed execution report
   async createExecutionReport(automationId, enrollmentId) {
     const enrollment = await AutomationEnrollment.findByPk(enrollmentId);

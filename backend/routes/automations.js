@@ -490,4 +490,38 @@ router.get('/:id/debug', authMiddleware, async (req, res) => {
   }
 });
 
+// Get debug logs for a specific entity
+router.get('/debug/entity/:entityType/:entityId', authMiddleware, async (req, res) => {
+  try {
+    const { entityType, entityId } = req.params;
+    const automationDebugger = require('../services/automationDebugger');
+    const logs = automationDebugger.getEntityLogs(entityType, entityId, 100);
+    
+    // Get enrollments for this entity
+    const enrollments = await AutomationEnrollment.findAll({
+      where: { 
+        entityType,
+        entityId,
+        userId: req.user.id 
+      },
+      include: [{ 
+        model: Automation,
+        attributes: ['id', 'name', 'trigger', 'isActive']
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({ 
+      debugLogs: logs,
+      enrollments,
+      entityType,
+      entityId,
+      debugMode: process.env.AUTOMATION_DEBUG === 'true'
+    });
+  } catch (error) {
+    console.error('Get entity debug logs error:', error);
+    res.status(500).json({ error: 'Failed to get entity debug logs' });
+  }
+});
+
 module.exports = router;

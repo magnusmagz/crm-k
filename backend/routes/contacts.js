@@ -54,21 +54,49 @@ router.get('/', authMiddleware, async (req, res) => {
       where.tags = { [Op.overlap]: tagArray };
     }
 
+    // First get contacts without deals for better performance
     const contacts = await Contact.findAndCountAll({
       where,
-      include: [{
-        model: Deal,
-        as: 'deals',
-        attributes: ['id', 'value', 'status'],
-        required: false
-      }],
       order: [[sortBy, sortOrder]],
       limit: parseInt(limit),
       offset: parseInt(offset)
     });
+    
+    // Then get deal counts and values in a single query
+    const contactIds = contacts.rows.map(c => c.id);
+    const dealStats = await Deal.findAll({
+      where: { 
+        contactId: contactIds,
+        userId: req.user.id 
+      },
+      attributes: [
+        'contactId',
+        [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'dealCount'],
+        [Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 'totalValue'],
+        [Deal.sequelize.fn('COUNT', Deal.sequelize.literal("CASE WHEN status = 'won' THEN 1 END")), 'wonDeals']
+      ],
+      group: ['contactId'],
+      raw: true
+    });
+    
+    // Create a map for quick lookup
+    const dealStatsMap = dealStats.reduce((map, stat) => {
+      map[stat.contactId] = {
+        dealCount: parseInt(stat.dealCount) || 0,
+        totalValue: parseFloat(stat.totalValue) || 0,
+        wonDeals: parseInt(stat.wonDeals) || 0
+      };
+      return map;
+    }, {});
+    
+    // Add deal stats to contacts
+    const contactsWithStats = contacts.rows.map(contact => ({
+      ...contact.toJSON(),
+      dealStats: dealStatsMap[contact.id] || { dealCount: 0, totalValue: 0, wonDeals: 0 }
+    }));
 
     res.json({
-      contacts: contacts.rows,
+      contacts: contactsWithStats,
       total: contacts.count,
       limit: parseInt(limit),
       offset: parseInt(offset)

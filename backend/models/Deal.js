@@ -75,6 +75,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       {
         fields: ['status']
+      },
+      {
+        fields: ['contact_id', 'user_id']
+      },
+      {
+        fields: ['user_id', 'status']
       }
     ]
   });
