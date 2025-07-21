@@ -21,6 +21,8 @@ const Deal = require('./Deal')(sequelize, Sequelize.DataTypes);
 const Stage = require('./Stage')(sequelize, Sequelize.DataTypes);
 const Automation = require('./Automation')(sequelize, Sequelize.DataTypes);
 const AutomationLog = require('./AutomationLog')(sequelize, Sequelize.DataTypes);
+const AutomationStep = require('./AutomationStep')(sequelize, Sequelize.DataTypes);
+const AutomationEnrollment = require('./AutomationEnrollment')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
@@ -53,6 +55,15 @@ AutomationLog.belongsTo(Automation, { foreignKey: 'automation_id' });
 User.hasMany(AutomationLog, { foreignKey: 'user_id', as: 'automationLogs' });
 AutomationLog.belongsTo(User, { foreignKey: 'user_id' });
 
+Automation.hasMany(AutomationStep, { foreignKey: 'automation_id', as: 'steps' });
+AutomationStep.belongsTo(Automation, { foreignKey: 'automation_id' });
+
+Automation.hasMany(AutomationEnrollment, { foreignKey: 'automation_id', as: 'enrollments' });
+AutomationEnrollment.belongsTo(Automation, { foreignKey: 'automation_id' });
+
+User.hasMany(AutomationEnrollment, { foreignKey: 'user_id', as: 'automationEnrollments' });
+AutomationEnrollment.belongsTo(User, { foreignKey: 'user_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -62,5 +73,7 @@ module.exports = {
   Deal,
   Stage,
   Automation,
-  AutomationLog
+  AutomationLog,
+  AutomationStep,
+  AutomationEnrollment
 };

@@ -114,12 +114,17 @@ export interface Automation {
   conditions: AutomationCondition[];
   actions: AutomationAction[];
   isActive: boolean;
+  isMultiStep: boolean;
   executionCount: number;
+  enrolledCount: number;
+  activeEnrollments: number;
+  completedEnrollments: number;
   lastExecutedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   totalExecutions?: number;
   successfulExecutions?: number;
+  steps?: AutomationStep[];
 }
 
 export interface AutomationLog {
@@ -134,6 +139,53 @@ export interface AutomationLog {
   status: 'success' | 'failed' | 'skipped';
   error?: string;
   executedAt: Date;
+}
+
+export interface AutomationStep {
+  id: string;
+  automationId: string;
+  stepIndex: number;
+  name: string;
+  type: 'action' | 'delay' | 'condition' | 'branch';
+  config: any;
+  conditions?: AutomationCondition[];
+  actions?: AutomationAction[];
+  delayConfig?: {
+    value: number;
+    unit: 'minutes' | 'hours' | 'days';
+  };
+  branchConfig?: {
+    branches: Array<{
+      name: string;
+      conditions: AutomationCondition[];
+    }>;
+    defaultBranch?: string;
+  };
+  nextStepIndex?: number;
+  branchStepIndices?: Record<string, number>;
+}
+
+export interface AutomationEnrollment {
+  id: string;
+  automationId: string;
+  userId: string;
+  entityType: 'contact' | 'deal';
+  entityId: string;
+  currentStepIndex: number;
+  status: 'active' | 'completed' | 'failed' | 'unenrolled';
+  enrolledAt: Date;
+  completedAt?: Date;
+  nextStepAt?: Date;
+  metadata: any;
+}
+
+export interface EnrollmentSummary {
+  total: number;
+  active: number;
+  completed: number;
+  failed: number;
+  unenrolled: number;
+  recentEnrollments: AutomationEnrollment[];
 }
 
 export interface AuthState {

@@ -1,10 +1,27 @@
 const EventEmitter = require('events');
+const automationEnrollmentService = require('./automationEnrollmentService');
 
 class AutomationEventEmitter extends EventEmitter {
   constructor() {
     super();
     // Increase max listeners to handle multiple automations
     this.setMaxListeners(100);
+    this.setupListeners();
+  }
+
+  setupListeners() {
+    // Listen for automation triggers and handle enrollments
+    this.on('automation:trigger', async (event) => {
+      try {
+        await automationEnrollmentService.handleTrigger(
+          event.type,
+          event.userId,
+          event.data
+        );
+      } catch (error) {
+        console.error('Error handling automation trigger:', error);
+      }
+    });
   }
 
   // Contact Events

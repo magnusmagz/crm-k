@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Automation } from '../types';
 import { automationsAPI } from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { PlusIcon, CogIcon, PlayIcon, PauseIcon, TrashIcon, ClockIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, CogIcon, PlayIcon, PauseIcon, TrashIcon, ClockIcon, ChartBarIcon, UserIcon } from '@heroicons/react/24/outline';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
@@ -143,6 +143,12 @@ const Automations: React.FC = () => {
                           </p>
                         )}
                         <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+                          {automation.activeEnrollments > 0 && (
+                            <span className="flex items-center text-blue-600">
+                              <UserIcon className="mr-1 h-3 w-3" />
+                              {automation.activeEnrollments} enrolled
+                            </span>
+                          )}
                           <span className="flex items-center">
                             <ChartBarIcon className="mr-1 h-3 w-3" />
                             {automation.totalExecutions || 0} runs
@@ -152,10 +158,15 @@ const Automations: React.FC = () => {
                               {automation.successfulExecutions || 0} successful
                             </span>
                           </span>
+                          {automation.completedEnrollments > 0 && (
+                            <span className="flex items-center text-gray-500">
+                              {automation.completedEnrollments} completed
+                            </span>
+                          )}
                           {automation.lastExecutedAt && (
                             <span className="flex items-center">
                               <ClockIcon className="mr-1 h-3 w-3" />
-                              Last run: {new Date(automation.lastExecutedAt).toLocaleDateString()}
+                              Last: {new Date(automation.lastExecutedAt).toLocaleDateString()}
                             </span>
                           )}
                         </div>

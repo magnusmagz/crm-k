@@ -58,6 +58,26 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
+    isMultiStep: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
+    enrolledCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false
+    },
+    activeEnrollments: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false
+    },
+    completedEnrollments: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
@@ -91,6 +111,8 @@ module.exports = (sequelize, DataTypes) => {
   Automation.associate = function(models) {
     Automation.belongsTo(models.User, { foreignKey: 'userId' });
     Automation.hasMany(models.AutomationLog, { foreignKey: 'automationId', as: 'logs' });
+    Automation.hasMany(models.AutomationStep, { foreignKey: 'automationId', as: 'steps' });
+    Automation.hasMany(models.AutomationEnrollment, { foreignKey: 'automationId', as: 'enrollments' });
   };
 
   return Automation;

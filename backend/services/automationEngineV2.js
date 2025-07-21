@@ -1,0 +1,440 @@
+const { Automation, AutomationLog, AutomationStep, AutomationEnrollment, Contact, Deal, Stage, sequelize } = require('../models');
+const { Op } = require('sequelize');
+const cron = require('node-cron');
+
+class AutomationEngineV2 {
+  constructor() {
+    this.isProcessing = false;
+    this.cronJob = null;
+  }
+
+  // Initialize the engine and start processing
+  initialize() {
+    // Process pending enrollments every minute
+    this.cronJob = cron.schedule('* * * * *', () => {
+      this.processPendingEnrollments();
+    });
+
+    console.log('AutomationEngineV2 initialized');
+  }
+
+  // Process enrollments that are ready for their next step
+  async processPendingEnrollments() {
+    if (this.isProcessing) return;
+
+    this.isProcessing = true;
+    try {
+      const now = new Date();
+      const pendingEnrollments = await AutomationEnrollment.findAll({
+        where: {
+          status: 'active',
+          nextStepAt: {
+            [Op.lte]: now
+          }
+        },
+        include: [{
+          model: Automation,
+          where: { isActive: true },
+          include: ['steps']
+        }]
+      });
+
+      for (const enrollment of pendingEnrollments) {
+        await this.processEnrollmentStep(enrollment);
+      }
+    } catch (error) {
+      console.error('Error processing pending enrollments:', error);
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  // Process a single enrollment step
+  async processEnrollmentStep(enrollment) {
+    try {
+      const automation = enrollment.Automation;
+      
+      if (automation.isMultiStep && automation.steps && automation.steps.length > 0) {
+        // Multi-step workflow
+        const currentStep = automation.steps.find(s => s.stepIndex === enrollment.currentStepIndex);
+        
+        if (!currentStep) {
+          // No more steps, complete the enrollment
+          await enrollment.update({
+            status: 'completed',
+            completedAt: new Date()
+          });
+          return;
+        }
+
+        const result = await this.executeStep(currentStep, enrollment);
+        
+        if (result.success) {
+          // Determine next step
+          const nextStepIndex = this.determineNextStep(currentStep, result);
+          
+          if (nextStepIndex !== null) {
+            const nextStep = automation.steps.find(s => s.stepIndex === nextStepIndex);
+            const nextStepAt = this.calculateNextStepTime(nextStep);
+            
+            await enrollment.update({
+              currentStepIndex: nextStepIndex,
+              nextStepAt
+            });
+          } else {
+            // No more steps
+            await enrollment.update({
+              status: 'completed',
+              completedAt: new Date()
+            });
+          }
+        } else {
+          // Step failed
+          await enrollment.update({
+            status: 'failed',
+            metadata: { ...enrollment.metadata, failureReason: result.error }
+          });
+        }
+      } else {
+        // Legacy single-step automation
+        await this.executeLegacyAutomation(automation, enrollment);
+      }
+    } catch (error) {
+      console.error('Error processing enrollment step:', error);
+      await enrollment.update({
+        status: 'failed',
+        metadata: { ...enrollment.metadata, error: error.message }
+      });
+    }
+  }
+
+  // Execute a single step
+  async executeStep(step, enrollment) {
+    switch (step.type) {
+      case 'action':
+        return await this.executeActions(step.actions, enrollment);
+      
+      case 'delay':
+        // Delays are handled by nextStepAt, just return success
+        return { success: true };
+      
+      case 'condition':
+        return await this.evaluateConditions(step.conditions, enrollment);
+      
+      case 'branch':
+        return await this.evaluateBranch(step, enrollment);
+      
+      default:
+        return { success: false, error: 'Unknown step type' };
+    }
+  }
+
+  // Execute actions
+  async executeActions(actions, enrollment) {
+    try {
+      const entity = await this.getEntity(enrollment);
+      
+      for (const action of actions) {
+        await this.executeAction(action, entity, enrollment);
+      }
+      
+      await this.logExecution(enrollment, 'success', { actions });
+      return { success: true };
+    } catch (error) {
+      await this.logExecution(enrollment, 'failed', { error: error.message });
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Execute a single action
+  async executeAction(action, entity, enrollment) {
+    switch (action.type) {
+      case 'update_contact_field':
+        if (enrollment.entityType === 'contact') {
+          await entity.update({ [action.config.field]: action.config.value });
+        }
+        break;
+      
+      case 'add_contact_tag':
+        if (enrollment.entityType === 'contact') {
+          const tags = entity.tags || [];
+          if (!tags.includes(action.config.tag)) {
+            tags.push(action.config.tag);
+            await entity.update({ tags });
+          }
+        }
+        break;
+      
+      case 'update_deal_field':
+        if (enrollment.entityType === 'deal') {
+          await entity.update({ [action.config.field]: action.config.value });
+        }
+        break;
+      
+      case 'move_deal_to_stage':
+        if (enrollment.entityType === 'deal') {
+          await entity.update({ stageId: action.config.stageId });
+        }
+        break;
+      
+      case 'create_task':
+        // Future: Create a task
+        break;
+      
+      case 'send_notification':
+        // Future: Send internal notification
+        break;
+    }
+  }
+
+  // Evaluate conditions
+  async evaluateConditions(conditions, enrollment) {
+    if (!conditions || conditions.length === 0) {
+      return { success: true };
+    }
+
+    const entity = await this.getEntity(enrollment);
+    
+    for (let i = 0; i < conditions.length; i++) {
+      const condition = conditions[i];
+      const met = await this.evaluateCondition(condition, entity);
+      
+      if (i === 0) {
+        if (!met) return { success: false, conditionsFailed: true };
+      } else {
+        const logic = conditions[i - 1].logic || 'AND';
+        if (logic === 'AND' && !met) return { success: false, conditionsFailed: true };
+        if (logic === 'OR' && met) return { success: true };
+      }
+    }
+    
+    return { success: true };
+  }
+
+  // Evaluate a single condition
+  async evaluateCondition(condition, entity) {
+    const fieldValue = entity[condition.field];
+    const targetValue = condition.value;
+    
+    switch (condition.operator) {
+      case 'equals':
+        return fieldValue == targetValue;
+      case 'not_equals':
+        return fieldValue != targetValue;
+      case 'contains':
+        return fieldValue && fieldValue.toString().includes(targetValue);
+      case 'not_contains':
+        return !fieldValue || !fieldValue.toString().includes(targetValue);
+      case 'is_empty':
+        return !fieldValue || fieldValue === '';
+      case 'is_not_empty':
+        return fieldValue && fieldValue !== '';
+      case 'greater_than':
+        return parseFloat(fieldValue) > parseFloat(targetValue);
+      case 'less_than':
+        return parseFloat(fieldValue) < parseFloat(targetValue);
+      case 'has_tag':
+        return entity.tags && entity.tags.includes(targetValue);
+      case 'not_has_tag':
+        return !entity.tags || !entity.tags.includes(targetValue);
+      default:
+        return false;
+    }
+  }
+
+  // Evaluate branch conditions and determine path
+  async evaluateBranch(step, enrollment) {
+    const entity = await this.getEntity(enrollment);
+    
+    for (const branch of step.branchConfig.branches) {
+      const conditionsMet = await this.evaluateConditions(branch.conditions, enrollment);
+      if (conditionsMet.success) {
+        return { success: true, nextBranch: branch.name };
+      }
+    }
+    
+    // No branch conditions met, use default if available
+    if (step.branchConfig.defaultBranch) {
+      return { success: true, nextBranch: 'default' };
+    }
+    
+    return { success: true, nextBranch: null };
+  }
+
+  // Determine the next step based on current step and results
+  determineNextStep(currentStep, result) {
+    if (currentStep.type === 'branch' && result.nextBranch) {
+      return currentStep.branchStepIndices[result.nextBranch] || null;
+    }
+    
+    if (currentStep.type === 'condition' && result.conditionsFailed) {
+      // Conditions not met, skip to alternative path if defined
+      return currentStep.branchStepIndices.false || null;
+    }
+    
+    return currentStep.nextStepIndex;
+  }
+
+  // Calculate when the next step should execute
+  calculateNextStepTime(step) {
+    if (!step || step.type !== 'delay') {
+      return new Date(); // Execute immediately
+    }
+    
+    const now = new Date();
+    const delayConfig = step.delayConfig;
+    
+    switch (delayConfig.unit) {
+      case 'minutes':
+        return new Date(now.getTime() + delayConfig.value * 60 * 1000);
+      case 'hours':
+        return new Date(now.getTime() + delayConfig.value * 60 * 60 * 1000);
+      case 'days':
+        return new Date(now.getTime() + delayConfig.value * 24 * 60 * 60 * 1000);
+      default:
+        return now;
+    }
+  }
+
+  // Get the entity (contact or deal) for the enrollment
+  async getEntity(enrollment) {
+    if (enrollment.entityType === 'contact') {
+      return await Contact.findByPk(enrollment.entityId);
+    } else if (enrollment.entityType === 'deal') {
+      return await Deal.findByPk(enrollment.entityId, {
+        include: ['Contact', 'Stage']
+      });
+    }
+    throw new Error('Unknown entity type');
+  }
+
+  // Enroll an entity in an automation
+  async enroll(automation, entityType, entityId, userId) {
+    try {
+      // Check if already enrolled
+      const existing = await AutomationEnrollment.findOne({
+        where: {
+          automationId: automation.id,
+          entityType,
+          entityId,
+          status: 'active'
+        }
+      });
+      
+      if (existing) {
+        return { success: false, reason: 'Already enrolled' };
+      }
+      
+      // Create enrollment
+      const enrollment = await AutomationEnrollment.create({
+        automationId: automation.id,
+        userId,
+        entityType,
+        entityId,
+        currentStepIndex: 0,
+        status: 'active',
+        nextStepAt: new Date() // Start immediately
+      });
+      
+      // Update automation enrollment counts
+      await automation.increment({
+        enrolledCount: 1,
+        activeEnrollments: 1
+      });
+      
+      return { success: true, enrollment };
+    } catch (error) {
+      console.error('Error enrolling entity:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Unenroll an entity from an automation
+  async unenroll(automationId, entityType, entityId) {
+    const enrollment = await AutomationEnrollment.findOne({
+      where: {
+        automationId,
+        entityType,
+        entityId,
+        status: 'active'
+      }
+    });
+    
+    if (enrollment) {
+      await enrollment.update({ status: 'unenrolled' });
+      
+      const automation = await Automation.findByPk(automationId);
+      await automation.decrement('activeEnrollments');
+    }
+  }
+
+  // Get enrollment statistics for an automation
+  async getEnrollmentStats(automationId) {
+    const stats = await AutomationEnrollment.findAll({
+      where: { automationId },
+      attributes: [
+        'status',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      group: ['status']
+    });
+    
+    return stats.reduce((acc, stat) => {
+      acc[stat.status] = parseInt(stat.get('count'));
+      return acc;
+    }, {});
+  }
+
+  // Log execution details
+  async logExecution(enrollment, status, details) {
+    await AutomationLog.create({
+      automationId: enrollment.automationId,
+      userId: enrollment.userId,
+      triggerType: 'step_execution',
+      triggerData: {
+        enrollmentId: enrollment.id,
+        stepIndex: enrollment.currentStepIndex,
+        entityType: enrollment.entityType,
+        entityId: enrollment.entityId
+      },
+      status,
+      conditionsEvaluated: details.conditions,
+      actionsExecuted: details.actions,
+      error: details.error,
+      executedAt: new Date()
+    });
+  }
+
+  // Execute legacy single-step automation
+  async executeLegacyAutomation(automation, enrollment) {
+    const entity = await this.getEntity(enrollment);
+    
+    // Check conditions
+    if (automation.conditions && automation.conditions.length > 0) {
+      const conditionsMet = await this.evaluateConditions(automation.conditions, enrollment);
+      if (!conditionsMet.success) {
+        await enrollment.update({ status: 'completed' });
+        return;
+      }
+    }
+    
+    // Execute actions
+    const result = await this.executeActions(automation.actions, enrollment);
+    
+    await enrollment.update({
+      status: result.success ? 'completed' : 'failed',
+      completedAt: new Date()
+    });
+    
+    await automation.increment(result.success ? 'completedEnrollments' : 'failedEnrollments');
+  }
+
+  // Shutdown the engine
+  shutdown() {
+    if (this.cronJob) {
+      this.cronJob.stop();
+    }
+  }
+}
+
+module.exports = new AutomationEngineV2();

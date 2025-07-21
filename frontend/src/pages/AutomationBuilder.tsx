@@ -7,6 +7,7 @@ import { ArrowLeftIcon, PlusIcon, TrashIcon, PlayIcon } from '@heroicons/react/2
 import TriggerSelector from '../components/automation/TriggerSelector';
 import ConditionBuilder from '../components/automation/ConditionBuilder';
 import ActionBuilder from '../components/automation/ActionBuilder';
+import EnrollmentView from '../components/automation/EnrollmentView';
 
 const AutomationBuilder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ const AutomationBuilder: React.FC = () => {
   const [stages, setStages] = useState<Stage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [showEnrollments, setShowEnrollments] = useState(false);
 
   useEffect(() => {
     fetchStages();
@@ -184,9 +186,26 @@ const AutomationBuilder: React.FC = () => {
 
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-6">
-            {isEditing ? 'Edit Automation' : 'Create Automation'}
-          </h3>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
+              {isEditing ? 'Edit Automation' : 'Create Automation'}
+            </h3>
+            {isEditing && (
+              <button
+                onClick={() => setShowEnrollments(!showEnrollments)}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                {showEnrollments ? 'Hide' : 'Show'} Enrollments
+              </button>
+            )}
+          </div>
+
+          {/* Enrollment View */}
+          {showEnrollments && isEditing && (
+            <div className="mb-8">
+              <EnrollmentView automationId={id!} isActive={true} />
+            </div>
+          )}
 
           {/* Basic Info */}
           <div className="space-y-4 mb-8">

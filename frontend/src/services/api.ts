@@ -169,6 +169,16 @@ export const automationsAPI = {
     api.get(`/automations/${id}/logs`, { params }),
   
   test: (id: string, testData?: any) => api.post(`/automations/${id}/test`, { testData }),
+  
+  getEnrollments: (id: string) => api.get(`/automations/${id}/enrollments`),
+  
+  previewEnrollment: (id: string) => api.get(`/automations/${id}/preview-enrollment`),
+  
+  enroll: (id: string, entityType: 'contact' | 'deal', entityIds: string[]) => 
+    api.post(`/automations/${id}/enroll`, { entityType, entityIds }),
+  
+  unenroll: (id: string, entityType: 'contact' | 'deal', entityId: string) => 
+    api.post(`/automations/${id}/unenroll`, { entityType, entityId }),
 };
 
 export default api;

@@ -1,8 +1,9 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { Automation, AutomationLog, Contact, Deal } = require('../models');
+const { Automation, AutomationLog, AutomationEnrollment, AutomationStep, Contact, Deal } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
+const automationEnrollmentService = require('../services/automationEnrollmentService');
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Get single automation with logs
+// Get single automation with logs and enrollment info
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const automation = await Automation.findOne({
@@ -39,12 +40,19 @@ router.get('/:id', authMiddleware, async (req, res) => {
         id: req.params.id,
         userId: req.user.id
       },
-      include: [{
-        model: AutomationLog,
-        as: 'logs',
-        limit: 50,
-        order: [['executedAt', 'DESC']]
-      }]
+      include: [
+        {
+          model: AutomationLog,
+          as: 'logs',
+          limit: 50,
+          order: [['executedAt', 'DESC']]
+        },
+        {
+          model: AutomationStep,
+          as: 'steps',
+          order: [['stepIndex', 'ASC']]
+        }
+      ]
     });
 
     if (!automation) {
@@ -309,5 +317,102 @@ async function generateTestData(triggerType, userId) {
       return {};
   }
 }
+
+// Get enrollment summary for an automation
+router.get('/:id/enrollments', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    const summary = await automationEnrollmentService.getEnrollmentSummary(req.params.id);
+    const enrolledEntities = await automationEnrollmentService.getEnrolledEntities(req.params.id);
+
+    res.json({ 
+      summary,
+      enrolledEntities: enrolledEntities.slice(0, 20) // Return first 20
+    });
+  } catch (error) {
+    console.error('Get enrollments error:', error);
+    res.status(500).json({ error: 'Failed to get enrollments' });
+  }
+});
+
+// Preview enrollment for an automation
+router.get('/:id/preview-enrollment', authMiddleware, async (req, res) => {
+  try {
+    const preview = await automationEnrollmentService.previewEnrollment(
+      req.params.id,
+      req.user.id
+    );
+
+    res.json(preview);
+  } catch (error) {
+    console.error('Preview enrollment error:', error);
+    res.status(500).json({ error: 'Failed to preview enrollment' });
+  }
+});
+
+// Manually enroll entities
+router.post('/:id/enroll', authMiddleware, async (req, res) => {
+  try {
+    const { entityType, entityIds } = req.body;
+
+    if (!entityType || !entityIds || !Array.isArray(entityIds)) {
+      return res.status(400).json({ error: 'Invalid request data' });
+    }
+
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    const results = [];
+    const automationEngineV2 = require('../services/automationEngineV2');
+
+    for (const entityId of entityIds) {
+      const result = await automationEngineV2.enroll(
+        automation,
+        entityType,
+        entityId,
+        req.user.id
+      );
+      results.push({ entityId, ...result });
+    }
+
+    res.json({ results });
+  } catch (error) {
+    console.error('Manual enroll error:', error);
+    res.status(500).json({ error: 'Failed to enroll entities' });
+  }
+});
+
+// Unenroll entity from automation
+router.post('/:id/unenroll', authMiddleware, async (req, res) => {
+  try {
+    const { entityType, entityId } = req.body;
+
+    const automationEngineV2 = require('../services/automationEngineV2');
+    await automationEngineV2.unenroll(req.params.id, entityType, entityId);
+
+    res.json({ message: 'Entity unenrolled successfully' });
+  } catch (error) {
+    console.error('Unenroll error:', error);
+    res.status(500).json({ error: 'Failed to unenroll entity' });
+  }
+});
 
 module.exports = router;
