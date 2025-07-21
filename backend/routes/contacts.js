@@ -73,7 +73,9 @@ router.get('/', authMiddleware, async (req, res) => {
         'contactId',
         [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'dealCount'],
         [Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 'totalValue'],
-        [Deal.sequelize.fn('COUNT', Deal.sequelize.literal("CASE WHEN status = 'won' THEN 1 END")), 'wonDeals']
+        [Deal.sequelize.fn('COUNT', Deal.sequelize.literal("CASE WHEN status = 'won' THEN 1 END")), 'wonDeals'],
+        [Deal.sequelize.fn('COUNT', Deal.sequelize.literal("CASE WHEN status = 'open' THEN 1 END")), 'openDeals'],
+        [Deal.sequelize.fn('SUM', Deal.sequelize.literal("CASE WHEN status = 'open' THEN value ELSE 0 END")), 'openValue']
       ],
       group: ['contactId'],
       raw: true
@@ -84,7 +86,9 @@ router.get('/', authMiddleware, async (req, res) => {
       map[stat.contactId] = {
         dealCount: parseInt(stat.dealCount) || 0,
         totalValue: parseFloat(stat.totalValue) || 0,
-        wonDeals: parseInt(stat.wonDeals) || 0
+        wonDeals: parseInt(stat.wonDeals) || 0,
+        openDeals: parseInt(stat.openDeals) || 0,
+        openValue: parseFloat(stat.openValue) || 0
       };
       return map;
     }, {});
@@ -92,7 +96,7 @@ router.get('/', authMiddleware, async (req, res) => {
     // Add deal stats to contacts
     const contactsWithStats = contacts.rows.map(contact => ({
       ...contact.toJSON(),
-      dealStats: dealStatsMap[contact.id] || { dealCount: 0, totalValue: 0, wonDeals: 0 }
+      dealStats: dealStatsMap[contact.id] || { dealCount: 0, totalValue: 0, wonDeals: 0, openDeals: 0, openValue: 0 }
     }));
 
     res.json({

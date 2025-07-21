@@ -42,6 +42,13 @@ export interface Contact {
   createdAt: Date;
   updatedAt: Date;
   deals?: Deal[];
+  dealStats?: {
+    dealCount: number;
+    totalValue: number;
+    wonDeals: number;
+    openDeals: number;
+    openValue: number;
+  };
 }
 
 export interface CustomField {

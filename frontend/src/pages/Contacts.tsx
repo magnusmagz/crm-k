@@ -180,12 +180,17 @@ const Contacts: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
-                          {contact.deals && contact.deals.length > 0 ? (
+                          {contact.dealStats && contact.dealStats.dealCount > 0 ? (
                             <div>
-                              <span className="font-medium">{contact.deals.filter(d => d.status === 'open').length}</span> open
+                              <span className="font-medium">{contact.dealStats.openDeals || 0}</span> open
                               <div className="text-xs text-gray-400">
-                                ${contact.deals.filter(d => d.status === 'open').reduce((sum, d) => sum + (d.value || 0), 0).toLocaleString()}
+                                ${(contact.dealStats.openValue || 0).toLocaleString()}
                               </div>
+                              {contact.dealStats.wonDeals > 0 && (
+                                <div className="text-xs text-green-600">
+                                  {contact.dealStats.wonDeals} won
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <span className="text-gray-400">-</span>
