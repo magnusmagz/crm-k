@@ -10,7 +10,10 @@
     "client": "cd frontend && npm start",
     "install-all": "npm install && cd frontend && npm install",
     "build": "cd frontend && npm run build",
-    "heroku-postbuild": "npm run install-all && npm run build"
+    "heroku-postbuild": "npm run install-all && npm run build",
+    "test": "jest --forceExit --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "crm",
@@ -35,6 +38,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
+    "jest": "^30.0.4",
     "nodemon": "^3.0.2"
   },
   "engines": {
