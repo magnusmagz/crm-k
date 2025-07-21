@@ -1,5 +1,6 @@
 const { Automation, AutomationEnrollment, Contact, Deal } = require('../models');
 const automationEngineV2 = require('./automationEngineV2');
+const automationDebugger = require('./automationDebugger');
 const { Op } = require('sequelize');
 
 class AutomationEnrollmentService {
@@ -36,6 +37,9 @@ class AutomationEnrollmentService {
   async processAutomationTrigger(automation, eventType, data) {
     let entityType, entityId, entity;
 
+    // Start debug session
+    const debugSessionId = automationDebugger.startSession(automation.id, 'trigger', eventType);
+
     // Determine entity based on trigger type
     switch (eventType) {
       case 'contact_created':
@@ -54,21 +58,30 @@ class AutomationEnrollmentService {
         break;
       
       default:
+        automationDebugger.log(debugSessionId, 'TRIGGER_ERROR', {
+          error: 'Unknown trigger type',
+          eventType
+        }, 'error');
         return { success: false, error: 'Unknown trigger type' };
     }
 
+    // Log trigger evaluation
+    automationDebugger.logTriggerEvaluation(debugSessionId, eventType, data, true);
+
     // Check if entity should be enrolled
-    const shouldEnroll = await this.checkEnrollmentCriteria(automation, entity, eventType, data);
+    const shouldEnroll = await this.checkEnrollmentCriteria(automation, entity, eventType, data, debugSessionId);
     
     if (shouldEnroll) {
+      automationDebugger.logEnrollmentDecision(debugSessionId, automation.id, entityId, true, 'All criteria met');
       return await automationEngineV2.enroll(automation, entityType, entityId, automation.userId);
     }
     
+    automationDebugger.logEnrollmentDecision(debugSessionId, automation.id, entityId, false, 'Enrollment criteria not met');
     return { success: false, reason: 'Enrollment criteria not met' };
   }
 
   // Check if entity meets enrollment criteria
-  async checkEnrollmentCriteria(automation, entity, eventType, data) {
+  async checkEnrollmentCriteria(automation, entity, eventType, data, debugSessionId) {
     // For stage change triggers, check if it's the right stage transition
     if (eventType === 'deal_stage_changed' && automation.trigger.config) {
       const { fromStageId, toStageId } = automation.trigger.config;
@@ -86,7 +99,13 @@ class AutomationEnrollmentService {
     if (automation.conditions && automation.conditions.length > 0) {
       // For simple automations, check conditions immediately
       if (!automation.isMultiStep) {
-        const conditionsMet = await this.evaluateConditions(automation.conditions, entity);
+        const conditionsMet = await this.evaluateConditions(automation.conditions, entity, debugSessionId);
+        if (!conditionsMet && debugSessionId) {
+          automationDebugger.log(debugSessionId, 'ENROLLMENT_CRITERIA_FAILED', {
+            reason: 'Initial conditions not met',
+            automationId: automation.id
+          });
+        }
         return conditionsMet;
       }
     }
@@ -95,10 +114,14 @@ class AutomationEnrollmentService {
   }
 
   // Evaluate conditions (simplified version for enrollment)
-  async evaluateConditions(conditions, entity) {
+  async evaluateConditions(conditions, entity, debugSessionId) {
     for (let i = 0; i < conditions.length; i++) {
       const condition = conditions[i];
       const met = this.evaluateCondition(condition, entity);
+      
+      if (debugSessionId) {
+        automationDebugger.logConditionEvaluation(debugSessionId, condition, entity, met);
+      }
       
       if (i === 0) {
         if (!met) return false;

@@ -1,6 +1,7 @@
 const { Automation, AutomationLog, AutomationStep, AutomationEnrollment, Contact, Deal, Stage, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const cron = require('node-cron');
+const automationDebugger = require('./automationDebugger');
 
 class AutomationEngineV2 {
   constructor() {
@@ -131,16 +132,34 @@ class AutomationEngineV2 {
 
   // Execute actions
   async executeActions(actions, enrollment) {
+    const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
+    
     try {
       const entity = await this.getEntity(enrollment);
       
+      automationDebugger.log(debugSessionId, 'ACTION_EXECUTION_START', {
+        enrollmentId: enrollment.id,
+        entityType: enrollment.entityType,
+        entityId: enrollment.entityId,
+        actionsCount: actions.length
+      });
+      
       for (const action of actions) {
+        automationDebugger.log(debugSessionId, 'ACTION_BEFORE_EXECUTE', {
+          actionType: action.type,
+          actionConfig: action.config,
+          entityState: entity
+        });
+        
         await this.executeAction(action, entity, enrollment);
+        
+        automationDebugger.logActionExecution(debugSessionId, action, entity, true);
       }
       
       await this.logExecution(enrollment, 'success', { actions });
       return { success: true };
     } catch (error) {
+      automationDebugger.logActionExecution(debugSessionId, { type: 'unknown' }, {}, false, error);
       await this.logExecution(enrollment, 'failed', { error: error.message });
       return { success: false, error: error.message };
     }
@@ -310,6 +329,8 @@ class AutomationEngineV2 {
 
   // Enroll an entity in an automation
   async enroll(automation, entityType, entityId, userId) {
+    const debugSessionId = automationDebugger.startSession(automation.id, entityType, entityId);
+    
     try {
       // Check if already enrolled
       const existing = await AutomationEnrollment.findOne({
@@ -322,6 +343,10 @@ class AutomationEngineV2 {
       });
       
       if (existing) {
+        automationDebugger.log(debugSessionId, 'ENROLLMENT_EXISTS', {
+          enrollmentId: existing.id,
+          status: existing.status
+        });
         return { success: false, reason: 'Already enrolled' };
       }
       
@@ -336,14 +361,47 @@ class AutomationEngineV2 {
         nextStepAt: new Date() // Start immediately
       });
       
+      automationDebugger.log(debugSessionId, 'ENROLLMENT_CREATED', {
+        enrollmentId: enrollment.id,
+        automationId: automation.id,
+        entityType,
+        entityId,
+        nextStepAt: enrollment.nextStepAt
+      });
+      
       // Update automation enrollment counts
       await automation.increment({
         enrolledCount: 1,
         activeEnrollments: 1
       });
       
+      // Process immediately for single-step automations
+      if (!automation.isMultiStep) {
+        automationDebugger.log(debugSessionId, 'IMMEDIATE_PROCESSING', {
+          reason: 'Single-step automation',
+          automationId: automation.id
+        });
+        
+        // Need to reload with associations
+        const fullEnrollment = await AutomationEnrollment.findByPk(enrollment.id, {
+          include: [{
+            model: Automation,
+            include: ['steps']
+          }]
+        });
+        
+        // Process immediately
+        setImmediate(async () => {
+          await this.processEnrollmentStep(fullEnrollment);
+        });
+      }
+      
       return { success: true, enrollment };
     } catch (error) {
+      automationDebugger.log(debugSessionId, 'ENROLLMENT_ERROR', {
+        error: error.message,
+        stack: error.stack
+      }, 'error');
       console.error('Error enrolling entity:', error);
       return { success: false, error: error.message };
     }

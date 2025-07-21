@@ -463,4 +463,31 @@ router.post('/:id/unenroll', authMiddleware, async (req, res) => {
   }
 });
 
+// Get debug logs for an automation
+router.get('/:id/debug', authMiddleware, async (req, res) => {
+  try {
+    const automationDebugger = require('../services/automationDebugger');
+    const logs = automationDebugger.getAutomationLogs(req.params.id, 100);
+    
+    // Get recent enrollments
+    const recentEnrollments = await AutomationEnrollment.findAll({
+      where: { 
+        automationId: req.params.id,
+        userId: req.user.id 
+      },
+      order: [['createdAt', 'DESC']],
+      limit: 10
+    });
+
+    res.json({ 
+      debugLogs: logs,
+      recentEnrollments,
+      debugMode: process.env.AUTOMATION_DEBUG === 'true'
+    });
+  } catch (error) {
+    console.error('Get debug logs error:', error);
+    res.status(500).json({ error: 'Failed to get debug logs' });
+  }
+});
+
 module.exports = router;

@@ -8,6 +8,7 @@ import TriggerSelector from '../components/automation/TriggerSelector';
 import ConditionBuilder from '../components/automation/ConditionBuilder';
 import ActionBuilder from '../components/automation/ActionBuilder';
 import EnrollmentView from '../components/automation/EnrollmentView';
+import DebugView from '../components/automation/DebugView';
 
 const AutomationBuilder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +24,7 @@ const AutomationBuilder: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [showEnrollments, setShowEnrollments] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
     fetchStages();
@@ -191,12 +193,20 @@ const AutomationBuilder: React.FC = () => {
               {isEditing ? 'Edit Automation' : 'Create Automation'}
             </h3>
             {isEditing && (
-              <button
-                onClick={() => setShowEnrollments(!showEnrollments)}
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                {showEnrollments ? 'Hide' : 'Show'} Enrollments
-              </button>
+              <div className="space-x-4">
+                <button
+                  onClick={() => setShowEnrollments(!showEnrollments)}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  {showEnrollments ? 'Hide' : 'Show'} Enrollments
+                </button>
+                <button
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  {showDebug ? 'Hide' : 'Show'} Debug
+                </button>
+              </div>
             )}
           </div>
 
@@ -204,6 +214,13 @@ const AutomationBuilder: React.FC = () => {
           {showEnrollments && isEditing && (
             <div className="mb-8">
               <EnrollmentView automationId={id!} isActive={true} />
+            </div>
+          )}
+
+          {/* Debug View */}
+          {showDebug && isEditing && (
+            <div className="mb-8">
+              <DebugView automationId={id!} />
             </div>
           )}
 
