@@ -371,14 +371,41 @@ class AutomationEngineV2 {
 
   // Get the entity (contact or deal) for the enrollment
   async getEntity(enrollment) {
-    if (enrollment.entityType === 'contact') {
-      return await Contact.findByPk(enrollment.entityId);
-    } else if (enrollment.entityType === 'deal') {
-      return await Deal.findByPk(enrollment.entityId, {
-        include: ['Contact', 'Stage']
-      });
+    const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
+    
+    automationDebugger.log(debugSessionId, 'GET_ENTITY_START', {
+      entityType: enrollment.entityType,
+      entityId: enrollment.entityId
+    });
+    
+    try {
+      if (enrollment.entityType === 'contact') {
+        const contact = await Contact.findByPk(enrollment.entityId);
+        automationDebugger.log(debugSessionId, 'GET_ENTITY_RESULT', {
+          found: !!contact,
+          entityId: enrollment.entityId
+        });
+        return contact;
+      } else if (enrollment.entityType === 'deal') {
+        const deal = await Deal.findByPk(enrollment.entityId, {
+          include: ['Contact', 'Stage']
+        });
+        automationDebugger.log(debugSessionId, 'GET_ENTITY_RESULT', {
+          found: !!deal,
+          entityId: enrollment.entityId
+        });
+        return deal;
+      }
+      throw new Error('Unknown entity type: ' + enrollment.entityType);
+    } catch (error) {
+      automationDebugger.log(debugSessionId, 'GET_ENTITY_ERROR', {
+        error: error.message,
+        stack: error.stack,
+        entityType: enrollment.entityType,
+        entityId: enrollment.entityId
+      }, 'error');
+      throw error;
     }
-    throw new Error('Unknown entity type');
   }
 
   // Enroll an entity in an automation
@@ -550,6 +577,10 @@ class AutomationEngineV2 {
     
     try {
       const entity = await this.getEntity(enrollment);
+      
+      if (!entity) {
+        throw new Error(`Entity not found: ${enrollment.entityType} ${enrollment.entityId}`);
+      }
       
       automationDebugger.log(debugSessionId, 'ENTITY_LOADED', {
         entityType: enrollment.entityType,
