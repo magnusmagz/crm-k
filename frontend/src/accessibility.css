@@ -1,0 +1,141 @@
+/* Accessibility overrides for users over 40 */
+/* Ensuring minimum 16px font size throughout the application */
+
+/* Override Tailwind's text-xs (12px) to be 16px minimum */
+.text-xs {
+  font-size: 1rem !important; /* 16px */
+  line-height: 1.5rem !important; /* 24px */
+}
+
+/* Override Tailwind's text-sm (14px) to be 16px minimum */
+.text-sm {
+  font-size: 1rem !important; /* 16px */
+  line-height: 1.5rem !important; /* 24px */
+}
+
+/* Ensure base text is also at least 16px */
+.text-base {
+  font-size: 1rem !important; /* 16px */
+  line-height: 1.5rem !important; /* 24px */
+}
+
+/* Make slightly larger sizes for better hierarchy */
+.text-lg {
+  font-size: 1.125rem !important; /* 18px */
+  line-height: 1.75rem !important; /* 28px */
+}
+
+.text-xl {
+  font-size: 1.25rem !important; /* 20px */
+  line-height: 1.75rem !important; /* 28px */
+}
+
+.text-2xl {
+  font-size: 1.5rem !important; /* 24px */
+  line-height: 2rem !important; /* 32px */
+}
+
+.text-3xl {
+  font-size: 1.875rem !important; /* 30px */
+  line-height: 2.25rem !important; /* 36px */
+}
+
+/* Ensure form inputs have readable text */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  font-size: 1rem !important; /* 16px minimum */
+}
+
+/* Ensure buttons have readable text */
+button {
+  font-size: 1rem !important; /* 16px minimum */
+}
+
+/* Tables should also have readable text */
+table {
+  font-size: 1rem !important; /* 16px minimum */
+}
+
+/* Ensure placeholders are readable */
+::placeholder {
+  font-size: 1rem !important; /* 16px minimum */
+}
+
+/* Make labels clearly readable */
+label {
+  font-size: 1rem !important; /* 16px minimum */
+  font-weight: 500; /* Slightly bolder for better readability */
+}
+
+/* Ensure error messages are readable */
+.error-message,
+.help-text {
+  font-size: 1rem !important; /* 16px minimum */
+}
+
+/* Improve link visibility */
+a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Increase touch targets for better accessibility */
+button,
+a,
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Better focus indicators */
+:focus {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+  
+  button {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* Better spacing for readability */
+p, div, li {
+  line-height: 1.6;
+}
+
+/* Improve table readability */
+td, th {
+  padding: 0.75rem !important;
+}
+
+/* Better form field spacing */
+.space-y-4 > * + * {
+  margin-top: 1.5rem !important;
+}
+
+.space-y-6 > * + * {
+  margin-top: 2rem !important;
+}
+
+/* Ensure badges and pills are readable */
+.badge, .pill, [class*="rounded-full"] {
+  padding: 0.5rem 1rem !important;
+  font-size: 1rem !important;
+}
