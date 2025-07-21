@@ -5,7 +5,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import KanbanBoard from '../components/KanbanBoard';
 import DealForm from '../components/DealForm';
 import StageManager from '../components/StageManager';
-import { CogIcon, PlusIcon } from '@heroicons/react/24/outline';
+import DealDebugModal from '../components/DealDebugModal';
+import { CogIcon, PlusIcon, BugAntIcon } from '@heroicons/react/24/outline';
 
 const Pipeline: React.FC = () => {
   const [stages, setStages] = useState<Stage[]>([]);
@@ -13,7 +14,9 @@ const Pipeline: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showDealForm, setShowDealForm] = useState(false);
   const [showStageManager, setShowStageManager] = useState(false);
+  const [showDebugModal, setShowDebugModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [debugDeal, setDebugDeal] = useState<Deal | null>(null);
   const [analytics, setAnalytics] = useState({
     total: 0,
     totalValue: 0,
@@ -157,6 +160,24 @@ const Pipeline: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none space-x-3">
+            {deals.length > 0 && (
+              <button
+                onClick={() => {
+                  // Find the deal with the specified ID
+                  const dealToDebug = deals.find(d => d.id === 'bbd11666-76ad-40e8-8c83-fbb41c8c4879');
+                  if (dealToDebug) {
+                    setDebugDeal(dealToDebug);
+                    setShowDebugModal(true);
+                  } else {
+                    toast.error('Deal not found for debugging');
+                  }
+                }}
+                className="inline-flex items-center justify-center rounded-md border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-800 shadow-sm hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+              >
+                <BugAntIcon className="-ml-1 mr-2 h-5 w-5" />
+                Debug Deal
+              </button>
+            )}
             <button
               onClick={() => setShowStageManager(true)}
               className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
@@ -222,6 +243,18 @@ const Pipeline: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Debug Modal */}
+      <DealDebugModal
+        isOpen={showDebugModal}
+        onClose={() => {
+          setShowDebugModal(false);
+          setDebugDeal(null);
+        }}
+        deal={debugDeal}
+      />
+
+      <Toaster position="top-right" />
     </div>
   );
 };
