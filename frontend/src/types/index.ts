@@ -88,6 +88,54 @@ export interface Deal {
   Stage?: Stage;
 }
 
+export interface AutomationTrigger {
+  type: 'contact_created' | 'contact_updated' | 'deal_created' | 'deal_updated' | 'deal_stage_changed';
+  config?: any;
+}
+
+export interface AutomationCondition {
+  field: string;
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'is_empty' | 'is_not_empty' | 'greater_than' | 'less_than' | 'has_tag' | 'not_has_tag';
+  value: any;
+  logic?: 'AND' | 'OR';
+}
+
+export interface AutomationAction {
+  type: 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage';
+  config: any;
+}
+
+export interface Automation {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  trigger: AutomationTrigger;
+  conditions: AutomationCondition[];
+  actions: AutomationAction[];
+  isActive: boolean;
+  executionCount: number;
+  lastExecutedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  totalExecutions?: number;
+  successfulExecutions?: number;
+}
+
+export interface AutomationLog {
+  id: string;
+  automationId: string;
+  userId: string;
+  triggerType: string;
+  triggerData: any;
+  conditionsMet: boolean;
+  conditionsEvaluated?: any[];
+  actionsExecuted?: any[];
+  status: 'success' | 'failed' | 'skipped';
+  error?: string;
+  executedAt: Date;
+}
+
 export interface AuthState {
   user: User | null;
   profile: UserProfile | null;

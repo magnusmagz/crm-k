@@ -11,6 +11,8 @@ import ContactDetail from './pages/ContactDetail';
 import Profile from './pages/Profile';
 import CustomFields from './pages/CustomFields';
 import Pipeline from './pages/Pipeline';
+import Automations from './pages/Automations';
+import AutomationBuilder from './pages/AutomationBuilder';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
             <Route path="contacts" element={<Contacts />} />
             <Route path="contacts/:id" element={<ContactDetail />} />
             <Route path="pipeline" element={<Pipeline />} />
+            <Route path="automations" element={<Automations />} />
+            <Route path="automations/:id" element={<AutomationBuilder />} />
             <Route path="profile" element={<Profile />} />
             <Route path="custom-fields" element={<CustomFields />} />
           </Route>

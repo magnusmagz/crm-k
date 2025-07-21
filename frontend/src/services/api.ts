@@ -145,4 +145,30 @@ export const dealsAPI = {
   delete: (id: string) => api.delete(`/deals/${id}`),
 };
 
+// Automations API
+export const automationsAPI = {
+  getAll: () => api.get('/automations'),
+  
+  getById: (id: string) => api.get(`/automations/${id}`),
+  
+  create: (data: {
+    name: string;
+    description?: string;
+    trigger: any;
+    conditions?: any[];
+    actions: any[];
+  }) => api.post('/automations', data),
+  
+  update: (id: string, data: any) => api.put(`/automations/${id}`, data),
+  
+  toggle: (id: string) => api.patch(`/automations/${id}/toggle`),
+  
+  delete: (id: string) => api.delete(`/automations/${id}`),
+  
+  getLogs: (id: string, params?: { limit?: number; offset?: number }) => 
+    api.get(`/automations/${id}/logs`, { params }),
+  
+  test: (id: string, testData?: any) => api.post(`/automations/${id}/test`, { testData }),
+};
+
 export default api;
