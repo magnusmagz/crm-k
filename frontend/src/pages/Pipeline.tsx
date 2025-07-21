@@ -49,7 +49,8 @@ const Pipeline: React.FC = () => {
 
       // Load deals
       const dealsResponse = await dealsAPI.getAll({ status: 'all' });
-      setDeals(dealsResponse.data.deals);
+      const allDeals = dealsResponse.data.deals;
+      setDeals(allDeals);
       setAnalytics(dealsResponse.data.analytics);
     } catch (error: any) {
       toast.error('Failed to load pipeline data');
@@ -161,22 +162,42 @@ const Pipeline: React.FC = () => {
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none space-x-3">
             {deals.length > 0 && (
-              <button
-                onClick={() => {
-                  // Find the deal with the specified ID
-                  const dealToDebug = deals.find(d => d.id === 'bbd11666-76ad-40e8-8c83-fbb41c8c4879');
-                  if (dealToDebug) {
-                    setDebugDeal(dealToDebug);
-                    setShowDebugModal(true);
-                  } else {
-                    toast.error('Deal not found for debugging');
+              <select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const dealToDebug = deals.find(d => d.id === e.target.value);
+                    if (dealToDebug) {
+                      setDebugDeal(dealToDebug);
+                      setShowDebugModal(true);
+                    }
+                    e.target.value = ''; // Reset selection
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-md border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-800 shadow-sm hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-md border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-800 shadow-sm hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 cursor-pointer"
               >
-                <BugAntIcon className="-ml-1 mr-2 h-5 w-5" />
-                Debug Deal
-              </button>
+                <option value="">🐛 Debug Deal...</option>
+                <optgroup label="Open Deals">
+                  {deals.filter(d => d.status === 'open').map(deal => (
+                    <option key={deal.id} value={deal.id}>
+                      {deal.name} - {deal.Stage?.name || 'No Stage'}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Won Deals">
+                  {deals.filter(d => d.status === 'won').map(deal => (
+                    <option key={deal.id} value={deal.id}>
+                      {deal.name} (Won)
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Lost Deals">
+                  {deals.filter(d => d.status === 'lost').map(deal => (
+                    <option key={deal.id} value={deal.id}>
+                      {deal.name} (Lost)
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
             )}
             <button
               onClick={() => setShowStageManager(true)}
