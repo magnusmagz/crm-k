@@ -56,6 +56,37 @@ export interface CustomField {
   createdAt: Date;
 }
 
+export interface Stage {
+  id: string;
+  userId: string;
+  name: string;
+  order: number;
+  color: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  dealCount?: number;
+  totalValue?: number;
+  deals?: Deal[];
+}
+
+export interface Deal {
+  id: string;
+  userId: string;
+  contactId?: string;
+  stageId: string;
+  name: string;
+  value: number;
+  status: 'open' | 'won' | 'lost';
+  notes?: string;
+  closedAt?: Date;
+  expectedCloseDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  Contact?: Contact;
+  Stage?: Stage;
+}
+
 export interface AuthState {
   user: User | null;
   profile: UserProfile | null;

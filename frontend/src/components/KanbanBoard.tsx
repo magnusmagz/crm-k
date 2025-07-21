@@ -1,0 +1,127 @@
+import React, { useState } from 'react';
+import { Stage, Deal } from '../types';
+import DealCard from './DealCard';
+
+interface KanbanBoardProps {
+  stages: Stage[];
+  deals: Deal[];
+  onDealMove: (dealId: string, stageId: string) => void;
+  onDealClick: (deal: Deal) => void;
+  onDealDelete: (dealId: string) => void;
+}
+
+const KanbanBoard: React.FC<KanbanBoardProps> = ({
+  stages,
+  deals,
+  onDealMove,
+  onDealClick,
+  onDealDelete
+}) => {
+  const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
+
+  const getDealsByStage = (stageId: string) => {
+    return deals.filter(deal => deal.stageId === stageId);
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  const handleDragStart = (e: React.DragEvent, deal: Deal) => {
+    setDraggedDeal(deal);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedDeal(null);
+    setDragOverStage(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDragEnter = (stageId: string) => {
+    setDragOverStage(stageId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverStage(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, stageId: string) => {
+    e.preventDefault();
+    if (draggedDeal && draggedDeal.stageId !== stageId) {
+      onDealMove(draggedDeal.id, stageId);
+    }
+    setDraggedDeal(null);
+    setDragOverStage(null);
+  };
+
+  return (
+    <div className="flex gap-4 overflow-x-auto pb-4">
+      {stages.map(stage => {
+        const stageDeals = getDealsByStage(stage.id);
+        const totalValue = stageDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+
+        return (
+          <div
+            key={stage.id}
+            className={`flex-shrink-0 w-80 bg-gray-50 rounded-lg ${
+              dragOverStage === stage.id ? 'ring-2 ring-gray-400' : ''
+            }`}
+            onDragOver={handleDragOver}
+            onDragEnter={() => handleDragEnter(stage.id)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, stage.id)}
+          >
+            {/* Stage Header */}
+            <div 
+              className="p-4 border-b border-gray-200"
+              style={{ borderTopColor: stage.color, borderTopWidth: '4px' }}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-900">{stage.name}</h3>
+                <span className="text-sm text-gray-500">
+                  {stageDeals.length} {stageDeals.length === 1 ? 'deal' : 'deals'}
+                </span>
+              </div>
+              <div className="mt-1 text-sm font-medium text-gray-600">
+                {formatCurrency(totalValue)}
+              </div>
+            </div>
+
+            {/* Deals Container */}
+            <div className="p-4 space-y-3 min-h-[200px]">
+              {stageDeals.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <p className="text-sm">No deals in this stage</p>
+                </div>
+              ) : (
+                stageDeals.map(deal => (
+                  <DealCard
+                    key={deal.id}
+                    deal={deal}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => onDealClick(deal)}
+                    onDelete={() => onDealDelete(deal.id)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+export default KanbanBoard;

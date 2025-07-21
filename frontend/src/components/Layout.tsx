@@ -8,6 +8,7 @@ import DraggableFAB from './DraggableFAB';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Contacts', href: '/contacts' },
+  { name: 'Pipeline', href: '/pipeline' },
   { name: 'Custom Fields', href: '/custom-fields' },
 ];
 

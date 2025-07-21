@@ -1,0 +1,229 @@
+import React, { useState, useEffect } from 'react';
+import { Stage, Deal } from '../types';
+import { stagesAPI, dealsAPI } from '../services/api';
+import toast, { Toaster } from 'react-hot-toast';
+import KanbanBoard from '../components/KanbanBoard';
+import DealForm from '../components/DealForm';
+import StageManager from '../components/StageManager';
+import { CogIcon, PlusIcon } from '@heroicons/react/24/outline';
+
+const Pipeline: React.FC = () => {
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showDealForm, setShowDealForm] = useState(false);
+  const [showStageManager, setShowStageManager] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [analytics, setAnalytics] = useState({
+    total: 0,
+    totalValue: 0,
+    open: 0,
+    openValue: 0,
+    won: 0,
+    wonValue: 0,
+    lost: 0,
+    lostValue: 0
+  });
+
+  useEffect(() => {
+    loadPipelineData();
+  }, []);
+
+  const loadPipelineData = async () => {
+    setIsLoading(true);
+    try {
+      // Load stages first
+      const stagesResponse = await stagesAPI.getAll();
+      let stagesData = stagesResponse.data.stages;
+
+      // Initialize default stages if none exist
+      if (stagesData.length === 0) {
+        const initResponse = await stagesAPI.initialize();
+        stagesData = initResponse.data.stages;
+      }
+
+      setStages(stagesData);
+
+      // Load deals
+      const dealsResponse = await dealsAPI.getAll({ status: 'all' });
+      setDeals(dealsResponse.data.deals);
+      setAnalytics(dealsResponse.data.analytics);
+    } catch (error: any) {
+      toast.error('Failed to load pipeline data');
+      console.error('Load pipeline error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDealCreate = async (dealData: any) => {
+    try {
+      const response = await dealsAPI.create(dealData);
+      setDeals([...deals, response.data.deal]);
+      setShowDealForm(false);
+      toast.success('Deal created successfully');
+      loadPipelineData(); // Reload to get updated analytics
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to create deal');
+    }
+  };
+
+  const handleDealUpdate = async (dealId: string, dealData: any) => {
+    try {
+      const response = await dealsAPI.update(dealId, dealData);
+      setDeals(deals.map(d => d.id === dealId ? response.data.deal : d));
+      setSelectedDeal(null);
+      setShowDealForm(false);
+      toast.success('Deal updated successfully');
+      loadPipelineData(); // Reload to get updated analytics
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update deal');
+    }
+  };
+
+  const handleDealMove = async (dealId: string, newStageId: string) => {
+    try {
+      await dealsAPI.updateStage(dealId, newStageId);
+      setDeals(deals.map(deal => 
+        deal.id === dealId ? { ...deal, stageId: newStageId } : deal
+      ));
+      loadPipelineData(); // Reload to get updated stage totals
+    } catch (error: any) {
+      toast.error('Failed to move deal');
+      loadPipelineData(); // Reload to revert on error
+    }
+  };
+
+  const handleDealDelete = async (dealId: string) => {
+    if (!window.confirm('Are you sure you want to delete this deal?')) {
+      return;
+    }
+
+    try {
+      await dealsAPI.delete(dealId);
+      setDeals(deals.filter(d => d.id !== dealId));
+      toast.success('Deal deleted successfully');
+      loadPipelineData(); // Reload to get updated analytics
+    } catch (error: any) {
+      toast.error('Failed to delete deal');
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full">
+      <Toaster position="top-right" />
+      
+      {/* Header */}
+      <div className="mb-6">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Sales Pipeline</h1>
+            <div className="mt-2 flex items-center space-x-6 text-sm text-gray-600">
+              <span>
+                Total Pipeline: <span className="font-semibold text-gray-900">
+                  {formatCurrency(analytics.openValue)}
+                </span>
+              </span>
+              <span>
+                Open Deals: <span className="font-semibold text-gray-900">{analytics.open}</span>
+              </span>
+              <span>
+                Won: <span className="font-semibold text-green-600">
+                  {formatCurrency(analytics.wonValue)}
+                </span>
+              </span>
+              <span>
+                Lost: <span className="font-semibold text-red-600">
+                  {formatCurrency(analytics.lostValue)}
+                </span>
+              </span>
+            </div>
+          </div>
+          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none space-x-3">
+            <button
+              onClick={() => setShowStageManager(true)}
+              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+            >
+              <CogIcon className="-ml-1 mr-2 h-5 w-5" />
+              Manage Stages
+            </button>
+            <button
+              onClick={() => {
+                setSelectedDeal(null);
+                setShowDealForm(true);
+              }}
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+            >
+              <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+              New Deal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Kanban Board */}
+      <KanbanBoard
+        stages={stages}
+        deals={deals.filter(d => d.status === 'open')}
+        onDealMove={handleDealMove}
+        onDealClick={(deal) => {
+          setSelectedDeal(deal);
+          setShowDealForm(true);
+        }}
+        onDealDelete={handleDealDelete}
+      />
+
+      {/* Deal Form Modal */}
+      {showDealForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <DealForm
+              deal={selectedDeal}
+              stages={stages}
+              onSubmit={selectedDeal 
+                ? (data) => handleDealUpdate(selectedDeal.id, data)
+                : handleDealCreate
+              }
+              onClose={() => {
+                setShowDealForm(false);
+                setSelectedDeal(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Stage Manager Modal */}
+      {showStageManager && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <StageManager
+              stages={stages}
+              onUpdate={loadPipelineData}
+              onClose={() => setShowStageManager(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Pipeline;

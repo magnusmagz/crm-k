@@ -11,6 +11,8 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const contactRoutes = require('./routes/contacts');
 const customFieldRoutes = require('./routes/customFields');
+const stageRoutes = require('./routes/stages');
+const dealRoutes = require('./routes/deals');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,6 +44,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/custom-fields', customFieldRoutes);
+app.use('/api/stages', stageRoutes);
+app.use('/api/deals', dealRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

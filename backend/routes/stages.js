@@ -1,0 +1,208 @@
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Stage, Deal } = require('../models');
+const { authMiddleware } = require('../middleware/auth');
+const { Op } = require('sequelize');
+
+const router = express.Router();
+
+// Get all stages for the user
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const stages = await Stage.findAll({
+      where: { userId: req.user.id },
+      order: [['order', 'ASC']],
+      include: [{
+        model: Deal,
+        as: 'deals',
+        attributes: ['id', 'value', 'status'],
+        where: { status: 'open' },
+        required: false
+      }]
+    });
+
+    // Calculate totals for each stage
+    const stagesWithTotals = stages.map(stage => {
+      const stageData = stage.toJSON();
+      const openDeals = stageData.deals || [];
+      return {
+        ...stageData,
+        dealCount: openDeals.length,
+        totalValue: openDeals.reduce((sum, deal) => sum + parseFloat(deal.value || 0), 0)
+      };
+    });
+
+    res.json({ stages: stagesWithTotals });
+  } catch (error) {
+    console.error('Get stages error:', error);
+    res.status(500).json({ error: 'Failed to get stages' });
+  }
+});
+
+// Create new stage
+router.post('/', authMiddleware, [
+  body('name').notEmpty().trim(),
+  body('color').optional().matches(/^#[0-9A-F]{6}$/i),
+  body('order').optional().isInt({ min: 0 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Get the highest order value
+    const maxOrderStage = await Stage.findOne({
+      where: { userId: req.user.id },
+      order: [['order', 'DESC']]
+    });
+
+    const stage = await Stage.create({
+      ...req.body,
+      userId: req.user.id,
+      order: req.body.order !== undefined ? req.body.order : (maxOrderStage ? maxOrderStage.order + 1 : 0)
+    });
+
+    res.status(201).json({ stage });
+  } catch (error) {
+    console.error('Create stage error:', error);
+    res.status(500).json({ error: 'Failed to create stage' });
+  }
+});
+
+// Update stage
+router.put('/:id', authMiddleware, [
+  body('name').optional().notEmpty().trim(),
+  body('color').optional().matches(/^#[0-9A-F]{6}$/i),
+  body('isActive').optional().isBoolean()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const stage = await Stage.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!stage) {
+      return res.status(404).json({ error: 'Stage not found' });
+    }
+
+    await stage.update(req.body);
+    res.json({ stage });
+  } catch (error) {
+    console.error('Update stage error:', error);
+    res.status(500).json({ error: 'Failed to update stage' });
+  }
+});
+
+// Reorder stages
+router.put('/reorder', authMiddleware, [
+  body('stages').isArray(),
+  body('stages.*.id').isUUID(),
+  body('stages.*.order').isInt({ min: 0 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { stages } = req.body;
+
+    // Update all stages in a transaction
+    const transaction = await Stage.sequelize.transaction();
+    try {
+      for (const stageUpdate of stages) {
+        await Stage.update(
+          { order: stageUpdate.order },
+          {
+            where: {
+              id: stageUpdate.id,
+              userId: req.user.id
+            },
+            transaction
+          }
+        );
+      }
+      await transaction.commit();
+      res.json({ message: 'Stages reordered successfully' });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Reorder stages error:', error);
+    res.status(500).json({ error: 'Failed to reorder stages' });
+  }
+});
+
+// Delete stage
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const stage = await Stage.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      },
+      include: [{
+        model: Deal,
+        as: 'deals',
+        where: { status: 'open' },
+        required: false
+      }]
+    });
+
+    if (!stage) {
+      return res.status(404).json({ error: 'Stage not found' });
+    }
+
+    if (stage.deals && stage.deals.length > 0) {
+      return res.status(400).json({ 
+        error: 'Cannot delete stage with active deals. Please move or close all deals first.' 
+      });
+    }
+
+    await stage.destroy();
+    res.json({ message: 'Stage deleted successfully' });
+  } catch (error) {
+    console.error('Delete stage error:', error);
+    res.status(500).json({ error: 'Failed to delete stage' });
+  }
+});
+
+// Initialize default stages for new users
+router.post('/initialize', authMiddleware, async (req, res) => {
+  try {
+    // Check if user already has stages
+    const existingStages = await Stage.count({
+      where: { userId: req.user.id }
+    });
+
+    if (existingStages > 0) {
+      return res.status(400).json({ error: 'Stages already initialized' });
+    }
+
+    const defaultStages = Stage.getDefaultStages();
+    const stages = await Promise.all(
+      defaultStages.map(stage => 
+        Stage.create({
+          ...stage,
+          userId: req.user.id
+        })
+      )
+    );
+
+    res.status(201).json({ stages });
+  } catch (error) {
+    console.error('Initialize stages error:', error);
+    res.status(500).json({ error: 'Failed to initialize stages' });
+  }
+});
+
+module.exports = router;

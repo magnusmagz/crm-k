@@ -99,4 +99,50 @@ export const customFieldsAPI = {
   reorder: (fields: { id: string }[]) => api.put('/custom-fields/reorder', { fields }),
 };
 
+// Stages API
+export const stagesAPI = {
+  getAll: () => api.get('/stages'),
+  
+  create: (data: { name: string; color?: string; order?: number }) => api.post('/stages', data),
+  
+  update: (id: string, data: any) => api.put(`/stages/${id}`, data),
+  
+  delete: (id: string) => api.delete(`/stages/${id}`),
+  
+  reorder: (stages: { id: string; order: number }[]) => api.put('/stages/reorder', { stages }),
+  
+  initialize: () => api.post('/stages/initialize'),
+};
+
+// Deals API
+export const dealsAPI = {
+  getAll: (params?: { 
+    search?: string; 
+    stageId?: string; 
+    status?: string; 
+    contactId?: string;
+    sortBy?: string; 
+    sortOrder?: string; 
+    limit?: number; 
+    offset?: number 
+  }) => api.get('/deals', { params }),
+  
+  getById: (id: string) => api.get(`/deals/${id}`),
+  
+  create: (data: {
+    name: string;
+    value?: number;
+    stageId: string;
+    contactId?: string;
+    notes?: string;
+    expectedCloseDate?: string;
+  }) => api.post('/deals', data),
+  
+  update: (id: string, data: any) => api.put(`/deals/${id}`, data),
+  
+  updateStage: (id: string, stageId: string) => api.patch(`/deals/${id}/stage`, { stageId }),
+  
+  delete: (id: string) => api.delete(`/deals/${id}`),
+};
+
 export default api;
