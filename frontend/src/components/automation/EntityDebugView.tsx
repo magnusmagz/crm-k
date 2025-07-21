@@ -29,6 +29,7 @@ interface Enrollment {
     name: string;
     trigger: any;
     isActive: boolean;
+    actions?: any[];
   };
 }
 
