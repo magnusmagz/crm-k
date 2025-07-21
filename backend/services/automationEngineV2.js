@@ -36,7 +36,10 @@ class AutomationEngineV2 {
         include: [{
           model: Automation,
           where: { isActive: true },
-          include: ['steps']
+          include: [{
+            model: AutomationStep,
+            as: 'steps'
+          }]
         }]
       });
 
@@ -52,8 +55,21 @@ class AutomationEngineV2 {
 
   // Process a single enrollment step
   async processEnrollmentStep(enrollment) {
+    const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
+    
     try {
+      automationDebugger.log(debugSessionId, 'PROCESS_ENROLLMENT_STEP_START', {
+        enrollmentId: enrollment.id,
+        automationId: enrollment.automationId,
+        hasAutomation: !!enrollment.Automation,
+        isMultiStep: enrollment.Automation?.isMultiStep
+      });
+      
       const automation = enrollment.Automation;
+      
+      if (!automation) {
+        throw new Error('Automation not loaded with enrollment');
+      }
       
       if (automation.isMultiStep && automation.steps && automation.steps.length > 0) {
         // Multi-step workflow
@@ -386,13 +402,31 @@ class AutomationEngineV2 {
         const fullEnrollment = await AutomationEnrollment.findByPk(enrollment.id, {
           include: [{
             model: Automation,
-            include: ['steps']
+            include: [{
+              model: AutomationStep,
+              as: 'steps'
+            }]
           }]
+        });
+        
+        automationDebugger.log(debugSessionId, 'ENROLLMENT_LOADED', {
+          enrollmentId: enrollment.id,
+          hasFullEnrollment: !!fullEnrollment,
+          hasAutomation: !!fullEnrollment?.Automation,
+          automationName: fullEnrollment?.Automation?.name,
+          actions: fullEnrollment?.Automation?.actions
         });
         
         // Process immediately
         setImmediate(async () => {
-          await this.processEnrollmentStep(fullEnrollment);
+          try {
+            await this.processEnrollmentStep(fullEnrollment);
+          } catch (error) {
+            automationDebugger.log(debugSessionId, 'IMMEDIATE_PROCESSING_ERROR', {
+              error: error.message,
+              stack: error.stack
+            }, 'error');
+          }
         });
       }
       
@@ -465,16 +499,36 @@ class AutomationEngineV2 {
 
   // Execute legacy single-step automation
   async executeLegacyAutomation(automation, enrollment) {
+    const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
+    
+    automationDebugger.log(debugSessionId, 'LEGACY_AUTOMATION_START', {
+      automationId: automation.id,
+      automationName: automation.name,
+      enrollmentId: enrollment.id,
+      conditions: automation.conditions,
+      actions: automation.actions,
+      hasActions: automation.actions && automation.actions.length > 0
+    });
+    
     const entity = await this.getEntity(enrollment);
     
     // Check conditions
     if (automation.conditions && automation.conditions.length > 0) {
       const conditionsMet = await this.evaluateConditions(automation.conditions, enrollment);
       if (!conditionsMet.success) {
+        automationDebugger.log(debugSessionId, 'LEGACY_CONDITIONS_NOT_MET', {
+          conditions: automation.conditions,
+          result: conditionsMet
+        });
         await enrollment.update({ status: 'completed' });
         return;
       }
     }
+    
+    automationDebugger.log(debugSessionId, 'LEGACY_EXECUTING_ACTIONS', {
+      actionsCount: automation.actions.length,
+      actions: automation.actions
+    });
     
     // Execute actions
     const result = await this.executeActions(automation.actions, enrollment);
