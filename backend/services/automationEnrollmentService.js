@@ -41,28 +41,48 @@ class AutomationEnrollmentService {
     const debugSessionId = automationDebugger.startSession(automation.id, 'trigger', eventType);
 
     // Determine entity based on trigger type
-    switch (eventType) {
-      case 'contact_created':
-      case 'contact_updated':
-        entityType = 'contact';
-        entityId = data.contact.id;
-        entity = data.contact;
-        break;
+    try {
+      switch (eventType) {
+        case 'contact_created':
+        case 'contact_updated':
+          entityType = 'contact';
+          entityId = data.contact.id;
+          entity = data.contact;
+          break;
+        
+        case 'deal_created':
+        case 'deal_updated':
+        case 'deal_stage_changed':
+          entityType = 'deal';
+          entityId = data.deal.id;
+          entity = data.deal;
+          break;
+        
+        default:
+          automationDebugger.log(debugSessionId, 'TRIGGER_ERROR', {
+            error: 'Unknown trigger type',
+            eventType
+          }, 'error');
+          return { success: false, error: 'Unknown trigger type' };
+      }
       
-      case 'deal_created':
-      case 'deal_updated':
-      case 'deal_stage_changed':
-        entityType = 'deal';
-        entityId = data.deal.id;
-        entity = data.deal;
-        break;
+      // Log entity details
+      automationDebugger.log(debugSessionId, 'ENTITY_DETAILS', {
+        entityType,
+        entityId,
+        entityData: entity,
+        eventType,
+        eventData: data
+      });
       
-      default:
-        automationDebugger.log(debugSessionId, 'TRIGGER_ERROR', {
-          error: 'Unknown trigger type',
-          eventType
-        }, 'error');
-        return { success: false, error: 'Unknown trigger type' };
+    } catch (error) {
+      automationDebugger.log(debugSessionId, 'ENTITY_EXTRACTION_ERROR', {
+        error: error.message,
+        eventType,
+        dataStructure: Object.keys(data || {}),
+        stack: error.stack
+      }, 'error');
+      return { success: false, error: `Failed to extract entity: ${error.message}` };
     }
 
     // Log trigger evaluation
@@ -86,11 +106,30 @@ class AutomationEnrollmentService {
     if (eventType === 'deal_stage_changed' && automation.trigger.config) {
       const { fromStageId, toStageId } = automation.trigger.config;
       
-      if (fromStageId && data.previousStageId !== fromStageId) {
+      // Get previousStageId from the previousStage object
+      const previousStageId = data.previousStage?.id || data.previousStageId;
+      
+      if (fromStageId && previousStageId !== fromStageId) {
+        if (debugSessionId) {
+          automationDebugger.log(debugSessionId, 'STAGE_CHANGE_MISMATCH', {
+            reason: 'From stage does not match',
+            expected: fromStageId,
+            actual: previousStageId,
+            previousStage: data.previousStage
+          });
+        }
         return false;
       }
       
       if (toStageId && entity.stageId !== toStageId) {
+        if (debugSessionId) {
+          automationDebugger.log(debugSessionId, 'STAGE_CHANGE_MISMATCH', {
+            reason: 'To stage does not match',
+            expected: toStageId,
+            actual: entity.stageId,
+            newStage: data.newStage
+          });
+        }
         return false;
       }
     }
