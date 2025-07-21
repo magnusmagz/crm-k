@@ -203,7 +203,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
               <button
                 onClick={() => handleDeleteStage(stage.id)}
                 className="p-1 text-red-400 hover:text-red-600"
-                disabled={stage.dealCount && stage.dealCount > 0}
+                disabled={!!(stage.dealCount && stage.dealCount > 0)}
                 title={stage.dealCount && stage.dealCount > 0 ? 'Cannot delete stage with deals' : 'Delete stage'}
               >
                 <TrashIcon className="h-4 w-4" />
