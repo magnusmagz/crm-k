@@ -10,6 +10,7 @@ import Contacts from './pages/Contacts';
 import ContactDetail from './pages/ContactDetail';
 import Profile from './pages/Profile';
 import CustomFields from './pages/CustomFields';
+import Pipeline from './pages/Pipeline';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="contacts" element={<Contacts />} />
             <Route path="contacts/:id" element={<ContactDetail />} />
+            <Route path="pipeline" element={<Pipeline />} />
             <Route path="profile" element={<Profile />} />
             <Route path="custom-fields" element={<CustomFields />} />
           </Route>
