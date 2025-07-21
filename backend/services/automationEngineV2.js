@@ -548,35 +548,64 @@ class AutomationEngineV2 {
       hasActions: automation.actions && automation.actions.length > 0
     });
     
-    const entity = await this.getEntity(enrollment);
+    try {
+      const entity = await this.getEntity(enrollment);
+      
+      automationDebugger.log(debugSessionId, 'ENTITY_LOADED', {
+        entityType: enrollment.entityType,
+        entityId: enrollment.entityId,
+        hasEntity: !!entity,
+        entityData: entity ? {
+          id: entity.id,
+          tags: entity.tags,
+          firstName: entity.firstName,
+          lastName: entity.lastName
+        } : null
+      });
     
-    // Check conditions
-    if (automation.conditions && automation.conditions.length > 0) {
-      const conditionsMet = await this.evaluateConditions(automation.conditions, enrollment);
-      if (!conditionsMet.success) {
-        automationDebugger.log(debugSessionId, 'LEGACY_CONDITIONS_NOT_MET', {
-          conditions: automation.conditions,
-          result: conditionsMet
-        });
-        await enrollment.update({ status: 'completed' });
-        return;
+      // Check conditions
+      if (automation.conditions && automation.conditions.length > 0) {
+        const conditionsMet = await this.evaluateConditions(automation.conditions, enrollment);
+        if (!conditionsMet.success) {
+          automationDebugger.log(debugSessionId, 'LEGACY_CONDITIONS_NOT_MET', {
+            conditions: automation.conditions,
+            result: conditionsMet
+          });
+          await enrollment.update({ status: 'completed' });
+          return;
+        }
       }
+      
+      automationDebugger.log(debugSessionId, 'LEGACY_EXECUTING_ACTIONS', {
+        actionsCount: automation.actions.length,
+        actions: automation.actions
+      });
+      
+      // Execute actions
+      const result = await this.executeActions(automation.actions, enrollment);
+      
+      await enrollment.update({
+        status: result.success ? 'completed' : 'failed',
+        completedAt: new Date()
+      });
+      
+      await automation.increment(result.success ? 'completedEnrollments' : 'failedEnrollments');
+      
+    } catch (error) {
+      automationDebugger.log(debugSessionId, 'LEGACY_AUTOMATION_ERROR', {
+        error: error.message,
+        stack: error.stack,
+        enrollmentId: enrollment.id
+      }, 'error');
+      
+      await enrollment.update({
+        status: 'failed',
+        completedAt: new Date(),
+        metadata: { ...enrollment.metadata, error: error.message }
+      });
+      
+      throw error;
     }
-    
-    automationDebugger.log(debugSessionId, 'LEGACY_EXECUTING_ACTIONS', {
-      actionsCount: automation.actions.length,
-      actions: automation.actions
-    });
-    
-    // Execute actions
-    const result = await this.executeActions(automation.actions, enrollment);
-    
-    await enrollment.update({
-      status: result.success ? 'completed' : 'failed',
-      completedAt: new Date()
-    });
-    
-    await automation.increment(result.success ? 'completedEnrollments' : 'failedEnrollments');
   }
 
   // Shutdown the engine
