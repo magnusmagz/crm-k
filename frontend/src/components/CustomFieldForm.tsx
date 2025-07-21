@@ -160,7 +160,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 placeholder="e.g., company_size"
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                   errors.name ? 'border-red-300' : 'border-gray-300'
-                } focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100`}
+                } focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               {!field && (

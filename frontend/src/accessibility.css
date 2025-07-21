@@ -91,17 +91,33 @@ a:hover {
 
 /* Increase touch targets for better accessibility */
 button,
-a,
-input[type="checkbox"],
-input[type="radio"] {
+a {
   min-height: 44px;
-  min-width: 44px;
 }
 
-/* Better focus indicators */
+/* Checkboxes and radios - smaller but still accessible */
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: 20px;
+  min-width: 20px;
+  cursor: pointer;
+}
+
+/* Better focus indicators using our primary color */
 :focus {
-  outline: 3px solid #2563eb;
+  outline: 3px solid #1f2937;
   outline-offset: 2px;
+}
+
+/* Override Tailwind's default checkbox colors */
+input[type="checkbox"]:checked {
+  background-color: #1f2937;
+  border-color: #1f2937;
+}
+
+input[type="checkbox"]:focus {
+  --tw-ring-color: #1f2937;
+  border-color: #1f2937;
 }
 
 /* High contrast mode support */

@@ -60,7 +60,7 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
             name="firstName"
             value={formData.firstName}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
             required
           />
         </div>
@@ -74,7 +74,7 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
             name="lastName"
             value={formData.lastName}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
             required
           />
         </div>
@@ -90,7 +90,7 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
         />
       </div>
 
@@ -104,7 +104,7 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
         />
       </div>
 
@@ -118,7 +118,7 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
           name="company"
           value={formData.company}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
         />
       </div>
 
@@ -132,7 +132,7 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
           name="position"
           value={formData.position}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
         />
       </div>
 
