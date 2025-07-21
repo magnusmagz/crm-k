@@ -162,42 +162,50 @@ const Pipeline: React.FC = () => {
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none space-x-3">
             {deals.length > 0 && (
-              <select
-                onChange={(e) => {
-                  if (e.target.value) {
-                    const dealToDebug = deals.find(d => d.id === e.target.value);
-                    if (dealToDebug) {
-                      setDebugDeal(dealToDebug);
-                      setShowDebugModal(true);
+              <div className="relative inline-block">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const selectedValue = e.target.value;
+                    if (selectedValue) {
+                      const dealToDebug = deals.find(d => d.id === selectedValue);
+                      if (dealToDebug) {
+                        setDebugDeal(dealToDebug);
+                        setShowDebugModal(true);
+                      }
                     }
-                    e.target.value = ''; // Reset selection
-                  }
-                }}
-                className="inline-flex items-center justify-center rounded-md border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm font-medium text-yellow-800 shadow-sm hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 cursor-pointer"
-              >
-                <option value="">🐛 Debug Deal...</option>
-                <optgroup label="Open Deals">
-                  {deals.filter(d => d.status === 'open').map(deal => (
-                    <option key={deal.id} value={deal.id}>
-                      {deal.name} - {deal.Stage?.name || 'No Stage'}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Won Deals">
-                  {deals.filter(d => d.status === 'won').map(deal => (
-                    <option key={deal.id} value={deal.id}>
-                      {deal.name} (Won)
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Lost Deals">
-                  {deals.filter(d => d.status === 'lost').map(deal => (
-                    <option key={deal.id} value={deal.id}>
-                      {deal.name} (Lost)
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
+                  }}
+                  className="appearance-none rounded-md border border-yellow-300 bg-yellow-50 pl-3 pr-10 py-2 text-sm font-medium text-yellow-800 shadow-sm hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 cursor-pointer"
+                >
+                  <option value="">🐛 Debug Deal...</option>
+                  <optgroup label="Open Deals">
+                    {deals.filter(d => d.status === 'open').map(deal => (
+                      <option key={deal.id} value={deal.id}>
+                        {deal.name} - {deal.Stage?.name || 'No Stage'}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Won Deals">
+                    {deals.filter(d => d.status === 'won').map(deal => (
+                      <option key={deal.id} value={deal.id}>
+                        {deal.name} (Won)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Lost Deals">
+                    {deals.filter(d => d.status === 'lost').map(deal => (
+                      <option key={deal.id} value={deal.id}>
+                        {deal.name} (Lost)
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-yellow-800">
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
             )}
             <button
               onClick={() => setShowStageManager(true)}
