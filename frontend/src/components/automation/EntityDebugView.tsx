@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BugAntIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { BugAntIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, ClockIcon, PlayIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface EntityDebugViewProps {
   entityType: 'contact' | 'deal';
@@ -37,6 +38,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
   const [isLoading, setIsLoading] = useState(true);
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
   const [selectedEnrollment, setSelectedEnrollment] = useState<string | null>(null);
+  const [processingEnrollment, setProcessingEnrollment] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDebugInfo();
@@ -59,6 +61,35 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
       console.error('Failed to fetch entity debug info:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const processEnrollment = async (enrollment: Enrollment) => {
+    setProcessingEnrollment(enrollment.id);
+    try {
+      const response = await fetch(`/api/automations/${enrollment.automationId}/process-enrollment`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ enrollmentId: enrollment.id })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Enrollment processed successfully');
+        // Refresh the debug info
+        await fetchDebugInfo();
+      } else {
+        toast.error(data.error || 'Failed to process enrollment');
+      }
+    } catch (error) {
+      console.error('Process enrollment error:', error);
+      toast.error('Failed to process enrollment');
+    } finally {
+      setProcessingEnrollment(null);
     }
   };
 
@@ -140,10 +171,25 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-gray-500">
-                    <ClockIcon className="h-4 w-4 inline mr-1" />
-                    {formatTimestamp(enrollment.enrolledAt)}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    {enrollment.status === 'active' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          processEnrollment(enrollment);
+                        }}
+                        disabled={processingEnrollment === enrollment.id}
+                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+                      >
+                        <PlayIcon className="h-3 w-3 mr-1" />
+                        {processingEnrollment === enrollment.id ? 'Processing...' : 'Process Now'}
+                      </button>
+                    )}
+                    <span className="text-xs text-gray-500">
+                      <ClockIcon className="h-4 w-4 inline mr-1" />
+                      {formatTimestamp(enrollment.enrolledAt)}
+                    </span>
+                  </div>
                 </div>
                 
                 {selectedEnrollment === enrollment.id && (
@@ -186,6 +232,19 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
                         <pre className="mt-1 p-2 bg-gray-100 rounded text-xs overflow-x-auto">
                           {JSON.stringify(enrollment.Automation.trigger, null, 2)}
                         </pre>
+                      </div>
+                    )}
+                    {enrollment.Automation?.actions && (
+                      <div>
+                        <span className="text-gray-600">Actions:</span>
+                        <pre className="mt-1 p-2 bg-gray-100 rounded text-xs overflow-x-auto">
+                          {JSON.stringify(enrollment.Automation.actions, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {enrollment.metadata?.error && (
+                      <div className="text-red-600">
+                        <span className="font-medium">Error:</span> {enrollment.metadata.error}
                       </div>
                     )}
                   </div>

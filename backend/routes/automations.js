@@ -506,7 +506,7 @@ router.get('/debug/entity/:entityType/:entityId', authMiddleware, async (req, re
       },
       include: [{ 
         model: Automation,
-        attributes: ['id', 'name', 'trigger', 'isActive']
+        attributes: ['id', 'name', 'trigger', 'isActive', 'actions']
       }],
       order: [['createdAt', 'DESC']]
     });
@@ -521,6 +521,64 @@ router.get('/debug/entity/:entityType/:entityId', authMiddleware, async (req, re
   } catch (error) {
     console.error('Get entity debug logs error:', error);
     res.status(500).json({ error: 'Failed to get entity debug logs' });
+  }
+});
+
+// Manually process an enrollment
+router.post('/:id/process-enrollment', authMiddleware, async (req, res) => {
+  try {
+    const { enrollmentId } = req.body;
+    
+    if (!enrollmentId) {
+      return res.status(400).json({ error: 'Enrollment ID required' });
+    }
+    
+    const enrollment = await AutomationEnrollment.findOne({
+      where: {
+        id: enrollmentId,
+        userId: req.user.id
+      },
+      include: [{
+        model: Automation,
+        include: [{
+          model: require('../models').AutomationStep,
+          as: 'steps'
+        }]
+      }]
+    });
+    
+    if (!enrollment) {
+      return res.status(404).json({ error: 'Enrollment not found' });
+    }
+    
+    const automationEngineV2 = require('../services/automationEngineV2');
+    const automationDebugger = require('../services/automationDebugger');
+    
+    // Enable debug mode for this request
+    automationDebugger.setDebugMode(true);
+    
+    // Process the enrollment
+    await automationEngineV2.processEnrollmentStep(enrollment);
+    
+    // Get the latest logs
+    const logs = automationDebugger.getEntityLogs(enrollment.entityType, enrollment.entityId, 20);
+    
+    res.json({ 
+      message: 'Enrollment processed',
+      enrollment: {
+        id: enrollment.id,
+        status: enrollment.status,
+        currentStepIndex: enrollment.currentStepIndex,
+        nextStepAt: enrollment.nextStepAt
+      },
+      debugLogs: logs
+    });
+  } catch (error) {
+    console.error('Process enrollment error:', error);
+    res.status(500).json({ 
+      error: 'Failed to process enrollment',
+      details: error.message 
+    });
   }
 });
 

@@ -201,42 +201,69 @@ class AutomationEngineV2 {
   async executeAction(action, entity, enrollment) {
     const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
     
-    automationDebugger.log(debugSessionId, 'EXECUTE_ACTION_DETAIL', {
-      actionType: action.type,
-      actionConfig: action.config,
-      entityType: enrollment.entityType,
-      entityId: entity.id,
-      entityHasUpdate: typeof entity.update === 'function'
-    });
-    
-    switch (action.type) {
-      case 'update_contact_field':
-        if (enrollment.entityType === 'contact') {
-          await entity.update({ [action.config.field]: action.config.value });
-        }
-        break;
+    try {
+      // Validate action structure
+      if (!action || !action.type) {
+        throw new Error('Invalid action: missing type');
+      }
       
-      case 'add_contact_tag':
-        if (enrollment.entityType === 'contact') {
-          const currentTags = entity.tags || [];
-          const newTag = action.config.tag;
-          
-          automationDebugger.log(debugSessionId, 'ADD_TAG_DETAIL', {
-            currentTags,
-            newTag,
-            tagExists: currentTags.includes(newTag)
-          });
-          
-          if (!currentTags.includes(newTag)) {
-            currentTags.push(newTag);
-            await entity.update({ tags: currentTags });
-            
-            automationDebugger.log(debugSessionId, 'TAG_ADDED', {
-              updatedTags: currentTags
+      if (!action.config) {
+        throw new Error('Invalid action: missing config');
+      }
+      
+      automationDebugger.log(debugSessionId, 'EXECUTE_ACTION_DETAIL', {
+        actionType: action.type,
+        actionConfig: action.config,
+        entityType: enrollment.entityType,
+        entityId: entity.id,
+        entityHasUpdate: typeof entity.update === 'function',
+        entityData: {
+          id: entity.id,
+          tags: entity.tags,
+          firstName: entity.firstName,
+          lastName: entity.lastName
+        }
+      });
+      
+      switch (action.type) {
+        case 'update_contact_field':
+          if (enrollment.entityType === 'contact') {
+            if (!action.config.field || action.config.value === undefined) {
+              throw new Error('Invalid update_contact_field config: missing field or value');
+            }
+            await entity.update({ [action.config.field]: action.config.value });
+            automationDebugger.log(debugSessionId, 'FIELD_UPDATED', {
+              field: action.config.field,
+              value: action.config.value
             });
           }
-        }
-        break;
+          break;
+        
+        case 'add_contact_tag':
+          if (enrollment.entityType === 'contact') {
+            if (!action.config.tag) {
+              throw new Error('Invalid add_contact_tag config: missing tag');
+            }
+            
+            const currentTags = entity.tags || [];
+            const newTag = action.config.tag;
+            
+            automationDebugger.log(debugSessionId, 'ADD_TAG_DETAIL', {
+              currentTags,
+              newTag,
+              tagExists: currentTags.includes(newTag)
+            });
+            
+            if (!currentTags.includes(newTag)) {
+              const updatedTags = [...currentTags, newTag];
+              await entity.update({ tags: updatedTags });
+              
+              automationDebugger.log(debugSessionId, 'TAG_ADDED', {
+                updatedTags: updatedTags
+              });
+            }
+          }
+          break;
       
       case 'update_deal_field':
         if (enrollment.entityType === 'deal') {
@@ -252,11 +279,37 @@ class AutomationEngineV2 {
       
       case 'create_task':
         // Future: Create a task
+        automationDebugger.log(debugSessionId, 'ACTION_NOT_IMPLEMENTED', {
+          actionType: 'create_task',
+          message: 'Task creation not yet implemented'
+        });
         break;
       
       case 'send_notification':
         // Future: Send internal notification
+        automationDebugger.log(debugSessionId, 'ACTION_NOT_IMPLEMENTED', {
+          actionType: 'send_notification',
+          message: 'Notification sending not yet implemented'
+        });
         break;
+        
+      default:
+        throw new Error(`Unknown action type: ${action.type}`);
+    }
+    
+    automationDebugger.log(debugSessionId, 'ACTION_COMPLETED', {
+      actionType: action.type,
+      entityId: entity.id
+    });
+    
+    } catch (error) {
+      automationDebugger.log(debugSessionId, 'ACTION_EXECUTION_ERROR', {
+        actionType: action.type,
+        actionConfig: action.config,
+        error: error.message,
+        stack: error.stack
+      }, 'error');
+      throw error;
     }
   }
 
@@ -379,24 +432,44 @@ class AutomationEngineV2 {
     });
     
     try {
+      let entity = null;
+      
       if (enrollment.entityType === 'contact') {
-        const contact = await Contact.findByPk(enrollment.entityId);
+        entity = await Contact.findByPk(enrollment.entityId);
         automationDebugger.log(debugSessionId, 'GET_ENTITY_RESULT', {
-          found: !!contact,
-          entityId: enrollment.entityId
+          found: !!entity,
+          entityId: enrollment.entityId,
+          entityData: entity ? {
+            id: entity.id,
+            firstName: entity.firstName,
+            lastName: entity.lastName,
+            tags: entity.tags,
+            email: entity.email
+          } : null
         });
-        return contact;
       } else if (enrollment.entityType === 'deal') {
-        const deal = await Deal.findByPk(enrollment.entityId, {
+        entity = await Deal.findByPk(enrollment.entityId, {
           include: ['Contact', 'Stage']
         });
         automationDebugger.log(debugSessionId, 'GET_ENTITY_RESULT', {
-          found: !!deal,
-          entityId: enrollment.entityId
+          found: !!entity,
+          entityId: enrollment.entityId,
+          entityData: entity ? {
+            id: entity.id,
+            name: entity.name,
+            value: entity.value,
+            status: entity.status
+          } : null
         });
-        return deal;
+      } else {
+        throw new Error('Unknown entity type: ' + enrollment.entityType);
       }
-      throw new Error('Unknown entity type: ' + enrollment.entityType);
+      
+      if (!entity) {
+        throw new Error(`Entity not found: ${enrollment.entityType} with id ${enrollment.entityId}`);
+      }
+      
+      return entity;
     } catch (error) {
       automationDebugger.log(debugSessionId, 'GET_ENTITY_ERROR', {
         error: error.message,
