@@ -114,6 +114,14 @@ class AutomationEngineV2 {
         }
       } else {
         // Legacy single-step automation
+        // Ensure automation has all data
+        if (!automation.actions || automation.actions.length === 0) {
+          // Reload automation with full data
+          const fullAutomation = await Automation.findByPk(automation.id);
+          automation.actions = fullAutomation.actions;
+          automation.conditions = fullAutomation.conditions;
+          automation.trigger = fullAutomation.trigger;
+        }
         await this.executeLegacyAutomation(automation, enrollment);
       }
     } catch (error) {
@@ -167,9 +175,17 @@ class AutomationEngineV2 {
           entityState: entity
         });
         
-        await this.executeAction(action, entity, enrollment);
-        
-        automationDebugger.logActionExecution(debugSessionId, action, entity, true);
+        try {
+          await this.executeAction(action, entity, enrollment);
+          automationDebugger.logActionExecution(debugSessionId, action, entity, true);
+        } catch (actionError) {
+          automationDebugger.log(debugSessionId, 'ACTION_ERROR', {
+            action,
+            error: actionError.message,
+            stack: actionError.stack
+          }, 'error');
+          throw actionError;
+        }
       }
       
       await this.logExecution(enrollment, 'success', { actions });
@@ -183,6 +199,16 @@ class AutomationEngineV2 {
 
   // Execute a single action
   async executeAction(action, entity, enrollment) {
+    const debugSessionId = automationDebugger.startSession(enrollment.automationId, enrollment.entityType, enrollment.entityId);
+    
+    automationDebugger.log(debugSessionId, 'EXECUTE_ACTION_DETAIL', {
+      actionType: action.type,
+      actionConfig: action.config,
+      entityType: enrollment.entityType,
+      entityId: entity.id,
+      entityHasUpdate: typeof entity.update === 'function'
+    });
+    
     switch (action.type) {
       case 'update_contact_field':
         if (enrollment.entityType === 'contact') {
@@ -192,10 +218,22 @@ class AutomationEngineV2 {
       
       case 'add_contact_tag':
         if (enrollment.entityType === 'contact') {
-          const tags = entity.tags || [];
-          if (!tags.includes(action.config.tag)) {
-            tags.push(action.config.tag);
-            await entity.update({ tags });
+          const currentTags = entity.tags || [];
+          const newTag = action.config.tag;
+          
+          automationDebugger.log(debugSessionId, 'ADD_TAG_DETAIL', {
+            currentTags,
+            newTag,
+            tagExists: currentTags.includes(newTag)
+          });
+          
+          if (!currentTags.includes(newTag)) {
+            currentTags.push(newTag);
+            await entity.update({ tags: currentTags });
+            
+            automationDebugger.log(debugSessionId, 'TAG_ADDED', {
+              updatedTags: currentTags
+            });
           }
         }
         break;
