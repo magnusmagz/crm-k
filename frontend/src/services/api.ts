@@ -191,6 +191,12 @@ export const automationsAPI = {
   
   getFields: (entityType: 'contact' | 'deal') => 
     api.get(`/automations/fields/${entityType}`),
+  
+  getEntityDebugInfo: (entityType: 'contact' | 'deal', entityId: string) =>
+    api.get(`/automations/debug/entity/${entityType}/${entityId}`),
+  
+  processEnrollment: (enrollmentId: string) =>
+    api.post(`/automations/enrollment/${enrollmentId}/process`),
 };
 
 export default api;

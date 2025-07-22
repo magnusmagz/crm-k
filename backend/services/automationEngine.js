@@ -157,7 +157,20 @@ class AutomationEngine {
   }
 
   getFieldValue(field, data) {
-    const parts = field.split('.');
+    // Handle both formats: "email" and "contact.email"
+    let fieldPath = field;
+    
+    // If field doesn't have a prefix and we have contact/deal data, add the prefix
+    // Exception: customFields already has a dot, so don't add prefix
+    if (!field.includes('.') || field.startsWith('customFields.')) {
+      if (data.contact && !field.startsWith('contact.')) {
+        fieldPath = `contact.${field}`;
+      } else if (data.deal && !field.startsWith('deal.')) {
+        fieldPath = `deal.${field}`;
+      }
+    }
+    
+    const parts = fieldPath.split('.');
     let value = data;
 
     for (const part of parts) {
