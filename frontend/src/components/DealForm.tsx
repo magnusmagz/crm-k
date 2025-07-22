@@ -9,16 +9,17 @@ interface DealFormProps {
   stages: Stage[];
   onSubmit: (data: any) => void;
   onClose: () => void;
+  defaultContactId?: string;
 }
 
-const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose }) => {
+const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, defaultContactId }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [formData, setFormData] = useState({
     name: deal?.name || '',
     value: deal?.value || 0,
     stageId: deal?.stageId || stages[0]?.id || '',
-    contactId: deal?.contactId || '',
+    contactId: deal?.contactId || defaultContactId || '',
     notes: deal?.notes || '',
     expectedCloseDate: deal?.expectedCloseDate 
       ? new Date(deal.expectedCloseDate).toISOString().split('T')[0] 

@@ -346,6 +346,7 @@ const ContactDetail: React.FC = () => {
               stages={stages}
               onSubmit={handleDealCreate}
               onClose={() => setShowDealForm(false)}
+              defaultContactId={contact?.id}
             />
           </div>
         </div>
