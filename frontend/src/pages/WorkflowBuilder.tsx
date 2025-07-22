@@ -88,7 +88,7 @@ const WorkflowBuilder: React.FC = () => {
         newStep.branchStepIndices = { true: null, false: null };
         break;
       case 'branch':
-        newStep.branchConfig = { branches: [], defaultBranch: null };
+        newStep.branchConfig = { branches: [] };
         newStep.branchStepIndices = {};
         break;
     }
