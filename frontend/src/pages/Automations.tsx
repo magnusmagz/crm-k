@@ -194,11 +194,19 @@ const Automations: React.FC = () => {
                         <button
                           onClick={() => toggleEnrollmentView(automation.id)}
                           className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                          title={`${automation.activeEnrollments || 0} currently active`}
                         >
                           <UserIcon className="h-5 w-5 text-blue-600 mr-2" />
                           <div className="text-left">
-                            <p className="text-sm font-medium text-gray-900">{automation.activeEnrollments || 0}</p>
-                            <p className="text-xs text-gray-500">enrolled</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              {automation.enrolledCount || 0}
+                              {automation.activeEnrollments > 0 && (
+                                <span className="text-xs text-blue-600 ml-1">
+                                  ({automation.activeEnrollments} active)
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-gray-500">total enrolled</p>
                           </div>
                           {automation.activeEnrollments > 0 && (
                             expandedAutomations.has(automation.id) ? (
