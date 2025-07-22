@@ -155,6 +155,14 @@ export const dealCustomFieldsAPI = {
 };
 
 // Automations API
+export const stagesAPI = {
+  getAll: () => api.get('/stages'),
+  create: (data: any) => api.post('/stages', data),
+  update: (id: string, data: any) => api.put(`/stages/${id}`, data),
+  delete: (id: string) => api.delete(`/stages/${id}`),
+  reorder: (orders: any) => api.put('/stages/reorder', { orders }),
+};
+
 export const automationsAPI = {
   getAll: () => api.get('/automations'),
   

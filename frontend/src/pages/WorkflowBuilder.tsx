@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Automation, AutomationStep, AutomationAction, AutomationCondition } from '../types';
 import { automationsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import ActionConfig from '../components/workflow/ActionConfig';
 import {
   PlusIcon,
   TrashIcon,
@@ -446,11 +447,40 @@ const WorkflowBuilder: React.FC = () => {
                   {/* Step-specific configuration */}
                   {step.type === 'action' && (
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">
+                      <p className="text-sm text-gray-500 mb-4">
                         Configure actions to execute in this step
                       </p>
-                      {/* Action configuration will be added here */}
-                      <button className="text-sm text-indigo-600 hover:text-indigo-500">
+                      <div className="space-y-3">
+                        {step.actions?.map((action, actionIndex) => (
+                          <ActionConfig
+                            key={actionIndex}
+                            action={action}
+                            entityType={automation.trigger?.type.includes('contact') ? 'contact' : 'deal'}
+                            onUpdate={(updatedAction) => {
+                              const updated = [...steps];
+                              const newActions = [...(step.actions || [])];
+                              newActions[actionIndex] = updatedAction as AutomationAction;
+                              updated[index] = { ...step, actions: newActions };
+                              setSteps(updated);
+                            }}
+                            onDelete={() => {
+                              const updated = [...steps];
+                              const newActions = (step.actions || []).filter((_, i) => i !== actionIndex);
+                              updated[index] = { ...step, actions: newActions };
+                              setSteps(updated);
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const updated = [...steps];
+                          const newActions = [...(step.actions || []), { type: '', config: {} }];
+                          updated[index] = { ...step, actions: newActions };
+                          setSteps(updated);
+                        }}
+                        className="mt-3 text-sm text-indigo-600 hover:text-indigo-500"
+                      >
                         + Add Action
                       </button>
                     </div>
