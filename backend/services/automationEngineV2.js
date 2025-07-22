@@ -641,7 +641,7 @@ class AutomationEngineV2 {
         return { success: false, reason: 'Already enrolled' };
       }
       
-      // Log if there was a previous completed enrollment
+      // Check for any previous enrollment (completed/failed)
       const previousEnrollment = await AutomationEnrollment.findOne({
         where: {
           automationId: automation.id,
@@ -652,24 +652,38 @@ class AutomationEngineV2 {
         order: [['completedAt', 'DESC']]
       });
       
+      let enrollment;
+      
       if (previousEnrollment) {
-        automationDebugger.log(debugSessionId, 'RE_ENROLLMENT', {
+        // Re-enrollment: Update the existing enrollment record instead of creating new
+        automationDebugger.log(debugSessionId, 'RE_ENROLLMENT_UPDATE', {
           previousEnrollmentId: previousEnrollment.id,
           previousStatus: previousEnrollment.status,
           completedAt: previousEnrollment.completedAt
         });
+        
+        // Reset the enrollment for re-use
+        await previousEnrollment.update({
+          status: 'active',
+          currentStepIndex: 0,
+          nextStepAt: new Date(),
+          completedAt: null,
+          metadata: {} // Clear any previous error metadata
+        });
+        
+        enrollment = previousEnrollment;
+      } else {
+        // First time enrollment
+        enrollment = await AutomationEnrollment.create({
+          automationId: automation.id,
+          userId,
+          entityType,
+          entityId,
+          currentStepIndex: 0,
+          status: 'active',
+          nextStepAt: new Date() // Start immediately
+        });
       }
-      
-      // Create enrollment
-      const enrollment = await AutomationEnrollment.create({
-        automationId: automation.id,
-        userId,
-        entityType,
-        entityId,
-        currentStepIndex: 0,
-        status: 'active',
-        nextStepAt: new Date() // Start immediately
-      });
       
       automationDebugger.log(debugSessionId, 'ENROLLMENT_CREATED', {
         enrollmentId: enrollment.id,
@@ -680,10 +694,15 @@ class AutomationEngineV2 {
       });
       
       // Update automation enrollment counts
-      await automation.increment({
-        enrolledCount: 1,
-        activeEnrollments: 1
-      });
+      // For re-enrollment, only increment activeEnrollments (not enrolledCount)
+      if (previousEnrollment) {
+        await automation.increment('activeEnrollments');
+      } else {
+        await automation.increment({
+          enrolledCount: 1,
+          activeEnrollments: 1
+        });
+      }
       
       // Process immediately for single-step automations
       if (!automation.isMultiStep) {
