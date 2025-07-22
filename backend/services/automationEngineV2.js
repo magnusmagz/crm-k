@@ -622,7 +622,8 @@ class AutomationEngineV2 {
     const debugSessionId = automationDebugger.startSession(automation.id, entityType, entityId);
     
     try {
-      // Check if already enrolled
+      // Check if already enrolled (only check for active enrollments)
+      // Allow re-enrollment if previous enrollment is completed or failed
       const existing = await AutomationEnrollment.findOne({
         where: {
           automationId: automation.id,
@@ -638,6 +639,25 @@ class AutomationEngineV2 {
           status: existing.status
         });
         return { success: false, reason: 'Already enrolled' };
+      }
+      
+      // Log if there was a previous completed enrollment
+      const previousEnrollment = await AutomationEnrollment.findOne({
+        where: {
+          automationId: automation.id,
+          entityType,
+          entityId,
+          status: ['completed', 'failed']
+        },
+        order: [['completedAt', 'DESC']]
+      });
+      
+      if (previousEnrollment) {
+        automationDebugger.log(debugSessionId, 'RE_ENROLLMENT', {
+          previousEnrollmentId: previousEnrollment.id,
+          previousStatus: previousEnrollment.status,
+          completedAt: previousEnrollment.completedAt
+        });
       }
       
       // Create enrollment
