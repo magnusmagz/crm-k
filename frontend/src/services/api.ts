@@ -197,6 +197,15 @@ export const automationsAPI = {
   
   processEnrollment: (enrollmentId: string) =>
     api.post(`/automations/enrollment/${enrollmentId}/process`),
+
+  // Multi-step automation endpoints
+  createMultiStep: (data: any) => api.post('/automations/multi-step', data),
+  
+  updateMultiStep: (id: string, data: any) => api.put(`/automations/${id}/multi-step`, data),
+  
+  getWithSteps: (id: string) => api.get(`/automations/${id}/with-steps`),
+  
+  validateWorkflow: (id: string) => api.post(`/automations/${id}/validate`),
 };
 
 export default api;

@@ -114,6 +114,30 @@ export interface AutomationAction {
   config: any;
 }
 
+export interface AutomationStep {
+  id: string;
+  automationId: string;
+  stepIndex: number;
+  name: string;
+  type: 'action' | 'delay' | 'condition' | 'branch';
+  config?: any;
+  conditions?: AutomationCondition[];
+  actions?: AutomationAction[];
+  delayConfig?: {
+    value: number;
+    unit: 'minutes' | 'hours' | 'days';
+  };
+  branchConfig?: {
+    branches: Array<{
+      name: string;
+      conditions: AutomationCondition[];
+    }>;
+    defaultBranch?: string;
+  };
+  nextStepIndex?: number | null;
+  branchStepIndices?: { [key: string]: number | null };
+}
+
 export interface Automation {
   id: string;
   userId: string;

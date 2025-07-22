@@ -18,7 +18,8 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ArrowPathIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  ArrowsPointingOutIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid';
 
@@ -131,13 +132,20 @@ const Automations: React.FC = () => {
             Automate your workflow with powerful rules and actions
           </p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-4 sm:mt-0 flex gap-2">
           <button
             onClick={() => navigate('/automations/new')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-            Create Automation
+            Simple Automation
+          </button>
+          <button
+            onClick={() => navigate('/automations/workflow/new')}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+          >
+            <ArrowsPointingOutIcon className="-ml-1 mr-2 h-5 w-5" />
+            Multi-Step Workflow
           </button>
         </div>
       </div>
@@ -178,9 +186,18 @@ const Automations: React.FC = () => {
                         <div className="ml-4">
                           <h3 className="text-lg font-medium text-gray-900">
                             {automation.name}
+                            {automation.isMultiStep && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                <ArrowsPointingOutIcon className="mr-1 h-3 w-3" />
+                                Multi-Step
+                              </span>
+                            )}
                           </h3>
                           <p className="mt-1 text-sm text-gray-500">
-                            When {getTriggerLabel(automation.trigger.type)} → {getActionsSummary(automation.actions)}
+                            {automation.isMultiStep 
+                              ? `When ${getTriggerLabel(automation.trigger.type)} → ${automation.steps?.length || 0} steps`
+                              : `When ${getTriggerLabel(automation.trigger.type)} → ${getActionsSummary(automation.actions)}`
+                            }
                           </p>
                         </div>
                       </div>
@@ -267,7 +284,7 @@ const Automations: React.FC = () => {
                         )}
                       </button>
                       <button
-                        onClick={() => navigate(`/automations/${automation.id}`)}
+                        onClick={() => navigate(automation.isMultiStep ? `/automations/workflow/${automation.id}` : `/automations/${automation.id}`)}
                         className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-all"
                         title="Edit automation"
                       >

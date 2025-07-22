@@ -13,6 +13,7 @@ import CustomFields from './pages/CustomFields';
 import Pipeline from './pages/Pipeline';
 import Automations from './pages/Automations';
 import AutomationBuilder from './pages/AutomationBuilder';
+import WorkflowBuilder from './pages/WorkflowBuilder';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="pipeline" element={<Pipeline />} />
             <Route path="automations" element={<Automations />} />
             <Route path="automations/:id" element={<AutomationBuilder />} />
+            <Route path="automations/workflow/:id" element={<WorkflowBuilder />} />
             <Route path="profile" element={<Profile />} />
             <Route path="custom-fields" element={<CustomFields />} />
           </Route>

@@ -773,4 +773,286 @@ router.get('/fields/:entityType', authMiddleware, async (req, res) => {
   }
 });
 
+// Create multi-step automation
+router.post('/multi-step', authMiddleware, [
+  body('name').notEmpty().trim(),
+  body('trigger').isObject(),
+  body('steps').isArray({ min: 1 }),
+  body('description').optional().trim()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { name, trigger, steps, description } = req.body;
+    
+    // Create the automation
+    const automation = await Automation.create({
+      name,
+      trigger,
+      conditions: [], // Multi-step automations use step conditions
+      actions: [], // Multi-step automations use step actions
+      isMultiStep: true,
+      type: 'multi_step',
+      description,
+      userId: req.user.id
+    });
+
+    // Create the steps
+    const createdSteps = [];
+    for (const step of steps) {
+      const createdStep = await AutomationStep.create({
+        automationId: automation.id,
+        stepIndex: step.stepIndex,
+        name: step.name,
+        type: step.type,
+        config: step.config || {},
+        conditions: step.conditions || [],
+        actions: step.actions || [],
+        delayConfig: step.delayConfig || null,
+        branchConfig: step.branchConfig || null,
+        nextStepIndex: step.nextStepIndex !== undefined ? step.nextStepIndex : null,
+        branchStepIndices: step.branchStepIndices || {}
+      });
+      createdSteps.push(createdStep);
+    }
+
+    // Return automation with steps
+    const result = await Automation.findByPk(automation.id, {
+      include: [{
+        model: AutomationStep,
+        as: 'steps',
+        order: [['stepIndex', 'ASC']]
+      }]
+    });
+
+    res.status(201).json({ automation: result });
+  } catch (error) {
+    console.error('Create multi-step automation error:', error);
+    res.status(500).json({ error: 'Failed to create multi-step automation' });
+  }
+});
+
+// Update multi-step automation
+router.put('/:id/multi-step', authMiddleware, [
+  body('name').optional().notEmpty().trim(),
+  body('trigger').optional().isObject(),
+  body('steps').optional().isArray({ min: 1 }),
+  body('description').optional().trim(),
+  body('isActive').optional().isBoolean()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+        isMultiStep: true
+      }
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Multi-step automation not found' });
+    }
+
+    // Update automation fields if provided
+    const updates = {};
+    if (req.body.name !== undefined) updates.name = req.body.name;
+    if (req.body.trigger !== undefined) updates.trigger = req.body.trigger;
+    if (req.body.description !== undefined) updates.description = req.body.description;
+    if (req.body.isActive !== undefined) updates.isActive = req.body.isActive;
+    
+    if (Object.keys(updates).length > 0) {
+      await automation.update(updates);
+    }
+
+    // Update steps if provided
+    if (req.body.steps) {
+      // Delete existing steps
+      await AutomationStep.destroy({
+        where: { automationId: automation.id }
+      });
+
+      // Create new steps
+      for (const step of req.body.steps) {
+        await AutomationStep.create({
+          automationId: automation.id,
+          stepIndex: step.stepIndex,
+          name: step.name,
+          type: step.type,
+          config: step.config || {},
+          conditions: step.conditions || [],
+          actions: step.actions || [],
+          delayConfig: step.delayConfig || null,
+          branchConfig: step.branchConfig || null,
+          nextStepIndex: step.nextStepIndex !== undefined ? step.nextStepIndex : null,
+          branchStepIndices: step.branchStepIndices || {}
+        });
+      }
+    }
+
+    // Return updated automation with steps
+    const result = await Automation.findByPk(automation.id, {
+      include: [{
+        model: AutomationStep,
+        as: 'steps',
+        order: [['stepIndex', 'ASC']]
+      }]
+    });
+
+    res.json({ automation: result });
+  } catch (error) {
+    console.error('Update multi-step automation error:', error);
+    res.status(500).json({ error: 'Failed to update multi-step automation' });
+  }
+});
+
+// Get automation with steps
+router.get('/:id/with-steps', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      },
+      include: [{
+        model: AutomationStep,
+        as: 'steps',
+        order: [['stepIndex', 'ASC']]
+      }]
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    res.json({ automation });
+  } catch (error) {
+    console.error('Get automation with steps error:', error);
+    res.status(500).json({ error: 'Failed to get automation' });
+  }
+});
+
+// Validate workflow
+router.post('/:id/validate', authMiddleware, async (req, res) => {
+  try {
+    const automation = await Automation.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      },
+      include: [{
+        model: AutomationStep,
+        as: 'steps',
+        order: [['stepIndex', 'ASC']]
+      }]
+    });
+
+    if (!automation) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
+
+    const errors = [];
+    const warnings = [];
+
+    // Validate each step
+    const stepIndices = new Set();
+    for (const step of automation.steps) {
+      stepIndices.add(step.stepIndex);
+
+      // Check for duplicate indices
+      if (stepIndices.size !== automation.steps.filter(s => s.stepIndex <= step.stepIndex).length) {
+        errors.push(`Duplicate step index: ${step.stepIndex}`);
+      }
+
+      // Validate step connections
+      if (step.nextStepIndex !== null && !stepIndices.has(step.nextStepIndex)) {
+        errors.push(`Step ${step.stepIndex} references non-existent step ${step.nextStepIndex}`);
+      }
+
+      // Validate branch connections
+      if (step.branchStepIndices) {
+        for (const [branch, targetIndex] of Object.entries(step.branchStepIndices)) {
+          if (targetIndex !== null && !stepIndices.has(targetIndex)) {
+            errors.push(`Step ${step.stepIndex} branch '${branch}' references non-existent step ${targetIndex}`);
+          }
+        }
+      }
+
+      // Check for required configurations
+      switch (step.type) {
+        case 'action':
+          if (!step.actions || step.actions.length === 0) {
+            errors.push(`Action step ${step.stepIndex} has no actions configured`);
+          }
+          break;
+        case 'delay':
+          if (!step.delayConfig || !step.delayConfig.value || !step.delayConfig.unit) {
+            errors.push(`Delay step ${step.stepIndex} missing delay configuration`);
+          }
+          break;
+        case 'condition':
+          if (!step.conditions || step.conditions.length === 0) {
+            errors.push(`Condition step ${step.stepIndex} has no conditions configured`);
+          }
+          if (!step.branchStepIndices || (!step.branchStepIndices.true && !step.branchStepIndices.false)) {
+            warnings.push(`Condition step ${step.stepIndex} has no branch paths configured`);
+          }
+          break;
+        case 'branch':
+          if (!step.branchConfig || !step.branchConfig.branches || step.branchConfig.branches.length === 0) {
+            errors.push(`Branch step ${step.stepIndex} has no branches configured`);
+          }
+          break;
+      }
+    }
+
+    // Check for unreachable steps
+    const reachableSteps = new Set([0]); // Start from step 0
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const step of automation.steps) {
+        if (reachableSteps.has(step.stepIndex)) {
+          // Add next step
+          if (step.nextStepIndex !== null && !reachableSteps.has(step.nextStepIndex)) {
+            reachableSteps.add(step.nextStepIndex);
+            changed = true;
+          }
+          // Add branch targets
+          if (step.branchStepIndices) {
+            for (const targetIndex of Object.values(step.branchStepIndices)) {
+              if (targetIndex !== null && !reachableSteps.has(targetIndex)) {
+                reachableSteps.add(targetIndex);
+                changed = true;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (const step of automation.steps) {
+      if (!reachableSteps.has(step.stepIndex)) {
+        warnings.push(`Step ${step.stepIndex} is unreachable`);
+      }
+    }
+
+    res.json({
+      valid: errors.length === 0,
+      errors,
+      warnings
+    });
+  } catch (error) {
+    console.error('Validate workflow error:', error);
+    res.status(500).json({ error: 'Failed to validate workflow' });
+  }
+});
+
 module.exports = router;
