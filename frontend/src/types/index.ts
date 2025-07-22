@@ -174,29 +174,6 @@ export interface AutomationLog {
   executedAt: Date;
 }
 
-export interface AutomationStep {
-  id: string;
-  automationId: string;
-  stepIndex: number;
-  name: string;
-  type: 'action' | 'delay' | 'condition' | 'branch';
-  config: any;
-  conditions?: AutomationCondition[];
-  actions?: AutomationAction[];
-  delayConfig?: {
-    value: number;
-    unit: 'minutes' | 'hours' | 'days';
-  };
-  branchConfig?: {
-    branches: Array<{
-      name: string;
-      conditions: AutomationCondition[];
-    }>;
-    defaultBranch?: string;
-  };
-  nextStepIndex?: number;
-  branchStepIndices?: Record<string, number>;
-}
 
 export interface AutomationEnrollment {
   id: string;
