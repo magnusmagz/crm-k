@@ -141,7 +141,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 placeholder="e.g., Company Size"
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                   errors.label ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800`}
+                } focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800`}
               />
               {errors.label && <p className="mt-1 text-sm text-red-600">{errors.label}</p>}
             </div>
@@ -160,7 +160,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 placeholder="e.g., company_size"
                 className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                   errors.name ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
+                } focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               {!field && (
@@ -180,7 +180,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 value={formData.type}
                 onChange={handleChange}
                 disabled={!!field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm disabled:bg-gray-100"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800 sm:text-sm disabled:bg-gray-100"
               >
                 <option value="text">Text</option>
                 <option value="textarea">Text Area</option>
@@ -230,7 +230,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
-                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                       {formData.options.length > 1 && (
                         <button

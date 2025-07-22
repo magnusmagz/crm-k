@@ -19,11 +19,11 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
     }
   };
 
-  const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800";
+  const inputClasses = "mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800";
 
   return (
     <div>
-      <label htmlFor={`custom_${field.name}`} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={`custom_${field.name}`} className="block text-sm font-medium text-gray-700">
         {field.label}
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -95,18 +95,22 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
       )}
 
       {field.type === 'checkbox' && (
-        <div className="flex items-center">
-          <input
-            id={`custom_${field.name}`}
-            name={`custom_${field.name}`}
-            type="checkbox"
-            checked={value || false}
-            onChange={handleChange}
-            className="h-5 w-5 text-gray-800 focus:ring-gray-800 border-gray-300 rounded"
-          />
-          <label htmlFor={`custom_${field.name}`} className="ml-2 text-sm text-gray-700">
-            Check if applicable
-          </label>
+        <div className="flex items-start">
+          <div className="flex items-center h-5">
+            <input
+              id={`custom_${field.name}`}
+              name={`custom_${field.name}`}
+              type="checkbox"
+              checked={value || false}
+              onChange={handleChange}
+              className="focus:ring-gray-800 h-4 w-4 text-gray-800 border-gray-300 rounded"
+            />
+          </div>
+          <div className="ml-3 text-sm">
+            <label htmlFor={`custom_${field.name}`} className="font-medium text-gray-700">
+              Check if applicable
+            </label>
+          </div>
         </div>
       )}
 
