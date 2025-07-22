@@ -136,7 +136,7 @@ class AutomationEngine {
       case 'not_equals':
         return fieldValue != value;
       case 'contains':
-        return fieldValue && fieldValue.toString().toLowerCase().includes(value.toLowerCase());
+        return fieldValue ? fieldValue.toString().toLowerCase().includes(value.toLowerCase()) : false;
       case 'not_contains':
         return !fieldValue || !fieldValue.toString().toLowerCase().includes(value.toLowerCase());
       case 'is_empty':
