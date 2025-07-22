@@ -307,12 +307,21 @@ class AutomationEngineV2 {
         
         case 'add_contact_tag':
           if (enrollment.entityType === 'contact') {
-            if (!action.config.tag) {
-              throw new Error('Invalid add_contact_tag config: missing tag');
+            // Handle both config.tag (V2) and config.tags (V1) formats
+            const tagValue = action.config.tag || action.config.tags;
+            if (!tagValue) {
+              automationDebugger.log(debugSessionId, 'ADD_TAG_CONFIG_ERROR', {
+                config: action.config,
+                hasTag: !!action.config.tag,
+                hasTags: !!action.config.tags
+              }, 'error');
+              throw new Error('Invalid add_contact_tag config: missing tag/tags');
             }
             
             const currentTags = entity.tags || [];
-            const newTag = action.config.tag;
+            // Handle both single tag and array of tags
+            const tagsToAdd = Array.isArray(tagValue) ? tagValue : [tagValue];
+            const newTag = tagsToAdd[0]; // For now, just handle the first tag
             
             automationDebugger.log(debugSessionId, 'ADD_TAG_DETAIL', {
               currentTags,
@@ -330,12 +339,16 @@ class AutomationEngineV2 {
             }
           } else if (enrollment.entityType === 'deal' && entity.Contact) {
             // For deals, add tag to the associated contact
-            if (!action.config.tag) {
-              throw new Error('Invalid add_contact_tag config: missing tag');
+            // Handle both config.tag (V2) and config.tags (V1) formats
+            const tagValue = action.config.tag || action.config.tags;
+            if (!tagValue) {
+              throw new Error('Invalid add_contact_tag config: missing tag/tags');
             }
             
             const currentTags = entity.Contact.tags || [];
-            const newTag = action.config.tag;
+            // Handle both single tag and array of tags
+            const tagsToAdd = Array.isArray(tagValue) ? tagValue : [tagValue];
+            const newTag = tagsToAdd[0]; // For now, just handle the first tag
             
             automationDebugger.log(debugSessionId, 'ADD_TAG_TO_DEAL_CONTACT', {
               contactId: entity.Contact.id,
