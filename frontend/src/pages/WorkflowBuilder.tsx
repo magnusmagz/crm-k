@@ -157,8 +157,8 @@ const WorkflowBuilder: React.FC = () => {
   const validateWorkflow = async () => {
     if (!isEditing) {
       // Basic validation for new workflows
-      const errors = [];
-      const warnings = [];
+      const errors: string[] = [];
+      const warnings: string[] = [];
 
       if (!automation.name) {
         errors.push('Automation name is required');
