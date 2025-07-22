@@ -475,8 +475,9 @@ const WorkflowBuilder: React.FC = () => {
                       <button 
                         onClick={() => {
                           const updated = [...steps];
-                          const newActions = [...(step.actions || []), { type: '', config: {} }];
-                          updated[index] = { ...step, actions: newActions };
+                          const newAction: Partial<AutomationAction> = { type: undefined, config: {} };
+                          const newActions = [...(step.actions || []), newAction];
+                          updated[index] = { ...step, actions: newActions as AutomationAction[] };
                           setSteps(updated);
                         }}
                         className="mt-3 text-sm text-indigo-600 hover:text-indigo-500"
