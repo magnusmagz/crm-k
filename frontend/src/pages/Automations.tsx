@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Automation } from '../types';
 import { automationsAPI } from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { PlusIcon, CogIcon, PlayIcon, PauseIcon, TrashIcon, ClockIcon, ChartBarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, CogIcon, PlayIcon, PauseIcon, TrashIcon, ClockIcon, ChartBarIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedAutomations, setExpandedAutomations] = useState<Set<string>>(new Set());
+  const [enrolledEntities, setEnrolledEntities] = useState<{ [key: string]: any[] }>({});
 
   useEffect(() => {
     fetchAutomations();
@@ -66,6 +68,31 @@ const Automations: React.FC = () => {
     if (actions.length === 0) return 'No actions';
     if (actions.length === 1) return '1 action';
     return `${actions.length} actions`;
+  };
+
+  const toggleEnrollmentView = async (automationId: string) => {
+    const newExpanded = new Set(expandedAutomations);
+    
+    if (newExpanded.has(automationId)) {
+      newExpanded.delete(automationId);
+    } else {
+      newExpanded.add(automationId);
+      
+      // Fetch enrolled entities if not already loaded
+      if (!enrolledEntities[automationId]) {
+        try {
+          const response = await automationsAPI.getEnrollments(automationId);
+          setEnrolledEntities(prev => ({
+            ...prev,
+            [automationId]: response.data.enrolledEntities
+          }));
+        } catch (error) {
+          console.error('Failed to fetch enrollments:', error);
+        }
+      }
+    }
+    
+    setExpandedAutomations(newExpanded);
   };
 
   if (isLoading) {
@@ -144,10 +171,18 @@ const Automations: React.FC = () => {
                         )}
                         <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
                           {automation.activeEnrollments > 0 && (
-                            <span className="flex items-center text-blue-600">
+                            <button
+                              onClick={() => toggleEnrollmentView(automation.id)}
+                              className="flex items-center text-blue-600 hover:text-blue-700"
+                            >
                               <UserIcon className="mr-1 h-3 w-3" />
                               {automation.activeEnrollments} enrolled
-                            </span>
+                              {expandedAutomations.has(automation.id) ? (
+                                <ChevronUpIcon className="ml-1 h-3 w-3" />
+                              ) : (
+                                <ChevronDownIcon className="ml-1 h-3 w-3" />
+                              )}
+                            </button>
                           )}
                           <span className="flex items-center">
                             <ChartBarIcon className="mr-1 h-3 w-3" />
@@ -204,6 +239,52 @@ const Automations: React.FC = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Enrolled Entities */}
+                  {expandedAutomations.has(automation.id) && enrolledEntities[automation.id] && (
+                    <div className="mt-4 border-t pt-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">Enrolled Entities</h4>
+                      {enrolledEntities[automation.id].length === 0 ? (
+                        <p className="text-sm text-gray-500">No entities currently enrolled</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {enrolledEntities[automation.id].slice(0, 5).map((item: any) => (
+                            <div key={item.enrollment.id} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center">
+                                {item.type === 'contact' ? (
+                                  <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                                ) : (
+                                  <span className="text-gray-400 mr-2">$</span>
+                                )}
+                                <span className="font-medium text-gray-900">
+                                  {item.type === 'contact' 
+                                    ? `${item.entity.firstName} ${item.entity.lastName}`
+                                    : item.entity.name}
+                                </span>
+                                {item.type === 'contact' && item.entity.email && (
+                                  <span className="ml-2 text-gray-500">({item.entity.email})</span>
+                                )}
+                                {item.type === 'deal' && (
+                                  <span className="ml-2 text-gray-500">(${item.entity.value.toLocaleString()})</span>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-400">
+                                Step {item.enrollment.currentStepIndex + 1}
+                              </span>
+                            </div>
+                          ))}
+                          {enrolledEntities[automation.id].length > 5 && (
+                            <button
+                              onClick={() => navigate(`/automations/${automation.id}`)}
+                              className="text-sm text-blue-600 hover:text-blue-700"
+                            >
+                              View all {enrolledEntities[automation.id].length} enrolled entities →
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
