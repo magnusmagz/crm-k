@@ -205,7 +205,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                   type="checkbox"
                   checked={formData.required}
                   onChange={handleChange}
-                  className="focus:ring-gray-800 h-4 w-4 text-gray-800 border-gray-300 rounded"
+                  className="focus:ring-gray-800 h-4 w-4 text-gray-800 border-gray-300 rounded checked:bg-gray-800 checked:border-gray-800"
                 />
               </div>
               <div className="ml-3 text-sm">

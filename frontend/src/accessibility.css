@@ -111,13 +111,24 @@ input[type="radio"] {
 
 /* Override Tailwind's default checkbox colors */
 input[type="checkbox"]:checked {
-  background-color: #1f2937;
-  border-color: #1f2937;
+  background-color: #1f2937 !important;
+  border-color: #1f2937 !important;
 }
 
 input[type="checkbox"]:focus {
-  --tw-ring-color: #1f2937;
-  border-color: #1f2937;
+  --tw-ring-color: #1f2937 !important;
+  border-color: #1f2937 !important;
+}
+
+/* Ensure checkbox check mark uses our color */
+input[type="checkbox"]:checked:hover {
+  background-color: #374151 !important;
+  border-color: #374151 !important;
+}
+
+input[type="checkbox"]:checked:focus {
+  background-color: #1f2937 !important;
+  border-color: #1f2937 !important;
 }
 
 /* High contrast mode support */
