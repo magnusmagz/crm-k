@@ -436,7 +436,8 @@ class AutomationEngineV2 {
 
   // Evaluate a single condition
   async evaluateCondition(condition, entity) {
-    const fieldValue = entity[condition.field];
+    // Use the same field extraction logic as automationEnrollmentService
+    const fieldValue = this.getFieldValue(condition.field, entity);
     const targetValue = condition.value;
     
     switch (condition.operator) {
@@ -445,9 +446,9 @@ class AutomationEngineV2 {
       case 'not_equals':
         return fieldValue != targetValue;
       case 'contains':
-        return fieldValue && fieldValue.toString().includes(targetValue);
+        return fieldValue ? fieldValue.toString().toLowerCase().includes(targetValue.toLowerCase()) : false;
       case 'not_contains':
-        return !fieldValue || !fieldValue.toString().includes(targetValue);
+        return !fieldValue || !fieldValue.toString().toLowerCase().includes(targetValue.toLowerCase());
       case 'is_empty':
         return !fieldValue || fieldValue === '';
       case 'is_not_empty':
@@ -463,6 +464,31 @@ class AutomationEngineV2 {
       default:
         return false;
     }
+  }
+
+  // Get field value with dot notation support
+  getFieldValue(field, entity) {
+    // Handle field names that don't have entity prefix
+    let fieldPath = field;
+    
+    // If the field doesn't contain a dot and isn't a custom field path,
+    // it's a direct entity property
+    if (!field.includes('.') || field.startsWith('customFields.')) {
+      fieldPath = field;
+    }
+    
+    const parts = fieldPath.split('.');
+    let value = entity;
+
+    for (const part of parts) {
+      if (value && typeof value === 'object') {
+        value = value[part];
+      } else {
+        return null;
+      }
+    }
+
+    return value;
   }
 
   // Evaluate branch conditions and determine path
@@ -655,8 +681,15 @@ class AutomationEngineV2 {
         // Process immediately
         setImmediate(async () => {
           try {
+            console.log('[AutomationEngineV2] Processing single-step automation immediately:', {
+              enrollmentId: fullEnrollment.id,
+              automationName: fullEnrollment.Automation?.name,
+              hasActions: !!fullEnrollment.Automation?.actions,
+              actionCount: fullEnrollment.Automation?.actions?.length
+            });
             await this.processEnrollmentStep(fullEnrollment);
           } catch (error) {
+            console.error('[AutomationEngineV2] Error processing single-step automation:', error);
             automationDebugger.log(debugSessionId, 'IMMEDIATE_PROCESSING_ERROR', {
               error: error.message,
               stack: error.stack
