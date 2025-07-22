@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
 import { Contact } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
+import { Dialog, Transition } from '@headlessui/react';
 
 const Contacts: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -90,14 +91,42 @@ const Contacts: React.FC = () => {
         </div>
       </div>
 
-      {showNewContact && (
-        <div className="mt-6">
-          <ContactForm
-            onSubmit={handleContactCreated}
-            onCancel={() => setShowNewContact(false)}
-          />
-        </div>
-      )}
+      <Transition.Root show={showNewContact} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={setShowNewContact}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                  <ContactForm
+                    onSubmit={handleContactCreated}
+                    onCancel={() => setShowNewContact(false)}
+                  />
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
 
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">

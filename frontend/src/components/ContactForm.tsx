@@ -221,170 +221,183 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
   };
 
   return (
-    <div className="bg-white shadow sm:rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">
+    <div className="bg-white">
+      <div className="px-6 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold leading-6 text-gray-900">
             {contact ? 'Edit Contact' : 'New Contact'}
           </h3>
           <button
             type="button"
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-500"
+            className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >
+            <span className="sr-only">Close</span>
             <XMarkIcon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                First Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                id="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                  errors.firstName ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800`}
-              />
-              {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="bg-gray-50 px-6 py-5 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-900 mb-4">Basic Information</h4>
+            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
+                    errors.firstName ? 'border-red-300' : 'border-gray-300'
+                  } focus:border-gray-800 focus:ring-gray-800`}
+                />
+                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                  Last Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
+                    errors.lastName ? 'border-red-300' : 'border-gray-300'
+                  } focus:border-gray-800 focus:ring-gray-800`}
+                />
+                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
+                    errors.email ? 'border-red-300' : 'border-gray-300'
+                  } focus:border-gray-800 focus:ring-gray-800`}
+                />
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                  Company
+                </label>
+                <input
+                  type="text"
+                  name="company"
+                  id="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="position" className="block text-sm font-medium text-gray-700">
+                  Position
+                </label>
+                <input
+                  type="text"
+                  name="position"
+                  id="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
+                />
+              </div>
             </div>
-            
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                Last Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                id="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                  errors.lastName ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800`}
-              />
-              {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800`}
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-            </div>
-            
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                id="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-                Company
-              </label>
-              <input
-                type="text"
-                name="company"
-                id="company"
-                value={formData.company}
-                onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="position" className="block text-sm font-medium text-gray-700">
-                Position
-              </label>
-              <input
-                type="text"
-                name="position"
-                id="position"
-                value={formData.position}
-                onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
-              />
-            </div>
-            
-            <div className="sm:col-span-2">
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                name="tags"
-                id="tags"
-                value={formData.tags}
-                onChange={handleChange}
-                placeholder="customer, vip, lead"
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
-              />
-            </div>
-            
-            <div className="sm:col-span-2">
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                id="notes"
-                rows={3}
-                value={formData.notes}
-                onChange={handleChange}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
-              />
-            </div>
-            
-            {customFields.length > 0 && (
-              <>
-                <div className="sm:col-span-2">
-                  <h4 className="text-sm font-medium text-gray-900 mt-4">Custom Fields</h4>
-                </div>
-                {customFields.map(renderCustomField)}
-              </>
-            )}
           </div>
           
-          <div className="mt-6 flex items-center justify-end gap-x-6">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="text-sm font-semibold leading-6 text-gray-900"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="rounded-md bg-gray-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Saving...' : contact ? 'Update' : 'Create'}
-            </button>
+          {/* Additional Information */}
+          <div className="bg-gray-50 px-6 py-5 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-900 mb-4">Additional Information</h4>
+            <div className="space-y-6">
+              <div>
+                <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  name="tags"
+                  id="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  placeholder="customer, vip, lead"
+                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+                  Notes
+                </label>
+                <textarea
+                  name="notes"
+                  id="notes"
+                  rows={3}
+                  value={formData.notes}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
+                />
+              </div>
+            </div>
+          </div>
+          
+          {customFields.length > 0 && (
+            <div className="bg-gray-50 px-6 py-5 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-4">Custom Fields</h4>
+              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                {customFields.map(renderCustomField)}
+              </div>
+            </div>
+          )}
+          
+          <div className="pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-x-3">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-md bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Saving...' : contact ? 'Update' : 'Create'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
