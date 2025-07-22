@@ -176,7 +176,8 @@ class AutomationEnrollmentService {
 
   // Evaluate a single condition
   evaluateCondition(condition, entity) {
-    const fieldValue = entity[condition.field];
+    // Get field value - supports dot notation for custom fields
+    const fieldValue = this.getFieldValue(condition.field, entity);
     const targetValue = condition.value;
     
     switch (condition.operator) {
@@ -203,6 +204,22 @@ class AutomationEnrollmentService {
       default:
         return false;
     }
+  }
+
+  // Get field value with dot notation support
+  getFieldValue(field, entity) {
+    const parts = field.split('.');
+    let value = entity;
+
+    for (const part of parts) {
+      if (value && typeof value === 'object') {
+        value = value[part];
+      } else {
+        return null;
+      }
+    }
+
+    return value;
   }
 
   // Get enrolled entities for an automation

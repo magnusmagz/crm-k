@@ -7,7 +7,8 @@ class AutomationEngine {
       'update_contact_field': this.updateContactField.bind(this),
       'add_contact_tag': this.addContactTag.bind(this),
       'update_deal_field': this.updateDealField.bind(this),
-      'move_deal_to_stage': this.moveDealToStage.bind(this)
+      'move_deal_to_stage': this.moveDealToStage.bind(this),
+      'update_custom_field': this.updateCustomField.bind(this)
     };
   }
 
@@ -196,9 +197,18 @@ class AutomationEngine {
       throw new Error('Contact not found');
     }
 
-    const updateData = {};
-    updateData[field] = value;
-    await contact.update(updateData);
+    // Check if it's a custom field
+    if (field.startsWith('customFields.')) {
+      const customFieldName = field.replace('customFields.', '');
+      const customFields = contact.customFields || {};
+      customFields[customFieldName] = value;
+      await contact.update({ customFields });
+    } else {
+      // Standard field update
+      const updateData = {};
+      updateData[field] = value;
+      await contact.update(updateData);
+    }
   }
 
   async addContactTag(config, eventData, userId) {
@@ -240,9 +250,18 @@ class AutomationEngine {
       throw new Error('Deal not found');
     }
 
-    const updateData = {};
-    updateData[field] = value;
-    await deal.update(updateData);
+    // Check if it's a custom field
+    if (field.startsWith('customFields.')) {
+      const customFieldName = field.replace('customFields.', '');
+      const customFields = deal.customFields || {};
+      customFields[customFieldName] = value;
+      await deal.update({ customFields });
+    } else {
+      // Standard field update
+      const updateData = {};
+      updateData[field] = value;
+      await deal.update(updateData);
+    }
   }
 
   async moveDealToStage(config, eventData, userId) {
@@ -271,6 +290,39 @@ class AutomationEngine {
     }
 
     await deal.update({ stageId });
+  }
+
+  async updateCustomField(config, eventData, userId) {
+    const { entityType, entityId, fieldName, value } = config;
+    
+    // Determine the entity ID based on config or event data
+    let targetEntityId = entityId;
+    if (!targetEntityId) {
+      if (entityType === 'contact') {
+        targetEntityId = eventData.contact?.id;
+      } else if (entityType === 'deal') {
+        targetEntityId = eventData.deal?.id;
+      }
+    }
+
+    if (!targetEntityId) {
+      throw new Error(`No ${entityType} ID available for update`);
+    }
+
+    // Get the entity
+    const Model = entityType === 'contact' ? Contact : Deal;
+    const entity = await Model.findOne({
+      where: { id: targetEntityId, userId }
+    });
+
+    if (!entity) {
+      throw new Error(`${entityType.charAt(0).toUpperCase() + entityType.slice(1)} not found`);
+    }
+
+    // Update custom field
+    const customFields = entity.customFields || {};
+    customFields[fieldName] = value;
+    await entity.update({ customFields });
   }
 }
 

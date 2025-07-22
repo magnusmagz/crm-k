@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AutomationCondition } from '../../types';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { automationsAPI } from '../../services/api';
 
 interface ConditionBuilderProps {
   condition: AutomationCondition;
@@ -10,6 +11,14 @@ interface ConditionBuilderProps {
   triggerType: string;
 }
 
+interface Field {
+  name: string;
+  label: string;
+  type: string;
+  options?: string[];
+  isCustom?: boolean;
+}
+
 const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   condition,
   onChange,
@@ -17,51 +26,92 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   showLogic,
   triggerType,
 }) => {
-  const getFieldOptions = () => {
-    const baseContactFields = [
-      { value: 'firstName', label: 'First Name' },
-      { value: 'lastName', label: 'Last Name' },
-      { value: 'email', label: 'Email' },
-      { value: 'phone', label: 'Phone' },
-      { value: 'company', label: 'Company' },
-      { value: 'position', label: 'Position' },
-      { value: 'tags', label: 'Tags' },
-    ];
+  const [fields, setFields] = useState<Field[]>([]);
+  const [isLoadingFields, setIsLoadingFields] = useState(false);
 
-    const baseDealFields = [
-      { value: 'name', label: 'Deal Name' },
-      { value: 'value', label: 'Deal Value' },
-      { value: 'status', label: 'Deal Status' },
-      { value: 'stage', label: 'Stage' },
-    ];
+  useEffect(() => {
+    fetchFields();
+  }, [triggerType]);
 
+  const fetchFields = async () => {
+    if (!triggerType) return;
+    
+    const entityType = triggerType.includes('contact') ? 'contact' : 'deal';
+    setIsLoadingFields(true);
+    
+    try {
+      const response = await automationsAPI.getFields(entityType);
+      setFields(response.data.fields);
+    } catch (error) {
+      console.error('Failed to fetch fields:', error);
+      // Fallback to default fields
+      setFields(getDefaultFields());
+    } finally {
+      setIsLoadingFields(false);
+    }
+  };
+
+  const getDefaultFields = () => {
     if (triggerType.includes('contact')) {
-      return baseContactFields;
+      return [
+        { name: 'firstName', label: 'First Name', type: 'text' },
+        { name: 'lastName', label: 'Last Name', type: 'text' },
+        { name: 'email', label: 'Email', type: 'email' },
+        { name: 'phone', label: 'Phone', type: 'text' },
+        { name: 'company', label: 'Company', type: 'text' },
+        { name: 'position', label: 'Position', type: 'text' },
+        { name: 'tags', label: 'Tags', type: 'array' },
+      ];
     } else if (triggerType.includes('deal')) {
-      return baseDealFields;
+      return [
+        { name: 'name', label: 'Deal Name', type: 'text' },
+        { name: 'value', label: 'Deal Value', type: 'number' },
+        { name: 'status', label: 'Deal Status', type: 'select', options: ['open', 'won', 'lost'] },
+        { name: 'stageId', label: 'Stage', type: 'select' },
+      ];
     }
     return [];
   };
 
   const getOperatorOptions = () => {
-    const field = condition.field;
+    const selectedField = fields.find(f => f.name === condition.field);
+    if (!selectedField) return [];
     
-    if (field === 'tags') {
+    if (selectedField.type === 'array' || selectedField.name === 'tags') {
       return [
         { value: 'has_tag', label: 'Has tag' },
         { value: 'not_has_tag', label: 'Does not have tag' },
       ];
     }
     
-    if (field === 'value') {
+    if (selectedField.type === 'number') {
       return [
         { value: 'equals', label: 'Equals' },
         { value: 'not_equals', label: 'Does not equal' },
         { value: 'greater_than', label: 'Greater than' },
         { value: 'less_than', label: 'Less than' },
+        { value: 'is_empty', label: 'Is empty' },
+        { value: 'is_not_empty', label: 'Is not empty' },
       ];
     }
     
+    if (selectedField.type === 'checkbox') {
+      return [
+        { value: 'equals', label: 'Is checked' },
+        { value: 'not_equals', label: 'Is not checked' },
+      ];
+    }
+    
+    if (selectedField.type === 'select') {
+      return [
+        { value: 'equals', label: 'Equals' },
+        { value: 'not_equals', label: 'Does not equal' },
+        { value: 'is_empty', label: 'Is empty' },
+        { value: 'is_not_empty', label: 'Is not empty' },
+      ];
+    }
+    
+    // Default text operators
     return [
       { value: 'equals', label: 'Equals' },
       { value: 'not_equals', label: 'Does not equal' },
@@ -76,7 +126,57 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
     return !['is_empty', 'is_not_empty'].includes(condition.operator);
   };
 
-  const fieldOptions = getFieldOptions();
+  const getValueInput = () => {
+    const selectedField = fields.find(f => f.name === condition.field);
+    if (!selectedField || !needsValue()) return null;
+
+    // For checkbox fields with equals/not_equals operators
+    if (selectedField.type === 'checkbox') {
+      return (
+        <select
+          value={condition.value || 'true'}
+          onChange={(e) => onChange({ ...condition, value: e.target.value })}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          disabled={!condition.operator}
+        >
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      );
+    }
+
+    // For select fields with options
+    if (selectedField.type === 'select' && selectedField.options) {
+      return (
+        <select
+          value={condition.value || ''}
+          onChange={(e) => onChange({ ...condition, value: e.target.value })}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          disabled={!condition.operator}
+        >
+          <option value="">Select value</option>
+          {selectedField.options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    // Default input
+    return (
+      <input
+        type={selectedField.type === 'number' ? 'number' : selectedField.type === 'date' ? 'date' : 'text'}
+        value={condition.value || ''}
+        onChange={(e) => onChange({ ...condition, value: e.target.value })}
+        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+        placeholder={selectedField.name === 'tags' ? 'Tag name' : 'Value'}
+        disabled={!condition.operator}
+      />
+    );
+  };
+
   const operatorOptions = getOperatorOptions();
 
   return (
@@ -97,13 +197,29 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
           value={condition.field}
           onChange={(e) => onChange({ ...condition, field: e.target.value, operator: 'equals', value: '' })}
           className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          disabled={isLoadingFields}
         >
           <option value="">Select field</option>
-          {fieldOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
+          {fields.length > 0 && (
+            <>
+              <optgroup label="Standard Fields">
+                {fields.filter(f => !f.isCustom).map((field) => (
+                  <option key={field.name} value={field.name}>
+                    {field.label}
+                  </option>
+                ))}
+              </optgroup>
+              {fields.some(f => f.isCustom) && (
+                <optgroup label="Custom Fields">
+                  {fields.filter(f => f.isCustom).map((field) => (
+                    <option key={field.name} value={field.name}>
+                      {field.label}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </>
+          )}
         </select>
 
         <select
@@ -120,16 +236,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
           ))}
         </select>
 
-        {needsValue() && (
-          <input
-            type={condition.field === 'value' ? 'number' : 'text'}
-            value={condition.value || ''}
-            onChange={(e) => onChange({ ...condition, value: e.target.value })}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-            placeholder={condition.field === 'tags' ? 'Tag name' : 'Value'}
-            disabled={!condition.operator}
-          />
-        )}
+        {getValueInput()}
       </div>
 
       <button

@@ -110,7 +110,7 @@ export interface AutomationCondition {
 }
 
 export interface AutomationAction {
-  type: 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage';
+  type: 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage' | 'update_custom_field';
   config: any;
 }
 

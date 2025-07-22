@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { Automation, AutomationLog, AutomationEnrollment, AutomationStep, Contact, Deal } = require('../models');
+const { Automation, AutomationLog, AutomationEnrollment, AutomationStep, Contact, Deal, CustomField } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEnrollmentService = require('../services/automationEnrollmentService');
@@ -713,6 +713,63 @@ router.post('/enrollment/:enrollmentId/process', authMiddleware, async (req, res
       details: error.message,
       stack: error.stack
     });
+  }
+});
+
+// Get available fields for automation conditions and actions
+router.get('/fields/:entityType', authMiddleware, async (req, res) => {
+  try {
+    const { entityType } = req.params;
+    
+    if (!['contact', 'deal'].includes(entityType)) {
+      return res.status(400).json({ error: 'Invalid entity type' });
+    }
+    
+    // Get custom fields for the entity type
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: entityType
+      },
+      order: [['createdAt', 'ASC']]
+    });
+    
+    // Define standard fields
+    const standardFields = entityType === 'contact' ? [
+      { name: 'firstName', label: 'First Name', type: 'text' },
+      { name: 'lastName', label: 'Last Name', type: 'text' },
+      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'phone', label: 'Phone', type: 'text' },
+      { name: 'company', label: 'Company', type: 'text' },
+      { name: 'position', label: 'Position', type: 'text' },
+      { name: 'tags', label: 'Tags', type: 'array' },
+      { name: 'notes', label: 'Notes', type: 'textarea' }
+    ] : [
+      { name: 'name', label: 'Deal Name', type: 'text' },
+      { name: 'value', label: 'Deal Value', type: 'number' },
+      { name: 'status', label: 'Status', type: 'select', options: ['open', 'won', 'lost'] },
+      { name: 'stageId', label: 'Stage', type: 'select' },
+      { name: 'expectedCloseDate', label: 'Expected Close Date', type: 'date' },
+      { name: 'notes', label: 'Notes', type: 'textarea' }
+    ];
+    
+    // Format custom fields to match standard fields structure
+    const formattedCustomFields = customFields.map(field => ({
+      name: `customFields.${field.name}`,
+      label: field.label,
+      type: field.type,
+      options: field.options,
+      isCustom: true,
+      required: field.required
+    }));
+    
+    res.json({ 
+      fields: [...standardFields, ...formattedCustomFields],
+      entityType 
+    });
+  } catch (error) {
+    console.error('Get fields error:', error);
+    res.status(500).json({ error: 'Failed to get fields' });
   }
 });
 

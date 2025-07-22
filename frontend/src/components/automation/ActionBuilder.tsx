@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AutomationAction, Stage } from '../../types';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { automationsAPI } from '../../services/api';
 
 interface ActionBuilderProps {
   action: AutomationAction;
@@ -10,6 +11,14 @@ interface ActionBuilderProps {
   stages: Stage[];
 }
 
+interface Field {
+  name: string;
+  label: string;
+  type: string;
+  options?: string[];
+  isCustom?: boolean;
+}
+
 const ActionBuilder: React.FC<ActionBuilderProps> = ({
   action,
   onChange,
@@ -17,6 +26,34 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
   triggerType,
   stages,
 }) => {
+  const [contactFields, setContactFields] = useState<Field[]>([]);
+  const [dealFields, setDealFields] = useState<Field[]>([]);
+  const [isLoadingFields, setIsLoadingFields] = useState(false);
+
+  useEffect(() => {
+    fetchFields();
+  }, [triggerType]);
+
+  const fetchFields = async () => {
+    setIsLoadingFields(true);
+    
+    try {
+      // Fetch contact fields
+      const contactResponse = await automationsAPI.getFields('contact');
+      setContactFields(contactResponse.data.fields);
+      
+      // Fetch deal fields if relevant
+      if (triggerType.includes('deal')) {
+        const dealResponse = await automationsAPI.getFields('deal');
+        setDealFields(dealResponse.data.fields);
+      }
+    } catch (error) {
+      console.error('Failed to fetch fields:', error);
+    } finally {
+      setIsLoadingFields(false);
+    }
+  };
+
   const getActionOptions = () => {
     const contactActions = [
       { value: 'update_contact_field', label: 'Update Contact Field' },
@@ -28,12 +65,88 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
       { value: 'move_deal_to_stage', label: 'Move Deal to Stage' },
     ];
 
+    const customFieldAction = [
+      { value: 'update_custom_field', label: 'Update Custom Field' },
+    ];
+
     if (triggerType.includes('contact')) {
-      return contactActions;
+      return [...contactActions, ...customFieldAction];
     } else if (triggerType.includes('deal')) {
-      return [...dealActions, ...contactActions];
+      return [...dealActions, ...contactActions, ...customFieldAction];
     }
     return [];
+  };
+
+  const getFieldValue = () => {
+    const fields = action.type === 'update_contact_field' ? contactFields : dealFields;
+    const selectedField = fields.find(f => f.name === action.config.field);
+    
+    if (!selectedField) {
+      return (
+        <input
+          type="text"
+          value={action.config.value || ''}
+          onChange={(e) => onChange({
+            ...action,
+            config: { ...action.config, value: e.target.value }
+          })}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          placeholder="New value"
+        />
+      );
+    }
+
+    // For select fields
+    if (selectedField.type === 'select' && selectedField.options) {
+      return (
+        <select
+          value={action.config.value || ''}
+          onChange={(e) => onChange({
+            ...action,
+            config: { ...action.config, value: e.target.value }
+          })}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+        >
+          <option value="">Select value</option>
+          {selectedField.options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    // For checkbox fields
+    if (selectedField.type === 'checkbox') {
+      return (
+        <select
+          value={action.config.value || 'true'}
+          onChange={(e) => onChange({
+            ...action,
+            config: { ...action.config, value: e.target.value }
+          })}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+        >
+          <option value="true">Checked</option>
+          <option value="false">Unchecked</option>
+        </select>
+      );
+    }
+
+    // Default input
+    return (
+      <input
+        type={selectedField.type === 'number' ? 'number' : selectedField.type === 'date' ? 'date' : 'text'}
+        value={action.config.value || ''}
+        onChange={(e) => onChange({
+          ...action,
+          config: { ...action.config, value: e.target.value }
+        })}
+        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+        placeholder="New value"
+      />
+    );
   };
 
   const renderActionConfig = () => {
@@ -45,28 +158,34 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
               value={action.config.field || ''}
               onChange={(e) => onChange({
                 ...action,
-                config: { ...action.config, field: e.target.value }
+                config: { ...action.config, field: e.target.value, value: '' }
               })}
               className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+              disabled={isLoadingFields}
             >
               <option value="">Select field</option>
-              <option value="firstName">First Name</option>
-              <option value="lastName">Last Name</option>
-              <option value="email">Email</option>
-              <option value="phone">Phone</option>
-              <option value="company">Company</option>
-              <option value="position">Position</option>
+              {contactFields.length > 0 && (
+                <>
+                  <optgroup label="Standard Fields">
+                    {contactFields.filter(f => !f.isCustom).map((field) => (
+                      <option key={field.name} value={field.name}>
+                        {field.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {contactFields.some(f => f.isCustom) && (
+                    <optgroup label="Custom Fields">
+                      {contactFields.filter(f => f.isCustom).map((field) => (
+                        <option key={field.name} value={field.name}>
+                          {field.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </>
+              )}
             </select>
-            <input
-              type="text"
-              value={action.config.value || ''}
-              onChange={(e) => onChange({
-                ...action,
-                config: { ...action.config, value: e.target.value }
-              })}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-              placeholder="New value"
-            />
+            {getFieldValue()}
           </div>
         );
 
@@ -74,10 +193,10 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
         return (
           <input
             type="text"
-            value={action.config.tag || ''}
+            value={action.config.tags || ''}
             onChange={(e) => onChange({
               ...action,
-              config: { ...action.config, tag: e.target.value }
+              config: { ...action.config, tags: e.target.value }
             })}
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
             placeholder="Tag name"
@@ -91,41 +210,34 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
               value={action.config.field || ''}
               onChange={(e) => onChange({
                 ...action,
-                config: { ...action.config, field: e.target.value }
+                config: { ...action.config, field: e.target.value, value: '' }
               })}
               className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+              disabled={isLoadingFields}
             >
               <option value="">Select field</option>
-              <option value="name">Deal Name</option>
-              <option value="value">Deal Value</option>
-              <option value="status">Status</option>
+              {dealFields.length > 0 && (
+                <>
+                  <optgroup label="Standard Fields">
+                    {dealFields.filter(f => !f.isCustom).map((field) => (
+                      <option key={field.name} value={field.name}>
+                        {field.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {dealFields.some(f => f.isCustom) && (
+                    <optgroup label="Custom Fields">
+                      {dealFields.filter(f => f.isCustom).map((field) => (
+                        <option key={field.name} value={field.name}>
+                          {field.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </>
+              )}
             </select>
-            {action.config.field === 'status' ? (
-              <select
-                value={action.config.value || ''}
-                onChange={(e) => onChange({
-                  ...action,
-                  config: { ...action.config, value: e.target.value }
-                })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-              >
-                <option value="">Select status</option>
-                <option value="open">Open</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-              </select>
-            ) : (
-              <input
-                type={action.config.field === 'value' ? 'number' : 'text'}
-                value={action.config.value || ''}
-                onChange={(e) => onChange({
-                  ...action,
-                  config: { ...action.config, value: e.target.value }
-                })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-                placeholder="New value"
-              />
-            )}
+            {getFieldValue()}
           </div>
         );
 
@@ -146,6 +258,51 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
               </option>
             ))}
           </select>
+        );
+
+      case 'update_custom_field':
+        const allFields = [...contactFields, ...dealFields].filter(f => f.isCustom);
+        const selectedField = allFields.find(f => f.name === action.config.fieldName);
+        
+        return (
+          <div className="space-y-3">
+            <select
+              value={action.config.entityType || ''}
+              onChange={(e) => onChange({
+                ...action,
+                config: { ...action.config, entityType: e.target.value, fieldName: '', value: '' }
+              })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+            >
+              <option value="">Select entity type</option>
+              <option value="contact">Contact</option>
+              {triggerType.includes('deal') && <option value="deal">Deal</option>}
+            </select>
+            
+            {action.config.entityType && (
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  value={action.config.fieldName || ''}
+                  onChange={(e) => onChange({
+                    ...action,
+                    config: { ...action.config, fieldName: e.target.value.replace('customFields.', ''), value: '' }
+                  })}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+                >
+                  <option value="">Select custom field</option>
+                  {(action.config.entityType === 'contact' ? contactFields : dealFields)
+                    .filter(f => f.isCustom)
+                    .map((field) => (
+                      <option key={field.name} value={field.name}>
+                        {field.label}
+                      </option>
+                    ))}
+                </select>
+                
+                {selectedField && getFieldValue()}
+              </div>
+            )}
+          </div>
         );
 
       default:

@@ -188,6 +188,9 @@ export const automationsAPI = {
   
   unenroll: (id: string, entityType: 'contact' | 'deal', entityId: string) => 
     api.post(`/automations/${id}/unenroll`, { entityType, entityId }),
+  
+  getFields: (entityType: 'contact' | 'deal') => 
+    api.get(`/automations/fields/${entityType}`),
 };
 
 export default api;
