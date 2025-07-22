@@ -115,8 +115,8 @@ export interface AutomationAction {
 }
 
 export interface AutomationStep {
-  id: string;
-  automationId: string;
+  id?: string;
+  automationId?: string;
   stepIndex: number;
   name: string;
   type: 'action' | 'delay' | 'condition' | 'branch';
