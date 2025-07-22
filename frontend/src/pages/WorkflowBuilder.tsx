@@ -103,7 +103,9 @@ const WorkflowBuilder: React.FC = () => {
     }
 
     setSteps([...updatedSteps, newStep]);
-    setExpandedSteps(new Set([...expandedSteps, newStepIndex]));
+    const newExpanded = new Set(expandedSteps);
+    newExpanded.add(newStepIndex);
+    setExpandedSteps(newExpanded);
   };
 
   const handleDeleteStep = (index: number) => {
