@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { CustomField } from '../types';
-import { customFieldsAPI } from '../services/api';
+import { customFieldsAPI, dealCustomFieldsAPI } from '../services/api';
 import { XMarkIcon, PlusIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 interface CustomFieldFormProps {
   field?: CustomField;
   onSubmit: (field: CustomField) => void;
   onCancel: () => void;
+  entityType?: 'contact' | 'deal';
 }
 
-const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCancel }) => {
+const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCancel, entityType = 'contact' }) => {
   const [formData, setFormData] = useState({
     name: field?.name || '',
     label: field?.label || '',
@@ -88,12 +89,14 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
           : undefined,
       };
       
+      const api = entityType === 'deal' ? dealCustomFieldsAPI : customFieldsAPI;
+      
       let result;
       if (field) {
-        const response = await customFieldsAPI.update(field.id, data);
+        const response = await api.update(field.id, data);
         result = response.data.customField;
       } else {
-        const response = await customFieldsAPI.create(data);
+        const response = await api.create(data);
         result = response.data.customField;
       }
       

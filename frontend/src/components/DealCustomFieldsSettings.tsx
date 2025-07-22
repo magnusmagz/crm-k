@@ -117,6 +117,7 @@ const DealCustomFieldsSettings: React.FC = () => {
             <CustomFieldForm
               onSubmit={handleCreate}
               onCancel={() => setShowAddForm(false)}
+              entityType="deal"
             />
           </div>
         </div>
@@ -132,6 +133,7 @@ const DealCustomFieldsSettings: React.FC = () => {
               field={editingField}
               onSubmit={(data) => handleUpdate(editingField.id, data)}
               onCancel={() => setEditingField(null)}
+              entityType="deal"
             />
           </div>
         </div>
