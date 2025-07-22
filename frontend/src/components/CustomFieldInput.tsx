@@ -37,7 +37,6 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
           onChange={handleChange}
           required={field.required}
           className={inputClasses}
-          placeholder={field.placeholder}
         />
       )}
 
@@ -50,7 +49,6 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
           required={field.required}
           rows={3}
           className={inputClasses}
-          placeholder={field.placeholder}
         />
       )}
 
@@ -63,7 +61,6 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
           onChange={handleChange}
           required={field.required}
           className={inputClasses}
-          placeholder={field.placeholder}
         />
       )}
 
@@ -108,7 +105,7 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
             className="h-5 w-5 text-gray-800 focus:ring-gray-800 border-gray-300 rounded"
           />
           <label htmlFor={`custom_${field.name}`} className="ml-2 text-sm text-gray-700">
-            {field.placeholder || 'Check if applicable'}
+            Check if applicable
           </label>
         </div>
       )}
@@ -122,7 +119,7 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
           onChange={handleChange}
           required={field.required}
           className={inputClasses}
-          placeholder={field.placeholder || 'https://example.com'}
+          placeholder="https://example.com"
         />
       )}
 
