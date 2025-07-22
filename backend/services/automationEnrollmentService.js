@@ -206,14 +206,22 @@ class AutomationEnrollmentService {
   }
 
   // Get enrolled entities for an automation
-  async getEnrolledEntities(automationId, status = 'active') {
+  async getEnrolledEntities(automationId, status = null) {
+    const whereClause = {
+      automationId
+    };
+    
+    // Only add status filter if explicitly provided
+    if (status) {
+      whereClause.status = status;
+    }
+    
     const enrollments = await AutomationEnrollment.findAll({
-      where: {
-        automationId,
-        ...(status && { status })
-      },
+      where: whereClause,
       order: [['enrolledAt', 'DESC']]
     });
+    
+    console.log(`Found ${enrollments.length} enrollments for automation ${automationId}`);
 
     // Fetch the actual entities
     const entities = [];
@@ -231,13 +239,16 @@ class AutomationEnrollmentService {
       
       if (entity) {
         entities.push({
-          enrollment,
-          entity,
+          enrollment: enrollment.toJSON(),
+          entity: entity.toJSON(),
           type: enrollment.entityType
         });
+      } else {
+        console.log(`Entity not found: ${enrollment.entityType} ${enrollment.entityId}`);
       }
     }
     
+    console.log(`Returning ${entities.length} entities with data`);
     return entities;
   }
 

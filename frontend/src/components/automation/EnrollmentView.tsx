@@ -24,8 +24,9 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
     setIsLoading(true);
     try {
       const response = await automationsAPI.getEnrollments(automationId);
+      console.log('Enrollment response:', response.data);
       setSummary(response.data.summary);
-      setEnrolledEntities(response.data.enrolledEntities);
+      setEnrolledEntities(response.data.enrolledEntities || []);
     } catch (error) {
       console.error('Failed to fetch enrollments:', error);
     } finally {
