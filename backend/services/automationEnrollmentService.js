@@ -186,7 +186,7 @@ class AutomationEnrollmentService {
       case 'not_equals':
         return fieldValue != targetValue;
       case 'contains':
-        return fieldValue && fieldValue.toString().includes(targetValue);
+        return fieldValue ? fieldValue.toString().toLowerCase().includes(targetValue.toLowerCase()) : false;
       case 'not_contains':
         return !fieldValue || !fieldValue.toString().includes(targetValue);
       case 'is_empty':
@@ -208,7 +208,19 @@ class AutomationEnrollmentService {
 
   // Get field value with dot notation support
   getFieldValue(field, entity) {
-    const parts = field.split('.');
+    // Handle field names that don't have entity prefix
+    // If field is just "email" or "firstName", access it directly from entity
+    let fieldPath = field;
+    
+    // If the field doesn't contain a dot and isn't a custom field path,
+    // it's a direct entity property
+    if (!field.includes('.') || field.startsWith('customFields.')) {
+      // For customFields.something, we still need to traverse
+      // For simple fields like 'email', we can access directly
+      fieldPath = field;
+    }
+    
+    const parts = fieldPath.split('.');
     let value = entity;
 
     for (const part of parts) {

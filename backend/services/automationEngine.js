@@ -129,6 +129,17 @@ class AutomationEngine {
   async evaluateCondition(condition, data) {
     const { field, operator, value } = condition;
     const fieldValue = this.getFieldValue(field, data);
+    
+    // Debug logging
+    if (process.env.AUTOMATION_DEBUG === 'true') {
+      console.log('[AutomationEngine] Evaluating condition:', {
+        field,
+        operator,
+        value,
+        fieldValue,
+        data: JSON.stringify(data, null, 2)
+      });
+    }
 
     switch (operator) {
       case 'equals':
