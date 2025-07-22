@@ -389,7 +389,12 @@ router.get('/:id/enrollments', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Get enrollments error:', error);
-    res.status(500).json({ error: 'Failed to get enrollments' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Failed to get enrollments',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

@@ -264,17 +264,7 @@ class AutomationEnrollmentService {
     const recentEnrollments = await AutomationEnrollment.findAll({
       where: { automationId },
       order: [['enrolledAt', 'DESC']],
-      limit: 10,
-      include: [{
-        model: Contact,
-        as: 'contact',
-        required: false
-      }, {
-        model: Deal,
-        as: 'deal',
-        required: false,
-        include: ['Contact']
-      }]
+      limit: 10
     });
 
     return {
