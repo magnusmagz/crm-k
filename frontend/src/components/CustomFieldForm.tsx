@@ -139,7 +139,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 value={formData.label}
                 onChange={handleChange}
                 placeholder="e.g., Company Size"
-                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
                   errors.label ? 'border-red-300' : 'border-gray-300'
                 } focus:border-gray-800 focus:ring-gray-800`}
               />
@@ -158,7 +158,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 onChange={handleChange}
                 disabled={!!field}
                 placeholder="e.g., company_size"
-                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
                   errors.name ? 'border-red-300' : 'border-gray-300'
                 } focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
               />
@@ -230,7 +230,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
-                        className="flex-1 px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                       {formData.options.length > 1 && (
                         <button
