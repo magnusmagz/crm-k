@@ -3,7 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { Automation } from '../types';
 import { automationsAPI } from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { PlusIcon, CogIcon, PlayIcon, PauseIcon, TrashIcon, ClockIcon, ChartBarIcon, UserIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { 
+  PlusIcon, 
+  CogIcon, 
+  PlayIcon, 
+  PauseIcon, 
+  TrashIcon, 
+  ClockIcon, 
+  ChartBarIcon, 
+  UserIcon, 
+  ChevronDownIcon, 
+  ChevronUpIcon,
+  BoltIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  CurrencyDollarIcon
+} from '@heroicons/react/24/outline';
+import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
@@ -144,151 +161,176 @@ const Automations: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {automations.map((automation) => (
-                <li key={automation.id}>
-                  <div className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center">
-                          <div className={`flex-shrink-0 h-2 w-2 rounded-full ${
-                            automation.isActive ? 'bg-green-400' : 'bg-gray-400'
+          <div className="space-y-4">
+            {automations.map((automation) => (
+              <div key={automation.id} className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+                <div className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center">
+                        <div className={`flex-shrink-0 p-2 rounded-lg ${
+                          automation.isActive ? 'bg-green-100' : 'bg-gray-100'
+                        }`}>
+                          <BoltIcon className={`h-5 w-5 ${
+                            automation.isActive ? 'text-green-600' : 'text-gray-400'
                           }`} />
-                          <p className="ml-3 text-sm font-medium text-gray-900 truncate">
+                        </div>
+                        <div className="ml-4">
+                          <h3 className="text-lg font-medium text-gray-900">
                             {automation.name}
-                          </p>
-                        </div>
-                        <div className="mt-2 flex items-center text-sm text-gray-500">
-                          <span className="truncate">
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-500">
                             When {getTriggerLabel(automation.trigger.type)} → {getActionsSummary(automation.actions)}
-                          </span>
-                        </div>
-                        {automation.description && (
-                          <p className="mt-1 text-sm text-gray-500 truncate">
-                            {automation.description}
                           </p>
-                        )}
-                        <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
-                          {automation.activeEnrollments > 0 && (
-                            <button
-                              onClick={() => toggleEnrollmentView(automation.id)}
-                              className="flex items-center text-blue-600 hover:text-blue-700"
-                            >
-                              <UserIcon className="mr-1 h-3 w-3" />
-                              {automation.activeEnrollments} enrolled
-                              {expandedAutomations.has(automation.id) ? (
-                                <ChevronUpIcon className="ml-1 h-3 w-3" />
-                              ) : (
-                                <ChevronDownIcon className="ml-1 h-3 w-3" />
-                              )}
-                            </button>
-                          )}
-                          <span className="flex items-center">
-                            <ChartBarIcon className="mr-1 h-3 w-3" />
-                            {automation.totalExecutions || 0} runs
-                          </span>
-                          <span className="flex items-center">
-                            <span className="text-green-600">
-                              {automation.successfulExecutions || 0} successful
-                            </span>
-                          </span>
-                          {automation.completedEnrollments > 0 && (
-                            <span className="flex items-center text-gray-500">
-                              {automation.completedEnrollments} completed
-                            </span>
-                          )}
-                          {automation.lastExecutedAt && (
-                            <span className="flex items-center">
-                              <ClockIcon className="mr-1 h-3 w-3" />
-                              Last: {new Date(automation.lastExecutedAt).toLocaleDateString()}
-                            </span>
-                          )}
                         </div>
                       </div>
-                      <div className="ml-4 flex items-center gap-2">
+                      {automation.description && (
+                        <p className="mt-2 text-sm text-gray-600">
+                          {automation.description}
+                        </p>
+                      )}
+                      
+                      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <button
-                          onClick={() => handleToggle(automation)}
-                          className={`p-2 rounded-md ${
-                            automation.isActive
-                              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                          }`}
-                          title={automation.isActive ? 'Pause automation' : 'Activate automation'}
+                          onClick={() => toggleEnrollmentView(automation.id)}
+                          className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                         >
-                          {automation.isActive ? (
-                            <PauseIcon className="h-5 w-5" />
-                          ) : (
-                            <PlayIcon className="h-5 w-5" />
+                          <UserIcon className="h-5 w-5 text-blue-600 mr-2" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-gray-900">{automation.activeEnrollments || 0}</p>
+                            <p className="text-xs text-gray-500">enrolled</p>
+                          </div>
+                          {automation.activeEnrollments > 0 && (
+                            expandedAutomations.has(automation.id) ? (
+                              <ChevronUpIcon className="ml-2 h-4 w-4 text-gray-400" />
+                            ) : (
+                              <ChevronDownIcon className="ml-2 h-4 w-4 text-gray-400" />
+                            )
                           )}
                         </button>
-                        <button
-                          onClick={() => navigate(`/automations/${automation.id}`)}
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
-                          title="Edit automation"
-                        >
-                          <CogIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(automation)}
-                          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md"
-                          title="Delete automation"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
+                        
+                        <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                          <ChartBarIcon className="h-5 w-5 text-gray-600 mr-2" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-gray-900">{automation.totalExecutions || 0}</p>
+                            <p className="text-xs text-gray-500">runs</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center p-3 bg-green-50 rounded-lg">
+                          <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-gray-900">{automation.successfulExecutions || 0}</p>
+                            <p className="text-xs text-gray-500">successful</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center p-3 bg-purple-50 rounded-lg">
+                          <CheckCircleIconSolid className="h-5 w-5 text-purple-600 mr-2" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-gray-900">{automation.completedEnrollments || 0}</p>
+                            <p className="text-xs text-gray-500">completed</p>
+                          </div>
+                        </div>
                       </div>
+                      
+                      {automation.lastExecutedAt && (
+                        <div className="mt-3 flex items-center text-xs text-gray-500">
+                          <ClockIcon className="mr-1 h-4 w-4" />
+                          Last run: {new Date(automation.lastExecutedAt).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleToggle(automation)}
+                        className={`p-2 rounded-lg border transition-all ${
+                          automation.isActive
+                            ? 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'
+                            : 'border-gray-200 bg-gray-50 text-gray-400 hover:bg-gray-100'
+                        }`}
+                        title={automation.isActive ? 'Pause automation' : 'Activate automation'}
+                      >
+                        {automation.isActive ? (
+                          <PauseIcon className="h-5 w-5" />
+                        ) : (
+                          <PlayIcon className="h-5 w-5" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => navigate(`/automations/${automation.id}`)}
+                        className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-all"
+                        title="Edit automation"
+                      >
+                        <CogIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(automation)}
+                        className="p-2 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 transition-all"
+                        title="Delete automation"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
                     </div>
                   </div>
 
                   {/* Enrolled Entities */}
                   {expandedAutomations.has(automation.id) && enrolledEntities[automation.id] && (
-                    <div className="mt-4 border-t pt-4">
+                    <div className="border-t bg-gray-50 px-6 py-4">
                       <h4 className="text-sm font-medium text-gray-900 mb-3">Enrolled Entities</h4>
                       {enrolledEntities[automation.id].length === 0 ? (
-                        <p className="text-sm text-gray-500">No entities currently enrolled</p>
+                        <p className="text-sm text-gray-500 italic">No entities currently enrolled</p>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {enrolledEntities[automation.id].slice(0, 5).map((item: any) => (
-                            <div key={item.enrollment.id} className="flex items-center justify-between text-sm">
+                            <div key={item.enrollment.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-3 shadow-sm">
                               <div className="flex items-center">
-                                {item.type === 'contact' ? (
-                                  <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
-                                ) : (
-                                  <span className="text-gray-400 mr-2">$</span>
-                                )}
-                                <span className="font-medium text-gray-900">
-                                  {item.type === 'contact' 
-                                    ? `${item.entity.firstName} ${item.entity.lastName}`
-                                    : item.entity.name}
-                                </span>
-                                {item.type === 'contact' && item.entity.email && (
-                                  <span className="ml-2 text-gray-500">({item.entity.email})</span>
-                                )}
-                                {item.type === 'deal' && (
-                                  <span className="ml-2 text-gray-500">(${item.entity.value.toLocaleString()})</span>
-                                )}
+                                <div className={`p-2 rounded-lg ${
+                                  item.type === 'contact' ? 'bg-blue-100' : 'bg-green-100'
+                                }`}>
+                                  {item.type === 'contact' ? (
+                                    <UserIcon className="h-4 w-4 text-blue-600" />
+                                  ) : (
+                                    <CurrencyDollarIcon className="h-4 w-4 text-green-600" />
+                                  )}
+                                </div>
+                                <div className="ml-3">
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {item.type === 'contact' 
+                                      ? `${item.entity.firstName} ${item.entity.lastName}`
+                                      : item.entity.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {item.type === 'contact' && item.entity.email}
+                                    {item.type === 'deal' && `$${item.entity.value.toLocaleString()}`}
+                                  </p>
+                                </div>
                               </div>
-                              <span className="text-xs text-gray-400">
-                                Step {item.enrollment.currentStepIndex + 1}
-                              </span>
+                              <div className="flex items-center">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  Step {item.enrollment.currentStepIndex + 1}
+                                </span>
+                              </div>
                             </div>
                           ))}
                           {enrolledEntities[automation.id].length > 5 && (
-                            <button
-                              onClick={() => navigate(`/automations/${automation.id}`)}
-                              className="text-sm text-blue-600 hover:text-blue-700"
-                            >
-                              View all {enrolledEntities[automation.id].length} enrolled entities →
-                            </button>
+                            <div className="pt-2">
+                              <button
+                                onClick={() => navigate(`/automations/${automation.id}`)}
+                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                              >
+                                View all {enrolledEntities[automation.id].length} enrolled entities →
+                              </button>
+                            </div>
                           )}
                         </div>
                       )}
                     </div>
                   )}
-                </li>
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
         )}
       </div>
     </div>
