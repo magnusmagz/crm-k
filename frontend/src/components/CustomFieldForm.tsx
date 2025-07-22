@@ -139,9 +139,9 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 value={formData.label}
                 onChange={handleChange}
                 placeholder="e.g., Company Size"
-                className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.label ? 'border-red-300' : 'border-gray-300'
-                } focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800`}
+                } focus:border-gray-800 focus:ring-gray-800`}
               />
               {errors.label && <p className="mt-1 text-sm text-red-600">{errors.label}</p>}
             </div>
@@ -158,9 +158,9 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 onChange={handleChange}
                 disabled={!!field}
                 placeholder="e.g., company_size"
-                className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm ${
                   errors.name ? 'border-red-300' : 'border-gray-300'
-                } focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
+                } focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               {!field && (
@@ -180,7 +180,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 value={formData.type}
                 onChange={handleChange}
                 disabled={!!field}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800 sm:text-sm disabled:bg-gray-100"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm disabled:bg-gray-100"
               >
                 <option value="text">Text</option>
                 <option value="textarea">Text Area</option>
@@ -230,7 +230,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
-                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="flex-1 px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
                       />
                       {formData.options.length > 1 && (
                         <button
@@ -246,7 +246,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                   <button
                     type="button"
                     onClick={addOption}
-                    className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
                   >
                     <PlusIcon className="-ml-0.5 mr-2 h-4 w-4" />
                     Add Option
@@ -260,14 +260,14 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
             <button
               type="button"
               onClick={onCancel}
-              className="text-sm font-semibold leading-6 text-gray-900"
+              className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-gray-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Saving...' : field ? 'Update' : 'Create'}
             </button>
