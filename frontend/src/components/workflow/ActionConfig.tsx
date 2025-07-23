@@ -83,10 +83,13 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
       case 'update_contact_field':
       case 'update_deal_field':
         return (
-          <div className="space-y-3">
+          <>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Field</label>
+              <label htmlFor={`field-select-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+                Field to Update
+              </label>
               <select
+                id={`field-select-${Math.random()}`}
                 value={action.config?.field || ''}
                 onChange={(e) => handleConfigChange('field', e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -101,25 +104,31 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
             </div>
             {action.config?.field && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Value</label>
+                <label htmlFor={`field-value-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+                  New Value
+                </label>
                 <input
                   type="text"
+                  id={`field-value-${Math.random()}`}
                   value={action.config?.value || ''}
                   onChange={(e) => handleConfigChange('value', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Enter value"
+                  placeholder="Enter new value"
                 />
               </div>
             )}
-          </div>
+          </>
         );
 
       case 'add_contact_tag':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700">Tag</label>
+            <label htmlFor={`tag-input-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+              Tag to Add
+            </label>
             <input
               type="text"
+              id={`tag-input-${Math.random()}`}
               value={action.config?.tag || ''}
               onChange={(e) => handleConfigChange('tag', e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -131,8 +140,11 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
       case 'move_deal_to_stage':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700">Stage</label>
+            <label htmlFor={`stage-select-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+              Move to Stage
+            </label>
             <select
+              id={`stage-select-${Math.random()}`}
               value={action.config?.stageId || ''}
               onChange={(e) => handleConfigChange('stageId', e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -150,10 +162,13 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
       case 'update_custom_field':
         const customFields = fields.filter(f => f.isCustom);
         return (
-          <div className="space-y-3">
+          <>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Custom Field</label>
+              <label htmlFor={`custom-field-select-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+                Custom Field
+              </label>
               <select
+                id={`custom-field-select-${Math.random()}`}
                 value={action.config?.field || ''}
                 onChange={(e) => handleConfigChange('field', e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -168,17 +183,20 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
             </div>
             {action.config?.field && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Value</label>
+                <label htmlFor={`custom-field-value-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+                  New Value
+                </label>
                 <input
                   type="text"
+                  id={`custom-field-value-${Math.random()}`}
                   value={action.config?.value || ''}
                   onChange={(e) => handleConfigChange('value', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Enter value"
+                  placeholder="Enter new value"
                 />
               </div>
             )}
-          </div>
+          </>
         );
 
       default:
@@ -187,33 +205,39 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700">Action Type</label>
-            <select
-              value={action.type || ''}
-              onChange={(e) => handleTypeChange(e.target.value as AutomationAction['type'])}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              disabled={isLoading}
-            >
-              <option value="">Select an action</option>
-              {getActionTypes().map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+    <div className="bg-gray-50 rounded-lg border border-gray-200">
+      <div className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-4">
+            <div>
+              <label htmlFor={`action-type-${Math.random()}`} className="block text-sm font-medium text-gray-700">
+                Action Type
+              </label>
+              <select
+                id={`action-type-${Math.random()}`}
+                value={action.type || ''}
+                onChange={(e) => handleTypeChange(e.target.value as AutomationAction['type'])}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                disabled={isLoading}
+              >
+                <option value="">Select an action</option>
+                {getActionTypes().map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {renderActionConfig()}
           </div>
-          {renderActionConfig()}
+          <button
+            onClick={onDelete}
+            className="ml-4 p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
+            title="Remove action"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
         </div>
-        <button
-          onClick={onDelete}
-          className="ml-3 text-red-600 hover:text-red-800"
-        >
-          <TrashIcon className="h-5 w-5" />
-        </button>
       </div>
     </div>
   );

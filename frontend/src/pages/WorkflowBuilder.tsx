@@ -344,42 +344,53 @@ const WorkflowBuilder: React.FC = () => {
       )}
 
       {/* Workflow Details */}
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Workflow Details</h2>
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              value={automation.name || ''}
-              onChange={(e) => setAutomation({ ...automation, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              placeholder="e.g., Welcome Email Sequence"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              value={automation.description || ''}
-              onChange={(e) => setAutomation({ ...automation, description: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              rows={2}
-              placeholder="Describe what this workflow does..."
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Trigger</label>
-            <select
-              value={automation.trigger?.type || 'contact_created'}
-              onChange={(e) => setAutomation({ ...automation, trigger: { type: e.target.value as any } })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-              <option value="contact_created">Contact Created</option>
-              <option value="contact_updated">Contact Updated</option>
-              <option value="deal_created">Deal Created</option>
-              <option value="deal_updated">Deal Updated</option>
-              <option value="deal_stage_changed">Deal Stage Changed</option>
-            </select>
+      <div className="bg-white shadow sm:rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Workflow Details</h2>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="workflow-name" className="block text-sm font-medium text-gray-700">
+                Workflow Name
+              </label>
+              <input
+                type="text"
+                id="workflow-name"
+                value={automation.name || ''}
+                onChange={(e) => setAutomation({ ...automation, name: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="e.g., Welcome Email Sequence"
+              />
+            </div>
+            <div>
+              <label htmlFor="workflow-description" className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                id="workflow-description"
+                value={automation.description || ''}
+                onChange={(e) => setAutomation({ ...automation, description: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                rows={3}
+                placeholder="Describe what this workflow does..."
+              />
+            </div>
+            <div>
+              <label htmlFor="workflow-trigger" className="block text-sm font-medium text-gray-700">
+                Trigger
+              </label>
+              <select
+                id="workflow-trigger"
+                value={automation.trigger?.type || 'contact_created'}
+                onChange={(e) => setAutomation({ ...automation, trigger: { type: e.target.value as any } })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              >
+                <option value="contact_created">When Contact is Created</option>
+                <option value="contact_updated">When Contact is Updated</option>
+                <option value="deal_created">When Deal is Created</option>
+                <option value="deal_updated">When Deal is Updated</option>
+                <option value="deal_stage_changed">When Deal Stage Changes</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -429,20 +440,25 @@ const WorkflowBuilder: React.FC = () => {
               </div>
 
               {expandedSteps.has(index) && (
-                <div className="p-4 border-t">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Step Name</label>
-                    <input
-                      type="text"
-                      value={step.name || ''}
-                      onChange={(e) => {
-                        const updated = [...steps];
-                        updated[index] = { ...step, name: e.target.value };
-                        setSteps(updated);
-                      }}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    />
-                  </div>
+                <div className="px-4 py-5 border-t border-gray-200">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor={`step-name-${index}`} className="block text-sm font-medium text-gray-700">
+                        Step Name
+                      </label>
+                      <input
+                        type="text"
+                        id={`step-name-${index}`}
+                        value={step.name || ''}
+                        onChange={(e) => {
+                          const updated = [...steps];
+                          updated[index] = { ...step, name: e.target.value };
+                          setSteps(updated);
+                        }}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Enter step name"
+                      />
+                    </div>
 
                   {/* Step-specific configuration */}
                   {step.type === 'action' && (
@@ -488,44 +504,60 @@ const WorkflowBuilder: React.FC = () => {
                   )}
 
                   {step.type === 'delay' && (
-                    <div className="flex gap-2 items-center">
-                      <label className="block text-sm font-medium text-gray-700">Wait</label>
-                      <input
-                        type="number"
-                        value={step.delayConfig?.value || 1}
-                        onChange={(e) => {
-                          const updated = [...steps];
-                          updated[index] = {
-                            ...step,
-                            delayConfig: {
-                              ...step.delayConfig!,
-                              value: parseInt(e.target.value) || 1,
-                            },
-                          };
-                          setSteps(updated);
-                        }}
-                        className="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        min="1"
-                      />
-                      <select
-                        value={step.delayConfig?.unit || 'hours'}
-                        onChange={(e) => {
-                          const updated = [...steps];
-                          updated[index] = {
-                            ...step,
-                            delayConfig: {
-                              ...step.delayConfig!,
-                              unit: e.target.value as any,
-                            },
-                          };
-                          setSteps(updated);
-                        }}
-                        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      >
-                        <option value="minutes">Minutes</option>
-                        <option value="hours">Hours</option>
-                        <option value="days">Days</option>
-                      </select>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Delay Duration
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label htmlFor={`delay-value-${index}`} className="block text-xs text-gray-500 mb-1">
+                            Amount
+                          </label>
+                          <input
+                            type="number"
+                            id={`delay-value-${index}`}
+                            value={step.delayConfig?.value || 1}
+                            onChange={(e) => {
+                              const updated = [...steps];
+                              updated[index] = {
+                                ...step,
+                                delayConfig: {
+                                  ...step.delayConfig!,
+                                  value: parseInt(e.target.value) || 1,
+                                },
+                              };
+                              setSteps(updated);
+                            }}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            min="1"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor={`delay-unit-${index}`} className="block text-xs text-gray-500 mb-1">
+                            Unit
+                          </label>
+                          <select
+                            id={`delay-unit-${index}`}
+                            value={step.delayConfig?.unit || 'hours'}
+                            onChange={(e) => {
+                              const updated = [...steps];
+                              updated[index] = {
+                                ...step,
+                                delayConfig: {
+                                  ...step.delayConfig!,
+                                  unit: e.target.value as any,
+                                },
+                              };
+                              setSteps(updated);
+                            }}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          >
+                            <option value="minutes">Minutes</option>
+                            <option value="hours">Hours</option>
+                            <option value="days">Days</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -552,6 +584,7 @@ const WorkflowBuilder: React.FC = () => {
                       </button>
                     </div>
                   )}
+                  </div>
                 </div>
               )}
             </div>
