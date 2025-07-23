@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Contact, CustomField } from '../types';
 import { contactsAPI, customFieldsAPI } from '../services/api';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { FormField, FormSelect, FormTextarea } from './ui/FormField';
 
 interface ContactFormProps {
   contact?: Contact;
@@ -144,9 +145,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               rows={3}
               value={value}
               onChange={handleChange}
-              className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
+              className={`mt-1 block w-full px-4 py-3 border ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } focus:border-gray-800 focus:ring-gray-800`}
+              } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -163,9 +164,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               name={`custom_${field.name}`}
               value={value}
               onChange={handleChange}
-              className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
+              className={`mt-1 block w-full px-4 py-3 border ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } focus:border-gray-800 focus:ring-gray-800`}
+              } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm`}
             >
               <option value="">Select...</option>
               {field.options?.map(option => (
@@ -210,9 +211,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : field.type === 'url' ? 'url' : 'text'}
               value={value}
               onChange={handleChange}
-              className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
+              className={`mt-1 block w-full px-4 py-3 border ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } focus:border-gray-800 focus:ring-gray-800`}
+              } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -242,98 +243,60 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
           <div className="bg-gray-50 px-6 py-5 rounded-lg">
             <h4 className="text-sm font-medium text-gray-900 mb-4">Basic Information</h4>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                    errors.firstName ? 'border-red-300' : 'border-gray-300'
-                  } focus:border-gray-800 focus:ring-gray-800`}
-                />
-                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
-              </div>
+              <FormField
+                label="First Name"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                error={errors.firstName}
+                required
+              />
               
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                    errors.lastName ? 'border-red-300' : 'border-gray-300'
-                  } focus:border-gray-800 focus:ring-gray-800`}
-                />
-                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
-              </div>
+              <FormField
+                label="Last Name"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                error={errors.lastName}
+                required
+              />
               
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } focus:border-gray-800 focus:ring-gray-800`}
-                />
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              </div>
+              <FormField
+                label="Email"
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                error={errors.email}
+              />
               
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
-                />
-              </div>
+              <FormField
+                label="Phone"
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+              />
               
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-                  Company
-                </label>
-                <input
-                  type="text"
-                  name="company"
-                  id="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
-                />
-              </div>
+              <FormField
+                label="Company"
+                id="company"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+              />
               
-              <div>
-                <label htmlFor="position" className="block text-sm font-medium text-gray-700">
-                  Position
-                </label>
-                <input
-                  type="text"
-                  name="position"
-                  id="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
-                />
-              </div>
+              <FormField
+                label="Position"
+                id="position"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+              />
             </div>
           </div>
           
@@ -341,34 +304,23 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
           <div className="bg-gray-50 px-6 py-5 rounded-lg">
             <h4 className="text-sm font-medium text-gray-900 mb-4">Additional Information</h4>
             <div className="space-y-6">
-              <div>
-                <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  name="tags"
-                  id="tags"
-                  value={formData.tags}
-                  onChange={handleChange}
-                  placeholder="customer, vip, lead"
-                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
-                />
-              </div>
+              <FormField
+                label="Tags (comma-separated)"
+                id="tags"
+                name="tags"
+                value={formData.tags}
+                onChange={handleChange}
+                placeholder="customer, vip, lead"
+              />
               
-              <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                  Notes
-                </label>
-                <textarea
-                  name="notes"
-                  id="notes"
-                  rows={3}
-                  value={formData.notes}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800"
-                />
-              </div>
+              <FormTextarea
+                label="Notes"
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                rows={3}
+              />
             </div>
           </div>
           

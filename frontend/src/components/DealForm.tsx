@@ -3,6 +3,7 @@ import { Deal, Stage, Contact, CustomField } from '../types';
 import { contactsAPI, dealCustomFieldsAPI } from '../services/api';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CustomFieldInput from './CustomFieldInput';
+import { FormField, FormSelect, FormTextarea } from './ui/FormField';
 
 interface DealFormProps {
   deal?: Deal | null;
@@ -137,22 +138,15 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Deal Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm ${
-              errors.name ? 'border-red-300' : 'border-gray-300'
-            } focus:ring-gray-800 focus:border-gray-800`}
-          />
-          {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-        </div>
+        <FormField
+          label="Deal Name"
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          error={errors.name}
+          required
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -171,104 +165,78 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
                 onChange={handleChange}
                 min="0"
                 step="0.01"
-                className={`block w-full pl-7 pr-3 py-3 rounded-md ${
+                className={`block w-full pl-7 pr-3 py-3 border ${
                   errors.value ? 'border-red-300' : 'border-gray-300'
-                } focus:ring-gray-800 focus:border-gray-800`}
+                } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm`}
               />
             </div>
             {errors.value && <p className="mt-1 text-sm text-red-600">{errors.value}</p>}
           </div>
 
-          <div>
-            <label htmlFor="stageId" className="block text-sm font-medium text-gray-700">
-              Stage <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="stageId"
-              name="stageId"
-              value={formData.stageId}
-              onChange={handleChange}
-              className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm ${
-                errors.stageId ? 'border-red-300' : 'border-gray-300'
-              } focus:ring-gray-800 focus:border-gray-800`}
-            >
-              {stages.map(stage => (
-                <option key={stage.id} value={stage.id}>
-                  {stage.name}
-                </option>
-              ))}
-            </select>
-            {errors.stageId && <p className="mt-1 text-sm text-red-600">{errors.stageId}</p>}
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="contactId" className="block text-sm font-medium text-gray-700">
-            Associated Contact
-          </label>
-          <select
-            id="contactId"
-            name="contactId"
-            value={formData.contactId}
+          <FormSelect
+            label="Stage"
+            id="stageId"
+            name="stageId"
+            value={formData.stageId}
             onChange={handleChange}
-            className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
+            error={errors.stageId}
+            required
           >
-            <option value="">No contact selected</option>
-            {contacts.map(contact => (
-              <option key={contact.id} value={contact.id}>
-                {contact.firstName} {contact.lastName}
-                {contact.company && ` - ${contact.company}`}
+            {stages.map(stage => (
+              <option key={stage.id} value={stage.id}>
+                {stage.name}
               </option>
             ))}
-          </select>
+          </FormSelect>
         </div>
 
-        <div>
-          <label htmlFor="expectedCloseDate" className="block text-sm font-medium text-gray-700">
-            Expected Close Date
-          </label>
-          <input
-            type="date"
-            id="expectedCloseDate"
-            name="expectedCloseDate"
-            value={formData.expectedCloseDate}
-            onChange={handleChange}
-            className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
-          />
-        </div>
+        <FormSelect
+          label="Associated Contact"
+          id="contactId"
+          name="contactId"
+          value={formData.contactId}
+          onChange={handleChange}
+        >
+          <option value="">No contact selected</option>
+          {contacts.map(contact => (
+            <option key={contact.id} value={contact.id}>
+              {contact.firstName} {contact.lastName}
+              {contact.company && ` - ${contact.company}`}
+            </option>
+          ))}
+        </FormSelect>
+
+        <FormField
+          label="Expected Close Date"
+          id="expectedCloseDate"
+          name="expectedCloseDate"
+          type="date"
+          value={formData.expectedCloseDate}
+          onChange={handleChange}
+        />
 
         {deal && (
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-              Status
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
-            >
-              <option value="open">Open</option>
-              <option value="won">Won</option>
-              <option value="lost">Lost</option>
-            </select>
-          </div>
+          <FormSelect
+            label="Status"
+            id="status"
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+          >
+            <option value="open">Open</option>
+            <option value="won">Won</option>
+            <option value="lost">Lost</option>
+          </FormSelect>
         )}
 
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-            Notes
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows={3}
-            value={formData.notes}
-            onChange={handleChange}
-            className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
-          />
-        </div>
+        <FormTextarea
+          label="Notes"
+          id="notes"
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
+          rows={3}
+        />
 
         {/* Custom Fields */}
         {customFields.length > 0 && (

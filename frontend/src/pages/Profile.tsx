@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid';
 import { PhotoIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { FormField } from '../components/ui/FormField';
 
 const Profile: React.FC = () => {
   const { profile, updateProfile } = useAuth();
@@ -261,7 +262,7 @@ const Profile: React.FC = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -276,7 +277,7 @@ const Profile: React.FC = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -290,7 +291,7 @@ const Profile: React.FC = () => {
                         id="companyName"
                         value={formData.companyName}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -304,7 +305,7 @@ const Profile: React.FC = () => {
                         id="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -318,7 +319,7 @@ const Profile: React.FC = () => {
                         id="website"
                         value={formData.website}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -332,7 +333,7 @@ const Profile: React.FC = () => {
                         id="address.street"
                         value={formData.address.street}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -346,7 +347,7 @@ const Profile: React.FC = () => {
                         id="address.city"
                         value={formData.address.city}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -360,7 +361,7 @@ const Profile: React.FC = () => {
                         id="address.state"
                         value={formData.address.state}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
 
@@ -374,7 +375,7 @@ const Profile: React.FC = () => {
                         id="address.zipCode"
                         value={formData.address.zipCode}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                     </div>
                   </div>
@@ -505,7 +506,7 @@ const Profile: React.FC = () => {
                           value={passwordData.currentPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                         />
                       </div>
 
@@ -520,7 +521,7 @@ const Profile: React.FC = () => {
                           value={passwordData.newPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                         />
                       </div>
 
@@ -535,7 +536,7 @@ const Profile: React.FC = () => {
                           value={passwordData.confirmPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                         />
                       </div>
                     </div>

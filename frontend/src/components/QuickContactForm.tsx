@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { FormField } from './ui/FormField';
 
 interface QuickContactFormProps {
   onClose: () => void;
@@ -50,91 +51,57 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-            First Name *
-          </label>
-          <input
-            type="text"
-            id="firstName"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-            Last Name *
-          </label>
-          <input
-            type="text"
-            id="lastName"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-            required
-          />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
+        <FormField
+          label="First Name"
+          id="firstName"
+          name="firstName"
+          value={formData.firstName}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          required
+        />
+        <FormField
+          label="Last Name"
+          id="lastName"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          required
         />
       </div>
 
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-          Phone
-        </label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-        />
-      </div>
+      <FormField
+        label="Email"
+        id="email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+      />
 
-      <div>
-        <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-          Company
-        </label>
-        <input
-          type="text"
-          id="company"
-          name="company"
-          value={formData.company}
-          onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-        />
-      </div>
+      <FormField
+        label="Phone"
+        id="phone"
+        name="phone"
+        type="tel"
+        value={formData.phone}
+        onChange={handleChange}
+      />
 
-      <div>
-        <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
-          Position
-        </label>
-        <input
-          type="text"
-          id="position"
-          name="position"
-          value={formData.position}
-          onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-        />
-      </div>
+      <FormField
+        label="Company"
+        id="company"
+        name="company"
+        value={formData.company}
+        onChange={handleChange}
+      />
+
+      <FormField
+        label="Position"
+        id="position"
+        name="position"
+        value={formData.position}
+        onChange={handleChange}
+      />
 
       <div className="flex gap-3 pt-4">
         <button

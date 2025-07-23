@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CustomField } from '../types';
 import { customFieldsAPI, dealCustomFieldsAPI } from '../services/api';
 import { XMarkIcon, PlusIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { FormField, FormSelect } from './ui/FormField';
 
 interface CustomFieldFormProps {
   field?: CustomField;
@@ -131,41 +132,29 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
         
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="label" className="block text-sm font-medium text-gray-700">
-                Field Label <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="label"
-                id="label"
-                value={formData.label}
-                onChange={handleChange}
-                placeholder="e.g., Company Size"
-                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                  errors.label ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800`}
-              />
-              {errors.label && <p className="mt-1 text-sm text-red-600">{errors.label}</p>}
-            </div>
+            <FormField
+              label="Field Label"
+              id="label"
+              name="label"
+              value={formData.label}
+              onChange={handleChange}
+              placeholder="e.g., Company Size"
+              error={errors.label}
+              required
+            />
             
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Field Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
+              <FormField
+                label="Field Name"
                 id="name"
+                name="name"
                 value={formData.name}
                 onChange={handleChange}
                 disabled={!!field}
                 placeholder="e.g., company_size"
-                className={`mt-1 block w-full px-4 py-3 border rounded-md shadow-sm sm:text-sm ${
-                  errors.name ? 'border-red-300' : 'border-gray-300'
-                } focus:border-gray-800 focus:ring-gray-800 disabled:bg-gray-100`}
+                error={errors.name}
+                required
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               {!field && (
                 <p className="mt-1 text-xs text-gray-500">
                   Used internally. Cannot be changed after creation.
@@ -174,16 +163,13 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
             </div>
             
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                Field Type
-              </label>
-              <select
-                name="type"
+              <FormSelect
+                label="Field Type"
                 id="type"
+                name="type"
                 value={formData.type}
                 onChange={handleChange}
                 disabled={!!field}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm disabled:bg-gray-100"
               >
                 <option value="text">Text</option>
                 <option value="textarea">Text Area</option>
@@ -192,7 +178,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 <option value="select">Dropdown</option>
                 <option value="checkbox">Checkbox</option>
                 <option value="url">URL</option>
-              </select>
+              </FormSelect>
               {field && (
                 <p className="mt-1 text-xs text-gray-500">
                   Field type cannot be changed after creation.
@@ -233,7 +219,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                         value={option}
                         onChange={(e) => handleOptionChange(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:border-gray-800 focus:ring-gray-800 sm:text-sm"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
                       />
                       {formData.options.length > 1 && (
                         <button
