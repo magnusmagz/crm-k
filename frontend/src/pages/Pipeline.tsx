@@ -7,18 +7,28 @@ import DealForm from '../components/DealForm';
 import StageManager from '../components/StageManager';
 import DealDebugModal from '../components/DealDebugModal';
 import DealImport from '../components/DealImport';
-import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import useDebounce from '../hooks/useDebounce';
+import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 const Pipeline: React.FC = () => {
   const [stages, setStages] = useState<Stage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [showDealForm, setShowDealForm] = useState(false);
   const [showStageManager, setShowStageManager] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [debugDeal, setDebugDeal] = useState<Deal | null>(null);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'won' | 'lost'>('open');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Debounce search query to avoid too many API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [analytics, setAnalytics] = useState({
     total: 0,
     totalValue: 0,
@@ -32,10 +42,15 @@ const Pipeline: React.FC = () => {
 
   useEffect(() => {
     loadPipelineData();
-  }, []);
+  }, [debouncedSearchQuery, statusFilter]);
 
   const loadPipelineData = async () => {
-    setIsLoading(true);
+    // Show searching indicator only if we have a search query
+    if (debouncedSearchQuery) {
+      setIsSearching(true);
+    } else {
+      setIsLoading(true);
+    }
     try {
       // Load stages first
       const stagesResponse = await stagesAPI.getAll();
@@ -49,16 +64,26 @@ const Pipeline: React.FC = () => {
 
       setStages(stagesData);
 
-      // Load deals
-      const dealsResponse = await dealsAPI.getAll({ status: 'all' });
-      const allDeals = dealsResponse.data.deals;
-      setDeals(allDeals);
+      // Load deals with filters
+      const params: any = { 
+        status: statusFilter,
+        limit: 500 // Reasonable limit to prevent performance issues
+      };
+      
+      if (debouncedSearchQuery) {
+        params.search = debouncedSearchQuery;
+      }
+      
+      const dealsResponse = await dealsAPI.getAll(params);
+      const filteredDeals = dealsResponse.data.deals;
+      setDeals(filteredDeals);
       setAnalytics(dealsResponse.data.analytics);
     } catch (error: any) {
       toast.error('Failed to load pipeline data');
       console.error('Load pipeline error:', error);
     } finally {
       setIsLoading(false);
+      setIsSearching(false);
     }
   };
 
@@ -136,6 +161,76 @@ const Pipeline: React.FC = () => {
       
       {/* Header */}
       <div className="mb-6">
+        {/* Search and Filters */}
+        <div className="mb-4 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search deals or contacts..."
+                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                {/* Searching indicator */}
+                {isSearching && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-800"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Filter Controls */}
+            <div className="flex gap-2">
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="open">Open Deals</option>
+                <option value="all">All Deals</option>
+                <option value="won">Won Deals</option>
+                <option value="lost">Lost Deals</option>
+              </select>
+              
+              {/* Filter Toggle Button */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium ${
+                  showFilters 
+                    ? 'border-blue-500 text-blue-700 bg-blue-50' 
+                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                }`}
+              >
+                <FunnelIcon className="h-5 w-5 mr-2" />
+                Filters
+              </button>
+            </div>
+          </div>
+          
+          {/* Advanced Filters (hidden by default) */}
+          {showFilters && (
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-sm text-gray-600">Advanced filters coming soon: date range, deal value, stage, and more!</p>
+            </div>
+          )}
+          
+          {/* Search Results Count */}
+          {debouncedSearchQuery && !isSearching && (
+            <div className="text-sm text-gray-600">
+              Found {deals.length} {deals.length === 1 ? 'deal' : 'deals'} 
+              {statusFilter !== 'all' && ` (${statusFilter} only)`}
+            </div>
+          )}
+        </div>
+        
         <div className="sm:flex sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Sales Pipeline</h1>

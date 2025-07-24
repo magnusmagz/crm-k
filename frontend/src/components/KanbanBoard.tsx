@@ -19,9 +19,22 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
+  const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
+  
+  const DEALS_PER_STAGE_LIMIT = 20; // Show first 20 deals by default
 
   const getDealsByStage = (stageId: string) => {
     return deals.filter(deal => deal.stageId === stageId);
+  };
+  
+  const toggleStageExpansion = (stageId: string) => {
+    const newExpanded = new Set(expandedStages);
+    if (newExpanded.has(stageId)) {
+      newExpanded.delete(stageId);
+    } else {
+      newExpanded.add(stageId);
+    }
+    setExpandedStages(newExpanded);
   };
 
   const formatCurrency = (value: number) => {
@@ -110,16 +123,34 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   <p className="text-sm">No deals in this stage</p>
                 </div>
               ) : (
-                stageDeals.map(deal => (
-                  <DealCard
-                    key={deal.id}
-                    deal={deal}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                    onClick={() => onDealClick(deal)}
-                    onDelete={() => onDealDelete(deal.id)}
-                  />
-                ))
+                <>
+                  {/* Show limited deals or all if expanded */}
+                  {(expandedStages.has(stage.id) ? stageDeals : stageDeals.slice(0, DEALS_PER_STAGE_LIMIT))
+                    .map(deal => (
+                      <DealCard
+                        key={deal.id}
+                        deal={deal}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        onClick={() => onDealClick(deal)}
+                        onDelete={() => onDealDelete(deal.id)}
+                      />
+                    ))
+                  }
+                  
+                  {/* Show more/less button */}
+                  {stageDeals.length > DEALS_PER_STAGE_LIMIT && (
+                    <button
+                      onClick={() => toggleStageExpansion(stage.id)}
+                      className="w-full mt-3 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                      {expandedStages.has(stage.id) 
+                        ? 'Show less' 
+                        : `Show ${stageDeals.length - DEALS_PER_STAGE_LIMIT} more deals`
+                      }
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
