@@ -362,7 +362,17 @@ async function processImportJob(job, records) {
           // No contact information provided at all
           job.errors.push({
             row: rowIndex,
-            error: 'Contact is required for deals'
+            error: 'Contact is required for deals. Please provide Contact Email, Contact Name, or First Name + Last Name'
+          });
+          job.skipped++;
+          return;
+        }
+        
+        // Ensure we have a contact ID (since contacts are now required)
+        if (!dealData.contactId) {
+          job.errors.push({
+            row: rowIndex,
+            error: 'Unable to find or create contact for this deal'
           });
           job.skipped++;
           return;

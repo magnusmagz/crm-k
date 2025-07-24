@@ -571,6 +571,15 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
     }
 
     const mapping = JSON.parse(fieldMapping);
+    
+    // Debug logging
+    console.log('Import parameters:', {
+      contactStrategy,
+      duplicateStrategy,
+      requireContact,
+      defaultStageId,
+      fieldMapping: mapping
+    });
     const stageMappingObj = stageMapping ? JSON.parse(stageMapping) : {};
 
     // Parse CSV
@@ -669,12 +678,21 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
           const contactFirstName = dealData.contactFirstName;
           const contactLastName = dealData.contactLastName;
           const company = dealData.company;
+          
+          // Debug - log what we got from mapCSVToDeal
+          console.log(`Row ${rowIndex}: DealData before contact extraction:`, {
+            contactEmail: dealData.contactEmail,
+            contactName: dealData.contactName,
+            contactFirstName: dealData.contactFirstName,
+            contactLastName: dealData.contactLastName
+          });
+          
           delete dealData.contactEmail;
           delete dealData.contactName;
           delete dealData.contactFirstName;
           delete dealData.contactLastName;
           delete dealData.company;
-
+          
           if (contactEmail || contactName || (contactFirstName && contactLastName)) {
             // Look for existing contact
             let contact = null;
@@ -763,7 +781,17 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
             // No contact information provided at all
             results.errors.push({
               row: rowIndex,
-              error: 'Contact is required for deals'
+              error: 'Contact is required for deals. Please provide Contact Email, Contact Name, or First Name + Last Name'
+            });
+            results.skipped++;
+            return;
+          }
+          
+          // Ensure we have a contact ID (since contacts are now required)
+          if (!dealData.contactId) {
+            results.errors.push({
+              row: rowIndex,
+              error: 'Unable to find or create contact for this deal'
             });
             results.skipped++;
             return;
