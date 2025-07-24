@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const contactRoutes = require('./routes/contacts');
 const contactImportRoutes = require('./routes/contacts-import');
+const dealImportRoutes = require('./routes/deals-import');
 const customFieldRoutes = require('./routes/customFields');
 const stageRoutes = require('./routes/stages');
 const dealRoutes = require('./routes/deals');
@@ -50,6 +51,7 @@ app.use('/api/contacts/import', contactImportRoutes);
 app.use('/api/custom-fields', customFieldRoutes);
 app.use('/api/stages', stageRoutes);
 app.use('/api/deals', dealRoutes);
+app.use('/api/deals/import', dealImportRoutes);
 app.use('/api/automations', automationRoutes);
 app.use('/api/deal-custom-fields', require('./routes/dealCustomFields'));
 
