@@ -25,6 +25,24 @@ interface ImportResults {
   }>;
 }
 
+interface ImportJob {
+  id: string;
+  status: 'processing' | 'completed' | 'failed';
+  totalRecords: number;
+  processedRecords: number;
+  created: number;
+  updated: number;
+  skipped: number;
+  errors: Array<{
+    row: number;
+    error: string;
+  }>;
+  errorCount: number;
+  progress: number;
+  completedAt?: string;
+  duration?: number;
+}
+
 interface ContactImportProps {
   onClose?: () => void;
 }
@@ -38,7 +56,10 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState<ImportResults | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<'upload' | 'mapping' | 'results'>('upload');
+  const [step, setStep] = useState<'upload' | 'mapping' | 'importing' | 'results'>('upload');
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [importJob, setImportJob] = useState<ImportJob | null>(null);
+  const progressCheckInterval = useRef<NodeJS.Timeout | null>(null);
 
   const standardFields = [
     { value: 'firstName', label: 'First Name' },
@@ -82,8 +103,43 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
     }
   };
 
+  const checkImportProgress = async (jobId: string) => {
+    try {
+      const response = await api.get(`/contacts/import/status/${jobId}`);
+      const job = response.data;
+      setImportJob(job);
+
+      if (job.status === 'completed' || job.status === 'failed') {
+        // Stop checking progress
+        if (progressCheckInterval.current) {
+          clearInterval(progressCheckInterval.current);
+          progressCheckInterval.current = null;
+        }
+
+        if (job.status === 'completed') {
+          setResults({
+            created: job.created,
+            updated: job.updated,
+            skipped: job.skipped,
+            errors: job.errors
+          });
+          setStep('results');
+        } else {
+          setError('Import failed. Please try again.');
+          setStep('mapping');
+        }
+        setImporting(false);
+      }
+    } catch (err) {
+      console.error('Failed to check import progress:', err);
+    }
+  };
+
   const handleImport = async () => {
     if (!file || !preview) return;
+
+    // For large files (> 1000 rows), use chunked import
+    const useChunkedImport = preview.totalRows > 1000;
 
     setImporting(true);
     setError(null);
@@ -94,17 +150,38 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
     formData.append('duplicateStrategy', duplicateStrategy);
 
     try {
-      const response = await api.post('/contacts/import', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      if (useChunkedImport) {
+        // Use the new chunked import endpoint
+        const response = await api.post('/contacts/import/start', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
 
-      setResults(response.data.results);
-      setStep('results');
+        setJobId(response.data.jobId);
+        setStep('importing');
+        
+        // Start checking progress every second
+        progressCheckInterval.current = setInterval(() => {
+          checkImportProgress(response.data.jobId);
+        }, 1000);
+        
+        // Initial check
+        checkImportProgress(response.data.jobId);
+      } else {
+        // Use the original import endpoint for smaller files
+        const response = await api.post('/contacts/import', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        setResults(response.data.results);
+        setStep('results');
+        setImporting(false);
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to import contacts');
-    } finally {
       setImporting(false);
     }
   };
@@ -139,16 +216,33 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
   };
 
   const resetImport = () => {
+    // Clear any progress checking interval
+    if (progressCheckInterval.current) {
+      clearInterval(progressCheckInterval.current);
+      progressCheckInterval.current = null;
+    }
+    
     setFile(null);
     setPreview(null);
     setFieldMapping({});
     setResults(null);
     setError(null);
     setStep('upload');
+    setJobId(null);
+    setImportJob(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (progressCheckInterval.current) {
+        clearInterval(progressCheckInterval.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -161,6 +255,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
               <p className="text-gray-600 mt-1">
                 {step === 'upload' && 'Upload a CSV file to import contacts'}
                 {step === 'mapping' && 'Map CSV columns to contact fields'}
+                {step === 'importing' && 'Importing contacts...'}
                 {step === 'results' && 'Import completed'}
               </p>
             </div>
@@ -347,7 +442,55 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
             </div>
           )}
 
-          {/* Step 3: Results */}
+          {/* Step 3: Importing Progress */}
+          {step === 'importing' && importJob && (
+            <div>
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <h3 className="text-xl font-medium">Importing Contacts...</h3>
+                </div>
+                
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Processing {importJob.processedRecords} of {importJob.totalRecords} records</span>
+                    <span>{Math.round(importJob.progress)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${importJob.progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-2xl font-bold text-green-800">{importJob.created}</div>
+                    <div className="text-green-700">Created</div>
+                  </div>
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-800">{importJob.updated}</div>
+                    <div className="text-blue-700">Updated</div>
+                  </div>
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-800">{importJob.skipped}</div>
+                    <div className="text-gray-700">Skipped</div>
+                  </div>
+                </div>
+
+                {importJob.errorCount > 0 && (
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="text-yellow-800">
+                      <span className="font-medium">{importJob.errorCount} errors</span> encountered during import
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Results */}
           {step === 'results' && results && (
             <div>
               <div className="mb-6">
@@ -405,6 +548,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
             <button
               onClick={resetImport}
               className="px-4 py-2 text-gray-700 hover:text-gray-900"
+              disabled={step === 'importing'}
             >
               {step === 'results' ? 'Import Another File' : 'Cancel'}
             </button>
