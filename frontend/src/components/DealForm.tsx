@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Deal, Stage, Contact, CustomField } from '../types';
 import { contactsAPI, dealCustomFieldsAPI } from '../services/api';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, UserIcon } from '@heroicons/react/24/outline';
 import CustomFieldInput from './CustomFieldInput';
 import { FormField, FormSelect, FormTextarea } from './ui/FormField';
+import { Link } from 'react-router-dom';
 
 interface DealFormProps {
   deal?: Deal | null;
@@ -30,11 +31,22 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   useEffect(() => {
     fetchContacts();
     fetchCustomFields();
   }, []);
+
+  useEffect(() => {
+    // Find and set the selected contact when deal loads or contactId changes
+    if (formData.contactId && contacts.length > 0) {
+      const contact = contacts.find(c => c.id === formData.contactId);
+      setSelectedContact(contact || null);
+    } else if (deal?.Contact) {
+      setSelectedContact(deal.Contact);
+    }
+  }, [formData.contactId, contacts, deal]);
 
   const fetchContacts = async () => {
     try {
@@ -61,6 +73,12 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
       [name]: name === 'value' ? parseFloat(value) || 0 : value
     }));
     setErrors(prev => ({ ...prev, [name]: '' }));
+    
+    // Update selected contact when contactId changes
+    if (name === 'contactId') {
+      const contact = contacts.find(c => c.id === value);
+      setSelectedContact(contact || null);
+    }
   };
 
   const handleCustomFieldChange = (fieldName: string, value: any) => {
@@ -189,6 +207,46 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
             ))}
           </FormSelect>
         </div>
+
+        {/* Contact Information Display */}
+        {selectedContact && (
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                <div className="bg-gray-200 rounded-full p-2">
+                  <UserIcon className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Contact Information</h4>
+                  <div className="text-sm text-gray-900">
+                    <p className="font-medium">
+                      {selectedContact.firstName} {selectedContact.lastName}
+                    </p>
+                    {selectedContact.company && (
+                      <p className="text-gray-600">{selectedContact.company}</p>
+                    )}
+                    {selectedContact.email && (
+                      <p className="text-gray-600">{selectedContact.email}</p>
+                    )}
+                    {selectedContact.phone && (
+                      <p className="text-gray-600">{selectedContact.phone}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Link
+                to={`/contacts/${selectedContact.id}`}
+                className="text-sm text-blue-600 hover:text-blue-800"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.open(`/contacts/${selectedContact.id}`, '_blank');
+                }}
+              >
+                View Contact
+              </Link>
+            </div>
+          </div>
+        )}
 
         <FormSelect
           label="Associated Contact"
