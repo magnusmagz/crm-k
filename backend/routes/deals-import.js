@@ -4,6 +4,7 @@ const { Deal, CustomField, Contact, Stage, Pipeline, sequelize } = require('../m
 const { authMiddleware } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { parseCSV, getCSVHeaders, autoDetectDealMapping, mapCSVToDeal } = require('../utils/csvParser');
+const { generateDealSkippedReport } = require('../utils/csvExporter');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
 
@@ -11,6 +12,9 @@ const router = express.Router();
 
 // Store import jobs in memory (in production, use Redis or a database)
 const importJobs = new Map();
+
+// Store skipped records for each job
+const skippedRecords = new Map();
 
 // CSV Import - Parse headers and preview
 router.post('/preview', authMiddleware, upload.single('file'), async (req, res) => {
@@ -167,6 +171,10 @@ router.get('/status/:jobId', authMiddleware, async (req, res) => {
 // Process import job
 async function processImportJob(job, records) {
   const { mapping, duplicateStrategy, contactStrategy, requireContact, stageMapping, defaultStageId } = job.config;
+  
+  // Initialize skipped records array for this job
+  const jobSkippedRecords = [];
+  skippedRecords.set(job.id, jobSkippedRecords);
 
   // Get custom field definitions
   const customFields = await CustomField.findAll({
@@ -218,11 +226,17 @@ async function processImportJob(job, records) {
         
         // Validate required fields
         if (!dealData.name) {
+          const error = 'Deal name is required';
           job.errors.push({
             row: rowIndex,
-            error: 'Deal name is required'
+            error: error
           });
           job.skipped++;
+          jobSkippedRecords.push({
+            row: rowIndex,
+            data: dealData,
+            reason: error
+          });
           return;
         }
 
@@ -394,6 +408,11 @@ async function processImportJob(job, records) {
           if (existingDeal) {
             if (duplicateStrategy === 'skip') {
               job.skipped++;
+              jobSkippedRecords.push({
+                row: rowIndex,
+                data: dealData,
+                reason: `Deal "${dealData.name}" already exists for this contact`
+              });
               return;
             } else if (duplicateStrategy === 'update') {
               await existingDeal.update(dealData);
@@ -484,7 +503,34 @@ async function processImportJob(job, records) {
   // Clean up job after 1 hour
   setTimeout(() => {
     importJobs.delete(job.id);
+    skippedRecords.delete(job.id);
   }, 3600000);
 }
+
+// Download skipped records report
+router.get('/skipped/:jobId', authMiddleware, async (req, res) => {
+  try {
+    const job = importJobs.get(req.params.jobId);
+    
+    if (!job || job.userId !== req.user.id) {
+      return res.status(404).json({ error: 'Import job not found' });
+    }
+    
+    const jobSkippedRecords = skippedRecords.get(req.params.jobId) || [];
+    
+    if (jobSkippedRecords.length === 0) {
+      return res.status(404).json({ error: 'No skipped records found' });
+    }
+    
+    const csv = generateDealSkippedReport(jobSkippedRecords);
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="skipped-deals-${req.params.jobId}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    console.error('Download skipped records error:', error);
+    res.status(500).json({ error: 'Failed to generate report' });
+  }
+});
 
 module.exports = router;

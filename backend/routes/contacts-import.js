@@ -4,6 +4,7 @@ const { Contact, CustomField, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { parseCSV, getCSVHeaders, autoDetectMapping, mapCSVToContact } = require('../utils/csvParser');
+const { generateContactSkippedReport } = require('../utils/csvExporter');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
 
@@ -11,6 +12,9 @@ const router = express.Router();
 
 // Store import jobs in memory (in production, use Redis or a database)
 const importJobs = new Map();
+
+// Store skipped records for each job
+const skippedRecords = new Map();
 
 // CSV Import - Parse headers and preview
 router.post('/preview', authMiddleware, upload.single('file'), async (req, res) => {
@@ -141,6 +145,10 @@ router.get('/status/:jobId', authMiddleware, async (req, res) => {
 
 // Process import job
 async function processImportJob(job, records, mapping, duplicateStrategy) {
+  // Initialize skipped records array for this job
+  const jobSkippedRecords = [];
+  skippedRecords.set(job.id, jobSkippedRecords);
+  
   // Get custom field definitions
   const customFields = await CustomField.findAll({
     where: { 
@@ -172,11 +180,17 @@ async function processImportJob(job, records, mapping, duplicateStrategy) {
         
         // Validate required fields
         if (!contactData.firstName || !contactData.lastName) {
+          const error = 'First name and last name are required';
           job.errors.push({
             row: rowIndex,
-            error: 'First name and last name are required'
+            error: error
           });
           job.skipped++;
+          jobSkippedRecords.push({
+            row: rowIndex,
+            data: contactData,
+            reason: error
+          });
           return;
         }
 
@@ -197,6 +211,11 @@ async function processImportJob(job, records, mapping, duplicateStrategy) {
           if (existingContact) {
             if (duplicateStrategy === 'skip') {
               job.skipped++;
+              jobSkippedRecords.push({
+                row: rowIndex,
+                data: contactData,
+                reason: `Contact with email ${contactData.email} already exists`
+              });
               return;
             } else if (duplicateStrategy === 'update') {
               await existingContact.update(contactData);
@@ -288,7 +307,34 @@ async function processImportJob(job, records, mapping, duplicateStrategy) {
   // Clean up job after 1 hour
   setTimeout(() => {
     importJobs.delete(job.id);
+    skippedRecords.delete(job.id);
   }, 3600000);
 }
+
+// Download skipped records report
+router.get('/skipped/:jobId', authMiddleware, async (req, res) => {
+  try {
+    const job = importJobs.get(req.params.jobId);
+    
+    if (!job || job.userId !== req.user.id) {
+      return res.status(404).json({ error: 'Import job not found' });
+    }
+    
+    const jobSkippedRecords = skippedRecords.get(req.params.jobId) || [];
+    
+    if (jobSkippedRecords.length === 0) {
+      return res.status(404).json({ error: 'No skipped records found' });
+    }
+    
+    const csv = generateContactSkippedReport(jobSkippedRecords);
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="skipped-contacts-${req.params.jobId}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    console.error('Download skipped records error:', error);
+    res.status(500).json({ error: 'Failed to generate report' });
+  }
+});
 
 module.exports = router;

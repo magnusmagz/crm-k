@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, AlertCircle, CheckCircle, X, ChevronRight } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle, X, ChevronRight, Download } from 'lucide-react';
 import api from '../services/api';
 
 interface CSVPreview {
@@ -513,6 +513,33 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                     <div className="text-gray-700">Rows Skipped</div>
                   </div>
                 </div>
+
+                {results.skipped > 0 && jobId && (
+                  <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        <span className="text-yellow-800">
+                          {results.skipped} duplicate {results.skipped === 1 ? 'contact was' : 'contacts were'} skipped
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = `/api/contacts/import/skipped/${jobId}`;
+                          link.download = `skipped-contacts-${new Date().toISOString().split('T')[0]}.csv`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="flex items-center gap-2 px-3 py-1 text-sm bg-white border border-yellow-300 rounded hover:bg-yellow-50"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Skipped Records
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {results.errors.length > 0 && (
                   <div>
