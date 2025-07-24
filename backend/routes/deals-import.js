@@ -39,13 +39,10 @@ router.post('/preview', authMiddleware, upload.single('file'), async (req, res) 
     });
 
     // Get stages for this user
-    const pipeline = await Pipeline.findOne({
-      where: { userId: req.user.id, isDefault: true },
-      include: [{
-        model: Stage,
-        as: 'stages',
-        attributes: ['id', 'name', 'order']
-      }]
+    const stages = await Stage.findAll({
+      where: { userId: req.user.id },
+      attributes: ['id', 'name', 'order'],
+      order: [['order', 'ASC']]
     });
 
     res.json({
@@ -58,7 +55,7 @@ router.post('/preview', authMiddleware, upload.single('file'), async (req, res) 
         type: cf.type,
         required: cf.required
       })),
-      stages: pipeline?.stages || [],
+      stages: stages || [],
       totalRows: allRecords.length
     });
   } catch (error) {
@@ -180,15 +177,14 @@ async function processImportJob(job, records) {
   });
 
   // Get stages for this user
-  const pipeline = await Pipeline.findOne({
-    where: { userId: job.userId, isDefault: true },
-    include: [{
-      model: Stage,
-      as: 'stages'
-    }]
+  const stages = await Stage.findAll({
+    where: { userId: job.userId },
+    order: [['order', 'ASC']]
   });
 
-  const stages = pipeline?.stages || [];
+  if (!stages || stages.length === 0) {
+    throw new Error('No stages found for user');
+  }
   
   // Create stage lookup
   const stageLookup = {};
