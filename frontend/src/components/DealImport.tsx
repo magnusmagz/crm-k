@@ -40,7 +40,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
   const [preview, setPreview] = useState<CSVPreview | null>(null);
   const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
   const [stageMapping, setStageMapping] = useState<Record<string, string>>({});
-  const [contactStrategy, setContactStrategy] = useState<'match' | 'create' | 'skip'>('match');
+  const [contactStrategy, setContactStrategy] = useState<'match' | 'create' | 'skip'>('create');
   const [duplicateStrategy, setDuplicateStrategy] = useState<'skip' | 'update' | 'create'>('skip');
   const [defaultStageId, setDefaultStageId] = useState<string>('');
   const [requireContact, setRequireContact] = useState(false);
@@ -86,8 +86,6 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
 
       setPreview(response.data);
       setFieldMapping(response.data.suggestedMapping);
-      console.log('Suggested mapping:', response.data.suggestedMapping);
-      console.log('Headers:', response.data.headers);
       setDefaultStageId(response.data.stages[0]?.id || '');
       
       // Auto-detect stage mappings
@@ -110,9 +108,6 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
 
   const handleImport = async () => {
     if (!file || !preview) return;
-
-    console.log('Current fieldMapping:', fieldMapping);
-    console.log('Has name mapping?', Object.values(fieldMapping).includes('name'));
 
     setImporting(true);
     setError(null);
@@ -143,14 +138,10 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
   };
 
   const handleMappingChange = (csvField: string, dealField: string) => {
-    const newMapping = {
-      ...fieldMapping,
+    setFieldMapping(prev => ({
+      ...prev,
       [csvField]: dealField
-    };
-    console.log('Mapping change:', csvField, '->', dealField);
-    console.log('New mapping:', newMapping);
-    console.log('Has name?', Object.values(newMapping).includes('name'));
-    setFieldMapping(newMapping);
+    }));
   };
 
   const handleStageMappingChange = (csvValue: string, stageId: string) => {
@@ -477,14 +468,6 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                   </div>
                 </div>
               )}
-
-              {/* Debug Info */}
-              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-medium mb-2">Debug Info:</h4>
-                <p className="text-sm">Field Mapping: {JSON.stringify(fieldMapping)}</p>
-                <p className="text-sm">Has 'name' mapped: {Object.values(fieldMapping).includes('name') ? 'YES' : 'NO'}</p>
-                <p className="text-sm">Button should be enabled: {!importing && Object.values(fieldMapping).includes('name') ? 'YES' : 'NO'}</p>
-              </div>
 
               {/* Preview */}
               <div>
