@@ -112,11 +112,25 @@ const Pipeline: React.FC = () => {
 
   const handleDealMove = async (dealId: string, newStageId: string) => {
     try {
-      await dealsAPI.updateStage(dealId, newStageId);
-      setDeals(deals.map(deal => 
-        deal.id === dealId ? { ...deal, stageId: newStageId } : deal
-      ));
-      loadPipelineData(); // Reload to get updated stage totals
+      const response = await dealsAPI.updateStage(dealId, newStageId);
+      
+      // Update local deals state with the updated deal (includes status changes)
+      if (response.data.deal) {
+        setDeals(deals.map(deal => 
+          deal.id === dealId ? response.data.deal : deal
+        ));
+        
+        // Check if status changed to won/lost
+        const updatedDeal = response.data.deal;
+        if (updatedDeal.status === 'won') {
+          toast.success('🎉 Deal won!');
+        } else if (updatedDeal.status === 'lost') {
+          toast.info('Deal marked as lost');
+        }
+      }
+      
+      // Reload to get updated analytics
+      loadPipelineData();
     } catch (error: any) {
       toast.error('Failed to move deal');
       loadPipelineData(); // Reload to revert on error

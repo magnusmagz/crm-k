@@ -443,7 +443,23 @@ router.patch('/:id/stage', authMiddleware, [
     }
 
     const previousStageId = deal.stageId;
-    await deal.update({ stageId: req.body.stageId });
+    
+    // Check if the new stage is a closing stage and update status accordingly
+    const updateData = { stageId: req.body.stageId };
+    
+    if (stage.name === 'Closed Won') {
+      updateData.status = 'won';
+      updateData.closedAt = new Date();
+    } else if (stage.name === 'Closed Lost') {
+      updateData.status = 'lost';
+      updateData.closedAt = new Date();
+    } else if (deal.status !== 'open') {
+      // Moving from closed back to open
+      updateData.status = 'open';
+      updateData.closedAt = null;
+    }
+    
+    await deal.update(updateData);
 
     // Fetch updated deal with associations
     const updatedDeal = await Deal.findByPk(deal.id, {
@@ -462,7 +478,11 @@ router.patch('/:id/stage', authMiddleware, [
       updatedDeal.Stage.toJSON()
     );
 
-    res.json({ message: 'Deal stage updated successfully' });
+    // Return the updated deal so frontend can update status
+    res.json({ 
+      message: 'Deal stage updated successfully',
+      deal: updatedDeal
+    });
   } catch (error) {
     console.error('Update deal stage error:', error);
     res.status(500).json({ error: 'Failed to update deal stage' });

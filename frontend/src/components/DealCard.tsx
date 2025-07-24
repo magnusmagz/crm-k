@@ -40,7 +40,13 @@ const DealCard: React.FC<DealCardProps> = ({
 
   return (
     <div
-      className="bg-white p-4 rounded-md shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow group"
+      className={`p-4 rounded-md shadow-sm border cursor-pointer hover:shadow-md transition-shadow group ${
+        deal.status === 'won' 
+          ? 'bg-green-50 border-green-200' 
+          : deal.status === 'lost'
+          ? 'bg-red-50 border-red-200'
+          : 'bg-white border-gray-200'
+      }`}
       draggable
       onDragStart={(e) => onDragStart(e, deal)}
       onDragEnd={onDragEnd}
