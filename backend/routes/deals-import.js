@@ -350,14 +350,22 @@ async function processImportJob(job, records) {
 
           if (contact) {
             dealData.contactId = contact.id;
-          } else if (requireContact || contactStrategy === 'skip') {
+          } else if (contactStrategy === 'skip') {
             job.errors.push({
               row: rowIndex,
-              error: `Contact not found: ${contactEmail || contactName}`
+              error: `Contact not found: ${contactEmail || contactName || 'No contact information provided'}`
             });
             job.skipped++;
             return;
           }
+        } else {
+          // No contact information provided at all
+          job.errors.push({
+            row: rowIndex,
+            error: 'Contact is required for deals'
+          });
+          job.skipped++;
+          return;
         }
 
         // Check for duplicates

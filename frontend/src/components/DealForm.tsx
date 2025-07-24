@@ -83,6 +83,9 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
     if (!formData.stageId) {
       newErrors.stageId = 'Stage is required';
     }
+    if (!formData.contactId) {
+      newErrors.contactId = 'Contact is required';
+    }
     if (formData.value < 0) {
       newErrors.value = 'Value cannot be negative';
     }
@@ -197,6 +200,8 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
           name="contactId"
           value={formData.contactId}
           onChange={handleChange}
+          error={errors.contactId}
+          required
         >
           <option value="">No contact selected</option>
           {contacts.map(contact => (

@@ -14,7 +14,7 @@ const validateDeal = [
   body('name').notEmpty().trim(),
   body('value').optional().isDecimal({ decimal_digits: '0,2' }),
   body('stageId').isUUID(),
-  body('contactId').optional({ nullable: true }).isUUID(),
+  body('contactId').notEmpty().isUUID().withMessage('Contact is required'),
   body('notes').optional().trim(),
   body('expectedCloseDate').optional().isISO8601()
 ];
@@ -170,18 +170,16 @@ router.post('/', authMiddleware, validateDeal, async (req, res) => {
       return res.status(400).json({ error: 'Invalid stage' });
     }
 
-    // Verify contact belongs to user if provided
-    if (req.body.contactId) {
-      const contact = await Contact.findOne({
-        where: {
-          id: req.body.contactId,
-          userId: req.user.id
-        }
-      });
-
-      if (!contact) {
-        return res.status(400).json({ error: 'Invalid contact' });
+    // Verify contact belongs to user (required)
+    const contact = await Contact.findOne({
+      where: {
+        id: req.body.contactId,
+        userId: req.user.id
       }
+    });
+
+    if (!contact) {
+      return res.status(400).json({ error: 'Invalid contact or contact not found' });
     }
 
     // Validate custom fields if provided
@@ -753,14 +751,22 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
 
             if (contact) {
               dealData.contactId = contact.id;
-            } else if (requireContact || contactStrategy === 'skip') {
+            } else if (contactStrategy === 'skip') {
               results.errors.push({
                 row: rowIndex,
-                error: `Contact not found: ${contactEmail || contactName}`
+                error: `Contact not found: ${contactEmail || contactName || 'No contact information provided'}`
               });
               results.skipped++;
               return;
             }
+          } else {
+            // No contact information provided at all
+            results.errors.push({
+              row: rowIndex,
+              error: 'Contact is required for deals'
+            });
+            results.skipped++;
+            return;
           }
 
           // Check for duplicates

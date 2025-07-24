@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     contactId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: 'contacts',
         key: 'id'
