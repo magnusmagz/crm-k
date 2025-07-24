@@ -125,7 +125,7 @@ const Pipeline: React.FC = () => {
         if (updatedDeal.status === 'won') {
           toast.success('🎉 Deal won!');
         } else if (updatedDeal.status === 'lost') {
-          toast.info('Deal marked as lost');
+          toast('Deal marked as lost');
         }
       }
       
