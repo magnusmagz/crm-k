@@ -4,6 +4,8 @@ const { Deal, Contact, Stage, CustomField } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
+const upload = require('../middleware/upload');
+const { parseCSV, getCSVHeaders, validateDealRecord, mapCSVToDeal, autoDetectDealMapping } = require('../utils/csvParser');
 
 const router = express.Router();
 
@@ -488,6 +490,359 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Delete deal error:', error);
     res.status(500).json({ error: 'Failed to delete deal' });
+  }
+});
+
+// CSV Import - Parse headers and preview
+router.post('/import/preview', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Parse CSV headers
+    const headers = await getCSVHeaders(req.file.buffer);
+    
+    // Parse first 5 rows for preview
+    const allRecords = await parseCSV(req.file.buffer);
+    const preview = allRecords.slice(0, 5);
+    
+    // Auto-detect field mapping
+    const suggestedMapping = autoDetectDealMapping(headers);
+    
+    // Get stages for this user
+    const stages = await Stage.findAll({
+      where: { 
+        userId: req.user.id,
+        isActive: true
+      },
+      attributes: ['id', 'name', 'order'],
+      order: [['order', 'ASC']]
+    });
+
+    // Get custom fields for deals
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: 'deal'
+      },
+      attributes: ['name', 'label', 'type', 'required']
+    });
+
+    res.json({
+      headers,
+      preview,
+      suggestedMapping,
+      stages: stages.map(s => ({
+        id: s.id,
+        name: s.name,
+        order: s.order
+      })),
+      customFields: customFields.map(cf => ({
+        name: cf.name,
+        label: cf.label,
+        type: cf.type,
+        required: cf.required
+      })),
+      totalRows: allRecords.length
+    });
+  } catch (error) {
+    console.error('CSV preview error:', error);
+    res.status(500).json({ error: 'Failed to parse CSV file' });
+  }
+});
+
+// CSV Import - Process and create deals
+router.post('/import', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const { 
+      fieldMapping, 
+      stageMapping,
+      contactStrategy = 'match',
+      duplicateStrategy = 'skip',
+      defaultStageId,
+      requireContact = false
+    } = req.body;
+    
+    if (!fieldMapping) {
+      return res.status(400).json({ error: 'Field mapping is required' });
+    }
+
+    const mapping = JSON.parse(fieldMapping);
+    const stageMappingObj = stageMapping ? JSON.parse(stageMapping) : {};
+
+    // Parse CSV
+    const records = await parseCSV(req.file.buffer);
+    
+    // Get custom field definitions
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: 'deal'
+      }
+    });
+
+    // Get all stages for mapping
+    const stages = await Stage.findAll({
+      where: { userId: req.user.id }
+    });
+
+    // Build stage lookup map
+    const stageLookup = {};
+    stages.forEach(stage => {
+      stageLookup[stage.id] = stage;
+      stageLookup[stage.name.toLowerCase()] = stage;
+    });
+
+    // Cache for contact lookups
+    const contactCache = {};
+
+    const results = {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      errors: []
+    };
+
+    // Process records in batches
+    const batchSize = 50;
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      
+      const processPromises = batch.map(async (record, index) => {
+        const rowIndex = i + index + 2; // +2 for header row and 1-based indexing
+        
+        try {
+          // Map CSV fields to deal fields
+          const dealData = mapCSVToDeal(record, mapping, customFields);
+          
+          // Add user ID
+          dealData.userId = req.user.id;
+          
+          // Validate required fields
+          if (!dealData.name) {
+            results.errors.push({
+              row: rowIndex,
+              error: 'Deal name is required'
+            });
+            results.skipped++;
+            return;
+          }
+
+          // Handle stage mapping
+          const stageValue = dealData.stage;
+          delete dealData.stage; // Remove stage field as we need stageId
+          
+          if (stageValue) {
+            // Check if CSV value maps to a stage
+            const mappedStageId = stageMappingObj[stageValue];
+            if (mappedStageId) {
+              dealData.stageId = mappedStageId;
+            } else {
+              // Try to find stage by name
+              const stage = stageLookup[stageValue.toLowerCase()];
+              if (stage) {
+                dealData.stageId = stage.id;
+              }
+            }
+          }
+          
+          // Use default stage if no stage found
+          if (!dealData.stageId) {
+            dealData.stageId = defaultStageId || stages[0]?.id;
+          }
+
+          if (!dealData.stageId) {
+            results.errors.push({
+              row: rowIndex,
+              error: 'Unable to determine stage for deal'
+            });
+            results.skipped++;
+            return;
+          }
+
+          // Handle contact association
+          const contactEmail = dealData.contactEmail;
+          const contactName = dealData.contactName;
+          const company = dealData.company;
+          delete dealData.contactEmail;
+          delete dealData.contactName;
+          delete dealData.company;
+
+          if (contactEmail || contactName) {
+            // Look for existing contact
+            let contact = null;
+            const cacheKey = contactEmail || contactName;
+            
+            // Check cache first
+            if (contactCache[cacheKey]) {
+              contact = contactCache[cacheKey];
+            } else {
+              // Search for contact
+              const whereClause = { userId: req.user.id };
+              
+              if (contactEmail) {
+                whereClause.email = contactEmail;
+              } else if (contactName) {
+                // Try to split name
+                const nameParts = contactName.trim().split(/\s+/);
+                if (nameParts.length >= 2) {
+                  whereClause[Op.and] = [
+                    { firstName: { [Op.iLike]: nameParts[0] } },
+                    { lastName: { [Op.iLike]: nameParts[nameParts.length - 1] } }
+                  ];
+                } else {
+                  whereClause[Op.or] = [
+                    { firstName: { [Op.iLike]: contactName } },
+                    { lastName: { [Op.iLike]: contactName } }
+                  ];
+                }
+              }
+
+              contact = await Contact.findOne({ where: whereClause });
+              
+              if (!contact && contactStrategy === 'create') {
+                // Create new contact
+                const nameParts = (contactName || '').trim().split(/\s+/);
+                const contactData = {
+                  userId: req.user.id,
+                  firstName: nameParts[0] || 'Unknown',
+                  lastName: nameParts.slice(1).join(' ') || 'Contact',
+                  email: contactEmail || null,
+                  company: company || null
+                };
+                
+                contact = await Contact.create(contactData);
+                automationEmitter.emitContactCreated(req.user.id, contact.toJSON());
+              }
+              
+              // Cache the result
+              if (contact) {
+                contactCache[cacheKey] = contact;
+              }
+            }
+
+            if (contact) {
+              dealData.contactId = contact.id;
+            } else if (requireContact || contactStrategy === 'skip') {
+              results.errors.push({
+                row: rowIndex,
+                error: `Contact not found: ${contactEmail || contactName}`
+              });
+              results.skipped++;
+              return;
+            }
+          }
+
+          // Check for duplicates
+          if (duplicateStrategy !== 'create') {
+            const existingDeal = await Deal.findOne({
+              where: {
+                name: dealData.name,
+                userId: req.user.id,
+                ...(dealData.contactId && { contactId: dealData.contactId })
+              }
+            });
+
+            if (existingDeal) {
+              if (duplicateStrategy === 'skip') {
+                results.skipped++;
+                return;
+              } else if (duplicateStrategy === 'update') {
+                await existingDeal.update(dealData);
+                results.updated++;
+                
+                // Emit update event
+                automationEmitter.emitDealUpdated(
+                  req.user.id, 
+                  existingDeal.toJSON(), 
+                  Object.keys(dealData)
+                );
+                return;
+              }
+            }
+          }
+
+          // Validate custom fields
+          if (dealData.customFields) {
+            for (const field of customFields) {
+              const value = dealData.customFields[field.name];
+              
+              if (field.required && !value) {
+                results.errors.push({
+                  row: rowIndex,
+                  error: `Custom field '${field.label}' is required`
+                });
+                results.skipped++;
+                return;
+              }
+
+              // Type validation
+              if (value) {
+                switch (field.type) {
+                  case 'number':
+                    if (isNaN(value)) {
+                      results.errors.push({
+                        row: rowIndex,
+                        error: `Custom field '${field.label}' must be a number`
+                      });
+                      results.skipped++;
+                      return;
+                    }
+                    dealData.customFields[field.name] = parseFloat(value);
+                    break;
+                  case 'checkbox':
+                    dealData.customFields[field.name] = 
+                      value === 'true' || value === '1' || value === 'yes';
+                    break;
+                  case 'date':
+                    if (isNaN(Date.parse(value))) {
+                      results.errors.push({
+                        row: rowIndex,
+                        error: `Custom field '${field.label}' must be a valid date`
+                      });
+                      results.skipped++;
+                      return;
+                    }
+                    break;
+                }
+              }
+            }
+          }
+
+          // Create deal
+          const deal = await Deal.create(dealData);
+          results.created++;
+          
+          // Emit creation event
+          automationEmitter.emitDealCreated(req.user.id, deal.toJSON());
+          
+        } catch (error) {
+          console.error(`Error processing row ${rowIndex}:`, error);
+          results.errors.push({
+            row: rowIndex,
+            error: error.message || 'Unknown error'
+          });
+          results.skipped++;
+        }
+      });
+
+      await Promise.all(processPromises);
+    }
+
+    res.json({
+      message: 'Import completed',
+      results,
+      totalProcessed: records.length
+    });
+
+  } catch (error) {
+    console.error('CSV import error:', error);
+    res.status(500).json({ error: 'Failed to import deals' });
   }
 });
 

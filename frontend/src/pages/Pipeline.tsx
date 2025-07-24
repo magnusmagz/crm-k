@@ -6,7 +6,8 @@ import KanbanBoard from '../components/KanbanBoard';
 import DealForm from '../components/DealForm';
 import StageManager from '../components/StageManager';
 import DealDebugModal from '../components/DealDebugModal';
-import { CogIcon, PlusIcon, BugAntIcon } from '@heroicons/react/24/outline';
+import DealImport from '../components/DealImport';
+import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 
 const Pipeline: React.FC = () => {
   const [stages, setStages] = useState<Stage[]>([]);
@@ -15,6 +16,7 @@ const Pipeline: React.FC = () => {
   const [showDealForm, setShowDealForm] = useState(false);
   const [showStageManager, setShowStageManager] = useState(false);
   const [showDebugModal, setShowDebugModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [debugDeal, setDebugDeal] = useState<Deal | null>(null);
   const [analytics, setAnalytics] = useState({
@@ -160,7 +162,7 @@ const Pipeline: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none space-x-3">
+          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
             {deals.length > 0 && (
               <div className="relative inline-block">
                 <select
@@ -207,6 +209,13 @@ const Pipeline: React.FC = () => {
                 </div>
               </div>
             )}
+            <button
+              onClick={() => setShowImport(true)}
+              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+            >
+              <ArrowUpTrayIcon className="-ml-1 mr-2 h-5 w-5" />
+              Import CSV
+            </button>
             <button
               onClick={() => setShowStageManager(true)}
               className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
@@ -282,6 +291,14 @@ const Pipeline: React.FC = () => {
         }}
         deal={debugDeal}
       />
+
+      {/* Import Modal */}
+      {showImport && (
+        <DealImport onClose={() => {
+          setShowImport(false);
+          loadPipelineData();
+        }} />
+      )}
 
       <Toaster position="top-right" />
     </div>

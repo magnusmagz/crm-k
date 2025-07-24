@@ -171,10 +171,138 @@ const autoDetectMapping = (headers) => {
   return mapping;
 };
 
+// Auto-detect deal field mapping
+const autoDetectDealMapping = (headers) => {
+  const mapping = {};
+  const dealMappings = {
+    'deal name': 'name',
+    'deal': 'name',
+    'opportunity': 'name',
+    'name': 'name',
+    'title': 'name',
+    'value': 'value',
+    'amount': 'value',
+    'deal value': 'value',
+    'deal amount': 'value',
+    'revenue': 'value',
+    'price': 'value',
+    'stage': 'stage',
+    'pipeline stage': 'stage',
+    'deal stage': 'stage',
+    'status': 'status',
+    'deal status': 'status',
+    'expected close date': 'expectedCloseDate',
+    'close date': 'expectedCloseDate',
+    'closing date': 'expectedCloseDate',
+    'expected close': 'expectedCloseDate',
+    'notes': 'notes',
+    'description': 'notes',
+    'comments': 'notes',
+    'details': 'notes',
+    'contact': 'contactName',
+    'contact name': 'contactName',
+    'customer': 'contactName',
+    'client': 'contactName',
+    'contact email': 'contactEmail',
+    'customer email': 'contactEmail',
+    'client email': 'contactEmail',
+    'email': 'contactEmail',
+    'company': 'company',
+    'company name': 'company',
+    'organization': 'company'
+  };
+  
+  headers.forEach(header => {
+    const normalizedHeader = header.toLowerCase().trim();
+    if (dealMappings[normalizedHeader]) {
+      mapping[header] = dealMappings[normalizedHeader];
+    }
+  });
+  
+  return mapping;
+};
+
+// Validate a single deal record
+const validateDealRecord = (record, rowIndex) => {
+  const errors = [];
+  
+  // Check required fields
+  if (!record.name && !record['Deal Name'] && !record.Deal && !record.Name) {
+    errors.push(`Row ${rowIndex}: Deal name is required`);
+  }
+  
+  // Validate value if provided
+  const value = record.value || record.Value || record.Amount || record['Deal Value'];
+  if (value && (isNaN(value) || parseFloat(value) < 0)) {
+    errors.push(`Row ${rowIndex}: Invalid value: ${value}. Must be a positive number`);
+  }
+  
+  // Validate status if provided
+  const status = record.status || record.Status || record['Deal Status'];
+  if (status && !['open', 'won', 'lost'].includes(status.toLowerCase())) {
+    errors.push(`Row ${rowIndex}: Invalid status: ${status}. Must be open, won, or lost`);
+  }
+  
+  // Validate expected close date if provided
+  const closeDate = record.expectedCloseDate || record['Expected Close Date'] || record['Close Date'];
+  if (closeDate && isNaN(Date.parse(closeDate))) {
+    errors.push(`Row ${rowIndex}: Invalid date format: ${closeDate}`);
+  }
+  
+  return errors;
+};
+
+// Map CSV fields to deal model fields
+const mapCSVToDeal = (record, fieldMapping, customFieldDefs = []) => {
+  const deal = {
+    customFields: {}
+  };
+  
+  // Apply field mapping
+  Object.entries(fieldMapping).forEach(([csvField, dealField]) => {
+    const value = record[csvField];
+    if (value !== null && value !== undefined && value !== '') {
+      // Check if it's a custom field
+      const customFieldDef = customFieldDefs.find(cf => cf.name === dealField);
+      if (customFieldDef) {
+        deal.customFields[dealField] = value;
+      } else {
+        // Standard field
+        switch (dealField) {
+          case 'value':
+            deal[dealField] = parseFloat(value) || 0;
+            break;
+          case 'expectedCloseDate':
+            deal[dealField] = new Date(value).toISOString();
+            break;
+          case 'status':
+            deal[dealField] = value.toLowerCase();
+            break;
+          default:
+            deal[dealField] = value;
+        }
+      }
+    }
+  });
+  
+  // Set defaults
+  if (!deal.status) {
+    deal.status = 'open';
+  }
+  if (!deal.value) {
+    deal.value = 0;
+  }
+  
+  return deal;
+};
+
 module.exports = {
   parseCSV,
   getCSVHeaders,
   validateContactRecord,
   mapCSVToContact,
-  autoDetectMapping
+  autoDetectMapping,
+  autoDetectDealMapping,
+  validateDealRecord,
+  mapCSVToDeal
 };
