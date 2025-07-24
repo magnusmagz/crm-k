@@ -25,12 +25,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   const formatCurrency = (value: number) => {
+    // Ensure value is a valid number
+    const numValue = isNaN(value) ? 0 : value;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(value);
+    }).format(numValue);
   };
 
   const handleDragStart = (e: React.DragEvent, deal: Deal) => {
@@ -69,7 +71,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     <div className="flex gap-4 overflow-x-auto pb-4">
       {stages.map(stage => {
         const stageDeals = getDealsByStage(stage.id);
-        const totalValue = stageDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+        const totalValue = stageDeals.reduce((sum, deal) => {
+          const value = parseFloat(String(deal.value)) || 0;
+          return sum + value;
+        }, 0);
 
         return (
           <div
