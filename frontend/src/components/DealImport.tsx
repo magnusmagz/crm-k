@@ -57,7 +57,9 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
     { value: 'expectedCloseDate', label: 'Expected Close Date' },
     { value: 'notes', label: 'Notes' },
     { value: 'contactEmail', label: 'Contact Email' },
-    { value: 'contactName', label: 'Contact Name' },
+    { value: 'contactName', label: 'Contact Name (Full)' },
+    { value: 'contactFirstName', label: 'Contact First Name' },
+    { value: 'contactLastName', label: 'Contact Last Name' },
     { value: 'company', label: 'Company' }
   ];
 

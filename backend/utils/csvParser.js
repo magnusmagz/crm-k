@@ -210,7 +210,15 @@ const autoDetectDealMapping = (headers) => {
     'email': 'contactEmail',
     'company': 'company',
     'company name': 'company',
-    'organization': 'company'
+    'organization': 'company',
+    'first name': 'contactFirstName',
+    'firstname': 'contactFirstName',
+    'first': 'contactFirstName',
+    'contact first name': 'contactFirstName',
+    'last name': 'contactLastName',
+    'lastname': 'contactLastName',
+    'last': 'contactLastName',
+    'contact last name': 'contactLastName'
   };
   
   headers.forEach(header => {
@@ -278,6 +286,14 @@ const mapCSVToDeal = (record, fieldMapping, customFieldDefs = []) => {
             break;
           case 'status':
             deal[dealField] = value.toLowerCase();
+            break;
+          case 'contactFirstName':
+          case 'contactLastName':
+          case 'contactEmail':
+          case 'contactName':
+          case 'company':
+            // These are handled separately for contact association
+            deal[dealField] = value;
             break;
           default:
             deal[dealField] = value;

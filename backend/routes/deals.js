@@ -668,15 +668,19 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
           // Handle contact association
           const contactEmail = dealData.contactEmail;
           const contactName = dealData.contactName;
+          const contactFirstName = dealData.contactFirstName;
+          const contactLastName = dealData.contactLastName;
           const company = dealData.company;
           delete dealData.contactEmail;
           delete dealData.contactName;
+          delete dealData.contactFirstName;
+          delete dealData.contactLastName;
           delete dealData.company;
 
-          if (contactEmail || contactName) {
+          if (contactEmail || contactName || (contactFirstName && contactLastName)) {
             // Look for existing contact
             let contact = null;
-            const cacheKey = contactEmail || contactName;
+            const cacheKey = contactEmail || contactName || `${contactFirstName} ${contactLastName}`;
             
             // Check cache first
             if (contactCache[cacheKey]) {
@@ -687,8 +691,14 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
               
               if (contactEmail) {
                 whereClause.email = contactEmail;
+              } else if (contactFirstName && contactLastName) {
+                // Use provided first and last names
+                whereClause[Op.and] = [
+                  { firstName: { [Op.iLike]: contactFirstName } },
+                  { lastName: { [Op.iLike]: contactLastName } }
+                ];
               } else if (contactName) {
-                // Try to split name
+                // Try to split full name
                 const nameParts = contactName.trim().split(/\s+/);
                 if (nameParts.length >= 2) {
                   whereClause[Op.and] = [
@@ -707,11 +717,26 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
               
               if (!contact && contactStrategy === 'create') {
                 // Create new contact
-                const nameParts = (contactName || '').trim().split(/\s+/);
+                let firstName, lastName;
+                
+                // Prefer separate first/last name fields
+                if (contactFirstName && contactLastName) {
+                  firstName = contactFirstName;
+                  lastName = contactLastName;
+                } else if (contactName) {
+                  // Fall back to splitting full name
+                  const nameParts = contactName.trim().split(/\s+/);
+                  firstName = nameParts[0] || 'Unknown';
+                  lastName = nameParts.slice(1).join(' ') || 'Contact';
+                } else {
+                  firstName = 'Unknown';
+                  lastName = 'Contact';
+                }
+                
                 const contactData = {
                   userId: req.user.id,
-                  firstName: nameParts[0] || 'Unknown',
-                  lastName: nameParts.slice(1).join(' ') || 'Contact',
+                  firstName,
+                  lastName,
                   email: contactEmail || null,
                   company: company || null
                 };
