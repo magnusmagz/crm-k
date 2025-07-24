@@ -5,27 +5,32 @@ import { Contact } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
 import ContactImport from '../components/ContactImport';
+import Pagination from '../components/Pagination';
 import { Dialog, Transition } from '@headlessui/react';
 
 const Contacts: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showNewContact, setShowNewContact] = useState(searchParams.get('new') === 'true');
   const [showImport, setShowImport] = useState(false);
   const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     fetchContacts();
-  }, [search]);
+  }, [search, currentPage, pageSize]);
 
   const fetchContacts = async () => {
     setIsLoading(true);
     try {
+      const offset = (currentPage - 1) * pageSize;
       const response = await contactsAPI.getAll({ 
         search: search || undefined,
-        limit: 50 
+        limit: pageSize,
+        offset: offset
       });
       setContacts(response.data.contacts);
       setTotal(response.data.total);
@@ -94,7 +99,10 @@ const Contacts: React.FC = () => {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1); // Reset to first page on search
+            }}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
             placeholder="Search contacts..."
           />
@@ -138,7 +146,26 @@ const Contacts: React.FC = () => {
         </Dialog>
       </Transition.Root>
 
-      <div className="mt-8 flex flex-col">
+      {/* Pagination above table */}
+      {total > pageSize && (
+        <div className="mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(total / pageSize)}
+            onPageChange={setCurrentPage}
+            pageSize={pageSize}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            totalItems={total}
+            startItem={(currentPage - 1) * pageSize + 1}
+            endItem={Math.min(currentPage * pageSize, total)}
+          />
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
@@ -260,9 +287,19 @@ const Contacts: React.FC = () => {
       </div>
 
       {total > 0 && (
-        <div className="mt-4 text-sm text-gray-700">
-          Showing {contacts.length} of {total} contacts
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(total / pageSize)}
+          onPageChange={setCurrentPage}
+          pageSize={pageSize}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1); // Reset to first page when page size changes
+          }}
+          totalItems={total}
+          startItem={(currentPage - 1) * pageSize + 1}
+          endItem={Math.min(currentPage * pageSize, total)}
+        />
       )}
 
       {showImport && (
