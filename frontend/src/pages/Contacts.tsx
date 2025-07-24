@@ -2,8 +2,9 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
 import { Contact } from '../types';
-import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
+import ContactImport from '../components/ContactImport';
 import { Dialog, Transition } from '@headlessui/react';
 
 const Contacts: React.FC = () => {
@@ -12,6 +13,7 @@ const Contacts: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showNewContact, setShowNewContact] = useState(searchParams.get('new') === 'true');
+  const [showImport, setShowImport] = useState(false);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
@@ -64,7 +66,15 @@ const Contacts: React.FC = () => {
             A list of all your contacts including their name, email, and phone.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
+          <button
+            type="button"
+            onClick={() => setShowImport(true)}
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+          >
+            <ArrowUpTrayIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            Import CSV
+          </button>
           <button
             type="button"
             onClick={() => setShowNewContact(true)}
@@ -253,6 +263,13 @@ const Contacts: React.FC = () => {
         <div className="mt-4 text-sm text-gray-700">
           Showing {contacts.length} of {total} contacts
         </div>
+      )}
+
+      {showImport && (
+        <ContactImport onClose={() => {
+          setShowImport(false);
+          fetchContacts();
+        }} />
       )}
     </div>
   );

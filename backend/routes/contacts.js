@@ -4,6 +4,8 @@ const { Contact, CustomField, Deal } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
+const upload = require('../middleware/upload');
+const { parseCSV, getCSVHeaders, validateContactRecord, mapCSVToContact, autoDetectMapping } = require('../utils/csvParser');
 
 const router = express.Router();
 
@@ -383,6 +385,216 @@ router.get('/tags/all', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Get tags error:', error);
     res.status(500).json({ error: 'Failed to get tags' });
+  }
+});
+
+// CSV Import - Parse headers and preview
+router.post('/import/preview', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Parse CSV headers
+    const headers = await getCSVHeaders(req.file.buffer);
+    
+    // Parse first 5 rows for preview
+    const allRecords = await parseCSV(req.file.buffer);
+    const preview = allRecords.slice(0, 5);
+    
+    // Auto-detect field mapping
+    const suggestedMapping = autoDetectMapping(headers);
+    
+    // Get custom fields for this user
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: 'contact'
+      },
+      attributes: ['name', 'label', 'type', 'required']
+    });
+
+    res.json({
+      headers,
+      preview,
+      suggestedMapping,
+      customFields: customFields.map(cf => ({
+        name: cf.name,
+        label: cf.label,
+        type: cf.type,
+        required: cf.required
+      })),
+      totalRows: allRecords.length
+    });
+  } catch (error) {
+    console.error('CSV preview error:', error);
+    res.status(500).json({ error: 'Failed to parse CSV file' });
+  }
+});
+
+// CSV Import - Process and create contacts
+router.post('/import', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const { fieldMapping, duplicateStrategy = 'skip' } = req.body;
+    
+    if (!fieldMapping) {
+      return res.status(400).json({ error: 'Field mapping is required' });
+    }
+
+    const mapping = JSON.parse(fieldMapping);
+
+    // Parse CSV
+    const records = await parseCSV(req.file.buffer);
+    
+    // Get custom field definitions
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: 'contact'
+      }
+    });
+
+    const results = {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      errors: []
+    };
+
+    // Process records in batches
+    const batchSize = 100;
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      
+      const processPromises = batch.map(async (record, index) => {
+        const rowIndex = i + index + 2; // +2 for header row and 1-based indexing
+        
+        try {
+          // Map CSV fields to contact fields
+          const contactData = mapCSVToContact(record, mapping, customFields);
+          
+          // Add user ID
+          contactData.userId = req.user.id;
+          
+          // Validate required fields
+          if (!contactData.firstName || !contactData.lastName) {
+            results.errors.push({
+              row: rowIndex,
+              error: 'First name and last name are required'
+            });
+            results.skipped++;
+            return;
+          }
+
+          // Check for duplicates based on email
+          if (contactData.email) {
+            const existingContact = await Contact.findOne({
+              where: {
+                email: contactData.email,
+                userId: req.user.id
+              }
+            });
+
+            if (existingContact) {
+              if (duplicateStrategy === 'skip') {
+                results.skipped++;
+                return;
+              } else if (duplicateStrategy === 'update') {
+                await existingContact.update(contactData);
+                results.updated++;
+                
+                // Emit update event
+                automationEmitter.emitContactUpdated(
+                  req.user.id, 
+                  existingContact.toJSON(), 
+                  Object.keys(contactData)
+                );
+                return;
+              }
+              // If strategy is 'create', continue to create new contact
+            }
+          }
+
+          // Validate custom fields
+          if (contactData.customFields) {
+            for (const field of customFields) {
+              const value = contactData.customFields[field.name];
+              
+              if (field.required && !value) {
+                results.errors.push({
+                  row: rowIndex,
+                  error: `Custom field '${field.label}' is required`
+                });
+                results.skipped++;
+                return;
+              }
+
+              // Type validation
+              if (value) {
+                switch (field.type) {
+                  case 'number':
+                    if (isNaN(value)) {
+                      results.errors.push({
+                        row: rowIndex,
+                        error: `Custom field '${field.label}' must be a number`
+                      });
+                      results.skipped++;
+                      return;
+                    }
+                    contactData.customFields[field.name] = parseFloat(value);
+                    break;
+                  case 'checkbox':
+                    contactData.customFields[field.name] = 
+                      value === 'true' || value === '1' || value === 'yes';
+                    break;
+                  case 'date':
+                    if (isNaN(Date.parse(value))) {
+                      results.errors.push({
+                        row: rowIndex,
+                        error: `Custom field '${field.label}' must be a valid date`
+                      });
+                      results.skipped++;
+                      return;
+                    }
+                    break;
+                }
+              }
+            }
+          }
+
+          // Create contact
+          const contact = await Contact.create(contactData);
+          results.created++;
+          
+          // Emit creation event
+          automationEmitter.emitContactCreated(req.user.id, contact.toJSON());
+          
+        } catch (error) {
+          console.error(`Error processing row ${rowIndex}:`, error);
+          results.errors.push({
+            row: rowIndex,
+            error: error.message || 'Unknown error'
+          });
+          results.skipped++;
+        }
+      });
+
+      await Promise.all(processPromises);
+    }
+
+    res.json({
+      message: 'Import completed',
+      results,
+      totalProcessed: records.length
+    });
+
+  } catch (error) {
+    console.error('CSV import error:', error);
+    res.status(500).json({ error: 'Failed to import contacts' });
   }
 });
 
