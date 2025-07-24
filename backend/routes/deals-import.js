@@ -1,6 +1,6 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { Deal, CustomField, Contact, Stage, Pipeline } = require('../models');
+const { Deal, CustomField, Contact, Stage, Pipeline, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { parseCSV, getCSVHeaders, autoDetectDealMapping, mapCSVToDeal } = require('../utils/csvParser');
@@ -283,7 +283,14 @@ async function processImportJob(job, records) {
             const whereClause = { userId: job.userId };
             
             if (contactEmail) {
-              whereClause.email = contactEmail;
+              // Use case-insensitive email matching
+              whereClause[Op.and] = [
+                sequelize.where(
+                  sequelize.fn('LOWER', sequelize.col('email')),
+                  contactEmail.toLowerCase()
+                ),
+                { userId: job.userId }
+              ];
             } else if (contactFirstName && contactLastName) {
               // Use provided first and last names
               whereClause[Op.and] = [

@@ -1,6 +1,6 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { Contact, CustomField } = require('../models');
+const { Contact, CustomField, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { parseCSV, getCSVHeaders, autoDetectMapping, mapCSVToContact } = require('../utils/csvParser');
@@ -180,12 +180,17 @@ async function processImportJob(job, records, mapping, duplicateStrategy) {
           return;
         }
 
-        // Check for duplicates based on email
+        // Check for duplicates based on email (case-insensitive)
         if (contactData.email) {
           const existingContact = await Contact.findOne({
             where: {
-              email: contactData.email,
-              userId: job.userId
+              [Op.and]: [
+                sequelize.where(
+                  sequelize.fn('LOWER', sequelize.col('email')),
+                  contactData.email.toLowerCase()
+                ),
+                { userId: job.userId }
+              ]
             }
           });
 

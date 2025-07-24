@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Contact, CustomField, Deal } = require('../models');
+const { Contact, CustomField, Deal, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
@@ -490,12 +490,17 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
             return;
           }
 
-          // Check for duplicates based on email
+          // Check for duplicates based on email (case-insensitive)
           if (contactData.email) {
             const existingContact = await Contact.findOne({
               where: {
-                email: contactData.email,
-                userId: req.user.id
+                [Op.and]: [
+                  sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('email')),
+                    contactData.email.toLowerCase()
+                  ),
+                  { userId: req.user.id }
+                ]
               }
             });
 

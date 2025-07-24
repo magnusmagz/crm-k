@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Deal, Contact, Stage, CustomField } = require('../models');
+const { Deal, Contact, Stage, CustomField, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
@@ -706,7 +706,14 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
               const whereClause = { userId: req.user.id };
               
               if (contactEmail) {
-                whereClause.email = contactEmail;
+                // Use case-insensitive email matching
+                whereClause[Op.and] = [
+                  sequelize.where(
+                    sequelize.fn('LOWER', sequelize.col('email')),
+                    contactEmail.toLowerCase()
+                  ),
+                  { userId: req.user.id }
+                ];
               } else if (contactFirstName && contactLastName) {
                 // Use provided first and last names
                 whereClause[Op.and] = [
