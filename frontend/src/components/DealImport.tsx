@@ -61,7 +61,6 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
   const [contactStrategy, setContactStrategy] = useState<'match' | 'create' | 'skip'>('create');
   const [duplicateStrategy, setDuplicateStrategy] = useState<'skip' | 'update' | 'create'>('skip');
   const [defaultStageId, setDefaultStageId] = useState<string>('');
-  const [requireContact, setRequireContact] = useState(false);
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState<ImportResults | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -177,7 +176,6 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
     formData.append('contactStrategy', contactStrategy);
     formData.append('duplicateStrategy', duplicateStrategy);
     formData.append('defaultStageId', defaultStageId);
-    formData.append('requireContact', String(requireContact));
 
     try {
       if (useChunkedImport) {
@@ -374,7 +372,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                 <div>
                   <h3 className="text-lg font-medium mb-3">Contact Association</h3>
                   <p className="text-gray-600 text-sm mb-3">
-                    How should we handle contacts when importing deals?
+                    How should we handle contacts when importing deals? <span className="font-medium text-gray-800">(All deals require a contact)</span>
                   </p>
                   <div className="space-y-2">
                     <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
@@ -417,15 +415,6 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                       </div>
                     </label>
                   </div>
-                  <label className="flex items-center gap-2 mt-3">
-                    <input
-                      type="checkbox"
-                      checked={requireContact}
-                      onChange={(e) => setRequireContact(e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm text-gray-700">Require contact for all deals</span>
-                  </label>
                 </div>
 
                 {/* Duplicate Strategy */}
