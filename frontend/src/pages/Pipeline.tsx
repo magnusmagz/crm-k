@@ -64,11 +64,10 @@ const Pipeline: React.FC = () => {
 
   const handleDealCreate = async (dealData: any) => {
     try {
-      const response = await dealsAPI.create(dealData);
-      setDeals([...deals, response.data.deal]);
+      await dealsAPI.create(dealData);
       setShowDealForm(false);
       toast.success('Deal created successfully');
-      loadPipelineData(); // Reload to get updated analytics
+      loadPipelineData(); // Reload to get updated analytics and Contact data
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create deal');
     }
@@ -76,12 +75,11 @@ const Pipeline: React.FC = () => {
 
   const handleDealUpdate = async (dealId: string, dealData: any) => {
     try {
-      const response = await dealsAPI.update(dealId, dealData);
-      setDeals(deals.map(d => d.id === dealId ? response.data.deal : d));
+      await dealsAPI.update(dealId, dealData);
       setSelectedDeal(null);
       setShowDealForm(false);
       toast.success('Deal updated successfully');
-      loadPipelineData(); // Reload to get updated analytics
+      loadPipelineData(); // Reload to get updated analytics and Contact data
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update deal');
     }

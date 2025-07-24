@@ -31,7 +31,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(deal?.Contact || null);
 
   useEffect(() => {
     fetchContacts();
@@ -40,11 +40,13 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
 
   useEffect(() => {
     // Find and set the selected contact when deal loads or contactId changes
-    if (formData.contactId && contacts.length > 0) {
+    if (deal?.Contact) {
+      // If deal already has Contact data, use it
+      setSelectedContact(deal.Contact);
+    } else if (formData.contactId && contacts.length > 0) {
+      // Otherwise, find contact from the loaded contacts list
       const contact = contacts.find(c => c.id === formData.contactId);
       setSelectedContact(contact || null);
-    } else if (deal?.Contact) {
-      setSelectedContact(deal.Contact);
     }
   }, [formData.contactId, contacts, deal]);
 
