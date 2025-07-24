@@ -176,6 +176,7 @@ const autoDetectDealMapping = (headers) => {
   const mapping = {};
   const dealMappings = {
     'deal name': 'name',
+    'dealname': 'name',
     'deal': 'name',
     'opportunity': 'name',
     'name': 'name',

@@ -86,6 +86,8 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
 
       setPreview(response.data);
       setFieldMapping(response.data.suggestedMapping);
+      console.log('Suggested mapping:', response.data.suggestedMapping);
+      console.log('Headers:', response.data.headers);
       setDefaultStageId(response.data.stages[0]?.id || '');
       
       // Auto-detect stage mappings
@@ -108,6 +110,9 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
 
   const handleImport = async () => {
     if (!file || !preview) return;
+
+    console.log('Current fieldMapping:', fieldMapping);
+    console.log('Has name mapping?', Object.values(fieldMapping).includes('name'));
 
     setImporting(true);
     setError(null);
@@ -138,10 +143,14 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
   };
 
   const handleMappingChange = (csvField: string, dealField: string) => {
-    setFieldMapping(prev => ({
-      ...prev,
+    const newMapping = {
+      ...fieldMapping,
       [csvField]: dealField
-    }));
+    };
+    console.log('Mapping change:', csvField, '->', dealField);
+    console.log('New mapping:', newMapping);
+    console.log('Has name?', Object.values(newMapping).includes('name'));
+    setFieldMapping(newMapping);
   };
 
   const handleStageMappingChange = (csvValue: string, stageId: string) => {
@@ -469,6 +478,14 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                 </div>
               )}
 
+              {/* Debug Info */}
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h4 className="font-medium mb-2">Debug Info:</h4>
+                <p className="text-sm">Field Mapping: {JSON.stringify(fieldMapping)}</p>
+                <p className="text-sm">Has 'name' mapped: {Object.values(fieldMapping).includes('name') ? 'YES' : 'NO'}</p>
+                <p className="text-sm">Button should be enabled: {!importing && Object.values(fieldMapping).includes('name') ? 'YES' : 'NO'}</p>
+              </div>
+
               {/* Preview */}
               <div>
                 <h3 className="text-lg font-medium mb-3">Preview</h3>
@@ -581,7 +598,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                   </button>
                   <button
                     onClick={handleImport}
-                    disabled={importing || !fieldMapping.name}
+                    disabled={importing || !Object.values(fieldMapping).includes('name')}
                     className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {importing ? 'Importing...' : `Import ${preview?.totalRows} Deals`}
