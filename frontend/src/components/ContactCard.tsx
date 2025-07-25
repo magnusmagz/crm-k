@@ -52,10 +52,10 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
         
         {contact.email && (
           <div className="flex items-center text-mobile-sm text-gray-600">
-            <EnvelopeIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+            <EnvelopeIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0 mt-0.5" />
             <a 
               href={`mailto:${contact.email}`}
-              className="truncate text-blue-600 hover:text-blue-800"
+              className="truncate text-blue-600 hover:text-blue-800 leading-4"
             >
               {contact.email}
             </a>
