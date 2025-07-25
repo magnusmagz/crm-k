@@ -268,10 +268,10 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                     <span className="font-medium">{stage.name}</span>
                     {(stage.name === 'Closed Won' || stage.name === 'Closed Lost') && (
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                        System{stage.dealCount !== undefined && stage.dealCount > 0 && ` • ${stage.dealCount} ${stage.dealCount === 1 ? 'deal' : 'deals'}`}
+                        System
                       </span>
                     )}
-                    {!(stage.name === 'Closed Won' || stage.name === 'Closed Lost') && stage.dealCount !== undefined && stage.dealCount > 0 && (
+                    {stage.dealCount !== undefined && stage.dealCount > 0 && (
                       <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                         {stage.dealCount} {stage.dealCount === 1 ? 'deal' : 'deals'}
                       </span>
