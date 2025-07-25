@@ -7,6 +7,7 @@ import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
 import SwipeableContactCard from '../components/SwipeableContactCard';
 import PullToRefresh from '../components/PullToRefresh';
+import LazyLoadWrapper from '../components/LazyLoadWrapper';
 import ContactCardSkeleton from '../components/ContactCardSkeleton';
 import ContactImport from '../components/ContactImport';
 import Pagination from '../components/Pagination';
@@ -211,11 +212,16 @@ const Contacts: React.FC = () => {
               </div>
               <div className="space-y-3">
               {contacts.map((contact) => (
-                <SwipeableContactCard
+                <LazyLoadWrapper
                   key={contact.id}
-                  contact={contact}
-                  onDelete={handleDelete}
-                />
+                  placeholder={<ContactCardSkeleton />}
+                  rootMargin="200px"
+                >
+                  <SwipeableContactCard
+                    contact={contact}
+                    onDelete={handleDelete}
+                  />
+                </LazyLoadWrapper>
               ))}
               </div>
             </PullToRefresh>
