@@ -16,7 +16,6 @@ router.get('/', authMiddleware, async (req, res) => {
         model: Deal,
         as: 'deals',
         attributes: ['id', 'value', 'status'],
-        where: { status: 'open' },
         required: false
       }]
     });
@@ -24,11 +23,12 @@ router.get('/', authMiddleware, async (req, res) => {
     // Calculate totals for each stage
     const stagesWithTotals = stages.map(stage => {
       const stageData = stage.toJSON();
-      const openDeals = stageData.deals || [];
+      const allDeals = stageData.deals || [];
       return {
         ...stageData,
-        dealCount: openDeals.length,
-        totalValue: openDeals.reduce((sum, deal) => sum + parseFloat(deal.value || 0), 0)
+        dealCount: allDeals.length,
+        totalValue: allDeals.reduce((sum, deal) => sum + parseFloat(deal.value || 0), 0),
+        deals: undefined // Remove the deals array from response to reduce payload
       };
     });
 
@@ -158,7 +158,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       include: [{
         model: Deal,
         as: 'deals',
-        where: { status: 'open' },
         required: false
       }]
     });
