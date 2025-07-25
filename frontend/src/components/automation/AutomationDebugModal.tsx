@@ -85,7 +85,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-end justify-center sm:items-center sm:p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -95,26 +95,26 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+              <Dialog.Panel className="modal-mobile transform bg-white text-left shadow-xl transition-all">
                 <div className="bg-white">
-                  <div className="flex items-center justify-between px-6 py-4 border-b">
-                    <Dialog.Title className="text-lg font-medium text-gray-900">
-                      Automation Debug Info
-                      {entityName && <span className="text-sm text-gray-500 ml-2">for {entityName}</span>}
+                  <div className="sticky top-0 bg-white flex items-center justify-between px-mobile py-3 sm:py-4 border-b z-10">
+                    <Dialog.Title className="text-mobile-lg font-medium text-gray-900 truncate pr-2">
+                      Automation Debug
+                      {entityName && <span className="text-mobile-sm text-gray-500 ml-2 hidden sm:inline">for {entityName}</span>}
                     </Dialog.Title>
                     <button
                       onClick={onClose}
-                      className="text-gray-400 hover:text-gray-500"
+                      className="text-gray-400 hover:text-gray-500 touch-target flex items-center justify-center"
                     >
-                      <XMarkIcon className="h-6 w-6" />
+                      <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </button>
                   </div>
 
-                  <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
+                  <div className="px-mobile py-mobile overflow-y-auto" style={{ maxHeight: 'calc(100vh - 120px)' }}>
                     {loading && (
-                      <div className="text-center py-8">
+                      <div className="text-center py-6 sm:py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                        <p className="mt-2 text-gray-500">Loading debug information...</p>
+                        <p className="mt-2 text-mobile-sm text-gray-500">Loading debug information...</p>
                       </div>
                     )}
 

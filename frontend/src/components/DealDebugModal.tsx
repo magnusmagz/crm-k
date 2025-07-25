@@ -29,7 +29,7 @@ const DealDebugModal: React.FC<DealDebugModalProps> = ({ isOpen, onClose, deal }
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="flex min-h-full items-center justify-center sm:p-4 text-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -39,36 +39,36 @@ const DealDebugModal: React.FC<DealDebugModalProps> = ({ isOpen, onClose, deal }
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-4">
+              <Dialog.Panel className="modal-mobile transform overflow-hidden bg-white text-left align-middle shadow-xl transition-all">
+                <div className="sticky top-0 bg-white border-b px-mobile py-3 sm:py-4 flex items-center justify-between">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="text-mobile-lg font-medium leading-6 text-gray-900 truncate pr-2"
                   >
-                    Deal Automation Debug Info - {deal.name}
+                    Deal Debug - {deal.name}
                   </Dialog.Title>
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 touch-target flex items-center justify-center"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                   </button>
                 </div>
 
-                <div className="mt-2">
+                <div className="px-mobile py-mobile">
                   <EntityDebugView entityType="deal" entityId={deal.id} />
-                </div>
-
-                <div className="mt-6">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                    onClick={onClose}
-                  >
-                    Close
-                  </button>
+                  
+                  <div className="mt-4 sm:mt-6">
+                    <button
+                      type="button"
+                      className="btn-mobile w-full sm:w-auto justify-center rounded-md border border-transparent bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      onClick={onClose}
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

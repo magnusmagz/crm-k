@@ -297,31 +297,31 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-4">
+      <div className="modal-mobile bg-white overflow-hidden sm:max-w-5xl">
         {/* Header */}
-        <div className="p-6 border-b">
+        <div className="sticky top-0 bg-white border-b px-mobile py-3 sm:py-4 z-10">
           <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold">Import Deals</h2>
-              <p className="text-gray-600 mt-1">
-                {step === 'upload' && 'Upload a CSV file to import deals'}
-                {step === 'mapping' && 'Map CSV columns to deal fields and configure import options'}
+            <div className="flex-1 min-w-0 pr-2">
+              <h2 className="text-mobile-xl font-bold">Import Deals</h2>
+              <p className="text-mobile-sm text-gray-600 mt-0.5 truncate">
+                {step === 'upload' && 'Upload CSV file'}
+                {step === 'mapping' && 'Map columns & configure'}
                 {step === 'importing' && 'Importing deals...'}
                 {step === 'results' && 'Import completed'}
               </p>
             </div>
             <button
               onClick={onClose || (() => window.location.reload())}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 touch-target flex items-center justify-center"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 200px)' }}>
+        <div className="p-mobile overflow-y-auto" style={{ maxHeight: 'calc(100vh - 140px)', minHeight: '60vh' }}>
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -347,7 +347,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <span className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+                <span className="btn-mobile bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer font-medium">
                   Choose File
                 </span>
               </label>
@@ -723,30 +723,31 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t bg-gray-50">
+        <div className="sticky bottom-0 p-mobile border-t bg-gray-50">
           <div className="flex justify-between items-center">
             <button
               onClick={resetImport}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900"
+              className="btn-mobile text-gray-700 hover:text-gray-900 font-medium"
               disabled={step === 'importing'}
             >
-              {step === 'results' ? 'Import Another File' : 'Cancel'}
+              {step === 'results' ? 'Import Another' : 'Cancel'}
             </button>
             <div className="flex gap-3">
               {step === 'mapping' && (
                 <>
                   <button
                     onClick={() => setStep('upload')}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="btn-mobile border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleImport}
                     disabled={importing || !Object.values(fieldMapping).includes('name')}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-mobile bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
-                    {importing ? 'Importing...' : `Import ${preview?.totalRows} Deals`}
+                    <span className="hidden sm:inline">{importing ? 'Importing...' : `Import ${preview?.totalRows} Deals`}</span>
+                    <span className="sm:hidden">{importing ? 'Importing...' : 'Import'}</span>
                   </button>
                 </>
               )}
