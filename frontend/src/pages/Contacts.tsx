@@ -6,6 +6,7 @@ import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@
 import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
 import SwipeableContactCard from '../components/SwipeableContactCard';
+import PullToRefresh from '../components/PullToRefresh';
 import ContactCardSkeleton from '../components/ContactCardSkeleton';
 import ContactImport from '../components/ContactImport';
 import Pagination from '../components/Pagination';
@@ -63,6 +64,10 @@ const Contacts: React.FC = () => {
       console.error('Failed to delete contact:', error);
       alert('Failed to delete contact');
     }
+  };
+
+  const handleRefresh = async () => {
+    await fetchContacts();
   };
 
   return (
@@ -194,24 +199,26 @@ const Contacts: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Mobile Cards View with Swipe-to-Delete */}
+          {/* Mobile Cards View with Swipe-to-Delete and Pull-to-Refresh */}
           <div className="md:hidden mt-4">
-            {/* Swipe hint - shown only once */}
-            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-mobile-sm text-blue-800">
-              <p className="flex items-center gap-2">
-                <span>💡</span>
-                <span>Tip: Swipe left on any contact to delete</span>
-              </p>
-            </div>
-            <div className="space-y-3">
-            {contacts.map((contact) => (
-              <SwipeableContactCard
-                key={contact.id}
-                contact={contact}
-                onDelete={handleDelete}
-              />
-            ))}
-            </div>
+            <PullToRefresh onRefresh={handleRefresh}>
+              {/* Swipe hint - shown only once */}
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-mobile-sm text-blue-800">
+                <p className="flex items-center gap-2">
+                  <span>💡</span>
+                  <span>Tip: Swipe left to delete • Pull down to refresh</span>
+                </p>
+              </div>
+              <div className="space-y-3">
+              {contacts.map((contact) => (
+                <SwipeableContactCard
+                  key={contact.id}
+                  contact={contact}
+                  onDelete={handleDelete}
+                />
+              ))}
+              </div>
+            </PullToRefresh>
           </div>
 
           {/* Desktop Table View */}

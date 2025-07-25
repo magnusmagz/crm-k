@@ -4,6 +4,7 @@ import { stagesAPI, dealsAPI } from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import KanbanBoard from '../components/KanbanBoard';
 import MobilePipeline from '../components/MobilePipeline';
+import PullToRefresh from '../components/PullToRefresh';
 import DealForm from '../components/DealForm';
 import StageManager from '../components/StageManager';
 import DealDebugModal from '../components/DealDebugModal';
@@ -383,17 +384,21 @@ const Pipeline: React.FC = () => {
         />
       </div>
 
-      {/* Mobile Pipeline */}
-      <MobilePipeline
-        stages={stages}
-        deals={deals}
-        onDealMove={handleDealMove}
-        onDealClick={(deal) => {
-          setSelectedDeal(deal);
-          setShowDealForm(true);
-        }}
-        onDealDelete={handleDealDelete}
-      />
+      {/* Mobile Pipeline with Pull-to-Refresh */}
+      <div className="md:hidden">
+        <PullToRefresh onRefresh={loadPipelineData}>
+          <MobilePipeline
+            stages={stages}
+            deals={deals}
+            onDealMove={handleDealMove}
+            onDealClick={(deal) => {
+              setSelectedDeal(deal);
+              setShowDealForm(true);
+            }}
+            onDealDelete={handleDealDelete}
+          />
+        </PullToRefresh>
+      </div>
 
       {/* Deal Form Modal */}
       {showDealForm && (
