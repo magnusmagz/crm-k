@@ -82,6 +82,13 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
 
   const handleDeleteStage = async (stageId: string, stageName: string) => {
     const stage = stageList.find(s => s.id === stageId);
+    
+    // Protect system-critical stages
+    if (stageName === 'Closed Won' || stageName === 'Closed Lost') {
+      toast.error(`Cannot delete "${stageName}" - this is a system stage required for deal closure`);
+      return;
+    }
+    
     if (stage?.dealCount && stage.dealCount > 0) {
       toast.error(`Cannot delete "${stageName}" - it contains ${stage.dealCount} deal${stage.dealCount > 1 ? 's' : ''}`);
       return;
@@ -248,6 +255,11 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                     }}
                   >
                     <span className="font-medium">{stage.name}</span>
+                    {(stage.name === 'Closed Won' || stage.name === 'Closed Lost') && (
+                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                        System
+                      </span>
+                    )}
                     {stage.dealCount !== undefined && stage.dealCount > 0 && (
                       <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                         {stage.dealCount} {stage.dealCount === 1 ? 'deal' : 'deals'}
@@ -261,12 +273,20 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
               <button
                 onClick={() => handleDeleteStage(stage.id, stage.name)}
                 className={`p-1.5 rounded transition-all ${
-                  stage.dealCount && stage.dealCount > 0
+                  stage.name === 'Closed Won' || stage.name === 'Closed Lost'
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : stage.dealCount && stage.dealCount > 0
                     ? 'text-gray-300 cursor-not-allowed'
                     : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                 }`}
-                disabled={!!(stage.dealCount && stage.dealCount > 0)}
-                title={stage.dealCount && stage.dealCount > 0 ? 'Cannot delete stage with deals' : 'Delete stage'}
+                disabled={!!(stage.name === 'Closed Won' || stage.name === 'Closed Lost' || (stage.dealCount && stage.dealCount > 0))}
+                title={
+                  stage.name === 'Closed Won' || stage.name === 'Closed Lost' 
+                    ? 'System stage - required for deal closure' 
+                    : stage.dealCount && stage.dealCount > 0 
+                    ? 'Cannot delete stage with deals' 
+                    : 'Delete stage'
+                }
               >
                 <TrashIcon className="h-5 w-5" />
               </button>

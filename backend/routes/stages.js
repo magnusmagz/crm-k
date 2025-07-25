@@ -162,6 +162,13 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Stage not found' });
     }
 
+    // Protect system-critical stages
+    if (stage.name === 'Closed Won' || stage.name === 'Closed Lost') {
+      return res.status(400).json({ 
+        error: 'Cannot delete system stage. These stages are required for deal closure functionality.' 
+      });
+    }
+
     if (stage.deals && stage.deals.length > 0) {
       return res.status(400).json({ 
         error: 'Cannot delete stage with active deals. Please move or close all deals first.' 
