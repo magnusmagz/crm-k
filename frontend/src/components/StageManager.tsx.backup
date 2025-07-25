@@ -191,9 +191,9 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
         <div>
           <h3 className="text-mobile-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
           <p className="text-mobile-sm text-gray-500 mt-1">
-            <span className="hidden sm:inline">Drag stages to reorder, click to edit names</span>
-            <span className="sm:hidden">Use arrows to reorder, tap to edit</span>
-          </p>
+        <span className="hidden sm:inline">Drag stages to reorder, click to edit names</span>
+        <span className="sm:hidden">Use arrows to reorder, tap to edit</span>
+      </p>
         </div>
         <button
           type="button"
