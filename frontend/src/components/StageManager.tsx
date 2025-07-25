@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Stage } from '../types';
 import { stagesAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { XMarkIcon, PlusIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, TrashIcon, CheckIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 interface StageManagerProps {
   stages: Stage[];
@@ -176,12 +176,24 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
     setDragOverIndex(null);
   };
 
+  const moveStage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= stageList.length) return;
+    
+    const newList = [...stageList];
+    const [movedStage] = newList.splice(fromIndex, 1);
+    newList.splice(toIndex, 0, movedStage);
+    setStageList(newList);
+  };
+
   return (
     <div className="p-mobile max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
           <h3 className="text-mobile-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
-          <p className="text-mobile-sm text-gray-500 mt-1">Drag stages to reorder, click to edit names</p>
+          <p className="text-mobile-sm text-gray-500 mt-1">
+        <span className="hidden sm:inline">Drag stages to reorder, click to edit names</span>
+        <span className="sm:hidden">Use arrows to reorder, tap to edit</span>
+      </p>
         </div>
         <button
           type="button"
@@ -202,26 +214,48 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
             onDragOver={(e) => handleDragOver(e, index)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, index)}
-            className={`group relative bg-white border rounded-lg p-3 sm:p-4 cursor-move transition-all ${
+            className={`group relative bg-white border rounded-lg p-3 sm:p-4 sm:cursor-move transition-all ${
               dragOverIndex === index ? 'border-blue-500 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
             }`}
           >
-            {/* Drag Handle */}
-            <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
+            {/* Drag Handle - Desktop Only */}
+            <div className="hidden sm:block absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M7 2a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0zM7 18a2 2 0 11-4 0 2 2 0 014 0zM17 2a2 2 0 11-4 0 2 2 0 014 0zM17 10a2 2 0 11-4 0 2 2 0 014 0zM17 18a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path d="M7 2a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0zM7 18a2 2 0 11-4 0 2 2 0 014 0zM17 2a2 2 0 11-4 0 2 2 0 014 0zM17 10a2 2 0 11-4 0 2 2 0 414 0zM17 18a2 2 0 11-4 0 2 2 0 414 0z" />
               </svg>
             </div>
+            
+            {/* Mobile Reorder Buttons */}
+            <div className="sm:hidden absolute left-1 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+              <button
+                onClick={() => moveStage(index, index - 1)}
+                disabled={index === 0}
+                className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed touch-target flex items-center justify-center"
+                title="Move up"
+              >
+                <ChevronUpIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => moveStage(index, index + 1)}
+                disabled={index === stageList.length - 1}
+                className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed touch-target flex items-center justify-center"
+                title="Move down"
+              >
+                <ChevronDownIcon className="h-4 w-4" />
+              </button>
+            </div>
 
-            <div className="ml-8 flex items-center gap-4">
-              {/* Color Indicator */}
-              <div
-                className="w-6 h-6 rounded"
-                style={{ backgroundColor: stage.color }}
-              />
-              
-              {/* Stage Name */}
-              <div className="flex-1">
+            <div className="ml-12 sm:ml-8">
+              {/* Stage Info Row */}
+              <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                {/* Color Indicator */}
+                <div
+                  className="w-6 h-6 rounded flex-shrink-0"
+                  style={{ backgroundColor: stage.color }}
+                />
+                
+                {/* Stage Name */}
+                <div className="flex-1 min-w-0">
                 {editingStage === stage.id ? (
                   <input
                     type="text"
@@ -280,54 +314,59 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                 )}
               </div>
 
-              {/* Color Dropdown */}
-              <select
-                value={stage.color}
-                onChange={(e) => handleUpdateStage(stage.id, { color: e.target.value })}
-                className="text-mobile-sm border border-gray-300 rounded px-2 py-1 touch-target"
-              >
-                {colors.map(color => (
-                  <option key={color.value} value={color.value}>
-                    {color.name}
-                  </option>
-                ))}
-              </select>
+              {/* Action Row - Mobile: Stack below, Desktop: Inline */}
+              <div className="flex items-center gap-2 sm:gap-3 ml-9 sm:ml-0 sm:mt-3">
+                {/* Color Dropdown */}
+                <select
+                  value={stage.color}
+                  onChange={(e) => handleUpdateStage(stage.id, { color: e.target.value })}
+                  className="text-mobile-sm border border-gray-300 rounded px-2 py-1 touch-target flex-1 sm:flex-initial"
+                  aria-label="Stage color"
+                >
+                  {colors.map(color => (
+                    <option key={color.value} value={color.value}>
+                      {color.name}
+                    </option>
+                  ))}
+                </select>
 
-              {/* Delete Button */}
-              <button
-                onClick={() => handleDeleteStage(stage.id, stage.name)}
-                className={`p-1.5 rounded transition-all ${
-                  stage.name === 'Closed Won' || stage.name === 'Closed Lost'
-                    ? 'text-gray-300 cursor-not-allowed'
-                    : stage.dealCount && stage.dealCount > 0
-                    ? 'text-gray-300 cursor-not-allowed'
-                    : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                }`}
-                disabled={!!(stage.name === 'Closed Won' || stage.name === 'Closed Lost' || (stage.dealCount && stage.dealCount > 0))}
-                title={
-                  stage.name === 'Closed Won' || stage.name === 'Closed Lost' 
-                    ? 'System stage - required for deal closure' 
-                    : stage.dealCount && stage.dealCount > 0 
-                    ? 'Cannot delete stage with deals' 
-                    : 'Delete stage'
-                }
-              >
-                <TrashIcon className="h-5 w-5" />
-              </button>
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDeleteStage(stage.id, stage.name)}
+                  className={`p-2 rounded transition-all touch-target flex items-center justify-center ${
+                    stage.name === 'Closed Won' || stage.name === 'Closed Lost'
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : stage.dealCount && stage.dealCount > 0
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                  }`}
+                  disabled={!!(stage.name === 'Closed Won' || stage.name === 'Closed Lost' || (stage.dealCount && stage.dealCount > 0))}
+                  title={
+                    stage.name === 'Closed Won' || stage.name === 'Closed Lost' 
+                      ? 'System stage - required for deal closure' 
+                      : stage.dealCount && stage.dealCount > 0 
+                      ? 'Cannot delete stage with deals' 
+                      : 'Delete stage'
+                  }
+                  aria-label="Delete stage"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Add New Stage */}
-      <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 mb-6">
-        <div className="flex gap-2">
+      <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={newStageName}
             onChange={(e) => setNewStageName(e.target.value)}
             placeholder="Enter new stage name..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-mobile-base"
             onKeyPress={(e) => {
               if (e.key === 'Enter' && newStageName.trim()) {
                 handleAddStage();
@@ -337,24 +376,26 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
           <button
             onClick={handleAddStage}
             disabled={isLoading || !newStageName.trim()}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn-mobile inline-flex items-center justify-center bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             <PlusIcon className="h-5 w-5 mr-1" />
-            Add Stage
+            <span className="sm:hidden">Add</span>
+            <span className="hidden sm:inline">Add Stage</span>
           </button>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         {hasChanges && (
           <button
             onClick={handleReorder}
             disabled={isLoading}
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+            className="btn-mobile flex-1 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 font-medium order-2 sm:order-1"
           >
             <CheckIcon className="h-5 w-5" />
-            Save Order Changes
+            <span className="sm:hidden">Save</span>
+            <span className="hidden sm:inline">Save Order Changes</span>
           </button>
         )}
         <button
@@ -362,9 +403,9 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
             onUpdate();
             onClose();
           }}
-          className={`${hasChanges ? 'flex-1' : 'w-full'} bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors`}
+          className={`btn-mobile ${hasChanges ? 'flex-1' : 'w-full'} bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium order-1 sm:order-2`}
         >
-          {hasChanges ? 'Close Without Saving' : 'Close'}
+          {hasChanges ? <span><span className="hidden sm:inline">Close Without Saving</span><span className="sm:hidden">Cancel</span></span> : 'Close'}
         </button>
       </div>
     </div>
