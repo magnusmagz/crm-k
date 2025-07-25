@@ -126,24 +126,22 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
       <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
         <Link
           to={`/contacts/${contact.id}`}
-          className="text-mobile-sm font-medium text-blue-600 hover:text-blue-800"
+          className="text-mobile-sm font-medium text-blue-600 hover:text-blue-800 flex-1 text-center"
         >
           View Details
         </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            to={`/contacts/${contact.id}`}
-            className="text-mobile-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            Edit
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="text-mobile-sm font-medium text-red-600 hover:text-red-800"
-          >
-            Delete
-          </button>
-        </div>
+        <Link
+          to={`/contacts/${contact.id}`}
+          className="text-mobile-sm font-medium text-gray-600 hover:text-gray-900 flex-1 text-center"
+        >
+          Edit
+        </Link>
+        <button
+          onClick={handleDelete}
+          className="text-mobile-sm font-medium text-red-600 hover:text-red-800 flex-1 text-center"
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
