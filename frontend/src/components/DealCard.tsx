@@ -40,7 +40,7 @@ const DealCard: React.FC<DealCardProps> = ({
 
   return (
     <div
-      className={`p-4 rounded-md shadow-sm border cursor-pointer hover:shadow-md transition-shadow group ${
+      className={`p-3 sm:p-4 rounded-md shadow-sm border cursor-pointer hover:shadow-md transition-shadow group ${
         deal.status === 'won' 
           ? 'bg-green-50 border-green-200' 
           : deal.status === 'lost'
@@ -54,25 +54,25 @@ const DealCard: React.FC<DealCardProps> = ({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-gray-900 truncate">
+          <h4 className="text-mobile-sm font-medium text-gray-900 truncate">
             {deal.name}
           </h4>
           {deal.Contact && (
-            <p className="mt-1 text-sm text-gray-500 truncate">
+            <p className="mt-1 text-mobile-xs text-gray-500 truncate">
               {deal.Contact.firstName} {deal.Contact.lastName}
               {deal.Contact.company && ` • ${deal.Contact.company}`}
             </p>
           )}
-          <p className="mt-2 text-lg font-semibold text-gray-900">
+          <p className="mt-2 text-mobile-base font-semibold text-gray-900">
             {formatCurrency(deal.value || 0)}
           </p>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-mobile-xs text-gray-400">
             {getDaysInStage()} {getDaysInStage() === 1 ? 'day' : 'days'} in stage
           </p>
         </div>
         <button
           onClick={handleDelete}
-          className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-600"
+          className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-600 touch-target flex items-center justify-center"
         >
           <TrashIcon className="h-4 w-4" />
         </button>

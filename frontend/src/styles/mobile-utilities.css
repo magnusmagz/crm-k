@@ -1,0 +1,158 @@
+/* Mobile-First Responsive Utilities */
+
+/* Responsive Typography Scale */
+.text-mobile-xs { @apply text-xs; }
+.text-mobile-sm { @apply text-sm; }
+.text-mobile-base { @apply text-base; }
+.text-mobile-lg { @apply text-lg; }
+.text-mobile-xl { @apply text-xl; }
+.text-mobile-2xl { @apply text-2xl; }
+.text-mobile-3xl { @apply text-3xl; }
+.text-mobile-4xl { @apply text-4xl; }
+
+/* Responsive Text Classes */
+@media (min-width: 640px) {
+  .text-mobile-xs { @apply sm:text-xs; }
+  .text-mobile-sm { @apply sm:text-sm; }
+  .text-mobile-base { @apply sm:text-base; }
+  .text-mobile-lg { @apply sm:text-lg; }
+  .text-mobile-xl { @apply sm:text-xl; }
+  .text-mobile-2xl { @apply sm:text-2xl; }
+  .text-mobile-3xl { @apply sm:text-3xl; }
+  .text-mobile-4xl { @apply sm:text-4xl; }
+}
+
+@media (min-width: 768px) {
+  .text-mobile-xs { @apply md:text-sm; }
+  .text-mobile-sm { @apply md:text-base; }
+  .text-mobile-base { @apply md:text-lg; }
+  .text-mobile-lg { @apply md:text-xl; }
+  .text-mobile-xl { @apply md:text-2xl; }
+  .text-mobile-2xl { @apply md:text-3xl; }
+  .text-mobile-3xl { @apply md:text-4xl; }
+  .text-mobile-4xl { @apply md:text-5xl; }
+}
+
+/* Responsive Spacing Scale */
+.p-mobile { @apply p-2 sm:p-3 md:p-4; }
+.px-mobile { @apply px-3 sm:px-4 md:px-6; }
+.py-mobile { @apply py-2 sm:py-3 md:py-4; }
+.m-mobile { @apply m-2 sm:m-3 md:m-4; }
+.mx-mobile { @apply mx-3 sm:mx-4 md:mx-6; }
+.my-mobile { @apply my-2 sm:my-3 md:my-4; }
+
+/* Responsive Container Padding */
+.container-mobile {
+  @apply px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto;
+}
+
+/* Mobile-Only and Desktop-Only Utilities */
+.mobile-only {
+  @apply block sm:hidden;
+}
+
+.desktop-only {
+  @apply hidden sm:block;
+}
+
+/* Touch Target Sizing (44px minimum) */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Responsive Button Sizing */
+.btn-mobile {
+  @apply px-3 py-2 text-sm sm:px-4 sm:py-2 sm:text-base touch-target;
+}
+
+/* Mobile-Friendly Card Spacing */
+.card-mobile {
+  @apply p-3 sm:p-4 md:p-6 rounded-lg;
+}
+
+/* Responsive Gap Utilities */
+.gap-mobile { @apply gap-2 sm:gap-3 md:gap-4; }
+.gap-mobile-lg { @apply gap-3 sm:gap-4 md:gap-6; }
+
+/* Mobile Modal Styles */
+.modal-mobile {
+  @apply fixed inset-0 w-full h-full sm:inset-auto sm:max-w-lg sm:max-h-[90vh] sm:mx-auto sm:my-8 sm:rounded-lg;
+}
+
+/* Responsive Grid Utilities */
+.grid-mobile {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-mobile;
+}
+
+.grid-mobile-lg {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-mobile;
+}
+
+/* Bottom Safe Area for Mobile Navigation */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Responsive Table to Card Pattern */
+@media (max-width: 639px) {
+  .table-mobile {
+    @apply block;
+  }
+  
+  .table-mobile thead {
+    @apply hidden;
+  }
+  
+  .table-mobile tbody {
+    @apply block;
+  }
+  
+  .table-mobile tr {
+    @apply block mb-3 p-3 border rounded-lg bg-white shadow-sm;
+  }
+  
+  .table-mobile td {
+    @apply block text-right py-1;
+  }
+  
+  .table-mobile td::before {
+    @apply content-[attr(data-label)] float-left font-medium text-gray-600;
+  }
+}
+
+/* Responsive List Utilities */
+.list-mobile {
+  @apply space-y-2 sm:space-y-3;
+}
+
+/* Mobile-Optimized Form Styles */
+.form-mobile {
+  @apply space-y-4;
+}
+
+.form-mobile input,
+.form-mobile select,
+.form-mobile textarea {
+  @apply w-full touch-target;
+}
+
+/* Prevent Horizontal Scroll */
+.no-scroll-x {
+  @apply overflow-x-hidden;
+}
+
+/* Mobile-Friendly Scroll */
+.scroll-mobile {
+  @apply overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide Scrollbar on Mobile */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

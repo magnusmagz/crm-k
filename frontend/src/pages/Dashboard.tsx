@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+          <div className="p-mobile">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <UserGroupIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
@@ -53,8 +53,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <div className="text-sm">
+          <div className="bg-gray-50 px-mobile py-2 sm:py-3">
+            <div className="text-mobile-sm">
               <Link to="/contacts" className="font-medium text-gray-800 hover:text-gray-700">
                 View all
               </Link>
@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+          <div className="p-mobile">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <PlusIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
@@ -76,8 +76,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <div className="text-sm">
+          <div className="bg-gray-50 px-mobile py-2 sm:py-3">
+            <div className="text-mobile-sm">
               <Link to="/contacts?new=true" className="font-medium text-gray-800 hover:text-gray-700">
                 Create new
               </Link>
@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
+          <div className="p-mobile">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <CogIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
@@ -99,8 +99,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <div className="text-sm">
+          <div className="bg-gray-50 px-mobile py-2 sm:py-3">
+            <div className="text-mobile-sm">
               <Link to="/custom-fields" className="font-medium text-gray-800 hover:text-gray-700">
                 Manage fields
               </Link>

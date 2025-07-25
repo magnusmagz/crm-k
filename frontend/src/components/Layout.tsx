@@ -4,6 +4,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import FixedFAB from './FixedFAB';
+import MobileNav from './MobileNav';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -37,7 +38,7 @@ const Layout: React.FC = () => {
                 <div className="flex h-16 items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <h1 className="text-white text-xl font-bold">CRM Killer</h1>
+                      <h1 className="text-white text-mobile-lg font-bold">CRM Killer</h1>
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
@@ -126,61 +127,20 @@ const Layout: React.FC = () => {
                 </div>
               </div>
 
-              <Disclosure.Panel className="md:hidden">
-                <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-                  {navigation.map((item) => (
-                    <Disclosure.Button
-                      key={item.name}
-                      as={Link}
-                      to={item.href}
-                      className={classNames(
-                        location.pathname === item.href
-                          ? 'bg-gray-900 text-white'
-                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                        'block rounded-md px-3 py-2 text-base font-medium'
-                      )}
-                    >
-                      {item.name}
-                    </Disclosure.Button>
-                  ))}
-                </div>
-                <div className="border-t border-gray-700 pb-3 pt-4">
-                  <div className="flex items-center px-5">
-                    <UserCircleIcon className="h-10 w-10 text-gray-300" />
-                    <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">
-                        {profile?.firstName} {profile?.lastName}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-1 px-2">
-                    <Disclosure.Button
-                      as={Link}
-                      to="/profile"
-                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                    >
-                      Your Profile
-                    </Disclosure.Button>
-                    <Disclosure.Button
-                      as="button"
-                      onClick={handleLogout}
-                      className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                    >
-                      Sign out
-                    </Disclosure.Button>
-                  </div>
-                </div>
+              <Disclosure.Panel className="hidden">
+                {/* Mobile menu panel is hidden - using bottom navigation instead */}
               </Disclosure.Panel>
             </>
           )}
         </Disclosure>
 
-        <main>
-          <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+        <main className="no-scroll-x">
+          <div className="container-mobile py-mobile pb-20 md:pb-6">
             <Outlet />
           </div>
         </main>
       </div>
+      <MobileNav />
       <FixedFAB />
     </>
   );

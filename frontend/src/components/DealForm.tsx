@@ -261,18 +261,18 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
           </div>
         )}
 
-        <div className="flex gap-3 pt-4">
+        <div className="flex gap-mobile pt-4">
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 btn-mobile bg-gray-800 text-white rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             {isLoading ? 'Saving...' : deal ? 'Update Deal' : 'Create Deal'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            className="flex-1 btn-mobile bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium"
           >
             Cancel
           </button>

@@ -177,23 +177,23 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-mobile max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
-          <p className="text-sm text-gray-500 mt-1">Drag stages to reorder, click to edit names</p>
+          <h3 className="text-mobile-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
+          <p className="text-mobile-sm text-gray-500 mt-1">Drag stages to reorder, click to edit names</p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-500 transition-colors"
+          className="text-gray-400 hover:text-gray-500 transition-colors touch-target flex items-center justify-center"
         >
-          <XMarkIcon className="h-6 w-6" />
+          <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
       </div>
 
       {/* Stages List */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
         {stageList.map((stage, index) => (
           <div
             key={stage.id}
@@ -202,7 +202,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
             onDragOver={(e) => handleDragOver(e, index)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, index)}
-            className={`group relative bg-white border rounded-lg p-4 cursor-move transition-all ${
+            className={`group relative bg-white border rounded-lg p-3 sm:p-4 cursor-move transition-all ${
               dragOverIndex === index ? 'border-blue-500 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
             }`}
           >
@@ -265,14 +265,14 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                         : 'Click to rename stage'
                     }
                   >
-                    <span className="font-medium">{stage.name}</span>
+                    <span className="font-medium text-mobile-base">{stage.name}</span>
                     {(stage.name === 'Closed Won' || stage.name === 'Closed Lost') && (
-                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                      <span className="text-mobile-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
                         System
                       </span>
                     )}
                     {stage.dealCount !== undefined && stage.dealCount > 0 && (
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                      <span className="text-mobile-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                         {stage.dealCount} {stage.dealCount === 1 ? 'deal' : 'deals'}
                       </span>
                     )}
@@ -284,7 +284,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
               <select
                 value={stage.color}
                 onChange={(e) => handleUpdateStage(stage.id, { color: e.target.value })}
-                className="text-sm border border-gray-300 rounded px-2 py-1"
+                className="text-mobile-sm border border-gray-300 rounded px-2 py-1 touch-target"
               >
                 {colors.map(color => (
                   <option key={color.value} value={color.value}>

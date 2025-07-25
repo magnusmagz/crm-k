@@ -3,6 +3,7 @@ import { Stage, Deal } from '../types';
 import { stagesAPI, dealsAPI } from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import KanbanBoard from '../components/KanbanBoard';
+import MobilePipeline from '../components/MobilePipeline';
 import DealForm from '../components/DealForm';
 import StageManager from '../components/StageManager';
 import DealDebugModal from '../components/DealDebugModal';
@@ -269,8 +270,8 @@ const Pipeline: React.FC = () => {
         
         <div className="sm:flex sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Sales Pipeline</h1>
-            <div className="mt-2 flex items-center space-x-6 text-sm text-gray-600">
+            <h1 className="text-mobile-2xl font-bold text-gray-900">Sales Pipeline</h1>
+            <div className="mt-2 flex flex-wrap gap-mobile text-mobile-sm text-gray-600">
               <span>
                 Total Pipeline: <span className="font-semibold text-gray-900">
                   {formatCurrency(displayedAnalytics.openValue)}
@@ -340,34 +341,50 @@ const Pipeline: React.FC = () => {
             )}
             <button
               onClick={() => setShowImport(true)}
-              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              className="desktop-only inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
             >
               <ArrowUpTrayIcon className="-ml-1 mr-2 h-5 w-5" />
               Import CSV
             </button>
             <button
               onClick={() => setShowStageManager(true)}
-              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              className="btn-mobile inline-flex items-center justify-center rounded-md border border-gray-300 bg-white font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
             >
               <CogIcon className="-ml-1 mr-2 h-5 w-5" />
-              Manage Stages
+              <span className="hidden sm:inline">Manage Stages</span>
+              <span className="sm:hidden">Stages</span>
             </button>
             <button
               onClick={() => {
                 setSelectedDeal(null);
                 setShowDealForm(true);
               }}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              className="btn-mobile inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-              New Deal
+              <span className="hidden sm:inline">New Deal</span>
+              <span className="sm:hidden">Add</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Kanban Board */}
-      <KanbanBoard
+      {/* Desktop Kanban Board */}
+      <div className="hidden md:block">
+        <KanbanBoard
+          stages={stages}
+          deals={deals}
+          onDealMove={handleDealMove}
+          onDealClick={(deal) => {
+            setSelectedDeal(deal);
+            setShowDealForm(true);
+          }}
+          onDealDelete={handleDealDelete}
+        />
+      </div>
+
+      {/* Mobile Pipeline */}
+      <MobilePipeline
         stages={stages}
         deals={deals}
         onDealMove={handleDealMove}
@@ -380,8 +397,8 @@ const Pipeline: React.FC = () => {
 
       {/* Deal Form Modal */}
       {showDealForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center sm:p-4">
+          <div className="modal-mobile bg-white shadow-xl overflow-y-auto">
             <DealForm
               deal={selectedDeal}
               stages={stages}
@@ -400,8 +417,8 @@ const Pipeline: React.FC = () => {
 
       {/* Stage Manager Modal */}
       {showStageManager && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center sm:p-4">
+          <div className="modal-mobile bg-white shadow-xl overflow-y-auto sm:max-w-4xl">
             <StageManager
               stages={stages}
               onUpdate={loadPipelineData}
