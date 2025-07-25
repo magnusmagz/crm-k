@@ -405,7 +405,14 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
           }}
           className={`btn-mobile ${hasChanges ? 'flex-1' : 'w-full'} bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium order-1 sm:order-2`}
         >
-          {hasChanges ? <span><span className="hidden sm:inline">Close Without Saving</span><span className="sm:hidden">Cancel</span></span> : 'Close'}
+          {hasChanges ? (
+            <>
+              <span className="hidden sm:inline">Close Without Saving</span>
+              <span className="sm:hidden">Cancel</span>
+            </>
+          ) : (
+            'Close'
+          )}
         </button>
       </div>
     </div>
