@@ -99,7 +99,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                 <div className="bg-white">
                   <div className="sticky top-0 bg-white flex items-center justify-between px-mobile py-3 sm:py-4 border-b z-10">
                     <Dialog.Title className="text-mobile-lg font-medium text-gray-900 truncate pr-2">
-                      Automation Debug
+                      Action Debug
                       {entityName && <span className="text-mobile-sm text-gray-500 ml-2 hidden sm:inline">for {entityName}</span>}
                     </Dialog.Title>
                     <button
@@ -128,9 +128,9 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                       <div className="space-y-6">
                         {/* Recent Logs */}
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-3">Recent Automation Logs</h3>
+                          <h3 className="text-lg font-medium text-gray-900 mb-3">Recent Action Logs</h3>
                           {debugInfo.logs.length === 0 ? (
-                            <p className="text-gray-500">No automation logs found</p>
+                            <p className="text-gray-500">No action logs found</p>
                           ) : (
                             <div className="space-y-3">
                               {debugInfo.logs.map((log) => (
@@ -140,7 +140,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                                       {getStatusIcon(log.status)}
                                       <div>
                                         <p className="font-medium text-gray-900">
-                                          {log.automation?.name || 'Unknown Automation'}
+                                          {log.automation?.name || 'Unknown Action'}
                                         </p>
                                         <p className="text-sm text-gray-500 mt-1">
                                           {formatDate(log.createdAt)}
@@ -186,7 +186,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                                   <div className="flex items-start justify-between">
                                     <div>
                                       <p className="font-medium text-gray-900">
-                                        {enrollment.automation?.name || 'Unknown Automation'}
+                                        {enrollment.automation?.name || 'Unknown Action'}
                                       </p>
                                       <p className="text-sm text-gray-600 mt-1">
                                         Status: {enrollment.status} | Step: {enrollment.currentStepIndex + 1}
@@ -212,9 +212,9 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
 
                         {/* Applicable Automations */}
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-3">Applicable Automations</h3>
+                          <h3 className="text-lg font-medium text-gray-900 mb-3">Applicable Actions</h3>
                           {debugInfo.applicableAutomations.length === 0 ? (
-                            <p className="text-gray-500">No applicable automations</p>
+                            <p className="text-gray-500">No applicable actions</p>
                           ) : (
                             <div className="space-y-3">
                               {debugInfo.applicableAutomations.map((automation) => (

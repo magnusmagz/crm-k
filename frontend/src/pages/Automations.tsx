@@ -40,7 +40,7 @@ const Automations: React.FC = () => {
       const response = await automationsAPI.getAll();
       setAutomations(response.data.automations);
     } catch (error) {
-      toast.error('Failed to load automations');
+      toast.error('Failed to load actions');
       console.error('Fetch automations error:', error);
     } finally {
       setIsLoading(false);
@@ -50,24 +50,24 @@ const Automations: React.FC = () => {
   const handleToggle = async (automation: Automation) => {
     try {
       await automationsAPI.toggle(automation.id);
-      toast.success(`Automation ${automation.isActive ? 'deactivated' : 'activated'}`);
+      toast.success(`Action ${automation.isActive ? 'deactivated' : 'activated'}`);
       fetchAutomations();
     } catch (error) {
-      toast.error('Failed to toggle automation');
+      toast.error('Failed to toggle action');
     }
   };
 
   const handleDelete = async (automation: Automation) => {
-    if (!window.confirm('Are you sure you want to delete this automation?')) {
+    if (!window.confirm('Are you sure you want to delete this action?')) {
       return;
     }
 
     try {
       await automationsAPI.delete(automation.id);
-      toast.success('Automation deleted');
+      toast.success('Action deleted');
       fetchAutomations();
     } catch (error) {
-      toast.error('Failed to delete automation');
+      toast.error('Failed to delete action');
     }
   };
 
@@ -127,7 +127,7 @@ const Automations: React.FC = () => {
       
       <div className="sm:flex sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Automations</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Actions</h1>
           <p className="mt-2 text-sm text-gray-700">
             Automate your workflow with powerful rules and actions
           </p>
@@ -138,7 +138,7 @@ const Automations: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-            Simple Automation
+            Simple Action
           </button>
           <button
             onClick={() => navigate('/automations/workflow/new')}
@@ -154,9 +154,9 @@ const Automations: React.FC = () => {
         {automations.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <CogIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No automations</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No actions</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Get started by creating your first automation.
+              Get started by creating your first action.
             </p>
             <div className="mt-6">
               <button
@@ -164,7 +164,7 @@ const Automations: React.FC = () => {
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900"
               >
                 <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-                Create Automation
+                Create Action
               </button>
             </div>
           </div>
@@ -275,7 +275,7 @@ const Automations: React.FC = () => {
                             ? 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'
                             : 'border-gray-200 bg-gray-50 text-gray-400 hover:bg-gray-100'
                         }`}
-                        title={automation.isActive ? 'Pause automation' : 'Activate automation'}
+                        title={automation.isActive ? 'Pause action' : 'Activate action'}
                       >
                         {automation.isActive ? (
                           <PauseIcon className="h-5 w-5" />
@@ -286,14 +286,14 @@ const Automations: React.FC = () => {
                       <button
                         onClick={() => navigate(automation.isMultiStep ? `/automations/workflow/${automation.id}` : `/automations/${automation.id}`)}
                         className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-all"
-                        title="Edit automation"
+                        title="Edit action"
                       >
                         <CogIcon className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(automation)}
                         className="p-2 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 transition-all"
-                        title="Delete automation"
+                        title="Delete action"
                       >
                         <TrashIcon className="h-5 w-5" />
                       </button>

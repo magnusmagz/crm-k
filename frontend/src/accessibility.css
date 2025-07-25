@@ -2,15 +2,23 @@
 /* Ensuring minimum 16px font size throughout the application */
 
 /* Override Tailwind's text-xs (12px) to be 16px minimum */
-.text-xs {
+.text-xs,
+*[class*="text-xs"],
+.sm\:text-xs,
+.md\:text-xs,
+.lg\:text-xs {
   font-size: 1rem !important; /* 16px */
-  line-height: 1.5rem !important; /* 24px */
+  line-height: 1.25 !important; /* 20px - tighter for small elements */
 }
 
 /* Override Tailwind's text-sm (14px) to be 16px minimum */
-.text-sm {
+.text-sm,
+*[class*="text-sm"],
+.sm\:text-sm,
+.md\:text-sm,
+.lg\:text-sm {
   font-size: 1rem !important; /* 16px */
-  line-height: 1.5rem !important; /* 24px */
+  line-height: 1.25 !important; /* 20px - consistent with xs */
 }
 
 /* Ensure base text is also at least 16px */

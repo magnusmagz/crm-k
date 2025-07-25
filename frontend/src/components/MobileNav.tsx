@@ -38,7 +38,7 @@ const MobileNav: React.FC = () => {
       iconActive: ChartBarIconSolid,
     },
     {
-      name: 'Automations',
+      name: 'Actions',
       href: '/automations',
       icon: SparklesIcon,
       iconActive: SparklesIconSolid,

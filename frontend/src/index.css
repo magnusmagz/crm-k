@@ -5,6 +5,9 @@
 /* Import mobile utilities */
 @import './styles/mobile-utilities.css';
 
+/* Import accessibility overrides */
+@import './accessibility.css';
+
 /* Ensure viewport is mobile-friendly */
 @layer base {
   html {
