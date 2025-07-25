@@ -281,12 +281,12 @@ const Pipeline: React.FC = () => {
               </span>
               <span>
                 Won: <span className="font-semibold text-green-600">
-                  {formatCurrency(displayedAnalytics.wonValue)}
+                  {displayedAnalytics.won} ({formatCurrency(displayedAnalytics.wonValue)})
                 </span>
               </span>
               <span>
                 Lost: <span className="font-semibold text-red-600">
-                  {formatCurrency(displayedAnalytics.lostValue)}
+                  {displayedAnalytics.lost} ({formatCurrency(displayedAnalytics.lostValue)})
                 </span>
               </span>
             </div>
