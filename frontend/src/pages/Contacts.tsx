@@ -4,6 +4,8 @@ import { contactsAPI } from '../services/api';
 import { Contact } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
+import ContactCard from '../components/ContactCard';
+import ContactCardSkeleton from '../components/ContactCardSkeleton';
 import ContactImport from '../components/ContactImport';
 import Pagination from '../components/Pagination';
 import { Dialog, Transition } from '@headlessui/react';
@@ -147,9 +149,9 @@ const Contacts: React.FC = () => {
         </Dialog>
       </Transition.Root>
 
-      {/* Pagination above table */}
+      {/* Pagination above content */}
       {total > pageSize && (
-        <div className="mt-4">
+        <div className="mt-4 mb-2">
           <Pagination
             currentPage={currentPage}
             totalPages={Math.ceil(total / pageSize)}
@@ -166,23 +168,47 @@ const Contacts: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-4 flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
-                </div>
-              ) : contacts.length === 0 ? (
-                <div className="text-center py-12">
-                  <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No contacts</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Get started by creating a new contact.
-                  </p>
-                </div>
-              ) : (
+      {/* Loading State */}
+      {isLoading ? (
+        <>
+          {/* Mobile Loading */}
+          <div className="md:hidden mt-4 space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <ContactCardSkeleton key={i} />
+            ))}
+          </div>
+          {/* Desktop Loading */}
+          <div className="hidden md:flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+          </div>
+        </>
+      ) : contacts.length === 0 ? (
+        /* Empty State */
+        <div className="text-center py-12">
+          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-mobile-base font-medium text-gray-900">No contacts</h3>
+          <p className="mt-1 text-mobile-sm text-gray-500">
+            Get started by creating a new contact.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Mobile Cards View */}
+          <div className="md:hidden mt-4 space-y-3">
+            {contacts.map((contact) => (
+              <ContactCard
+                key={contact.id}
+                contact={contact}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block mt-4">
+            <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                 <table className="min-w-full divide-y divide-gray-300">
                   <thead className="bg-gray-50">
                     <tr>
@@ -281,11 +307,12 @@ const Contacts: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
-              )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {total > 0 && (
         <Pagination
