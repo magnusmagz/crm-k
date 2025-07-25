@@ -161,6 +161,28 @@ const Pipeline: React.FC = () => {
     }).format(value);
   };
 
+  // Calculate won/lost totals from actual deals in view
+  const calculateDisplayedAnalytics = () => {
+    const wonDeals = deals.filter(d => d.status === 'won');
+    const lostDeals = deals.filter(d => d.status === 'lost');
+    const openDeals = deals.filter(d => d.status === 'open');
+    
+    const wonValue = wonDeals.reduce((sum, deal) => sum + (parseFloat(String(deal.value)) || 0), 0);
+    const lostValue = lostDeals.reduce((sum, deal) => sum + (parseFloat(String(deal.value)) || 0), 0);
+    const openValue = openDeals.reduce((sum, deal) => sum + (parseFloat(String(deal.value)) || 0), 0);
+    
+    return {
+      won: wonDeals.length,
+      wonValue,
+      lost: lostDeals.length,
+      lostValue,
+      open: openDeals.length,
+      openValue
+    };
+  };
+  
+  const displayedAnalytics = calculateDisplayedAnalytics();
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -251,20 +273,20 @@ const Pipeline: React.FC = () => {
             <div className="mt-2 flex items-center space-x-6 text-sm text-gray-600">
               <span>
                 Total Pipeline: <span className="font-semibold text-gray-900">
-                  {formatCurrency(analytics.openValue)}
+                  {formatCurrency(displayedAnalytics.openValue)}
                 </span>
               </span>
               <span>
-                Open Deals: <span className="font-semibold text-gray-900">{analytics.open}</span>
+                Open Deals: <span className="font-semibold text-gray-900">{displayedAnalytics.open}</span>
               </span>
               <span>
                 Won: <span className="font-semibold text-green-600">
-                  {formatCurrency(analytics.wonValue)}
+                  {formatCurrency(displayedAnalytics.wonValue)}
                 </span>
               </span>
               <span>
                 Lost: <span className="font-semibold text-red-600">
-                  {formatCurrency(analytics.lostValue)}
+                  {formatCurrency(displayedAnalytics.lostValue)}
                 </span>
               </span>
             </div>
