@@ -294,7 +294,7 @@ const Pipeline: React.FC = () => {
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
             {deals.length > 0 && (
-              <div className="relative inline-block">
+              <div className="relative inline-block desktop-only">
                 <select
                   value=""
                   onChange={(e) => {

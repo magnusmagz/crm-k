@@ -685,7 +685,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                           link.click();
                           document.body.removeChild(link);
                         }}
-                        className="flex items-center gap-2 px-3 py-1 text-sm bg-white border border-yellow-300 rounded hover:bg-yellow-50"
+                        className="desktop-only flex items-center gap-2 px-3 py-1 text-sm bg-white border border-yellow-300 rounded hover:bg-yellow-50"
                       >
                         <Download className="w-4 h-4" />
                         Download Skipped Records
