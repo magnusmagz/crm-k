@@ -24,7 +24,7 @@ const Pipeline: React.FC = () => {
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'won' | 'lost'>('open');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'won' | 'lost'>('all');
   const [showFilters, setShowFilters] = useState(false);
   
   // Debounce search query to avoid too many API calls
@@ -208,8 +208,8 @@ const Pipeline: React.FC = () => {
                 onChange={(e) => setStatusFilter(e.target.value as any)}
                 className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
-                <option value="open">Open Deals</option>
                 <option value="all">All Deals</option>
+                <option value="open">Open Deals</option>
                 <option value="won">Won Deals</option>
                 <option value="lost">Lost Deals</option>
               </select>
@@ -347,7 +347,7 @@ const Pipeline: React.FC = () => {
       {/* Kanban Board */}
       <KanbanBoard
         stages={stages}
-        deals={deals.filter(d => d.status === 'open')}
+        deals={deals}
         onDealMove={handleDealMove}
         onDealClick={(deal) => {
           setSelectedDeal(deal);
