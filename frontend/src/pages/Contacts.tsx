@@ -5,6 +5,7 @@ import { Contact } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
+import SwipeableContactCard from '../components/SwipeableContactCard';
 import ContactCardSkeleton from '../components/ContactCardSkeleton';
 import ContactImport from '../components/ContactImport';
 import Pagination from '../components/Pagination';
@@ -193,15 +194,24 @@ const Contacts: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Mobile Cards View */}
-          <div className="md:hidden mt-4 space-y-3">
+          {/* Mobile Cards View with Swipe-to-Delete */}
+          <div className="md:hidden mt-4">
+            {/* Swipe hint - shown only once */}
+            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-mobile-sm text-blue-800">
+              <p className="flex items-center gap-2">
+                <span>💡</span>
+                <span>Tip: Swipe left on any contact to delete</span>
+              </p>
+            </div>
+            <div className="space-y-3">
             {contacts.map((contact) => (
-              <ContactCard
+              <SwipeableContactCard
                 key={contact.id}
                 contact={contact}
                 onDelete={handleDelete}
               />
             ))}
+            </div>
           </div>
 
           {/* Desktop Table View */}
