@@ -11,6 +11,54 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+  
+  /* Remove default focus outline and add custom focus styles */
+  a:focus,
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  [role="button"]:focus,
+  [tabindex]:focus {
+    outline: none;
+  }
+  
+  /* Add subtle focus ring for keyboard navigation (accessibility) */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+  
+  /* Remove tap highlight on mobile devices */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Specific styles for React Router links */
+  a {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Remove focus styles from buttons that use Tailwind's focus utilities */
+  .focus\:outline-none:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Override any ring utilities on focus */
+  *:focus {
+    --tw-ring-shadow: 0 0 transparent !important;
+  }
 }
 
 body {
