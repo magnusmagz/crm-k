@@ -10,7 +10,7 @@ import StageManager from '../components/StageManager';
 import DealDebugModal from '../components/DealDebugModal';
 import DealImport from '../components/DealImport';
 import useDebounce from '../hooks/useDebounce';
-import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, FunnelIcon, CurrencyDollarIcon, ChartBarIcon, TrophyIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const Pipeline: React.FC = () => {
   const [stages, setStages] = useState<Stage[]>([]);
@@ -269,31 +269,87 @@ const Pipeline: React.FC = () => {
           )}
         </div>
         
-        <div className="sm:flex sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-mobile-2xl font-bold text-gray-900">Sales Pipeline</h1>
-            <div className="mt-2 flex flex-wrap gap-mobile text-mobile-sm text-gray-600">
-              <span>
-                Total Pipeline: <span className="font-semibold text-gray-900">
+        <div className="mb-6">
+          <h1 className="text-mobile-2xl font-bold text-gray-900 mb-6">Sales Pipeline</h1>
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            {/* Total Pipeline Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors duration-200">
+                  <CurrencyDollarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-mobile-xs sm:text-sm text-gray-600">Total Pipeline</p>
+                <p className="text-mobile-xl sm:text-2xl font-bold text-gray-900">
                   {formatCurrency(displayedAnalytics.openValue)}
-                </span>
-              </span>
-              <span>
-                Open Deals: <span className="font-semibold text-gray-900">{displayedAnalytics.open}</span>
-              </span>
-              <span>
-                Won: <span className="font-semibold text-green-600">
-                  {displayedAnalytics.won} ({formatCurrency(displayedAnalytics.wonValue)})
-                </span>
-              </span>
-              <span>
-                Lost: <span className="font-semibold text-red-600">
-                  {displayedAnalytics.lost} ({formatCurrency(displayedAnalytics.lostValue)})
-                </span>
-              </span>
+                </p>
+                <p className="text-mobile-xs sm:text-sm text-gray-500">
+                  {displayedAnalytics.open} open {displayedAnalytics.open === 1 ? 'deal' : 'deals'}
+                </p>
+              </div>
+            </div>
+
+            {/* Open Deals Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors duration-200">
+                  <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-mobile-xs sm:text-sm text-gray-600">Open Deals</p>
+                <p className="text-mobile-xl sm:text-2xl font-bold text-gray-900">
+                  {displayedAnalytics.open}
+                </p>
+                <p className="text-mobile-xs sm:text-sm text-gray-500">
+                  Active opportunities
+                </p>
+              </div>
+            </div>
+
+            {/* Won Deals Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors duration-200">
+                  <TrophyIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-mobile-xs sm:text-sm text-gray-600">Won Deals</p>
+                <p className="text-mobile-xl sm:text-2xl font-bold text-green-600">
+                  {displayedAnalytics.won}
+                </p>
+                <p className="text-mobile-xs sm:text-sm text-gray-500">
+                  {formatCurrency(displayedAnalytics.wonValue)}
+                </p>
+              </div>
+            </div>
+
+            {/* Lost Deals Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors duration-200">
+                  <XCircleIcon className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-mobile-xs sm:text-sm text-gray-600">Lost Deals</p>
+                <p className="text-mobile-xl sm:text-2xl font-bold text-red-600">
+                  {displayedAnalytics.lost}
+                </p>
+                <p className="text-mobile-xs sm:text-sm text-gray-500">
+                  {formatCurrency(displayedAnalytics.lostValue)}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
+        </div>
+        
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <div className="mt-4 sm:mt-0 sm:flex-none flex gap-3">
             {deals.length > 0 && (
               <div className="relative inline-block desktop-only">
                 <select
