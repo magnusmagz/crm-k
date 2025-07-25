@@ -111,7 +111,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   {stageDeals.length} {stageDeals.length === 1 ? 'deal' : 'deals'}
                 </span>
               </div>
-              <div className="mt-1 text-sm font-medium text-gray-600">
+              <div className={`mt-1 font-medium ${
+                stage.name === 'Closed Won' ? 'text-lg text-green-600' : 
+                stage.name === 'Closed Lost' ? 'text-lg text-red-600' : 
+                'text-sm text-gray-600'
+              }`}>
                 {formatCurrency(totalValue)}
               </div>
             </div>
