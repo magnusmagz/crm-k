@@ -123,25 +123,13 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+      <div className="flex justify-end mt-4 pt-3 border-t border-gray-100">
         <Link
           to={`/contacts/${contact.id}`}
-          className="text-mobile-sm font-medium text-blue-600 hover:text-blue-800 flex-1 text-center"
+          className="text-mobile-sm font-medium text-blue-600 hover:text-blue-800"
         >
-          View Details
+          View
         </Link>
-        <Link
-          to={`/contacts/${contact.id}`}
-          className="text-mobile-sm font-medium text-gray-600 hover:text-gray-900 flex-1 text-center"
-        >
-          Edit
-        </Link>
-        <button
-          onClick={handleDelete}
-          className="text-mobile-sm font-medium text-red-600 hover:text-red-800 flex-1 text-center"
-        >
-          Delete
-        </button>
       </div>
     </div>
   );
