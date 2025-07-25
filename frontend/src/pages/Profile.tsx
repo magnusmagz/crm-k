@@ -124,10 +124,10 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-mobile sm:px-6 lg:px-8 py-mobile">
       <div className="md:grid md:grid-cols-3 md:gap-6">
         <div className="md:col-span-1">
-          <div className="px-4 sm:px-0">
+          <div>
             <h3 className="text-lg font-medium leading-6 text-gray-900">Profile</h3>
             <p className="mt-1 text-sm text-gray-600">
               Your personal information and business details.
@@ -164,7 +164,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
                   <div className="grid grid-cols-6 gap-6">
                     <div className="col-span-6">
-                      <div className="flex gap-6">
+                      <div className="flex flex-col sm:flex-row gap-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700">Profile Photo</label>
                           <div className="mt-1 flex items-center">
