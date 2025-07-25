@@ -205,21 +205,12 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
             </div>
 
             <div className="ml-8 flex items-center gap-4">
-              {/* Color Swatches */}
-              <div className="flex gap-1">
-                {colors.map(color => (
-                  <button
-                    key={color.value}
-                    onClick={() => handleUpdateStage(stage.id, { color: color.value })}
-                    className={`w-6 h-6 rounded transition-all ${
-                      stage.color === color.value ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-
+              {/* Color Indicator */}
+              <div
+                className="w-6 h-6 rounded"
+                style={{ backgroundColor: stage.color }}
+              />
+              
               {/* Stage Name */}
               <div className="flex-1">
                 {editingStage === stage.id ? (
@@ -268,6 +259,19 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                   </div>
                 )}
               </div>
+
+              {/* Color Dropdown */}
+              <select
+                value={stage.color}
+                onChange={(e) => handleUpdateStage(stage.id, { color: e.target.value })}
+                className="text-sm border border-gray-300 rounded px-2 py-1"
+              >
+                {colors.map(color => (
+                  <option key={color.value} value={color.value}>
+                    {color.name}
+                  </option>
+                ))}
+              </select>
 
               {/* Delete Button */}
               <button
