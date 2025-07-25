@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stage } from '../types';
 import { stagesAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 interface StageManagerProps {
   stages: Stage[];
@@ -16,6 +16,9 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
   const [editingStage, setEditingStage] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [draggedStage, setDraggedStage] = useState<Stage | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const colors = [
     { name: 'Gray', value: '#6B7280' },
@@ -25,8 +28,19 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
     { name: 'Green', value: '#10B981' },
     { name: 'Red', value: '#EF4444' },
     { name: 'Pink', value: '#EC4899' },
-    { name: 'Indigo', value: '#6366F1' }
+    { name: 'Indigo', value: '#6366F1' },
+    { name: 'Yellow', value: '#EAB308' },
+    { name: 'Teal', value: '#14B8A6' }
   ];
+
+  // Track if order has changed
+  useEffect(() => {
+    const orderChanged = stageList.some((stage, index) => {
+      const originalStage = stages.find(s => s.id === stage.id);
+      return originalStage && originalStage.order !== index;
+    });
+    setHasChanges(orderChanged);
+  }, [stageList, stages]);
 
   const handleAddStage = async () => {
     if (!newStageName.trim()) {
@@ -43,6 +57,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
       setStageList([...stageList, response.data.stage]);
       setNewStageName('');
       toast.success('Stage added successfully');
+      onUpdate();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to add stage');
     } finally {
@@ -56,7 +71,8 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
       await stagesAPI.update(stageId, updates);
       setStageList(stageList.map(s => s.id === stageId ? { ...s, ...updates } : s));
       setEditingStage(null);
-      toast.success('Stage updated successfully');
+      toast.success('Stage updated');
+      onUpdate();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update stage');
     } finally {
@@ -64,8 +80,14 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
     }
   };
 
-  const handleDeleteStage = async (stageId: string) => {
-    if (!window.confirm('Are you sure you want to delete this stage? Deals in this stage must be moved first.')) {
+  const handleDeleteStage = async (stageId: string, stageName: string) => {
+    const stage = stageList.find(s => s.id === stageId);
+    if (stage?.dealCount && stage.dealCount > 0) {
+      toast.error(`Cannot delete "${stageName}" - it contains ${stage.dealCount} deal${stage.dealCount > 1 ? 's' : ''}`);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete the "${stageName}" stage?`)) {
       return;
     }
 
@@ -74,6 +96,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
       await stagesAPI.delete(stageId);
       setStageList(stageList.filter(s => s.id !== stageId));
       toast.success('Stage deleted successfully');
+      onUpdate();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to delete stage');
     } finally {
@@ -90,167 +113,214 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
     setIsLoading(true);
     try {
       await stagesAPI.reorder(reorderedStages);
-      toast.success('Stages reordered successfully');
+      toast.success('Stage order saved');
+      setHasChanges(false);
       onUpdate();
     } catch (error: any) {
-      toast.error('Failed to reorder stages');
+      toast.error('Failed to save stage order');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const moveStage = (index: number, direction: 'up' | 'down') => {
-    const newList = [...stageList];
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    
-    if (newIndex >= 0 && newIndex < newList.length) {
-      [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
-      setStageList(newList);
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, stage: Stage, index: number) => {
+    setDraggedStage(stage);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedStage) {
+      setDragOverIndex(index);
     }
   };
 
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (!draggedStage) return;
+
+    const draggedIndex = stageList.findIndex(s => s.id === draggedStage.id);
+    if (draggedIndex === dropIndex) {
+      setDraggedStage(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const newList = [...stageList];
+    newList.splice(draggedIndex, 1);
+    newList.splice(dropIndex, 0, draggedStage);
+    
+    setStageList(newList);
+    setDraggedStage(null);
+    setDragOverIndex(null);
+  };
+
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
+          <p className="text-sm text-gray-500 mt-1">Drag stages to reorder, click to edit names</p>
+        </div>
         <button
           type="button"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-500"
+          className="text-gray-400 hover:text-gray-500 transition-colors"
         >
           <XMarkIcon className="h-6 w-6" />
         </button>
       </div>
 
-      <div className="space-y-4 mb-6">
+      {/* Stages List */}
+      <div className="space-y-3 mb-6">
         {stageList.map((stage, index) => (
-          <div key={stage.id} className="flex items-center gap-2 p-3 bg-gray-50 rounded-md">
-            <div className="flex items-center gap-2 flex-1">
-              <div
-                className="w-6 h-6 rounded"
-                style={{ backgroundColor: stage.color }}
-              />
-              {editingStage === stage.id ? (
-                <input
-                  type="text"
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  onBlur={() => {
-                    if (editingName.trim() && editingName !== stage.name) {
-                      handleUpdateStage(stage.id, { name: editingName });
-                    } else {
-                      setEditingStage(null);
-                    }
-                  }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
+          <div
+            key={stage.id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, stage, index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, index)}
+            className={`group relative bg-white border rounded-lg p-4 cursor-move transition-all ${
+              dragOverIndex === index ? 'border-blue-500 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+            }`}
+          >
+            {/* Drag Handle */}
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M7 2a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0zM7 18a2 2 0 11-4 0 2 2 0 014 0zM17 2a2 2 0 11-4 0 2 2 0 014 0zM17 10a2 2 0 11-4 0 2 2 0 014 0zM17 18a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+
+            <div className="ml-8 flex items-center gap-4">
+              {/* Color Swatches */}
+              <div className="flex gap-1">
+                {colors.map(color => (
+                  <button
+                    key={color.value}
+                    onClick={() => handleUpdateStage(stage.id, { color: color.value })}
+                    className={`w-6 h-6 rounded transition-all ${
+                      stage.color === color.value ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+
+              {/* Stage Name */}
+              <div className="flex-1">
+                {editingStage === stage.id ? (
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onBlur={() => {
                       if (editingName.trim() && editingName !== stage.name) {
                         handleUpdateStage(stage.id, { name: editingName });
                       } else {
                         setEditingStage(null);
                       }
-                    }
-                  }}
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded"
-                  autoFocus
-                />
-              ) : (
-                <span
-                  className="flex-1 cursor-pointer"
-                  onClick={() => {
-                    setEditingStage(stage.id);
-                    setEditingName(stage.name);
-                  }}
-                >
-                  {stage.name}
-                </span>
-              )}
-              {stage.dealCount !== undefined && (
-                <span className="text-sm text-gray-500">
-                  ({stage.dealCount} {stage.dealCount === 1 ? 'deal' : 'deals'})
-                </span>
-              )}
-            </div>
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        if (editingName.trim() && editingName !== stage.name) {
+                          handleUpdateStage(stage.id, { name: editingName });
+                        } else {
+                          setEditingStage(null);
+                        }
+                      }
+                    }}
+                    className="w-full px-3 py-1 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                ) : (
+                  <div
+                    className="flex items-center gap-2 cursor-text hover:bg-gray-50 px-3 py-1 -mx-3 -my-1 rounded"
+                    onClick={() => {
+                      setEditingStage(stage.id);
+                      setEditingName(stage.name);
+                    }}
+                  >
+                    <span className="font-medium">{stage.name}</span>
+                    {stage.dealCount !== undefined && stage.dealCount > 0 && (
+                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {stage.dealCount} {stage.dealCount === 1 ? 'deal' : 'deals'}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
 
-            <div className="flex items-center gap-1">
-              <select
-                value={stage.color}
-                onChange={(e) => handleUpdateStage(stage.id, { color: e.target.value })}
-                className="text-sm border border-gray-300 rounded px-2 py-1"
-              >
-                {colors.map(color => (
-                  <option key={color.value} value={color.value}>
-                    {color.name}
-                  </option>
-                ))}
-              </select>
-
+              {/* Delete Button */}
               <button
-                onClick={() => moveStage(index, 'up')}
-                disabled={index === 0}
-                className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
-              >
-                ↑
-              </button>
-              <button
-                onClick={() => moveStage(index, 'down')}
-                disabled={index === stageList.length - 1}
-                className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
-              >
-                ↓
-              </button>
-
-              <button
-                onClick={() => handleDeleteStage(stage.id)}
-                className="p-1 text-red-400 hover:text-red-600"
+                onClick={() => handleDeleteStage(stage.id, stage.name)}
+                className={`p-1.5 rounded transition-all ${
+                  stage.dealCount && stage.dealCount > 0
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                }`}
                 disabled={!!(stage.dealCount && stage.dealCount > 0)}
                 title={stage.dealCount && stage.dealCount > 0 ? 'Cannot delete stage with deals' : 'Delete stage'}
               >
-                <TrashIcon className="h-4 w-4" />
+                <TrashIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          value={newStageName}
-          onChange={(e) => setNewStageName(e.target.value)}
-          placeholder="New stage name"
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleAddStage();
-            }
-          }}
-        />
-        <button
-          onClick={handleAddStage}
-          disabled={isLoading || !newStageName.trim()}
-          className="inline-flex items-center px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 disabled:opacity-50"
-        >
-          <PlusIcon className="h-5 w-5" />
-        </button>
+      {/* Add New Stage */}
+      <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 mb-6">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newStageName}
+            onChange={(e) => setNewStageName(e.target.value)}
+            placeholder="Enter new stage name..."
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && newStageName.trim()) {
+                handleAddStage();
+              }
+            }}
+          />
+          <button
+            onClick={handleAddStage}
+            disabled={isLoading || !newStageName.trim()}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <PlusIcon className="h-5 w-5 mr-1" />
+            Add Stage
+          </button>
+        </div>
       </div>
 
+      {/* Action Buttons */}
       <div className="flex gap-3">
-        <button
-          onClick={handleReorder}
-          disabled={isLoading}
-          className="flex-1 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:opacity-50"
-        >
-          Save Order
-        </button>
+        {hasChanges && (
+          <button
+            onClick={handleReorder}
+            disabled={isLoading}
+            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          >
+            <CheckIcon className="h-5 w-5" />
+            Save Order Changes
+          </button>
+        )}
         <button
           onClick={() => {
             onUpdate();
             onClose();
           }}
-          className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          className={`${hasChanges ? 'flex-1' : 'w-full'} bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors`}
         >
-          Done
+          {hasChanges ? 'Close Without Saving' : 'Close'}
         </button>
       </div>
     </div>
