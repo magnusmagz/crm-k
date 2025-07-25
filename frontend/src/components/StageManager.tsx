@@ -66,6 +66,15 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
   };
 
   const handleUpdateStage = async (stageId: string, updates: Partial<Stage>) => {
+    const stage = stageList.find(s => s.id === stageId);
+    
+    // Frontend check for system stages
+    if (stage && (stage.name === 'Closed Won' || stage.name === 'Closed Lost') && updates.name && updates.name !== stage.name) {
+      toast.error('System stages cannot be renamed');
+      setEditingStage(null);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await stagesAPI.update(stageId, updates);
@@ -239,11 +248,22 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                   />
                 ) : (
                   <div
-                    className="flex items-center gap-2 cursor-text hover:bg-gray-50 px-3 py-1 -mx-3 -my-1 rounded"
+                    className={`flex items-center gap-2 px-3 py-1 -mx-3 -my-1 rounded ${
+                      stage.name === 'Closed Won' || stage.name === 'Closed Lost'
+                        ? 'cursor-not-allowed'
+                        : 'cursor-text hover:bg-gray-50'
+                    }`}
                     onClick={() => {
-                      setEditingStage(stage.id);
-                      setEditingName(stage.name);
+                      if (stage.name !== 'Closed Won' && stage.name !== 'Closed Lost') {
+                        setEditingStage(stage.id);
+                        setEditingName(stage.name);
+                      }
                     }}
+                    title={
+                      stage.name === 'Closed Won' || stage.name === 'Closed Lost'
+                        ? 'System stages cannot be renamed'
+                        : 'Click to rename stage'
+                    }
                   >
                     <span className="font-medium">{stage.name}</span>
                     {(stage.name === 'Closed Won' || stage.name === 'Closed Lost') && (

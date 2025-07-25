@@ -134,6 +134,11 @@ router.put('/:id', authMiddleware, [
       return res.status(404).json({ error: 'Stage not found' });
     }
 
+    // Prevent renaming system stages
+    if ((stage.name === 'Closed Won' || stage.name === 'Closed Lost') && req.body.name && req.body.name !== stage.name) {
+      return res.status(400).json({ error: 'System stages cannot be renamed' });
+    }
+
     await stage.update(req.body);
     res.json({ stage });
   } catch (error) {
