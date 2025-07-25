@@ -70,38 +70,7 @@ router.post('/', authMiddleware, [
   }
 });
 
-// Update stage
-router.put('/:id', authMiddleware, [
-  body('name').optional().notEmpty().trim(),
-  body('color').optional().matches(/^#[0-9A-F]{6}$/i),
-  body('isActive').optional().isBoolean()
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const stage = await Stage.findOne({
-      where: {
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-
-    if (!stage) {
-      return res.status(404).json({ error: 'Stage not found' });
-    }
-
-    await stage.update(req.body);
-    res.json({ stage });
-  } catch (error) {
-    console.error('Update stage error:', error);
-    res.status(500).json({ error: 'Failed to update stage' });
-  }
-});
-
-// Reorder stages
+// Reorder stages - MUST be defined before /:id route
 router.put('/reorder', authMiddleware, [
   body('stages').isArray(),
   body('stages.*.id').isUUID(),
@@ -139,6 +108,37 @@ router.put('/reorder', authMiddleware, [
   } catch (error) {
     console.error('Reorder stages error:', error);
     res.status(500).json({ error: 'Failed to reorder stages' });
+  }
+});
+
+// Update stage
+router.put('/:id', authMiddleware, [
+  body('name').optional().notEmpty().trim(),
+  body('color').optional().matches(/^#[0-9A-F]{6}$/i),
+  body('isActive').optional().isBoolean()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const stage = await Stage.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!stage) {
+      return res.status(404).json({ error: 'Stage not found' });
+    }
+
+    await stage.update(req.body);
+    res.json({ stage });
+  } catch (error) {
+    console.error('Update stage error:', error);
+    res.status(500).json({ error: 'Failed to update stage' });
   }
 });
 
