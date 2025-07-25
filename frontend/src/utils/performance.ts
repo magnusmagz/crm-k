@@ -1,5 +1,12 @@
 // Performance monitoring utilities
 
+// Extend Window interface to include gtag
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
 export const measurePerformance = (metricName: string, callback: () => void) => {
   const startTime = performance.now();
   callback();
