@@ -20,7 +20,7 @@ const MobileNav: React.FC = () => {
 
   const navItems = [
     {
-      name: 'Dashboard',
+      name: 'Home',
       href: '/dashboard',
       icon: HomeIcon,
       iconActive: HomeIconSolid,
