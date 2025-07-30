@@ -25,6 +25,9 @@ const Layout: React.FC = () => {
   const { profile, logout } = useAuth();
   const { crmName, primaryColor } = useTheme();
 
+  // Debug logging
+  console.log('Layout - Theme values:', { crmName, primaryColor, profile });
+
   const handleLogout = () => {
     logout();
     navigate('/login');
