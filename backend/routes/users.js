@@ -15,7 +15,9 @@ const validateProfileUpdate = [
   body('address.street').optional().trim(),
   body('address.city').optional().trim(),
   body('address.state').optional().trim(),
-  body('address.zipCode').optional().matches(/^\d{5}(-\d{4})?$/)
+  body('address.zipCode').optional().matches(/^\d{5}(-\d{4})?$/),
+  body('primaryColor').optional().matches(/^#[0-9A-F]{6}$/i).withMessage('Invalid hex color format'),
+  body('crmName').optional().trim().isLength({ min: 1, max: 50 }).withMessage('CRM name must be between 1 and 50 characters')
 ];
 
 // Get user profile
@@ -52,7 +54,7 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address'];
+    const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address', 'profilePhoto', 'companyLogo', 'primaryColor', 'crmName'];
     const updates = {};
 
     allowedFields.forEach(field => {
