@@ -53,14 +53,14 @@ const TriggerSelector: React.FC<TriggerSelectorProps> = ({ trigger, onChange }) 
             onClick={() => onChange({ type: triggerOption.type as AutomationTrigger['type'] })}
             className={`relative rounded-lg border p-4 text-left transition-all ${
               isSelected
-                ? 'border-gray-800 bg-gray-50 ring-2 ring-gray-800'
+                ? 'border-primary bg-gray-50 ring-2 ring-primary'
                 : 'border-gray-300 hover:border-gray-400'
             }`}
           >
             <div className="flex items-start">
-              <Icon className={`h-5 w-5 ${isSelected ? 'text-gray-800' : 'text-gray-400'}`} />
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />
               <div className="ml-3">
-                <p className={`text-sm font-medium ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
+                <p className={`text-sm font-medium ${isSelected ? 'text-primary-dark' : 'text-gray-700'}`}>
                   {triggerOption.label}
                 </p>
                 <p className="mt-1 text-xs text-gray-500">

@@ -147,7 +147,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               onChange={handleChange}
               className={`mt-1 block w-full px-4 py-3 border ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 text-mobile-sm touch-target`}
+              } rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-mobile-sm touch-target`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
@@ -166,7 +166,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               onChange={handleChange}
               className={`mt-1 block w-full px-4 py-3 border ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 text-mobile-sm touch-target`}
+              } rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-mobile-sm touch-target`}
             >
               <option value="">Select...</option>
               {field.options?.map(option => (
@@ -213,7 +213,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               onChange={handleChange}
               className={`mt-1 block w-full px-4 py-3 border ${
                 error ? 'border-red-300' : 'border-gray-300'
-              } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 text-mobile-sm touch-target`}
+              } rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-mobile-sm touch-target`}
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>

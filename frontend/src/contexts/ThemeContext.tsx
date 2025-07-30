@@ -19,10 +19,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const primaryColor = profile?.primaryColor || '#1f2937';
   const crmName = profile?.crmName || 'CRM Killer';
 
-  // Debug logging
-  console.log('ThemeProvider - Profile:', profile);
-  console.log('ThemeProvider - Using colors:', { primaryColor, crmName });
-
   useEffect(() => {
     // Update CSS variables for theme
     const root = document.documentElement;
@@ -66,10 +62,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Set primary color variables
       root.style.setProperty('--color-primary', `${rgb.r} ${rgb.g} ${rgb.b}`);
       root.style.setProperty('--color-primary-hex', primaryColor);
-      console.log('ThemeProvider - Set CSS variables:', {
-        '--color-primary': `${rgb.r} ${rgb.g} ${rgb.b}`,
-        '--color-primary-hex': primaryColor
-      });
       
       // Set darker variant for hover states
       const darkerColor = darkenColor(primaryColor, 10);

@@ -18,7 +18,7 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200';
   
   const variantStyles = {
-    primary: 'bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-800',
+    primary: 'bg-primary text-white hover:bg-primary-dark focus:ring-primary',
     secondary: 'bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 focus:ring-gray-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
   };

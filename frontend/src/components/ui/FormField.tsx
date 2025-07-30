@@ -49,7 +49,7 @@ export const FormField: React.FC<FormFieldProps> = ({
         disabled={disabled}
         className={`mt-1 block w-full px-4 py-3 border ${
           error ? 'border-red-300' : 'border-gray-300'
-        } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm ${
+        } rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm ${
           disabled ? 'bg-gray-100 cursor-not-allowed' : ''
         }`}
       />
@@ -100,7 +100,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
         disabled={disabled}
         className={`mt-1 block w-full px-4 py-3 border ${
           error ? 'border-red-300' : 'border-gray-300'
-        } rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm ${
+        } rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm ${
           disabled ? 'bg-gray-100 cursor-not-allowed' : ''
         }`}
       >
@@ -157,7 +157,7 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
         disabled={disabled}
         className={`mt-1 block w-full px-4 py-3 border ${
           error ? 'border-red-300' : 'border-gray-300'
-        } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm ${
+        } rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm ${
           disabled ? 'bg-gray-100 cursor-not-allowed' : ''
         }`}
       />

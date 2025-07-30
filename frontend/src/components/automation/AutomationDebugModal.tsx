@@ -163,7 +163,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                                       </div>
                                     </div>
                                     <span className={`text-xs px-2 py-1 rounded-full ${
-                                      log.conditionsMet ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                      log.conditionsMet ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-primary'
                                     }`}>
                                       Conditions: {log.conditionsMet ? 'Met' : 'Not Met'}
                                     </span>

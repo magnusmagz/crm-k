@@ -285,7 +285,7 @@ const ContactDetail: React.FC = () => {
                         <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           deal.status === 'won' ? 'bg-green-100 text-green-800' :
                           deal.status === 'lost' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
+                          'bg-gray-100 text-primary'
                         }`}>
                           {deal.status}
                         </span>

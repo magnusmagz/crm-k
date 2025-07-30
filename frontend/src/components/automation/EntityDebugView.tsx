@@ -118,9 +118,9 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
       active: 'bg-blue-100 text-blue-800',
       completed: 'bg-green-100 text-green-800',
       failed: 'bg-red-100 text-red-800',
-      unenrolled: 'bg-gray-100 text-gray-800'
+      unenrolled: 'bg-gray-100 text-primary'
     };
-    return statusStyles[status as keyof typeof statusStyles] || 'bg-gray-100 text-gray-800';
+    return statusStyles[status as keyof typeof statusStyles] || 'bg-gray-100 text-primary';
   };
 
   if (isLoading) {

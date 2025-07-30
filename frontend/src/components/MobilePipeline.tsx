@@ -118,7 +118,7 @@ const MobilePipeline: React.FC<MobilePipelineProps> = ({
                 onClick={() => setCurrentStageIndex(index)}
                 className={`h-2 rounded-full transition-all ${
                   index === currentStageIndex
-                    ? 'w-6 bg-gray-800'
+                    ? 'w-6 bg-primary'
                     : 'w-2 bg-gray-300'
                 }`}
               />

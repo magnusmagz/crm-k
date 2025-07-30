@@ -19,7 +19,7 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
     }
   };
 
-  const inputClasses = "mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-gray-800 focus:ring-gray-800";
+  const inputClasses = "mt-1 block w-full px-4 py-3 rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-primary focus:ring-primary";
 
   return (
     <div>

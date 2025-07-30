@@ -171,7 +171,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
                 step="0.01"
                 className={`block w-full pl-7 pr-3 py-3 border ${
                   errors.value ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm`}
+                } rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm`}
               />
             </div>
             {errors.value && <p className="mt-1 text-sm text-red-600">{errors.value}</p>}
