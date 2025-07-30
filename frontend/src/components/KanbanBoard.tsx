@@ -106,7 +106,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               style={{ borderTopColor: stage.color, borderTopWidth: '4px' }}
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">{stage.name}</h3>
+                <h3 className="font-semibold text-primary-dark">{stage.name}</h3>
                 <span className="text-sm text-gray-500">
                   {stageDeals.length} {stageDeals.length === 1 ? 'deal' : 'deals'}
                 </span>

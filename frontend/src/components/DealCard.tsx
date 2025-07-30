@@ -54,7 +54,7 @@ const DealCard: React.FC<DealCardProps> = ({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <h4 className="text-mobile-sm font-medium text-gray-900 truncate">
+          <h4 className="text-mobile-sm font-medium text-primary-dark truncate">
             {deal.name}
           </h4>
           {deal.Contact && (
@@ -63,7 +63,7 @@ const DealCard: React.FC<DealCardProps> = ({
               {deal.Contact.company && ` • ${deal.Contact.company}`}
             </p>
           )}
-          <p className="mt-2 text-mobile-base font-semibold text-gray-900">
+          <p className="mt-2 text-mobile-base font-semibold text-primary-dark">
             {formatCurrency(deal.value || 0)}
           </p>
           <p className="mt-1 text-mobile-xs text-gray-400">

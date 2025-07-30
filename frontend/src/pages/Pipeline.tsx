@@ -188,7 +188,7 @@ const Pipeline: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -218,7 +218,7 @@ const Pipeline: React.FC = () => {
                 {/* Searching indicator */}
                 {isSearching && (
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-800"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                   </div>
                 )}
               </div>
@@ -270,7 +270,7 @@ const Pipeline: React.FC = () => {
         </div>
         
         <div className="mb-6">
-          <h1 className="text-mobile-2xl font-bold text-gray-900 mb-6">Sales Pipeline</h1>
+          <h1 className="text-mobile-2xl font-bold text-primary-dark mb-6">Sales Pipeline</h1>
           
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -283,7 +283,7 @@ const Pipeline: React.FC = () => {
               </div>
               <div className="space-y-1">
                 <p className="text-mobile-xs sm:text-sm text-gray-600">Total Pipeline</p>
-                <p className="text-mobile-xl sm:text-2xl font-bold text-gray-900">
+                <p className="text-mobile-xl sm:text-2xl font-bold text-primary-dark">
                   {formatCurrency(displayedAnalytics.openValue)}
                 </p>
                 <p className="text-mobile-xs sm:text-sm text-gray-500">
@@ -301,7 +301,7 @@ const Pipeline: React.FC = () => {
               </div>
               <div className="space-y-1">
                 <p className="text-mobile-xs sm:text-sm text-gray-600">Open Deals</p>
-                <p className="text-mobile-xl sm:text-2xl font-bold text-gray-900">
+                <p className="text-mobile-xl sm:text-2xl font-bold text-primary-dark">
                   {displayedAnalytics.open}
                 </p>
                 <p className="text-mobile-xs sm:text-sm text-gray-500">
@@ -398,14 +398,14 @@ const Pipeline: React.FC = () => {
             )}
             <button
               onClick={() => setShowImport(true)}
-              className="desktop-only inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              className="desktop-only inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               <ArrowUpTrayIcon className="-ml-1 mr-2 h-5 w-5" />
               Import CSV
             </button>
             <button
               onClick={() => setShowStageManager(true)}
-              className="btn-mobile inline-flex items-center justify-center rounded-md border border-gray-300 bg-white font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              className="btn-mobile inline-flex items-center justify-center rounded-md border border-gray-300 bg-white font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               <CogIcon className="-ml-1 mr-2 h-5 w-5" />
               <span className="hidden sm:inline">Manage Stages</span>
@@ -416,7 +416,7 @@ const Pipeline: React.FC = () => {
                 setSelectedDeal(null);
                 setShowDealForm(true);
               }}
-              className="btn-mobile inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              className="btn-mobile inline-flex items-center justify-center rounded-md border border-transparent bg-primary font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
               <span className="hidden sm:inline">New Deal</span>

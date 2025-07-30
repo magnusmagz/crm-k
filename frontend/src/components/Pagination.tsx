@@ -110,7 +110,7 @@ const Pagination: React.FC<PaginationProps> = ({
               id="page-size"
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="border-gray-300 rounded-md text-sm focus:ring-gray-800 focus:border-gray-800"
+              className="border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
             >
               {pageSizes.map(size => (
                 <option key={size} value={size}>

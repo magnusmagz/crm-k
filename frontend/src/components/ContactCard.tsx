@@ -30,7 +30,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
           to={`/contacts/${contact.id}`}
           className="flex-1 min-w-0"
         >
-          <h3 className="text-mobile-base font-semibold text-gray-900 truncate">
+          <h3 className="text-mobile-base font-semibold text-primary-dark truncate">
             {contact.firstName} {contact.lastName}
           </h3>
           {contact.position && (

@@ -271,7 +271,7 @@ const WorkflowBuilder: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-dark mx-auto"></div>
           <p className="mt-4 text-gray-500">Loading workflow...</p>
         </div>
       </div>
@@ -283,7 +283,7 @@ const WorkflowBuilder: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-primary-dark">
               {isEditing ? 'Edit Workflow' : 'Create Multi-Step Workflow'}
             </h1>
             <p className="mt-2 text-sm text-gray-600">
@@ -300,7 +300,7 @@ const WorkflowBuilder: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-900 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark disabled:opacity-50"
             >
               {isLoading ? 'Saving...' : 'Save Workflow'}
             </button>
@@ -347,7 +347,7 @@ const WorkflowBuilder: React.FC = () => {
       {/* Workflow Details */}
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Workflow Details</h2>
+          <h2 className="text-lg font-medium text-primary-dark mb-4">Workflow Details</h2>
           <div className="space-y-4">
             <FormField
               label="Workflow Name"
@@ -386,7 +386,7 @@ const WorkflowBuilder: React.FC = () => {
 
       {/* Workflow Steps */}
       <div className="space-y-4">
-        <h2 className="text-lg font-medium text-gray-900">Workflow Steps</h2>
+        <h2 className="text-lg font-medium text-primary-dark">Workflow Steps</h2>
         
         {steps.map((step, index) => (
           <div key={index}>
@@ -401,7 +401,7 @@ const WorkflowBuilder: React.FC = () => {
                       {getStepIcon(step.type!)}
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-sm font-medium text-gray-900">
+                      <h3 className="text-sm font-medium text-primary-dark">
                         Step {index + 1}: {step.name}
                       </h3>
                       <p className="text-xs text-gray-500 capitalize">{step.type}</p>

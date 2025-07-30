@@ -12,6 +12,8 @@
 :root {
   --color-primary: 31 41 55; /* Default gray-800 in RGB */
   --color-primary-hex: #1f2937;
+  --color-primary-dark: 17 24 39; /* Default gray-900 in RGB */
+  --color-primary-dark-hex: #111827;
 }
 
 /* Ensure viewport is mobile-friendly */

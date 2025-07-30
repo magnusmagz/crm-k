@@ -136,7 +136,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
         <select
           value={condition.value || 'true'}
           onChange={(e) => onChange({ ...condition, value: e.target.value })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
           disabled={!condition.operator}
         >
           <option value="true">Yes</option>
@@ -151,7 +151,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
         <select
           value={condition.value || ''}
           onChange={(e) => onChange({ ...condition, value: e.target.value })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
           disabled={!condition.operator}
         >
           <option value="">Select value</option>
@@ -170,7 +170,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
         type={selectedField.type === 'number' ? 'number' : selectedField.type === 'date' ? 'date' : 'text'}
         value={condition.value || ''}
         onChange={(e) => onChange({ ...condition, value: e.target.value })}
-        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
         placeholder={selectedField.name === 'tags' ? 'Tag name' : 'Value'}
         disabled={!condition.operator}
       />
@@ -185,7 +185,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
         <select
           value={condition.logic || 'AND'}
           onChange={(e) => onChange({ ...condition, logic: e.target.value as 'AND' | 'OR' })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800 text-sm"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm"
         >
           <option value="AND">AND</option>
           <option value="OR">OR</option>
@@ -196,7 +196,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
         <select
           value={condition.field}
           onChange={(e) => onChange({ ...condition, field: e.target.value, operator: 'equals', value: '' })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
           disabled={isLoadingFields}
         >
           <option value="">Select field</option>
@@ -225,7 +225,7 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
         <select
           value={condition.operator}
           onChange={(e) => onChange({ ...condition, operator: e.target.value as AutomationCondition['operator'] })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
           disabled={!condition.field}
         >
           <option value="">Select operator</option>

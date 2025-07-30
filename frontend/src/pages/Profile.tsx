@@ -130,7 +130,7 @@ const Profile: React.FC = () => {
       <div className="md:grid md:grid-cols-3 md:gap-6">
         <div className="md:col-span-1">
           <div>
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Profile</h3>
+            <h3 className="text-lg font-medium leading-6 text-primary-dark">Profile</h3>
             <p className="mt-1 text-sm text-gray-600">
               Your personal information and business details.
             </p>
@@ -185,7 +185,7 @@ const Profile: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => profilePhotoRef.current?.click()}
-                                className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                                className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                               >
                                 Change
                               </button>
@@ -227,7 +227,7 @@ const Profile: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => companyLogoRef.current?.click()}
-                                className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                                className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                               >
                                 Change
                               </button>
@@ -264,7 +264,7 @@ const Profile: React.FC = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -279,7 +279,7 @@ const Profile: React.FC = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         required
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -293,7 +293,7 @@ const Profile: React.FC = () => {
                         id="companyName"
                         value={formData.companyName}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -307,7 +307,7 @@ const Profile: React.FC = () => {
                         id="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -321,7 +321,7 @@ const Profile: React.FC = () => {
                         id="website"
                         value={formData.website}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -336,7 +336,7 @@ const Profile: React.FC = () => {
                         value={formData.crmName}
                         onChange={handleChange}
                         placeholder="CRM Killer"
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -358,7 +358,7 @@ const Profile: React.FC = () => {
                           value={formData.primaryColor}
                           onChange={(e) => setFormData(prev => ({ ...prev, primaryColor: e.target.value }))}
                           placeholder="#1f2937"
-                          className="ml-3 flex-1 px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                          className="ml-3 flex-1 px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                         />
                       </div>
                     </div>
@@ -373,7 +373,7 @@ const Profile: React.FC = () => {
                         id="address.street"
                         value={formData.address.street}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -387,7 +387,7 @@ const Profile: React.FC = () => {
                         id="address.city"
                         value={formData.address.city}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -401,7 +401,7 @@ const Profile: React.FC = () => {
                         id="address.state"
                         value={formData.address.state}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
 
@@ -415,7 +415,7 @@ const Profile: React.FC = () => {
                         id="address.zipCode"
                         value={formData.address.zipCode}
                         onChange={handleChange}
-                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
                     </div>
                   </div>
@@ -424,13 +424,13 @@ const Profile: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="mr-3 inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                    className="mr-3 inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-800 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-primary py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   >
                     Save
                   </button>
@@ -463,44 +463,44 @@ const Profile: React.FC = () => {
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Name</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
+                    <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.firstName} {profile?.lastName}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Company</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
+                    <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.companyName || 'Not specified'}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Phone</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
+                    <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.phone || 'Not specified'}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Website</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
+                    <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.website || 'Not specified'}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">CRM Name</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
+                    <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.crmName || 'CRM Killer'}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Primary Color</dt>
-                    <dd className="mt-1 text-sm text-gray-900 flex items-center">
+                    <dd className="mt-1 text-sm text-primary-dark flex items-center">
                       <span className="inline-block w-6 h-6 rounded mr-2 border border-gray-300" style={{ backgroundColor: profile?.primaryColor || '#1f2937' }}></span>
                       {profile?.primaryColor || '#1f2937'}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
                     <dt className="text-sm font-medium text-gray-500">Address</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
+                    <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.address?.street && (
                         <>
                           {profile.address.street}<br />
@@ -515,7 +515,7 @@ const Profile: React.FC = () => {
                 <div className="mt-6">
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-800 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-primary py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   >
                     Edit Profile
                   </button>
@@ -536,7 +536,7 @@ const Profile: React.FC = () => {
         <div className="md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Change Password</h3>
+              <h3 className="text-lg font-medium leading-6 text-primary-dark">Change Password</h3>
               <p className="mt-1 text-sm text-gray-600">
                 Update your password to keep your account secure.
               </p>
@@ -559,7 +559,7 @@ const Profile: React.FC = () => {
                           value={passwordData.currentPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                         />
                       </div>
 
@@ -574,7 +574,7 @@ const Profile: React.FC = () => {
                           value={passwordData.newPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                         />
                       </div>
 
@@ -589,7 +589,7 @@ const Profile: React.FC = () => {
                           value={passwordData.confirmPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                          className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                         />
                       </div>
                     </div>
@@ -601,13 +601,13 @@ const Profile: React.FC = () => {
                         setIsChangingPassword(false);
                         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                       }}
-                      className="mr-3 inline-flex justify-center rounded-md border border-gray-300 shadow-sm py-2 px-4 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                      className="mr-3 inline-flex justify-center rounded-md border border-gray-300 shadow-sm py-2 px-4 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                      className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-sm font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     >
                       Change Password
                     </button>
@@ -619,7 +619,7 @@ const Profile: React.FC = () => {
                 <div className="px-4 py-5 bg-white sm:p-6">
                   <button
                     onClick={() => setIsChangingPassword(true)}
-                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   >
                     Change Password
                   </button>

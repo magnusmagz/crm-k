@@ -75,7 +75,7 @@ const Contacts: React.FC = () => {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-mobile-2xl font-bold text-gray-900">Contacts</h1>
+          <h1 className="text-mobile-2xl font-bold text-primary-dark">Contacts</h1>
           <p className="mt-2 text-mobile-sm text-gray-700">
             A list of all your contacts including their name, email, and phone.
           </p>
@@ -84,7 +84,7 @@ const Contacts: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowImport(true)}
-            className="desktop-only inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+            className="desktop-only inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             <ArrowUpTrayIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Import CSV
@@ -92,7 +92,7 @@ const Contacts: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowNewContact(true)}
-            className="btn-mobile inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 sm:w-auto"
+            className="btn-mobile inline-flex items-center justify-center rounded-md border border-transparent bg-primary font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             <span className="hidden sm:inline">Add contact</span>
@@ -113,7 +113,7 @@ const Contacts: React.FC = () => {
               setSearch(e.target.value);
               setCurrentPage(1); // Reset to first page on search
             }}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
             placeholder="Search contacts..."
           />
         </div>
@@ -186,14 +186,14 @@ const Contacts: React.FC = () => {
           </div>
           {/* Desktop Loading */}
           <div className="hidden md:flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </>
       ) : contacts.length === 0 ? (
         /* Empty State */
         <div className="text-center py-12">
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-mobile-base font-medium text-gray-900">No contacts</h3>
+          <h3 className="mt-2 text-mobile-base font-medium text-primary-dark">No contacts</h3>
           <p className="mt-1 text-mobile-sm text-gray-500">
             Get started by creating a new contact.
           </p>
@@ -235,25 +235,25 @@ const Contacts: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-300">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-primary-dark sm:pl-6">
                         Name
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Email
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Phone
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Company
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Tags
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Notes
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Deals
                       </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -264,8 +264,8 @@ const Contacts: React.FC = () => {
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {contacts.map((contact) => (
                       <tr key={contact.id}>
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          <Link to={`/contacts/${contact.id}`} className="hover:text-gray-800">
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-dark sm:pl-6">
+                          <Link to={`/contacts/${contact.id}`} className="hover:text-primary">
                             {contact.firstName} {contact.lastName}
                           </Link>
                         </td>
@@ -283,7 +283,7 @@ const Contacts: React.FC = () => {
                             {contact.tags.map((tag, index) => (
                               <span
                                 key={index}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary"
                               >
                                 {tag}
                               </span>
@@ -315,7 +315,7 @@ const Contacts: React.FC = () => {
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <Link
                             to={`/contacts/${contact.id}`}
-                            className="text-gray-800 hover:text-gray-900 mr-4"
+                            className="text-primary hover:text-primary-dark mr-4"
                           >
                             Edit
                           </Link>

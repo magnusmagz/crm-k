@@ -72,7 +72,7 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -84,7 +84,7 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-bold text-gray-900">{summary.total}</div>
+          <div className="text-2xl font-bold text-primary-dark">{summary.total}</div>
           <div className="text-sm text-gray-500">Total Enrolled</div>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
@@ -107,7 +107,7 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
 
       {/* Actions */}
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Enrolled Entities</h3>
+        <h3 className="text-lg font-medium text-primary-dark">Enrolled Entities</h3>
         <button
           onClick={handlePreview}
           className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -137,7 +137,7 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
                       )}
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-primary-dark">
                         {item.type === 'contact' 
                           ? `${item.entity.firstName} ${item.entity.lastName}`
                           : item.entity.name}

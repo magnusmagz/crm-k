@@ -103,7 +103,7 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
               type="checkbox"
               checked={value || false}
               onChange={handleChange}
-              className="focus:ring-gray-800 h-4 w-4 text-gray-800 border-gray-300 rounded"
+              className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
             />
           </div>
           <div className="ml-3 text-sm">

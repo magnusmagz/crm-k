@@ -107,14 +107,14 @@ const QuickContactForm: React.FC<QuickContactFormProps> = ({ onClose }) => {
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 btn-mobile bg-gray-800 text-white rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex-1 btn-mobile bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
           {loading ? 'Adding...' : 'Add Contact'}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 btn-mobile bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium"
+          className="flex-1 btn-mobile bg-gray-200 text-primary rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium"
         >
           Cancel
         </button>

@@ -126,7 +126,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -134,7 +134,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900 flex items-center">
+        <h3 className="text-lg font-medium text-primary-dark flex items-center">
           <BugAntIcon className="h-5 w-5 mr-2" />
           Entity Debug Information
         </h3>
@@ -163,7 +163,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(enrollment.status)}`}>
                       {enrollment.status}
                     </span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-primary-dark">
                       {enrollment.Automation?.name || 'Unknown Automation'}
                     </span>
                     {!enrollment.Automation?.isActive && (
@@ -277,7 +277,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
                   <div className="flex items-start">
                     {getEventIcon(log.event, log.level)}
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">{log.event}</p>
+                      <p className="text-sm font-medium text-primary-dark">{log.event}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatTimestamp(log.timestamp)}
                       </p>

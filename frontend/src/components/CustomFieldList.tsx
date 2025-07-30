@@ -45,7 +45,7 @@ const CustomFieldList: React.FC<CustomFieldListProps> = ({
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-medium text-gray-900">
+                      <h3 className="text-sm font-medium text-primary-dark">
                         {field.label}
                       </h3>
                       <div className="mt-1 flex items-center text-sm text-gray-500">
@@ -71,7 +71,7 @@ const CustomFieldList: React.FC<CustomFieldListProps> = ({
               <div className="ml-4 flex items-center space-x-2">
                 <button
                   onClick={() => onEdit(field)}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-gray-600 hover:text-primary-dark"
                   title="Edit field"
                 >
                   <PencilIcon className="h-5 w-5" />

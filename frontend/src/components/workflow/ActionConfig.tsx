@@ -92,7 +92,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
                 id={`field-select-${Math.random()}`}
                 value={action.config?.field || ''}
                 onChange={(e) => handleConfigChange('field', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
               >
                 <option value="">Select a field</option>
                 {fields.filter(f => !f.isCustom).map((field) => (
@@ -112,7 +112,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
                   id={`field-value-${Math.random()}`}
                   value={action.config?.value || ''}
                   onChange={(e) => handleConfigChange('value', e.target.value)}
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                   placeholder="Enter new value"
                 />
               </div>
@@ -131,7 +131,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
               id={`tag-input-${Math.random()}`}
               value={action.config?.tag || ''}
               onChange={(e) => handleConfigChange('tag', e.target.value)}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="Enter tag name"
             />
           </div>
@@ -147,7 +147,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
               id={`stage-select-${Math.random()}`}
               value={action.config?.stageId || ''}
               onChange={(e) => handleConfigChange('stageId', e.target.value)}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
             >
               <option value="">Select a stage</option>
               {stages.map((stage) => (
@@ -171,7 +171,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
                 id={`custom-field-select-${Math.random()}`}
                 value={action.config?.field || ''}
                 onChange={(e) => handleConfigChange('field', e.target.value)}
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
               >
                 <option value="">Select a custom field</option>
                 {customFields.map((field) => (
@@ -191,7 +191,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
                   id={`custom-field-value-${Math.random()}`}
                   value={action.config?.value || ''}
                   onChange={(e) => handleConfigChange('value', e.target.value)}
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                   placeholder="Enter new value"
                 />
               </div>
@@ -217,7 +217,7 @@ const ActionConfig: React.FC<ActionConfigProps> = ({ action, entityType, onUpdat
                 id={`action-type-${Math.random()}`}
                 value={action.type || ''}
                 onChange={(e) => handleTypeChange(e.target.value as AutomationAction['type'])}
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                 disabled={isLoading}
               >
                 <option value="">Select an action</option>

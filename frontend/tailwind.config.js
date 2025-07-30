@@ -4,7 +4,29 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          dark: 'rgb(var(--color-primary-dark) / <alpha-value>)',
+        }
+      },
+      backgroundColor: {
+        primary: 'rgb(var(--color-primary))',
+        'primary-dark': 'rgb(var(--color-primary-dark))',
+      },
+      textColor: {
+        primary: 'rgb(var(--color-primary))',
+        'primary-dark': 'rgb(var(--color-primary-dark))',
+      },
+      borderColor: {
+        primary: 'rgb(var(--color-primary))',
+        'primary-dark': 'rgb(var(--color-primary-dark))',
+      },
+      ringColor: {
+        primary: 'rgb(var(--color-primary))',
+      },
+    },
     fontSize: {
       // Override Tailwind's default font sizes to ensure minimum 16px
       'xs': ['16px', '20px'],    // was 12px - now 16px for accessibility

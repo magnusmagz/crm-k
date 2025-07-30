@@ -70,7 +70,7 @@ const TriggerSelector: React.FC<TriggerSelectorProps> = ({ trigger, onChange }) 
             </div>
             {isSelected && (
               <div className="absolute top-2 right-2">
-                <div className="h-2 w-2 rounded-full bg-gray-800"></div>
+                <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
             )}
           </button>

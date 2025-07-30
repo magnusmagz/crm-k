@@ -43,7 +43,7 @@ const DealDebugModal: React.FC<DealDebugModalProps> = ({ isOpen, onClose, deal }
                 <div className="sticky top-0 bg-white border-b px-mobile py-3 sm:py-4 flex items-center justify-between">
                   <Dialog.Title
                     as="h3"
-                    className="text-mobile-lg font-medium leading-6 text-gray-900 truncate pr-2"
+                    className="text-mobile-lg font-medium leading-6 text-primary-dark truncate pr-2"
                   >
                     Deal Debug - {deal.name}
                   </Dialog.Title>
@@ -63,7 +63,7 @@ const DealDebugModal: React.FC<DealDebugModalProps> = ({ isOpen, onClose, deal }
                   <div className="mt-4 sm:mt-6">
                     <button
                       type="button"
-                      className="btn-mobile w-full sm:w-auto justify-center rounded-md border border-transparent bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      className="btn-mobile w-full sm:w-auto justify-center rounded-md border border-transparent bg-gray-100 font-medium text-primary-dark hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
                       onClick={onClose}
                     >
                       Close

@@ -90,7 +90,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
             ...action,
             config: { ...action.config, value: e.target.value }
           })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
           placeholder="New value"
         />
       );
@@ -105,7 +105,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
             ...action,
             config: { ...action.config, value: e.target.value }
           })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
         >
           <option value="">Select value</option>
           {selectedField.options.map((option) => (
@@ -126,7 +126,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
             ...action,
             config: { ...action.config, value: e.target.value }
           })}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
         >
           <option value="true">Checked</option>
           <option value="false">Unchecked</option>
@@ -143,7 +143,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
           ...action,
           config: { ...action.config, value: e.target.value }
         })}
-        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
         placeholder="New value"
       />
     );
@@ -160,7 +160,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 ...action,
                 config: { ...action.config, field: e.target.value, value: '' }
               })}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
               disabled={isLoadingFields}
             >
               <option value="">Select field</option>
@@ -198,7 +198,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
               ...action,
               config: { ...action.config, tags: e.target.value }
             })}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
             placeholder="Tag name"
           />
         );
@@ -212,7 +212,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 ...action,
                 config: { ...action.config, field: e.target.value, value: '' }
               })}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
               disabled={isLoadingFields}
             >
               <option value="">Select field</option>
@@ -249,7 +249,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
               ...action,
               config: { ...action.config, stageId: e.target.value }
             })}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
           >
             <option value="">Select stage</option>
             {stages.map((stage) => (
@@ -272,7 +272,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 ...action,
                 config: { ...action.config, entityType: e.target.value, fieldName: '', value: '' }
               })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
             >
               <option value="">Select entity type</option>
               <option value="contact">Contact</option>
@@ -287,7 +287,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                     ...action,
                     config: { ...action.config, fieldName: e.target.value.replace('customFields.', ''), value: '' }
                   })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                 >
                   <option value="">Select custom field</option>
                   {(action.config.entityType === 'contact' ? contactFields : dealFields)
@@ -321,7 +321,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
             type: e.target.value as AutomationAction['type'],
             config: {}
           })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-gray-800 focus:border-gray-800"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
         >
           <option value="">Select action</option>
           {actionOptions.map((option) => (

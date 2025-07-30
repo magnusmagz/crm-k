@@ -107,7 +107,7 @@ const ContactDetail: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -141,7 +141,7 @@ const ContactDetail: React.FC = () => {
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <div>
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <h3 className="text-lg leading-6 font-medium text-primary-dark">
               {contact.firstName} {contact.lastName}
             </h3>
             <p className="mt-1 max-w-2xl text-sm text-gray-500">
@@ -151,7 +151,7 @@ const ContactDetail: React.FC = () => {
           <div className="flex space-x-3">
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+              className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               <PencilIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
               Edit
@@ -169,43 +169,43 @@ const ContactDetail: React.FC = () => {
           <dl>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Full name</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {contact.firstName} {contact.lastName}
               </dd>
             </div>
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Email address</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {contact.email || 'Not provided'}
               </dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Phone number</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {contact.phone || 'Not provided'}
               </dd>
             </div>
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Company</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {contact.company || 'Not provided'}
               </dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Position</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {contact.position || 'Not provided'}
               </dd>
             </div>
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Tags</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {contact.tags.length > 0 ? (
                   <div className="flex flex-wrap gap-1">
                     {contact.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-primary"
                       >
                         {tag}
                       </span>
@@ -219,14 +219,14 @@ const ContactDetail: React.FC = () => {
             {contact.notes && (
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Notes</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 whitespace-pre-wrap">
+                <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2 whitespace-pre-wrap">
                   {contact.notes}
                 </dd>
               </div>
             )}
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Created</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
                 {new Date(contact.createdAt).toLocaleDateString()}
               </dd>
             </div>
@@ -238,16 +238,16 @@ const ContactDetail: React.FC = () => {
       <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <div>
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <h3 className="text-lg leading-6 font-medium text-primary-dark">
               Deals
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Total Pipeline Value: <span className="font-semibold text-gray-900">{formatCurrency(totalDealValue)}</span>
+              Total Pipeline Value: <span className="font-semibold text-primary-dark">{formatCurrency(totalDealValue)}</span>
             </p>
           </div>
           <button
             onClick={() => setShowDealForm(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
             New Deal
@@ -258,14 +258,14 @@ const ContactDetail: React.FC = () => {
           {deals.length === 0 ? (
             <div className="text-center py-12">
               <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No deals</h3>
+              <h3 className="mt-2 text-sm font-medium text-primary-dark">No deals</h3>
               <p className="mt-1 text-sm text-gray-500">
                 Create a deal to start tracking opportunities with this contact.
               </p>
               <div className="mt-6">
                 <button
                   onClick={() => setShowDealForm(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark"
                 >
                   <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
                   Create Deal
@@ -279,7 +279,7 @@ const ContactDetail: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-primary-dark truncate">
                           {deal.name}
                         </p>
                         <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -323,7 +323,7 @@ const ContactDetail: React.FC = () => {
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center cursor-pointer" onClick={() => setShowDebugView(!showDebugView)}>
           <div className="flex items-center">
             <CpuChipIcon className="h-5 w-5 mr-2 text-gray-500" />
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <h3 className="text-lg leading-6 font-medium text-primary-dark">
               Automation Debug Info
             </h3>
           </div>

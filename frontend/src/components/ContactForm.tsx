@@ -187,7 +187,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 type="checkbox"
                 checked={value || false}
                 onChange={handleChange}
-                className="focus:ring-gray-800 h-4 w-4 text-gray-800 border-gray-300 rounded"
+                className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
               />
             </div>
             <div className="ml-3 text-sm">
@@ -225,7 +225,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
     <div className="bg-white">
       <div className="px-6 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold leading-6 text-gray-900">
+          <h3 className="text-xl font-semibold leading-6 text-primary-dark">
             {contact ? 'Edit Contact' : 'New Contact'}
           </h3>
           <button
@@ -241,7 +241,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="bg-gray-50 px-6 py-5 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-900 mb-4">Basic Information</h4>
+            <h4 className="text-sm font-medium text-primary-dark mb-4">Basic Information</h4>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
               <FormField
                 label="First Name"
@@ -302,7 +302,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
           
           {/* Additional Information */}
           <div className="bg-gray-50 px-6 py-5 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-900 mb-4">Additional Information</h4>
+            <h4 className="text-sm font-medium text-primary-dark mb-4">Additional Information</h4>
             <div className="space-y-6">
               <FormField
                 label="Tags (comma-separated)"
@@ -326,7 +326,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
           
           {customFields.length > 0 && (
             <div className="bg-gray-50 px-6 py-5 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-900 mb-4">Custom Fields</h4>
+              <h4 className="text-sm font-medium text-primary-dark mb-4">Custom Fields</h4>
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                 {customFields.map(renderCustomField)}
               </div>
@@ -338,14 +338,14 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-primary-dark shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="rounded-md bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Saving...' : contact ? 'Update' : 'Create'}
               </button>

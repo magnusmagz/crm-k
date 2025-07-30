@@ -167,7 +167,7 @@ const AutomationBuilder: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -189,20 +189,20 @@ const AutomationBuilder: React.FC = () => {
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
+            <h3 className="text-lg font-medium leading-6 text-primary-dark">
               {isEditing ? 'Edit Automation' : 'Create Automation'}
             </h3>
             {isEditing && (
               <div className="space-x-4">
                 <button
                   onClick={() => setShowEnrollments(!showEnrollments)}
-                  className="text-sm text-gray-600 hover:text-gray-900"
+                  className="text-sm text-gray-600 hover:text-primary-dark"
                 >
                   {showEnrollments ? 'Hide' : 'Show'} Enrollments
                 </button>
                 <button
                   onClick={() => setShowDebug(!showDebug)}
-                  className="text-sm text-gray-600 hover:text-gray-900"
+                  className="text-sm text-gray-600 hover:text-primary-dark"
                 >
                   {showDebug ? 'Hide' : 'Show'} Debug
                 </button>
@@ -235,7 +235,7 @@ const AutomationBuilder: React.FC = () => {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
                 placeholder="e.g., Tag new high-value leads"
               />
             </div>
@@ -249,7 +249,7 @@ const AutomationBuilder: React.FC = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-gray-800 focus:border-gray-800"
+                className="mt-1 block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
                 placeholder="What does this automation do?"
               />
             </div>
@@ -257,7 +257,7 @@ const AutomationBuilder: React.FC = () => {
 
           {/* Trigger */}
           <div className="mb-8">
-            <h4 className="text-sm font-medium text-gray-900 mb-4">
+            <h4 className="text-sm font-medium text-primary-dark mb-4">
               When this happens...
             </h4>
             <TriggerSelector
@@ -269,7 +269,7 @@ const AutomationBuilder: React.FC = () => {
           {/* Conditions */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-medium text-gray-900">
+              <h4 className="text-sm font-medium text-primary-dark">
                 If these conditions are met... (optional)
               </h4>
               <button
@@ -299,7 +299,7 @@ const AutomationBuilder: React.FC = () => {
           {/* Actions */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-medium text-gray-900">
+              <h4 className="text-sm font-medium text-primary-dark">
                 Then do this...
               </h4>
               <button
@@ -334,7 +334,7 @@ const AutomationBuilder: React.FC = () => {
             <button
               onClick={handleTest}
               disabled={isLoading || isTesting}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
             >
               <PlayIcon className="h-4 w-4 mr-2" />
               {isTesting ? 'Testing...' : 'Test Automation'}
@@ -349,7 +349,7 @@ const AutomationBuilder: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
               >
                 {isLoading ? 'Saving...' : isEditing ? 'Update' : 'Create'} Automation
               </button>

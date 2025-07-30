@@ -117,7 +117,7 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
             <div className="flex gap-2">
               <button
                 onClick={handleCancel}
-                className="flex-1 btn-mobile bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                className="flex-1 btn-mobile bg-gray-200 text-primary rounded-md hover:bg-gray-300"
               >
                 Cancel
               </button>

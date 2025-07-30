@@ -372,7 +372,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                 <div>
                   <h3 className="text-lg font-medium mb-3">Contact Association</h3>
                   <p className="text-gray-600 text-sm mb-3">
-                    How should we handle contacts when importing deals? <span className="font-medium text-gray-800">(All deals require a contact)</span>
+                    How should we handle contacts when importing deals? <span className="font-medium text-primary">(All deals require a contact)</span>
                   </p>
                   <div className="space-y-2">
                     <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
@@ -582,7 +582,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                       {preview.preview.map((row, index) => (
                         <tr key={index}>
                           {preview.headers.map(header => (
-                            <td key={header} className="px-4 py-3 text-sm text-gray-900">
+                            <td key={header} className="px-4 py-3 text-sm text-primary-dark">
                               {row[header] || '-'}
                             </td>
                           ))}
@@ -627,7 +627,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                     <div className="text-blue-700">Updated</div>
                   </div>
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-800">{importJob.skipped}</div>
+                    <div className="text-2xl font-bold text-primary">{importJob.skipped}</div>
                     <div className="text-gray-700">Skipped</div>
                   </div>
                 </div>
@@ -662,7 +662,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                     <div className="text-blue-700">Deals Updated</div>
                   </div>
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-800">{results.skipped}</div>
+                    <div className="text-2xl font-bold text-primary">{results.skipped}</div>
                     <div className="text-gray-700">Rows Skipped</div>
                   </div>
                 </div>
@@ -708,7 +708,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {results.errors.map((error, index) => (
                             <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900">{error.row}</td>
+                              <td className="px-4 py-2 text-sm text-primary-dark">{error.row}</td>
                               <td className="px-4 py-2 text-sm text-red-600">{error.error}</td>
                             </tr>
                           ))}
@@ -727,7 +727,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
           <div className="flex justify-between items-center">
             <button
               onClick={resetImport}
-              className="btn-mobile text-gray-700 hover:text-gray-900 font-medium"
+              className="btn-mobile text-gray-700 hover:text-primary-dark font-medium"
               disabled={step === 'importing'}
             >
               {step === 'results' ? 'Import Another' : 'Cancel'}

@@ -116,7 +116,7 @@ const Automations: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -127,7 +127,7 @@ const Automations: React.FC = () => {
       
       <div className="sm:flex sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Actions</h1>
+          <h1 className="text-3xl font-bold text-primary-dark">Actions</h1>
           <p className="mt-2 text-sm text-gray-700">
             Automate your workflow with powerful rules and actions
           </p>
@@ -142,7 +142,7 @@ const Automations: React.FC = () => {
           </button>
           <button
             onClick={() => navigate('/automations/workflow/new')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             <ArrowsPointingOutIcon className="-ml-1 mr-2 h-5 w-5" />
             Multi-Step Workflow
@@ -154,14 +154,14 @@ const Automations: React.FC = () => {
         {automations.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <CogIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No actions</h3>
+            <h3 className="mt-2 text-sm font-medium text-primary-dark">No actions</h3>
             <p className="mt-1 text-sm text-gray-500">
               Get started by creating your first action.
             </p>
             <div className="mt-6">
               <button
                 onClick={() => navigate('/automations/new')}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-900"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark"
               >
                 <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
                 Create Action
@@ -184,7 +184,7 @@ const Automations: React.FC = () => {
                           }`} />
                         </div>
                         <div className="ml-4">
-                          <h3 className="text-lg font-medium text-gray-900">
+                          <h3 className="text-lg font-medium text-primary-dark">
                             {automation.name}
                             {automation.isMultiStep && (
                               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
@@ -215,7 +215,7 @@ const Automations: React.FC = () => {
                         >
                           <UserIcon className="h-5 w-5 text-blue-600 mr-2" />
                           <div className="text-left">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-primary-dark">
                               {automation.enrolledCount || 0}
                               {automation.activeEnrollments > 0 && (
                                 <span className="text-xs text-blue-600 ml-1">
@@ -237,7 +237,7 @@ const Automations: React.FC = () => {
                         <div className="flex items-center p-3 bg-gray-50 rounded-lg">
                           <ChartBarIcon className="h-5 w-5 text-gray-600 mr-2" />
                           <div className="text-left">
-                            <p className="text-sm font-medium text-gray-900">{automation.totalExecutions || 0}</p>
+                            <p className="text-sm font-medium text-primary-dark">{automation.totalExecutions || 0}</p>
                             <p className="text-xs text-gray-500">runs</p>
                           </div>
                         </div>
@@ -245,7 +245,7 @@ const Automations: React.FC = () => {
                         <div className="flex items-center p-3 bg-green-50 rounded-lg">
                           <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
                           <div className="text-left">
-                            <p className="text-sm font-medium text-gray-900">{automation.successfulExecutions || 0}</p>
+                            <p className="text-sm font-medium text-primary-dark">{automation.successfulExecutions || 0}</p>
                             <p className="text-xs text-gray-500">successful</p>
                           </div>
                         </div>
@@ -253,7 +253,7 @@ const Automations: React.FC = () => {
                         <div className="flex items-center p-3 bg-purple-50 rounded-lg">
                           <CheckCircleIconSolid className="h-5 w-5 text-purple-600 mr-2" />
                           <div className="text-left">
-                            <p className="text-sm font-medium text-gray-900">{automation.completedEnrollments || 0}</p>
+                            <p className="text-sm font-medium text-primary-dark">{automation.completedEnrollments || 0}</p>
                             <p className="text-xs text-gray-500">completed</p>
                           </div>
                         </div>
@@ -303,7 +303,7 @@ const Automations: React.FC = () => {
                   {/* Enrolled Entities */}
                   {expandedAutomations.has(automation.id) && enrolledEntities[automation.id] && (
                     <div className="border-t bg-gray-50 px-6 py-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-3">Enrolled Entities</h4>
+                      <h4 className="text-sm font-medium text-primary-dark mb-3">Enrolled Entities</h4>
                       {enrolledEntities[automation.id].length === 0 ? (
                         <p className="text-sm text-gray-500 italic">No entities currently enrolled</p>
                       ) : (
@@ -321,7 +321,7 @@ const Automations: React.FC = () => {
                                   )}
                                 </div>
                                 <div className="ml-3">
-                                  <p className="text-sm font-medium text-gray-900">
+                                  <p className="text-sm font-medium text-primary-dark">
                                     {item.type === 'contact' 
                                       ? `${item.entity.firstName} ${item.entity.lastName}`
                                       : item.entity.name}
@@ -333,7 +333,7 @@ const Automations: React.FC = () => {
                                 </div>
                               </div>
                               <div className="flex items-center">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-primary">
                                   Step {item.enrollment.currentStepIndex + 1}
                                 </span>
                               </div>

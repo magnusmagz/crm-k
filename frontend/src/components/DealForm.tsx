@@ -129,7 +129,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-primary-dark">
           {deal ? 'Edit Deal' : 'New Deal'}
         </h3>
         <button
@@ -247,7 +247,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
         {/* Custom Fields */}
         {customFields.length > 0 && (
           <div className="space-y-4 pt-4 border-t">
-            <h4 className="font-medium text-gray-900">Additional Information</h4>
+            <h4 className="font-medium text-primary-dark">Additional Information</h4>
             {customFields.map(field => (
               <div key={field.id}>
                 <CustomFieldInput
@@ -265,14 +265,14 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 btn-mobile bg-gray-800 text-white rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="flex-1 btn-mobile bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             {isLoading ? 'Saving...' : deal ? 'Update Deal' : 'Create Deal'}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 btn-mobile bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium"
+            className="flex-1 btn-mobile bg-gray-200 text-primary rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 font-medium"
           >
             Cancel
           </button>

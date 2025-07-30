@@ -180,7 +180,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
     <div className="p-mobile max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h3 className="text-mobile-lg font-semibold text-gray-900">Manage Pipeline Stages</h3>
+          <h3 className="text-mobile-lg font-semibold text-primary-dark">Manage Pipeline Stages</h3>
           <p className="text-mobile-sm text-gray-500 mt-1">Drag stages to reorder, click to edit names</p>
         </div>
         <button

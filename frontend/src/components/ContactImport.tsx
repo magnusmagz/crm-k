@@ -429,7 +429,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                       {preview.preview.map((row, index) => (
                         <tr key={index}>
                           {preview.headers.map(header => (
-                            <td key={header} className="px-4 py-3 text-sm text-gray-900">
+                            <td key={header} className="px-4 py-3 text-sm text-primary-dark">
                               {row[header] || '-'}
                             </td>
                           ))}
@@ -474,7 +474,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                     <div className="text-blue-700">Updated</div>
                   </div>
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-800">{importJob.skipped}</div>
+                    <div className="text-2xl font-bold text-primary">{importJob.skipped}</div>
                     <div className="text-gray-700">Skipped</div>
                   </div>
                 </div>
@@ -509,7 +509,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                     <div className="text-blue-700">Contacts Updated</div>
                   </div>
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-800">{results.skipped}</div>
+                    <div className="text-2xl font-bold text-primary">{results.skipped}</div>
                     <div className="text-gray-700">Rows Skipped</div>
                   </div>
                 </div>
@@ -555,7 +555,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {results.errors.map((error, index) => (
                             <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900">{error.row}</td>
+                              <td className="px-4 py-2 text-sm text-primary-dark">{error.row}</td>
                               <td className="px-4 py-2 text-sm text-red-600">{error.error}</td>
                             </tr>
                           ))}
@@ -574,7 +574,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
           <div className="flex justify-between items-center">
             <button
               onClick={resetImport}
-              className="btn-mobile text-gray-700 hover:text-gray-900 font-medium"
+              className="btn-mobile text-gray-700 hover:text-primary-dark font-medium"
               disabled={step === 'importing'}
             >
               {step === 'results' ? 'Import Another' : 'Cancel'}

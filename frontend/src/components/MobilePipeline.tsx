@@ -110,7 +110,7 @@ const MobilePipeline: React.FC<MobilePipelineProps> = ({
         </button>
 
         <div className="flex-1 text-center">
-          <h3 className="font-semibold text-gray-900 text-mobile-base">{currentStage.name}</h3>
+          <h3 className="font-semibold text-primary-dark text-mobile-base">{currentStage.name}</h3>
           <div className="flex items-center justify-center gap-1 mt-1">
             {stages.map((_, index) => (
               <button

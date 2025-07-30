@@ -71,7 +71,7 @@ const CustomFields: React.FC = () => {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-bold text-gray-900">Custom Fields</h1>
+          <h1 className="text-3xl font-bold text-primary-dark">Custom Fields</h1>
           <p className="mt-2 text-sm text-gray-700">
             Define custom fields to track additional information for your contacts and deals.
           </p>
@@ -110,7 +110,7 @@ const CustomFields: React.FC = () => {
           <div>
             <div className="sm:flex sm:items-center sm:justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Contact Custom Fields</h2>
+                <h2 className="text-xl font-semibold text-primary-dark">Contact Custom Fields</h2>
                 <p className="mt-1 text-sm text-gray-500">
                   Add custom fields to capture additional information about your contacts.
                 </p>
@@ -119,7 +119,7 @@ const CustomFields: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowForm(true)}
-                  className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 sm:w-auto"
+                  className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
                 >
                   <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                   Add field
@@ -142,7 +142,7 @@ const CustomFields: React.FC = () => {
 
             {isLoading ? (
               <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               </div>
             ) : (
               <div className="flex flex-col">
@@ -165,7 +165,7 @@ const CustomFields: React.FC = () => {
                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                             />
                           </svg>
-                          <h3 className="mt-2 text-sm font-medium text-gray-900">No custom fields</h3>
+                          <h3 className="mt-2 text-sm font-medium text-primary-dark">No custom fields</h3>
                           <p className="mt-1 text-sm text-gray-500">
                             Get started by creating a new custom field.
                           </p>
@@ -174,16 +174,16 @@ const CustomFields: React.FC = () => {
                         <table className="min-w-full divide-y divide-gray-300">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-primary-dark sm:pl-6">
                                 Label
                               </th>
-                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                                 Field Name
                               </th>
-                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                                 Type
                               </th>
-                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                                 Required
                               </th>
                               <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -194,7 +194,7 @@ const CustomFields: React.FC = () => {
                           <tbody className="divide-y divide-gray-200 bg-white">
                             {customFields.map((field) => (
                               <tr key={field.id}>
-                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-dark sm:pl-6">
                                   {field.label}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -214,7 +214,7 @@ const CustomFields: React.FC = () => {
                                       Yes
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-primary">
                                       No
                                     </span>
                                   )}
@@ -222,7 +222,7 @@ const CustomFields: React.FC = () => {
                                 <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                   <button
                                     onClick={() => setEditingField(field)}
-                                    className="text-gray-800 hover:text-gray-900 mr-4"
+                                    className="text-primary hover:text-primary-dark mr-4"
                                   >
                                     <PencilIcon className="h-5 w-5" aria-hidden="true" />
                                   </button>
