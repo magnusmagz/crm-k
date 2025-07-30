@@ -8,6 +8,12 @@
 /* Import accessibility overrides */
 @import './accessibility.css';
 
+/* Theme CSS Variables */
+:root {
+  --color-primary: 31 41 55; /* Default gray-800 in RGB */
+  --color-primary-hex: #1f2937;
+}
+
 /* Ensure viewport is mobile-friendly */
 @layer base {
   html {

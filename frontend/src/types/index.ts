@@ -23,6 +23,8 @@ export interface UserProfile {
   website?: string;
   profilePhoto?: string;
   companyLogo?: string;
+  primaryColor?: string;
+  crmName?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -71,6 +71,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true,
       comment: 'Base64 encoded company logo'
+    },
+    primaryColor: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: '#1f2937',
+      validate: {
+        is: /^#[0-9A-F]{6}$/i
+      }
+    },
+    crmName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 'CRM Killer',
+      validate: {
+        len: [1, 50]
+      }
     }
   }, {
     tableName: 'user_profiles',

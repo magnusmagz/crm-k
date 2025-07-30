@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import FixedFAB from './FixedFAB';
 import MobileNav from './MobileNav';
 
@@ -22,6 +23,7 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, logout } = useAuth();
+  const { crmName, primaryColor } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -31,14 +33,14 @@ const Layout: React.FC = () => {
   return (
     <>
       <div className="min-h-full">
-        <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800" style={{ backgroundColor: primaryColor }}>
           {({ open }) => (
             <>
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <h1 className="text-white text-mobile-lg font-bold">CRM Killer</h1>
+                      <h1 className="text-white text-mobile-lg font-bold">{crmName}</h1>
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">

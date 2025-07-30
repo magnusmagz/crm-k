@@ -24,6 +24,8 @@ const Profile: React.FC = () => {
     },
     profilePhoto: profile?.profilePhoto || '',
     companyLogo: profile?.companyLogo || '',
+    primaryColor: profile?.primaryColor || '#1f2937',
+    crmName: profile?.crmName || 'CRM Killer',
   });
   const profilePhotoRef = useRef<HTMLInputElement>(null);
   const companyLogoRef = useRef<HTMLInputElement>(null);
@@ -323,6 +325,44 @@ const Profile: React.FC = () => {
                       />
                     </div>
 
+                    <div className="col-span-6 sm:col-span-3">
+                      <label htmlFor="crmName" className="block text-sm font-medium text-gray-700">
+                        CRM Name
+                      </label>
+                      <input
+                        type="text"
+                        name="crmName"
+                        id="crmName"
+                        value={formData.crmName}
+                        onChange={handleChange}
+                        placeholder="CRM Killer"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                      />
+                    </div>
+
+                    <div className="col-span-6 sm:col-span-3">
+                      <label htmlFor="primaryColor" className="block text-sm font-medium text-gray-700">
+                        Primary Color
+                      </label>
+                      <div className="mt-1 flex items-center">
+                        <input
+                          type="color"
+                          name="primaryColor"
+                          id="primaryColor"
+                          value={formData.primaryColor}
+                          onChange={handleChange}
+                          className="h-10 w-20 border border-gray-300 rounded-md cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={formData.primaryColor}
+                          onChange={(e) => setFormData(prev => ({ ...prev, primaryColor: e.target.value }))}
+                          placeholder="#1f2937"
+                          className="ml-3 flex-1 px-4 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-800 focus:border-gray-800 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+
                     <div className="col-span-6">
                       <label htmlFor="address.street" className="block text-sm font-medium text-gray-700">
                         Street address
@@ -443,6 +483,19 @@ const Profile: React.FC = () => {
                     <dt className="text-sm font-medium text-gray-500">Website</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {profile?.website || 'Not specified'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">CRM Name</dt>
+                    <dd className="mt-1 text-sm text-gray-900">
+                      {profile?.crmName || 'CRM Killer'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Primary Color</dt>
+                    <dd className="mt-1 text-sm text-gray-900 flex items-center">
+                      <span className="inline-block w-6 h-6 rounded mr-2 border border-gray-300" style={{ backgroundColor: profile?.primaryColor || '#1f2937' }}></span>
+                      {profile?.primaryColor || '#1f2937'}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
