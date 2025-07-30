@@ -35,7 +35,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       validate: {
-        is: /^[\d\s\-\+\(\)]+$/i
+        isValidPhone(value) {
+          if (value && value.trim() !== '') {
+            if (!/^[\d\s\-\+\(\)]+$/i.test(value)) {
+              throw new Error('Invalid phone number format');
+            }
+          }
+        }
       }
     },
     address: {
@@ -59,7 +65,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       validate: {
-        isUrl: true
+        isValidUrl(value) {
+          if (value && value.trim() !== '') {
+            // Simple URL validation
+            const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+            if (!urlPattern.test(value)) {
+              throw new Error('Invalid URL format');
+            }
+          }
+        }
       }
     },
     profilePhoto: {
@@ -77,7 +91,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: '#1f2937',
       validate: {
-        is: /^#[0-9A-Fa-f]{6}$/i
+        isValidHexColor(value) {
+          if (value && value.trim() !== '') {
+            if (!/^#[0-9A-Fa-f]{6}$/i.test(value)) {
+              throw new Error('Invalid hex color format');
+            }
+          }
+        }
       }
     },
     crmName: {
