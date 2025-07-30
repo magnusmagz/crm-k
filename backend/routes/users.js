@@ -16,7 +16,7 @@ const validateProfileUpdate = [
   body('address.city').optional().trim(),
   body('address.state').optional().trim(),
   body('address.zipCode').optional().matches(/^\d{5}(-\d{4})?$/),
-  body('primaryColor').optional().matches(/^#[0-9A-F]{6}$/i).withMessage('Invalid hex color format'),
+  body('primaryColor').optional().matches(/^#[0-9A-Fa-f]{6}$/i).withMessage('Invalid hex color format'),
   body('crmName').optional().trim().isLength({ min: 1, max: 50 }).withMessage('CRM name must be between 1 and 50 characters')
 ];
 
@@ -41,8 +41,15 @@ router.get('/profile', authMiddleware, async (req, res) => {
 // Update user profile
 router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) => {
   try {
+    console.log('Profile update request received:', {
+      userId: req.user?.id,
+      body: req.body,
+      headers: req.headers
+    });
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -51,6 +58,7 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
     });
 
     if (!profile) {
+      console.log('Profile not found for user:', req.user.id);
       return res.status(404).json({ error: 'Profile not found' });
     }
 
@@ -63,7 +71,11 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
       }
     });
 
+    console.log('Updates to be applied:', updates);
+
     await profile.update(updates);
+
+    console.log('Profile updated successfully:', profile.toJSON());
 
     res.json({ 
       message: 'Profile updated successfully',
@@ -71,7 +83,8 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
     });
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to update profile', details: error.message });
   }
 });
 

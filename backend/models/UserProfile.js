@@ -77,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: '#1f2937',
       validate: {
-        is: /^#[0-9A-F]{6}$/i
+        is: /^#[0-9A-Fa-f]{6}$/i
       }
     },
     crmName: {
