@@ -10,14 +10,14 @@ const validateProfileUpdate = [
   body('firstName').optional().notEmpty().trim(),
   body('lastName').optional().notEmpty().trim(),
   body('companyName').optional().trim(),
-  body('phone').optional().matches(/^[\d\s\-\+\(\)]+$/),
-  body('website').optional().isURL(),
+  body('phone').optional({ checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/),
+  body('website').optional({ checkFalsy: true }).isURL(),
   body('address.street').optional().trim(),
   body('address.city').optional().trim(),
   body('address.state').optional().trim(),
-  body('address.zipCode').optional().matches(/^\d{5}(-\d{4})?$/),
-  body('primaryColor').optional().matches(/^#[0-9A-Fa-f]{6}$/i).withMessage('Invalid hex color format'),
-  body('crmName').optional().trim().isLength({ min: 1, max: 50 }).withMessage('CRM name must be between 1 and 50 characters')
+  body('address.zipCode').optional({ checkFalsy: true }).matches(/^\d{5}(-\d{4})?$/),
+  body('primaryColor').optional({ checkFalsy: true }).matches(/^#[0-9A-Fa-f]{6}$/i).withMessage('Invalid hex color format'),
+  body('crmName').optional({ checkFalsy: true }).trim().isLength({ min: 1, max: 50 }).withMessage('CRM name must be between 1 and 50 characters')
 ];
 
 // Get user profile
