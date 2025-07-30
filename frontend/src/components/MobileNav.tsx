@@ -64,8 +64,8 @@ const MobileNav: React.FC = () => {
               to={item.href}
               className={`flex flex-col items-center justify-center py-2 px-1 touch-target ${
                 isActive
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-primary'
+                  : 'text-gray-500 hover:text-primary-dark'
               }`}
             >
               <Icon className="h-5 w-5" />

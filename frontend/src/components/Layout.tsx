@@ -50,9 +50,9 @@ const Layout: React.FC = () => {
                             to={item.href}
                             className={classNames(
                               location.pathname === item.href
-                                ? 'bg-gray-900 text-white'
-                                : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                              'rounded-md px-3 py-2 text-sm font-medium'
+                                ? 'bg-primary-light text-white'
+                                : 'text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white',
+                              'rounded-md px-3 py-2 text-sm font-medium transition-colors'
                             )}
                           >
                             {item.name}
@@ -65,7 +65,7 @@ const Layout: React.FC = () => {
                     <div className="ml-4 flex items-center md:ml-6">
                       <Menu as="div" className="relative ml-3">
                         <div>
-                          <Menu.Button className="flex max-w-xs items-center rounded-full bg-primary text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                          <Menu.Button className="flex max-w-xs items-center rounded-full bg-primary text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
                             <span className="sr-only">Open user menu</span>
                             <UserCircleIcon className="h-8 w-8 text-gray-300" />
                           </Menu.Button>
@@ -117,7 +117,7 @@ const Layout: React.FC = () => {
                     </div>
                   </div>
                   <div className="-mr-2 flex md:hidden">
-                    <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-primary p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                    <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-primary p-2 text-gray-300 hover:bg-primary-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
                       <span className="sr-only">Open main menu</span>
                       {open ? (
                         <XMarkIcon className="block h-6 w-6" aria-hidden="true" />

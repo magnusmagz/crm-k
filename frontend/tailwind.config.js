@@ -9,11 +9,13 @@ module.exports = {
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
           dark: 'rgb(var(--color-primary-dark) / <alpha-value>)',
+          light: 'rgb(var(--color-primary-light) / <alpha-value>)',
         }
       },
       backgroundColor: {
         primary: 'rgb(var(--color-primary))',
         'primary-dark': 'rgb(var(--color-primary-dark))',
+        'primary-light': 'rgb(var(--color-primary-light))',
       },
       textColor: {
         primary: 'rgb(var(--color-primary))',

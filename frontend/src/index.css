@@ -14,6 +14,8 @@
   --color-primary-hex: #1f2937;
   --color-primary-dark: 17 24 39; /* Default gray-900 in RGB */
   --color-primary-dark-hex: #111827;
+  --color-primary-light: 75 85 99; /* Default gray-600 in RGB */
+  --color-primary-light-hex: #4b5563;
 }
 
 /* Ensure viewport is mobile-friendly */
