@@ -544,7 +544,6 @@ const Profile: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
 
         {/* Password Section */}
         <div className="">
