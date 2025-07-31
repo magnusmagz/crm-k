@@ -66,9 +66,16 @@ router.post('/send', authMiddleware, validateSendEmail, async (req, res) => {
 
   } catch (error) {
     console.error('Error sending email:', error);
+    console.error('Full error details:', {
+      message: error.message,
+      code: error.code,
+      statusCode: error.statusCode,
+      response: error.response
+    });
     res.status(500).json({ 
       error: 'Failed to send email',
-      details: error.message 
+      details: error.message,
+      code: error.code
     });
   }
 });

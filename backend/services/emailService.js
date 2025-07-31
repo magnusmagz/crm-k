@@ -527,6 +527,14 @@ class EmailService {
         }
       };
 
+      console.log('Sending email with data:', {
+        From: emailData.From,
+        To: emailData.To,
+        Subject: emailData.Subject,
+        ReplyTo: emailData.ReplyTo,
+        emailDomain: this.emailDomain
+      });
+
       // Send email via Postmark
       const response = await this.client.sendEmail(emailData);
 

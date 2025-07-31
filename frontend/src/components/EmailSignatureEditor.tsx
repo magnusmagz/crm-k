@@ -18,6 +18,7 @@ interface EmailSignature {
     company: { show: boolean; value: string };
     address: { show: boolean; value: string };
     department?: { show: boolean; value: string };
+    website?: { show: boolean; value: string };
   };
   fieldOrder?: string[];
   social: {

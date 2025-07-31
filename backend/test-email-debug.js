@@ -36,6 +36,21 @@ async function testEmailSending() {
 
     // Test 2: Find a test contact
     console.log('🧪 Test 2: Finding test contact...');
+    
+    // First, let's see what contacts exist
+    const allContacts = await Contact.findAll({
+      where: { userId: user.id },
+      attributes: ['id', 'firstName', 'lastName', 'email']
+    });
+    
+    console.log(`Found ${allContacts.length} total contacts for this user`);
+    if (allContacts.length > 0) {
+      console.log('Sample contacts:');
+      allContacts.slice(0, 3).forEach(c => {
+        console.log(`  - ${c.firstName} ${c.lastName}: ${c.email || 'NO EMAIL'}`);
+      });
+    }
+    
     const contact = await Contact.findOne({
       where: { 
         userId: user.id,
@@ -45,6 +60,19 @@ async function testEmailSending() {
     
     if (!contact) {
       console.log('❌ No contacts with email found for this user');
+      
+      // Let's check any contact with email in the system
+      const anyContact = await Contact.findOne({
+        where: { 
+          email: { [require('sequelize').Op.ne]: null }
+        }
+      });
+      
+      if (anyContact) {
+        console.log(`\n💡 Found a contact with email in the system: ${anyContact.email}`);
+        console.log('But it belongs to a different user.');
+      }
+      
       return;
     }
     
