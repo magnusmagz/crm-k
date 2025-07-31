@@ -122,7 +122,17 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
       onSubmit(result);
     } catch (error: any) {
       console.error('Failed to save contact:', error);
-      alert(error.response?.data?.error || 'Failed to save contact');
+      let errorMessage = 'Failed to save contact';
+      
+      if (error.response?.data?.errors) {
+        // Express validator errors
+        errorMessage = error.response.data.errors.map((err: any) => err.msg).join(', ');
+      } else if (error.response?.data?.error) {
+        // Custom error message
+        errorMessage = error.response.data.error;
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

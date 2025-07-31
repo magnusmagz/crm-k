@@ -152,7 +152,7 @@ router.post('/', authMiddleware, validateContact, async (req, res) => {
         const value = req.body.customFields[field.name];
         
         // Check required fields
-        if (field.required && !value) {
+        if (field.required && !value && value !== 0 && value !== false) {
           return res.status(400).json({ 
             error: `Custom field '${field.label}' is required` 
           });
@@ -226,6 +226,7 @@ router.put('/:id', authMiddleware, validateContact, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.error('Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -249,7 +250,7 @@ router.put('/:id', authMiddleware, validateContact, async (req, res) => {
       for (const field of customFields) {
         const value = req.body.customFields[field.name];
         
-        if (field.required && !value) {
+        if (field.required && !value && value !== 0 && value !== false) {
           return res.status(400).json({ 
             error: `Custom field '${field.label}' is required` 
           });
