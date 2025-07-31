@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Switch } from '@headlessui/react';
+import { Switch } from './ui/Switch';
 import { userAPI } from '../services/api';
 
 interface EmailSignature {
@@ -48,7 +48,13 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
-  // Remove photo/logo input refs since we'll use profile images
+  // Default values from profile
+  const defaultValues = {
+    name: `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim(),
+    email: profile?.email || '',
+    phone: profile?.phone || '',
+    company: profile?.companyName || '',
+  };
 
   useEffect(() => {
     fetchSignature();
@@ -72,12 +78,98 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
   };
 
   const generatePreview = async () => {
-    try {
-      const response = await userAPI.generateEmailSignature();
-      setPreviewHtml(response.data.html);
-    } catch (err) {
-      console.error('Failed to generate preview:', err);
+    if (!signature || !signature.enabled) {
+      setPreviewHtml('');
+      return;
     }
+    
+    // Generate preview locally for immediate feedback
+    const html = generateLocalPreview(signature);
+    setPreviewHtml(html);
+  };
+  
+  const generateLocalPreview = (sig: EmailSignature) => {
+    const { fields, style, social, layout } = sig;
+    const { primaryColor, fontFamily, fontSize } = style;
+
+    // Fill in default values from profile
+    const name = fields.name.value || defaultValues.name;
+    const email = fields.email.value || defaultValues.email;
+    const phone = fields.phone.value || defaultValues.phone;
+    const company = fields.company.value || defaultValues.company;
+
+    let html = `<div style="font-family: ${fontFamily}; font-size: ${fontSize}; color: #333; line-height: 1.5;">`;
+    
+    if (layout === 'modern') {
+      html += `<table cellpadding="0" cellspacing="0" border="0" style="font-family: ${fontFamily};">`;
+      html += '<tr>';
+      
+      // Photo column if enabled
+      if (sig.includePhoto && profile?.profilePhoto) {
+        html += `<td style="padding-right: 15px; vertical-align: top;">`;
+        html += `<img src="${profile.profilePhoto}" alt="Profile" style="width: 80px; height: 80px; border-radius: 50%; object-cover;">`;
+        html += '</td>';
+      }
+      
+      // Info column
+      html += '<td style="vertical-align: top;">';
+      
+      // Name and title
+      if (fields.name.show && name) {
+        html += `<div style="font-weight: bold; color: ${primaryColor}; margin-bottom: 5px;">${name}</div>`;
+      }
+      if (fields.title.show && fields.title.value) {
+        html += `<div style="color: #666; margin-bottom: 10px;">${fields.title.value}</div>`;
+      }
+      
+      // Contact info
+      if (fields.email.show && email) {
+        html += `<div style="margin-bottom: 3px;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>`;
+      }
+      if (fields.phone.show && phone) {
+        html += `<div style="margin-bottom: 10px;"><a href="tel:${phone}" style="color: #333; text-decoration: none;">${phone}</a></div>`;
+      }
+      
+      // Company info with logo
+      if (sig.includeLogo || fields.company.show || fields.address.show) {
+        html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5e5;">';
+        
+        if (sig.includeLogo && profile?.companyLogo) {
+          html += `<img src="${profile.companyLogo}" alt="Company Logo" style="max-height: 40px; margin-bottom: 5px;">`;
+        }
+        
+        if (fields.company.show && company) {
+          html += `<div style="font-weight: bold; margin-bottom: 3px;">${company}</div>`;
+        }
+        
+        if (fields.address.show && fields.address.value) {
+          html += `<div style="color: #666; font-size: 0.9em;">${fields.address.value}</div>`;
+        }
+        
+        html += '</div>';
+      }
+      
+      // Social links
+      if (sig.includeSocial) {
+        const activeSocial = Object.entries(social).filter(([_, data]) => data.show && data.url);
+        if (activeSocial.length > 0) {
+          html += '<div style="margin-top: 10px;">';
+          activeSocial.forEach(([platform, data], index) => {
+            if (index > 0) html += ' | ';
+            html += `<a href="${data.url}" style="color: ${primaryColor}; text-decoration: none;">${platform.charAt(0).toUpperCase() + platform.slice(1)}</a>`;
+          });
+          html += '</div>';
+        }
+      }
+      
+      html += '</td>';
+      html += '</tr>';
+      html += '</table>';
+    }
+    
+    html += '</div>';
+    
+    return html;
   };
 
   const handleSave = async () => {
@@ -164,13 +256,6 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
     return <div>No signature data available</div>;
   }
 
-  // Fill in default values from profile
-  const defaultValues = {
-    name: `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim(),
-    email: profile?.email || '',
-    phone: profile?.phone || '',
-    company: profile?.companyName || '',
-  };
 
   return (
     <div className="space-y-6">
@@ -195,16 +280,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
         <Switch
           checked={signature.enabled}
           onChange={(enabled) => setSignature({ ...signature, enabled })}
-          className={`${
-            signature.enabled ? 'bg-primary' : 'bg-gray-200'
-          } relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-        >
-          <span
-            className={`${
-              signature.enabled ? 'translate-x-5' : 'translate-x-0.5'
-            } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
-          />
-        </Switch>
+        />
       </div>
 
       {signature.enabled && (
@@ -239,22 +315,11 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                 
                 {/* Profile Photo */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      checked={signature.includePhoto}
-                      onChange={(checked) => updateSignatureImages(checked, signature.includeLogo)}
-                      className={`${
-                        signature.includePhoto ? 'bg-primary' : 'bg-gray-200'
-                      } relative inline-flex h-5 w-9 items-center rounded-full`}
-                    >
-                      <span
-                        className={`${
-                          signature.includePhoto ? 'translate-x-5' : 'translate-x-0.5'
-                        } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
-                      />
-                    </Switch>
-                    <span className="text-sm text-gray-700">Profile Photo</span>
-                  </div>
+                  <Switch
+                    checked={signature.includePhoto}
+                    onChange={(checked) => updateSignatureImages(checked, signature.includeLogo)}
+                    label="Profile Photo"
+                  />
                   {signature.includePhoto && (
                     <div className="flex items-center space-x-2">
                       {profile?.profilePhoto ? (
@@ -268,22 +333,11 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
 
                 {/* Company Logo */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      checked={signature.includeLogo}
-                      onChange={(checked) => updateSignatureImages(signature.includePhoto, checked)}
-                      className={`${
-                        signature.includeLogo ? 'bg-primary' : 'bg-gray-200'
-                      } relative inline-flex h-5 w-9 items-center rounded-full`}
-                    >
-                      <span
-                        className={`${
-                          signature.includeLogo ? 'translate-x-5' : 'translate-x-0.5'
-                        } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
-                      />
-                    </Switch>
-                    <span className="text-sm text-gray-700">Company Logo</span>
-                  </div>
+                  <Switch
+                    checked={signature.includeLogo}
+                    onChange={(checked) => updateSignatureImages(signature.includePhoto, checked)}
+                    label="Company Logo"
+                  />
                   {signature.includeLogo && (
                     <div className="flex items-center space-x-2">
                       {profile?.companyLogo ? (
@@ -302,22 +356,11 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                 
                 {Object.entries(signature.fields).map(([field, data]) => (
                   <div key={field} className="space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <Switch
-                        checked={data.show}
-                        onChange={(checked) => handleFieldChange(field, 'show', checked)}
-                        className={`${
-                          data.show ? 'bg-primary' : 'bg-gray-200'
-                        } relative inline-flex h-5 w-9 items-center rounded-full`}
-                      >
-                        <span
-                          className={`${
-                            data.show ? 'translate-x-5' : 'translate-x-0.5'
-                          } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
-                        />
-                      </Switch>
-                      <span className="text-sm text-gray-700 capitalize">{field}</span>
-                    </div>
+                    <Switch
+                      checked={data.show}
+                      onChange={(checked) => handleFieldChange(field, 'show', checked)}
+                      label={field.charAt(0).toUpperCase() + field.slice(1)}
+                    />
                     {data.show && (
                       <input
                         type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
@@ -338,36 +381,16 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                   <Switch
                     checked={signature.includeSocial}
                     onChange={(checked) => setSignature({ ...signature, includeSocial: checked })}
-                    className={`${
-                      signature.includeSocial ? 'bg-primary' : 'bg-gray-200'
-                    } relative inline-flex h-6 w-11 items-center rounded-full`}
-                  >
-                    <span
-                      className={`${
-                        signature.includeSocial ? 'translate-x-5' : 'translate-x-0.5'
-                      } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
-                    />
-                  </Switch>
+                  />
                 </div>
                 
                 {signature.includeSocial && Object.entries(signature.social).map(([platform, data]) => (
                   <div key={platform} className="space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <Switch
-                        checked={data.show}
-                        onChange={(checked) => handleSocialChange(platform, 'show', checked)}
-                        className={`${
-                          data.show ? 'bg-primary' : 'bg-gray-200'
-                        } relative inline-flex h-5 w-9 items-center rounded-full`}
-                      >
-                        <span
-                          className={`${
-                            data.show ? 'translate-x-5' : 'translate-x-0.5'
-                          } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
-                        />
-                      </Switch>
-                      <span className="text-sm text-gray-700 capitalize">{platform}</span>
-                    </div>
+                    <Switch
+                      checked={data.show}
+                      onChange={(checked) => handleSocialChange(platform, 'show', checked)}
+                      label={platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    />
                     {data.show && (
                       <input
                         type="url"
