@@ -508,26 +508,58 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
 
               {/* Contact Information */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Contact Information</h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-gray-900">Contact Information</h4>
+                  <p className="text-xs text-gray-500">Drag to reorder</p>
+                </div>
                 
-                {Object.entries(signature.fields).map(([field, data]) => (
-                  <div key={field} className="space-y-2">
-                    <Checkbox
-                      checked={data.show}
-                      onChange={(checked) => handleFieldChange(field, 'show', checked)}
-                      label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    />
-                    {data.show && (
-                      <input
-                        type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
-                        value={data.value}
-                        onChange={(e) => handleFieldChange(field, 'value', e.target.value)}
-                        placeholder={defaultValues[field as keyof typeof defaultValues] || `Enter ${field}`}
-                        className="ml-9 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                      />
-                    )}
-                  </div>
-                ))}
+                {(signature.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address']).map((field) => {
+                  const data = signature.fields[field as keyof typeof signature.fields];
+                  return (
+                    <div
+                      key={field}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, field)}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, field)}
+                      className={`space-y-2 p-3 rounded-lg border ${
+                        draggedField === field 
+                          ? 'border-primary bg-primary/5 opacity-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      } cursor-move transition-all`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <svg
+                          className="w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 8h16M4 16h16"
+                          />
+                        </svg>
+                        <Checkbox
+                          checked={data.show}
+                          onChange={(checked) => handleFieldChange(field, 'show', checked)}
+                          label={getFieldLabel(field)}
+                        />
+                      </div>
+                      {data.show && (
+                        <input
+                          type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                          value={data.value}
+                          onChange={(e) => handleFieldChange(field, 'value', e.target.value)}
+                          placeholder={defaultValues[field as keyof typeof defaultValues] || `Enter ${field}`}
+                          className="ml-9 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Social Links */}

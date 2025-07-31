@@ -2,19 +2,39 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    // Add customFields column to deals table
-    await queryInterface.addColumn('deals', 'custom_fields', {
-      type: Sequelize.JSONB,
-      defaultValue: {},
-      allowNull: false
-    });
+    // Check if custom_fields column already exists
+    const [results] = await queryInterface.sequelize.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'deals' 
+      AND column_name = 'custom_fields'
+    `);
+    
+    if (results.length === 0) {
+      // Add customFields column to deals table
+      await queryInterface.addColumn('deals', 'custom_fields', {
+        type: Sequelize.JSONB,
+        defaultValue: {},
+        allowNull: false
+      });
+    }
 
-    // Add entityType column to custom_fields table to support both contacts and deals
-    await queryInterface.addColumn('custom_fields', 'entity_type', {
-      type: Sequelize.ENUM('contact', 'deal'),
-      defaultValue: 'contact',
-      allowNull: false
-    });
+    // Check if entity_type column already exists
+    const [entityTypeResults] = await queryInterface.sequelize.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'custom_fields' 
+      AND column_name = 'entity_type'
+    `);
+    
+    if (entityTypeResults.length === 0) {
+      // Add entityType column to custom_fields table to support both contacts and deals
+      await queryInterface.addColumn('custom_fields', 'entity_type', {
+        type: Sequelize.ENUM('contact', 'deal'),
+        defaultValue: 'contact',
+        allowNull: false
+      });
+    }
 
     // Update existing custom fields to be contact type
     await queryInterface.sequelize.query(`

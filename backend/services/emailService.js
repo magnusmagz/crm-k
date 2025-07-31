@@ -132,37 +132,57 @@ class EmailService {
       // Info column
       html += '<td style="vertical-align: top;">';
       
-      // Name and title
-      if (fields.name.show && name) {
-        html += `<div style="font-weight: bold; color: ${primaryColor}; margin-bottom: 5px;">${name}</div>`;
-      }
-      if (fields.title.show && fields.title.value) {
-        html += `<div style="color: #666; margin-bottom: 10px;">${fields.title.value}</div>`;
-      }
+      // Use field order if available
+      const fieldOrder = signature.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address'];
+      const fieldValues = {
+        name,
+        title: fields.title.value,
+        email,
+        phone,
+        company,
+        address: fields.address.value
+      };
       
-      // Contact info
-      if (fields.email.show && email) {
-        html += `<div style="margin-bottom: 3px;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>`;
-      }
-      if (fields.phone.show && phone) {
-        html += `<div style="margin-bottom: 10px;"><a href="tel:${phone}" style="color: #333; text-decoration: none;">${phone}</a></div>`;
-      }
+      // Render top section fields (name, title, email, phone)
+      const topFields = fieldOrder.filter(f => ['name', 'title', 'email', 'phone'].includes(f));
+      topFields.forEach(fieldName => {
+        const field = fields[fieldName];
+        const value = fieldValues[fieldName];
+        
+        if (field && field.show && value) {
+          if (fieldName === 'name') {
+            html += `<div style="font-weight: bold; color: ${primaryColor}; margin-bottom: 5px;">${value}</div>`;
+          } else if (fieldName === 'title') {
+            html += `<div style="color: #666; margin-bottom: 10px;">${value}</div>`;
+          } else if (fieldName === 'email') {
+            html += `<div style="margin-bottom: 3px;"><a href="mailto:${value}" style="color: ${primaryColor}; text-decoration: none;">${value}</a></div>`;
+          } else if (fieldName === 'phone') {
+            html += `<div style="margin-bottom: 10px;"><a href="tel:${value}" style="color: #333; text-decoration: none;">${value}</a></div>`;
+          }
+        }
+      });
       
       // Company info with logo
-      if (signature.includeLogo || fields.company.show || fields.address.show) {
+      const bottomFields = fieldOrder.filter(f => ['company', 'address'].includes(f));
+      if (signature.includeLogo || bottomFields.some(f => fields[f] && fields[f].show && fieldValues[f])) {
         html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5e5;">';
         
         if (signature.includeLogo && signature.logoUrl) {
           html += `<img src="${signature.logoUrl}" alt="Company Logo" style="max-height: 40px; margin-bottom: 5px;">`;
         }
         
-        if (fields.company.show && company) {
-          html += `<div style="font-weight: bold; margin-bottom: 3px;">${company}</div>`;
-        }
-        
-        if (fields.address.show && fields.address.value) {
-          html += `<div style="color: #666; font-size: 0.9em;">${fields.address.value}</div>`;
-        }
+        bottomFields.forEach(fieldName => {
+          const field = fields[fieldName];
+          const value = fieldValues[fieldName];
+          
+          if (field && field.show && value) {
+            if (fieldName === 'company') {
+              html += `<div style="font-weight: bold; margin-bottom: 3px;">${value}</div>`;
+            } else if (fieldName === 'address') {
+              html += `<div style="color: #666; font-size: 0.9em;">${value}</div>`;
+            }
+          }
+        });
         
         html += '</div>';
       }
