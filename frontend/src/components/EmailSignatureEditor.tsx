@@ -387,8 +387,8 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
         html += '</tr></table></td></tr>';
       }
       
-      const website = profile?.website || fields.website?.value;
-      if (website && fields.website?.show !== false) {
+      const website = profile?.website || (fields.website?.value || '');
+      if (website && fields.website?.show) {
         html += '<tr><td style="padding: 2px 0; vertical-align: middle;">';
         html += '<table cellpadding="0" cellspacing="0" border="0"><tr>';
         html += `<td style="width: 24px; vertical-align: middle;"><div style="width: 16px; height: 16px; background-color: #9b59b6; border-radius: 8px; text-align: center; line-height: 16px; color: white; font-size: 10px; margin-right: 8px;">🌐</div></td>`;
