@@ -43,7 +43,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       validate: {
-        is: /^[\d\s\-\+\(\)]+$/i
+        isValidPhone(value) {
+          // Allow empty strings and null
+          if (!value || value === '') {
+            return true;
+          }
+          // Otherwise validate the phone format
+          if (!/^[\d\s\-\+\(\)]+$/i.test(value)) {
+            throw new Error('Invalid phone number format');
+          }
+        }
       }
     },
     company: {
