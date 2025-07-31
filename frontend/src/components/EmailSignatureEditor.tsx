@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Switch } from './ui/Switch';
+import { Checkbox } from './ui/Checkbox';
 import { userAPI } from '../services/api';
 
 interface EmailSignature {
@@ -277,7 +277,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
           <h3 className="text-lg font-medium text-gray-900">Email Signature</h3>
           <p className="text-sm text-gray-500">Automatically append your signature to all emails</p>
         </div>
-        <Switch
+        <Checkbox
           checked={signature.enabled}
           onChange={(enabled) => setSignature({ ...signature, enabled })}
         />
@@ -315,7 +315,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                 
                 {/* Profile Photo */}
                 <div className="flex items-center justify-between">
-                  <Switch
+                  <Checkbox
                     checked={signature.includePhoto}
                     onChange={(checked) => updateSignatureImages(checked, signature.includeLogo)}
                     label="Profile Photo"
@@ -333,7 +333,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
 
                 {/* Company Logo */}
                 <div className="flex items-center justify-between">
-                  <Switch
+                  <Checkbox
                     checked={signature.includeLogo}
                     onChange={(checked) => updateSignatureImages(signature.includePhoto, checked)}
                     label="Company Logo"
@@ -356,7 +356,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                 
                 {Object.entries(signature.fields).map(([field, data]) => (
                   <div key={field} className="space-y-2">
-                    <Switch
+                    <Checkbox
                       checked={data.show}
                       onChange={(checked) => handleFieldChange(field, 'show', checked)}
                       label={field.charAt(0).toUpperCase() + field.slice(1)}
@@ -378,7 +378,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-gray-900">Social Links</h4>
-                  <Switch
+                  <Checkbox
                     checked={signature.includeSocial}
                     onChange={(checked) => setSignature({ ...signature, includeSocial: checked })}
                   />
@@ -386,7 +386,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                 
                 {signature.includeSocial && Object.entries(signature.social).map(([platform, data]) => (
                   <div key={platform} className="space-y-2">
-                    <Switch
+                    <Checkbox
                       checked={data.show}
                       onChange={(checked) => handleSocialChange(platform, 'show', checked)}
                       label={platform.charAt(0).toUpperCase() + platform.slice(1)}
