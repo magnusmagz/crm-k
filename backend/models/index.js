@@ -23,6 +23,10 @@ const Automation = require('./Automation')(sequelize, Sequelize.DataTypes);
 const AutomationLog = require('./AutomationLog')(sequelize, Sequelize.DataTypes);
 const AutomationStep = require('./AutomationStep')(sequelize, Sequelize.DataTypes);
 const AutomationEnrollment = require('./AutomationEnrollment')(sequelize, Sequelize.DataTypes);
+const EmailSend = require('./EmailSend')(sequelize, Sequelize.DataTypes);
+const EmailEvent = require('./EmailEvent')(sequelize, Sequelize.DataTypes);
+const EmailLink = require('./EmailLink')(sequelize, Sequelize.DataTypes);
+const EmailSuppression = require('./EmailSuppression')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
@@ -64,6 +68,21 @@ AutomationEnrollment.belongsTo(Automation, { foreignKey: 'automation_id' });
 User.hasMany(AutomationEnrollment, { foreignKey: 'user_id', as: 'automationEnrollments' });
 AutomationEnrollment.belongsTo(User, { foreignKey: 'user_id' });
 
+User.hasMany(EmailSend, { foreignKey: 'user_id', as: 'emailSends' });
+EmailSend.belongsTo(User, { foreignKey: 'user_id' });
+
+Contact.hasMany(EmailSend, { foreignKey: 'contact_id', as: 'emailSends' });
+EmailSend.belongsTo(Contact, { foreignKey: 'contact_id' });
+
+EmailSend.hasMany(EmailEvent, { foreignKey: 'email_send_id', as: 'events' });
+EmailEvent.belongsTo(EmailSend, { foreignKey: 'email_send_id' });
+
+EmailSend.hasMany(EmailLink, { foreignKey: 'email_send_id', as: 'links' });
+EmailLink.belongsTo(EmailSend, { foreignKey: 'email_send_id' });
+
+User.hasMany(EmailSuppression, { foreignKey: 'user_id', as: 'emailSuppressions' });
+EmailSuppression.belongsTo(User, { foreignKey: 'user_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -75,5 +94,9 @@ module.exports = {
   Automation,
   AutomationLog,
   AutomationStep,
-  AutomationEnrollment
+  AutomationEnrollment,
+  EmailSend,
+  EmailEvent,
+  EmailLink,
+  EmailSuppression
 };

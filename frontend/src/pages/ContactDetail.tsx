@@ -5,7 +5,9 @@ import { contactsAPI, dealsAPI } from '../services/api';
 import ContactForm from '../components/ContactForm';
 import DealForm from '../components/DealForm';
 import EntityDebugView from '../components/automation/EntityDebugView';
-import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon } from '@heroicons/react/24/outline';
+import EmailModal from '../components/email/EmailModal';
+import EmailHistory from '../components/email/EmailHistory';
+import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
 const ContactDetail: React.FC = () => {
@@ -19,6 +21,8 @@ const ContactDetail: React.FC = () => {
   const [showDealForm, setShowDealForm] = useState(false);
   const [totalDealValue, setTotalDealValue] = useState(0);
   const [showDebugView, setShowDebugView] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailRefresh, setEmailRefresh] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -149,6 +153,15 @@ const ContactDetail: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3">
+            {contact.email && (
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <EnvelopeIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                Email
+              </button>
+            )}
             <button
               onClick={() => setIsEditing(true)}
               className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -318,6 +331,23 @@ const ContactDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Email History Section */}
+      {contact.email && (
+        <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-primary-dark">
+              Email History
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              View all emails sent to this contact
+            </p>
+          </div>
+          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <EmailHistory contactId={contact.id} refresh={emailRefresh} />
+          </div>
+        </div>
+      )}
+
       {/* Automation Debug Section */}
       <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center cursor-pointer" onClick={() => setShowDebugView(!showDebugView)}>
@@ -350,6 +380,19 @@ const ContactDetail: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* Email Modal */}
+      {contact && (
+        <EmailModal
+          isOpen={showEmailModal}
+          onClose={() => setShowEmailModal(false)}
+          contact={contact}
+          onSuccess={() => {
+            setShowEmailModal(false);
+            setEmailRefresh(!emailRefresh);
+          }}
+        />
       )}
 
       <Toaster position="top-right" />

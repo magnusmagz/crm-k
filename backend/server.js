@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
@@ -16,6 +16,10 @@ const customFieldRoutes = require('./routes/customFields');
 const stageRoutes = require('./routes/stages');
 const dealRoutes = require('./routes/deals');
 const automationRoutes = require('./routes/automations');
+const emailRoutes = require('./routes/emails');
+const webhookRoutes = require('./routes/webhooks');
+const trackingRoutes = require('./routes/tracking');
+// const analyticsRoutes = require('./routes/analytics');
 const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
@@ -54,6 +58,10 @@ app.use('/api/deals', dealRoutes);
 app.use('/api/deals/import', dealImportRoutes);
 app.use('/api/automations', automationRoutes);
 app.use('/api/deal-custom-fields', require('./routes/dealCustomFields'));
+app.use('/api/emails', emailRoutes);
+app.use('/api/webhooks', webhookRoutes);
+app.use('/api', trackingRoutes);
+// app.use('/api/analytics', analyticsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
