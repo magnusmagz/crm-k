@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     companyName: {
       type: DataTypes.STRING,
       allowNull: true

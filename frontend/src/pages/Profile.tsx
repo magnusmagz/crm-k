@@ -14,6 +14,7 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || '',
     lastName: profile?.lastName || '',
+    title: profile?.title || '',
     companyName: profile?.companyName || '',
     phone: profile?.phone || '',
     website: profile?.website || '',
@@ -128,11 +129,17 @@ const Profile: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-mobile sm:px-6 lg:px-8 py-mobile">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
+        <p className="mt-2 text-sm text-gray-600">Manage your profile information, email signature, and security settings</p>
+      </div>
+      
       <div className="space-y-8">
         {/* Profile Section */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-primary-dark">Profile Settings</h2>
+            <h2 className="text-2xl font-bold text-primary-dark">Profile Information</h2>
           </div>
           {message && (
             <div className={`rounded-md p-4 mb-4 ${
@@ -289,7 +296,22 @@ const Profile: React.FC = () => {
                       />
                     </div>
 
-                    <div className="col-span-6 sm:col-span-4">
+                    <div className="col-span-6 sm:col-span-3">
+                      <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                        Job Title
+                      </label>
+                      <input
+                        type="text"
+                        name="title"
+                        id="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="e.g. Sales Manager, CEO"
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                      />
+                    </div>
+
+                    <div className="col-span-6 sm:col-span-3">
                       <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
                         Company name
                       </label>
@@ -485,6 +507,12 @@ const Profile: React.FC = () => {
                     <dt className="text-sm font-medium text-gray-500">Email</dt>
                     <dd className="mt-1 text-sm text-primary-dark">
                       {user?.email}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Job Title</dt>
+                    <dd className="mt-1 text-sm text-primary-dark">
+                      {profile?.title || 'Not specified'}
                     </dd>
                   </div>
                   <div>
