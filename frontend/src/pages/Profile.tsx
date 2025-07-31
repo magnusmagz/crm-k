@@ -127,17 +127,13 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-mobile sm:px-6 lg:px-8 py-mobile">
-      <div className="md:grid md:grid-cols-3 md:gap-6">
-        <div className="md:col-span-1">
-          <div>
-            <h3 className="text-lg font-medium leading-6 text-primary-dark">Profile</h3>
-            <p className="mt-1 text-sm text-gray-600">
-              Your personal information and business details.
-            </p>
+    <div className="max-w-5xl mx-auto px-mobile sm:px-6 lg:px-8 py-mobile">
+      <div className="space-y-8">
+        {/* Profile Section */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-primary-dark">Profile Settings</h2>
           </div>
-        </div>
-        <div className="mt-5 md:col-span-2 md:mt-0">
           {message && (
             <div className={`rounded-md p-4 mb-4 ${
               message.type === 'success' ? 'bg-green-50' : 'bg-red-50'
@@ -165,7 +161,10 @@ const Profile: React.FC = () => {
             <form onSubmit={handleSubmit}>
               <div className="shadow sm:overflow-hidden sm:rounded-md">
                 <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
-                  <div className="grid grid-cols-6 gap-6">
+                  {/* Profile Images */}
+                  <div>
+                    <h4 className="text-base font-medium text-gray-900 mb-4">Profile Images</h4>
+                    <div className="grid grid-cols-6 gap-6">
                     <div className="col-span-6">
                       <div className="flex flex-col sm:flex-row gap-6">
                         <div>
@@ -253,7 +252,13 @@ const Profile: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+                    </div>
+                  </div>
+                  
+                  {/* Personal Information */}
+                  <div className="border-t pt-6">
+                    <h4 className="text-base font-medium text-gray-900 mb-4">Personal Information</h4>
+                    <div className="grid grid-cols-6 gap-6">
                     <div className="col-span-6 sm:col-span-3">
                       <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
                         First name
@@ -364,6 +369,13 @@ const Profile: React.FC = () => {
                       </div>
                     </div>
 
+                    </div>
+                  </div>
+                  
+                  {/* Address */}
+                  <div className="border-t pt-6">
+                    <h4 className="text-base font-medium text-gray-900 mb-4">Address</h4>
+                    <div className="grid grid-cols-6 gap-6">
                     <div className="col-span-6">
                       <label htmlFor="address.street" className="block text-sm font-medium text-gray-700">
                         Street address
@@ -418,6 +430,7 @@ const Profile: React.FC = () => {
                         onChange={handleChange}
                         className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -533,23 +546,12 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      <div className="hidden sm:block" aria-hidden="true">
-        <div className="py-5">
-          <div className="border-t border-gray-200" />
-        </div>
-      </div>
-
-      <div className="mt-10 sm:mt-0">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
-          <div className="md:col-span-1">
-            <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-primary-dark">Change Password</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Update your password to keep your account secure.
-              </p>
-            </div>
+        {/* Password Section */}
+        <div className="">
+          <div className="border-t border-gray-200 pt-8 mb-6">
+            <h3 className="text-xl font-semibold text-primary-dark">Security</h3>
+            <p className="text-sm text-gray-600 mt-1">Manage your password and account security</p>
           </div>
-          <div className="mt-5 md:col-span-2 md:mt-0">
             {isChangingPassword ? (
               <form onSubmit={handlePasswordSubmit}>
                 <div className="shadow overflow-hidden sm:rounded-md">
@@ -637,27 +639,15 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      <div className="hidden sm:block" aria-hidden="true">
-        <div className="py-5">
-          <div className="border-t border-gray-200" />
-        </div>
-      </div>
-
-      <div className="mt-10 sm:mt-0">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
-          <div className="md:col-span-1">
-            <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-primary-dark">Email Signature</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Customize your email signature that will be automatically appended to all emails.
-              </p>
-            </div>
+        {/* Email Signature Section */}
+        <div className="">
+          <div className="border-t border-gray-200 pt-8 mb-6">
+            <h3 className="text-xl font-semibold text-primary-dark">Email Signature</h3>
+            <p className="text-sm text-gray-600 mt-1">Customize your email signature for all outgoing emails</p>
           </div>
-          <div className="mt-5 md:col-span-2 md:mt-0">
-            <div className="shadow overflow-hidden sm:rounded-md">
-              <div className="px-4 py-5 bg-white sm:p-6">
-                <EmailSignatureEditor profile={profile} user={user} />
-              </div>
+          <div className="shadow overflow-hidden sm:rounded-md">
+            <div className="px-4 py-5 bg-white sm:p-6">
+              <EmailSignatureEditor profile={profile} user={user} />
             </div>
           </div>
         </div>
