@@ -185,7 +185,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
         const field = fields[fieldName as keyof typeof fields];
         const value = fieldValues[fieldName];
         
-        if (field.show && value) {
+        if (field && field.show && value) {
           if (fieldName === 'name') {
             html += `<div style="font-weight: bold; color: ${primaryColor}; margin-bottom: 5px;">${value}</div>`;
           } else if (fieldName === 'title') {
@@ -200,7 +200,10 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
       
       // Company info with logo
       const bottomFields = fieldOrder.filter(f => ['company', 'address'].includes(f));
-      if (sig.includeLogo || bottomFields.some(f => fields[f as keyof typeof fields].show && fieldValues[f])) {
+      if (sig.includeLogo || bottomFields.some(f => {
+        const field = fields[f as keyof typeof fields];
+        return field && field.show && fieldValues[f];
+      })) {
         html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5e5;">';
         
         if (sig.includeLogo && profile?.companyLogo) {
@@ -211,7 +214,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
           const field = fields[fieldName as keyof typeof fields];
           const value = fieldValues[fieldName];
           
-          if (field.show && value) {
+          if (field && field.show && value) {
             if (fieldName === 'company') {
               html += `<div style="font-weight: bold; margin-bottom: 3px;">${value}</div>`;
             } else if (fieldName === 'address') {
