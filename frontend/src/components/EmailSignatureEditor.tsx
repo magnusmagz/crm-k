@@ -197,12 +197,12 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
           onChange={(enabled) => setSignature({ ...signature, enabled })}
           className={`${
             signature.enabled ? 'bg-primary' : 'bg-gray-200'
-          } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
+          } relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
         >
           <span
             className={`${
-              signature.enabled ? 'translate-x-6' : 'translate-x-1'
-            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+              signature.enabled ? 'translate-x-5' : 'translate-x-0.5'
+            } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
           />
         </Switch>
       </div>
@@ -245,12 +245,12 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                       onChange={(checked) => updateSignatureImages(checked, signature.includeLogo)}
                       className={`${
                         signature.includePhoto ? 'bg-primary' : 'bg-gray-200'
-                      } relative inline-flex h-6 w-11 items-center rounded-full`}
+                      } relative inline-flex h-5 w-9 items-center rounded-full`}
                     >
                       <span
                         className={`${
-                          signature.includePhoto ? 'translate-x-6' : 'translate-x-1'
-                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                          signature.includePhoto ? 'translate-x-5' : 'translate-x-0.5'
+                        } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
                       />
                     </Switch>
                     <span className="text-sm text-gray-700">Profile Photo</span>
@@ -274,12 +274,12 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                       onChange={(checked) => updateSignatureImages(signature.includePhoto, checked)}
                       className={`${
                         signature.includeLogo ? 'bg-primary' : 'bg-gray-200'
-                      } relative inline-flex h-6 w-11 items-center rounded-full`}
+                      } relative inline-flex h-5 w-9 items-center rounded-full`}
                     >
                       <span
                         className={`${
-                          signature.includeLogo ? 'translate-x-6' : 'translate-x-1'
-                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                          signature.includeLogo ? 'translate-x-5' : 'translate-x-0.5'
+                        } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
                       />
                     </Switch>
                     <span className="text-sm text-gray-700">Company Logo</span>
@@ -308,12 +308,12 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                         onChange={(checked) => handleFieldChange(field, 'show', checked)}
                         className={`${
                           data.show ? 'bg-primary' : 'bg-gray-200'
-                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                        } relative inline-flex h-5 w-9 items-center rounded-full`}
                       >
                         <span
                           className={`${
-                            data.show ? 'translate-x-6' : 'translate-x-1'
-                          } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                            data.show ? 'translate-x-5' : 'translate-x-0.5'
+                          } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
                         />
                       </Switch>
                       <span className="text-sm text-gray-700 capitalize">{field}</span>
@@ -344,8 +344,8 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                   >
                     <span
                       className={`${
-                        signature.includeSocial ? 'translate-x-6' : 'translate-x-1'
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                        signature.includeSocial ? 'translate-x-5' : 'translate-x-0.5'
+                      } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
                     />
                   </Switch>
                 </div>
@@ -358,12 +358,12 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
                         onChange={(checked) => handleSocialChange(platform, 'show', checked)}
                         className={`${
                           data.show ? 'bg-primary' : 'bg-gray-200'
-                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                        } relative inline-flex h-5 w-9 items-center rounded-full`}
                       >
                         <span
                           className={`${
-                            data.show ? 'translate-x-6' : 'translate-x-1'
-                          } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                            data.show ? 'translate-x-5' : 'translate-x-0.5'
+                          } inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform`}
                         />
                       </Switch>
                       <span className="text-sm text-gray-700 capitalize">{platform}</span>
