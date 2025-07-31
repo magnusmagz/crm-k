@@ -635,9 +635,7 @@ const Profile: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
         </div>
-      </div>
 
         {/* Email Signature Section */}
         <div className="">
