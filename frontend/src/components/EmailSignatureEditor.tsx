@@ -18,6 +18,7 @@ interface EmailSignature {
     company: { show: boolean; value: string };
     address: { show: boolean; value: string };
   };
+  fieldOrder?: string[];
   social: {
     linkedin: { show: boolean; url: string };
     twitter: { show: boolean; url: string };
@@ -48,6 +49,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
   const [previewHtml, setPreviewHtml] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [draggedField, setDraggedField] = useState<string | null>(null);
   
   // Default values from profile
   const defaultValues = {
@@ -70,7 +72,14 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
   const fetchSignature = async () => {
     try {
       const response = await userAPI.getEmailSignature();
-      setSignature(response.data.emailSignature);
+      const sig = response.data.emailSignature;
+      
+      // Ensure fieldOrder exists
+      if (!sig.fieldOrder) {
+        sig.fieldOrder = ['name', 'title', 'email', 'phone', 'company', 'address'];
+      }
+      
+      setSignature(sig);
       setLoading(false);
     } catch (err) {
       setError('Failed to load email signature');
@@ -89,6 +98,49 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
     setPreviewHtml(html);
   };
   
+  const handleDragStart = (e: React.DragEvent, field: string) => {
+    setDraggedField(field);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetField: string) => {
+    e.preventDefault();
+    
+    if (!signature || !draggedField || draggedField === targetField) return;
+    
+    const fieldOrder = [...(signature.fieldOrder || [])];
+    const draggedIndex = fieldOrder.indexOf(draggedField);
+    const targetIndex = fieldOrder.indexOf(targetField);
+    
+    // Remove dragged field and insert at target position
+    fieldOrder.splice(draggedIndex, 1);
+    fieldOrder.splice(targetIndex, 0, draggedField);
+    
+    setSignature({
+      ...signature,
+      fieldOrder
+    });
+    
+    setDraggedField(null);
+  };
+
+  const getFieldLabel = (field: string) => {
+    const labels: Record<string, string> = {
+      name: 'Name',
+      title: 'Title',
+      email: 'Email',
+      phone: 'Phone',
+      company: 'Company',
+      address: 'Address'
+    };
+    return labels[field] || field;
+  };
+
   const generateLocalPreview = (sig: EmailSignature) => {
     const { fields, style, social, layout } = sig;
     const { primaryColor, fontFamily, fontSize } = style;
@@ -115,37 +167,57 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
       // Info column
       html += '<td style="vertical-align: top;">';
       
-      // Name and title
-      if (fields.name.show && name) {
-        html += `<div style="font-weight: bold; color: ${primaryColor}; margin-bottom: 5px;">${name}</div>`;
-      }
-      if (fields.title.show && fields.title.value) {
-        html += `<div style="color: #666; margin-bottom: 10px;">${fields.title.value}</div>`;
-      }
+      // Render fields in the specified order
+      const fieldOrder = sig.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address'];
+      const fieldValues: Record<string, string> = {
+        name,
+        title: fields.title.value,
+        email,
+        phone,
+        company,
+        address: fields.address.value
+      };
       
-      // Contact info
-      if (fields.email.show && email) {
-        html += `<div style="margin-bottom: 3px;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>`;
-      }
-      if (fields.phone.show && phone) {
-        html += `<div style="margin-bottom: 10px;"><a href="tel:${phone}" style="color: #333; text-decoration: none;">${phone}</a></div>`;
-      }
+      // Render top section fields (name, title, email, phone)
+      const topFields = fieldOrder.filter(f => ['name', 'title', 'email', 'phone'].includes(f));
+      topFields.forEach((fieldName, index) => {
+        const field = fields[fieldName as keyof typeof fields];
+        const value = fieldValues[fieldName];
+        
+        if (field.show && value) {
+          if (fieldName === 'name') {
+            html += `<div style="font-weight: bold; color: ${primaryColor}; margin-bottom: 5px;">${value}</div>`;
+          } else if (fieldName === 'title') {
+            html += `<div style="color: #666; margin-bottom: 10px;">${value}</div>`;
+          } else if (fieldName === 'email') {
+            html += `<div style="margin-bottom: 3px;"><a href="mailto:${value}" style="color: ${primaryColor}; text-decoration: none;">${value}</a></div>`;
+          } else if (fieldName === 'phone') {
+            html += `<div style="margin-bottom: 10px;"><a href="tel:${value}" style="color: #333; text-decoration: none;">${value}</a></div>`;
+          }
+        }
+      });
       
       // Company info with logo
-      if (sig.includeLogo || fields.company.show || fields.address.show) {
+      const bottomFields = fieldOrder.filter(f => ['company', 'address'].includes(f));
+      if (sig.includeLogo || bottomFields.some(f => fields[f as keyof typeof fields].show && fieldValues[f])) {
         html += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5e5;">';
         
         if (sig.includeLogo && profile?.companyLogo) {
           html += `<img src="${profile.companyLogo}" alt="Company Logo" style="max-height: 40px; margin-bottom: 5px;">`;
         }
         
-        if (fields.company.show && company) {
-          html += `<div style="font-weight: bold; margin-bottom: 3px;">${company}</div>`;
-        }
-        
-        if (fields.address.show && fields.address.value) {
-          html += `<div style="color: #666; font-size: 0.9em;">${fields.address.value}</div>`;
-        }
+        bottomFields.forEach(fieldName => {
+          const field = fields[fieldName as keyof typeof fields];
+          const value = fieldValues[fieldName];
+          
+          if (field.show && value) {
+            if (fieldName === 'company') {
+              html += `<div style="font-weight: bold; margin-bottom: 3px;">${value}</div>`;
+            } else if (fieldName === 'address') {
+              html += `<div style="color: #666; font-size: 0.9em;">${value}</div>`;
+            }
+          }
+        });
         
         html += '</div>';
       }

@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(50),
       defaultValue: 'sent',
       validate: {
-        isIn: [['sent', 'bounced', 'delivered']]
+        isIn: [['sent', 'bounced', 'delivered', 'failed']]
       }
     },
     trackingId: {
