@@ -286,6 +286,123 @@ class EmailService {
           html += '</div>';
         }
       }
+    } else if (layout === 'professional') {
+      // Professional layout - comprehensive table-based design
+      html = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; background-color: white;">`;
+      html += '<tr><td style="padding: 20px;">';
+      html += '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>';
+      
+      // Profile Photo column
+      if (signature.includePhoto && signature.photoUrl) {
+        html += `<td style="width: 120px; vertical-align: top; padding-right: 20px;">`;
+        html += `<img src="${signature.photoUrl}" alt="Profile Photo" width="120" height="120" style="border-radius: 60px; display: block; border: 3px solid ${primaryColor};">`;
+        html += '</td>';
+      }
+      
+      // Main Content column
+      html += '<td style="vertical-align: top;">';
+      
+      // Name, Title, and Company header
+      html += '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>';
+      html += '<td style="vertical-align: top;">';
+      
+      if (fields.name.show && name) {
+        html += `<div style="margin: 0 0 5px 0; font-size: 28px; font-weight: bold; color: #2c3e50; font-family: Georgia, serif; line-height: 32px;">${name}</div>`;
+      }
+      if (fields.title.show && fields.title.value) {
+        html += `<div style="margin: 0 0 5px 0; font-size: 16px; color: #7f8c8d; font-weight: 500; line-height: 20px;">${fields.title.value}</div>`;
+      }
+      if (fields.company.show && company) {
+        const department = fields.department?.show && fields.department?.value ? ` | ${fields.department.value}` : '';
+        html += `<div style="margin: 0 0 15px 0; font-size: 14px; color: #95a5a6; line-height: 18px;">${company}${department}</div>`;
+      }
+      
+      html += '</td>';
+      
+      // Company Logo
+      if (signature.includeLogo && signature.logoUrl) {
+        html += '<td style="text-align: right; vertical-align: top; width: 100px;">';
+        html += `<img src="${signature.logoUrl}" alt="Company Logo" width="80" style="display: block; height: auto; max-height: 60px;">`;
+        html += '</td>';
+      }
+      
+      html += '</tr></table>';
+      
+      // Contact Information with icons
+      html += '<table cellpadding="0" cellspacing="0" border="0" width="100%">';
+      
+      if (fields.phone.show && phone) {
+        html += '<tr><td style="padding: 2px 0; vertical-align: middle;">';
+        html += '<table cellpadding="0" cellspacing="0" border="0"><tr>';
+        html += `<td style="width: 24px; vertical-align: middle;"><div style="width: 16px; height: 16px; background-color: #3498db; border-radius: 8px; text-align: center; line-height: 16px; color: white; font-size: 10px; margin-right: 8px;">📞</div></td>`;
+        html += `<td style="vertical-align: middle;"><a href="tel:${phone}" style="color: #2c3e50; text-decoration: none; font-size: 14px;">${phone}</a></td>`;
+        html += '</tr></table></td></tr>';
+      }
+      
+      if (fields.email.show && email) {
+        html += '<tr><td style="padding: 2px 0; vertical-align: middle;">';
+        html += '<table cellpadding="0" cellspacing="0" border="0"><tr>';
+        html += `<td style="width: 24px; vertical-align: middle;"><div style="width: 16px; height: 16px; background-color: #e74c3c; border-radius: 8px; text-align: center; line-height: 16px; color: white; font-size: 10px; margin-right: 8px;">✉</div></td>`;
+        html += `<td style="vertical-align: middle;"><a href="mailto:${email}" style="color: #2c3e50; text-decoration: none; font-size: 14px;">${email}</a></td>`;
+        html += '</tr></table></td></tr>';
+      }
+      
+      // Website (if available)
+      const website = profile.website;
+      if (website) {
+        html += '<tr><td style="padding: 2px 0; vertical-align: middle;">';
+        html += '<table cellpadding="0" cellspacing="0" border="0"><tr>';
+        html += `<td style="width: 24px; vertical-align: middle;"><div style="width: 16px; height: 16px; background-color: #9b59b6; border-radius: 8px; text-align: center; line-height: 16px; color: white; font-size: 10px; margin-right: 8px;">🌐</div></td>`;
+        html += `<td style="vertical-align: middle;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: #2c3e50; text-decoration: none; font-size: 14px;">${website.replace(/^https?:\/\//, '')}</a></td>`;
+        html += '</tr></table></td></tr>';
+      }
+      
+      if (fields.address.show && fields.address.value) {
+        html += '<tr><td style="padding: 2px 0 15px 0; vertical-align: middle;">';
+        html += '<table cellpadding="0" cellspacing="0" border="0"><tr>';
+        html += `<td style="width: 24px; vertical-align: middle;"><div style="width: 16px; height: 16px; background-color: #f39c12; border-radius: 8px; text-align: center; line-height: 16px; color: white; font-size: 10px; margin-right: 8px;">📍</div></td>`;
+        html += `<td style="vertical-align: middle;"><span style="color: #7f8c8d; font-size: 14px;">${fields.address.value}</span></td>`;
+        html += '</tr></table></td></tr>';
+      }
+      
+      html += '</table>';
+      
+      // Social Media Icons
+      if (signature.includeSocial) {
+        const activeSocial = Object.entries(social).filter(([_, data]) => data.show && data.url);
+        if (activeSocial.length > 0) {
+          html += '<table cellpadding="0" cellspacing="0" border="0"><tr>';
+          activeSocial.forEach(([platform, data]) => {
+            let bgColor = '#0077b5'; // default LinkedIn
+            let icon = 'in';
+            if (platform === 'twitter') { bgColor = '#1da1f2'; icon = '🐦'; }
+            else if (platform === 'facebook') { bgColor = '#4267b2'; icon = 'f'; }
+            else if (platform === 'instagram') { bgColor = '#e4405f'; icon = '📷'; }
+            else if (platform === 'website') { bgColor = '#34495e'; icon = '🌐'; }
+            
+            html += '<td style="padding-right: 8px;">';
+            html += `<a href="${data.url}" style="text-decoration: none;">`;
+            html += `<div style="width: 32px; height: 32px; background-color: ${bgColor}; border-radius: 6px; text-align: center; line-height: 32px; color: white; font-weight: bold; font-size: 14px;">${icon}</div>`;
+            html += '</a></td>';
+          });
+          html += '</tr></table>';
+        }
+      }
+      
+      html += '</td>'; // End main content column
+      html += '</tr></table></td></tr>';
+      
+      // Optional separator line
+      if (style.dividerStyle === 'line') {
+        html += '<tr><td style="padding: 0 20px;">';
+        html += '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>';
+        html += `<td style="height: 3px; background-color: ${primaryColor};"></td>`;
+        html += '</tr></table></td></tr>';
+      }
+      
+      html += '</table>';
+      
+      return html; // Return early for professional layout
     }
     
     html += '</div>';
