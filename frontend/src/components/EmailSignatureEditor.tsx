@@ -468,7 +468,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
     }
   };
 
-  const handleFieldChange = (field: string, subfield: 'show' | 'value', value: any) => {
+  const handleFieldToggle = (field: string, show: boolean) => {
     if (!signature) return;
     
     setSignature({
@@ -477,7 +477,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
         ...signature.fields,
         [field]: {
           ...signature.fields[field as keyof typeof signature.fields],
-          [subfield]: value
+          show
         }
       }
     });
@@ -627,9 +627,12 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
 
               {/* Contact Information */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900">Contact Information</h4>
-                  <p className="text-xs text-gray-500">Drag to reorder</p>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-gray-900">Contact Information</h4>
+                    <p className="text-xs text-gray-500">Drag to reorder</p>
+                  </div>
+                  <p className="text-xs text-gray-500">Values are managed in your profile settings</p>
                 </div>
                 
                 {(signature.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address']).map((field) => {
@@ -664,18 +667,14 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
                         </svg>
                         <Checkbox
                           checked={data.show}
-                          onChange={(checked) => handleFieldChange(field, 'show', checked)}
+                          onChange={(checked) => handleFieldToggle(field, checked)}
                           label={getFieldLabel(field)}
                         />
                       </div>
                       {data.show && (
-                        <input
-                          type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
-                          value={data.value}
-                          onChange={(e) => handleFieldChange(field, 'value', e.target.value)}
-                          placeholder={defaultValues[field as keyof typeof defaultValues] || `Enter ${field}`}
-                          className="ml-9 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                        />
+                        <div className="ml-9 text-sm text-gray-600">
+                          {data.value || defaultValues[field as keyof typeof defaultValues] || `No ${field} set`}
+                        </div>
                       )}
                     </div>
                   );
