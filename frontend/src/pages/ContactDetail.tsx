@@ -7,6 +7,7 @@ import DealForm from '../components/DealForm';
 import EntityDebugView from '../components/automation/EntityDebugView';
 import EmailModal from '../components/email/EmailModal';
 import EmailHistory from '../components/email/EmailHistory';
+import ContactEmailEngagement from '../components/email/ContactEmailEngagement';
 import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
