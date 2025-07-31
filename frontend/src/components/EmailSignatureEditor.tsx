@@ -37,10 +37,11 @@ interface EmailSignature {
 
 interface Props {
   profile: any;
+  user?: any;
   onSave?: () => void;
 }
 
-const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
+const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
   const [signature, setSignature] = useState<EmailSignature | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,7 +52,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, onSave }) => {
   // Default values from profile
   const defaultValues = {
     name: `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim(),
-    email: profile?.email || '',
+    email: user?.email || '',
     phone: profile?.phone || '',
     company: profile?.companyName || '',
   };

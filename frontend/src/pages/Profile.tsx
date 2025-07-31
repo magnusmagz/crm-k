@@ -7,7 +7,7 @@ import { FormField } from '../components/ui/FormField';
 import EmailSignatureEditor from '../components/EmailSignatureEditor';
 
 const Profile: React.FC = () => {
-  const { profile, updateProfile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -469,6 +469,12 @@ const Profile: React.FC = () => {
                     </dd>
                   </div>
                   <div>
+                    <dt className="text-sm font-medium text-gray-500">Email</dt>
+                    <dd className="mt-1 text-sm text-primary-dark">
+                      {user?.email}
+                    </dd>
+                  </div>
+                  <div>
                     <dt className="text-sm font-medium text-gray-500">Company</dt>
                     <dd className="mt-1 text-sm text-primary-dark">
                       {profile?.companyName || 'Not specified'}
@@ -650,7 +656,7 @@ const Profile: React.FC = () => {
           <div className="mt-5 md:col-span-2 md:mt-0">
             <div className="shadow overflow-hidden sm:rounded-md">
               <div className="px-4 py-5 bg-white sm:p-6">
-                <EmailSignatureEditor profile={profile} />
+                <EmailSignatureEditor profile={profile} user={user} />
               </div>
             </div>
           </div>
