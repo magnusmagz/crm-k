@@ -222,15 +222,22 @@ router.post('/', authMiddleware, validateContact, async (req, res) => {
 });
 
 // Update contact
-router.put('/:id', authMiddleware, validateContact, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     console.log('Update contact request body:', JSON.stringify(req.body, null, 2));
     console.log('Contact ID:', req.params.id);
     
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.error('Express validator errors:', errors.array());
-      return res.status(400).json({ errors: errors.array() });
+    // Run validation manually to catch errors
+    try {
+      await Promise.all(validateContact.map(validation => validation.run(req)));
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.error('Express validator errors:', errors.array());
+        return res.status(400).json({ errors: errors.array() });
+      }
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
+      return res.status(400).json({ error: 'Validation failed', details: validationError.message });
     }
 
     const contact = await Contact.findOne({
@@ -327,6 +334,20 @@ router.put('/:id', authMiddleware, validateContact, async (req, res) => {
   } catch (error) {
     console.error('Update contact error:', error);
     console.error('Error stack:', error.stack);
+    
+    // Handle Sequelize validation errors
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(err => ({
+        field: err.path,
+        message: err.message
+      }));
+      console.error('Sequelize validation errors:', validationErrors);
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        validationErrors 
+      });
+    }
+    
     res.status(500).json({ error: 'Failed to update contact' });
   }
 });

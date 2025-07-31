@@ -332,6 +332,13 @@ const ContactDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Email Engagement Analytics */}
+      {contact.email && (
+        <div className="mt-8">
+          <ContactEmailEngagement contactId={contact.id} />
+        </div>
+      )}
+
       {/* Email History Section */}
       {contact.email && (
         <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
