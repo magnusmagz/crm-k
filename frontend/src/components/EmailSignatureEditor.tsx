@@ -634,6 +634,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
                 
                 {(signature.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address']).map((field) => {
                   const data = signature.fields[field as keyof typeof signature.fields];
+                  if (!data) return null;
                   return (
                     <div
                       key={field}
