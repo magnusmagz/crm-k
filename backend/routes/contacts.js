@@ -222,22 +222,11 @@ router.post('/', authMiddleware, validateContact, async (req, res) => {
 });
 
 // Update contact
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, validateContact, async (req, res) => {
   try {
-    console.log('Update contact request body:', JSON.stringify(req.body, null, 2));
-    console.log('Contact ID:', req.params.id);
-    
-    // Run validation manually to catch errors
-    try {
-      await Promise.all(validateContact.map(validation => validation.run(req)));
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        console.error('Express validator errors:', errors.array());
-        return res.status(400).json({ errors: errors.array() });
-      }
-    } catch (validationError) {
-      console.error('Validation error:', validationError);
-      return res.status(400).json({ error: 'Validation failed', details: validationError.message });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
     const contact = await Contact.findOne({
@@ -253,23 +242,14 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
     // Validate custom fields (same as create)
     if (req.body.customFields) {
-      console.log('Custom fields in request:', req.body.customFields);
-      
       const customFields = await CustomField.findAll({
         where: { userId: req.user.id }
       });
-      
-      console.log('User custom field definitions:', customFields.map(f => ({ 
-        name: f.name, 
-        type: f.type, 
-        required: f.required 
-      })));
 
       for (const field of customFields) {
         const value = req.body.customFields[field.name];
         
         if (field.required && !value && value !== 0 && value !== false) {
-          console.error(`Required field '${field.label}' is missing. Value:`, value);
           return res.status(400).json({ 
             error: `Custom field '${field.label}' is required` 
           });
@@ -333,7 +313,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Update contact error:', error);
-    console.error('Error stack:', error.stack);
     
     // Handle Sequelize validation errors
     if (error.name === 'SequelizeValidationError') {
@@ -341,7 +320,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
         field: err.path,
         message: err.message
       }));
-      console.error('Sequelize validation errors:', validationErrors);
       return res.status(400).json({ 
         error: 'Validation failed', 
         validationErrors 

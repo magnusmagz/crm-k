@@ -111,7 +111,6 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
       };
       
-      console.log('Sending contact data:', JSON.stringify(data, null, 2));
       
       let result;
       if (contact) {
@@ -125,15 +124,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
       onSubmit(result);
     } catch (error: any) {
       console.error('Failed to save contact:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      console.error('Request data was:', data);
       
       let errorMessage = 'Failed to save contact';
       
       if (error.response?.data?.errors) {
         // Express validator errors
-        console.error('Validation errors:', error.response.data.errors);
         errorMessage = error.response.data.errors.map((err: any) => err.msg).join(', ');
       } else if (error.response?.data?.error) {
         // Custom error message
