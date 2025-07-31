@@ -182,6 +182,89 @@ class EmailService {
       html += '</td>';
       html += '</tr>';
       html += '</table>';
+    } else if (layout === 'classic') {
+      // Classic layout - vertical stacked format
+      if (fields.name.show && name) {
+        html += `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 2px;">${name}</div>`;
+      }
+      if (fields.title.show && fields.title.value) {
+        html += `<div style="color: #666; margin-bottom: 8px;">${fields.title.value}</div>`;
+      }
+      
+      if (fields.company.show && company) {
+        html += `<div style="font-weight: bold; margin-bottom: 8px;">${company}</div>`;
+      }
+      
+      // Contact details
+      if (fields.email.show && email) {
+        html += `<div style="margin-bottom: 2px;">Email: <a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>`;
+      }
+      if (fields.phone.show && phone) {
+        html += `<div style="margin-bottom: 2px;">Phone: <a href="tel:${phone}" style="color: #333; text-decoration: none;">${phone}</a></div>`;
+      }
+      if (fields.address.show && fields.address.value) {
+        html += `<div style="margin-bottom: 8px;">Address: ${fields.address.value}</div>`;
+      }
+      
+      // Logo at bottom
+      if (signature.includeLogo && signature.logoUrl) {
+        html += `<div style="margin-top: 12px;"><img src="${signature.logoUrl}" alt="Company Logo" style="max-height: 50px;"></div>`;
+      }
+      
+      // Social links
+      if (signature.includeSocial) {
+        const activeSocial = Object.entries(social).filter(([_, data]) => data.show && data.url);
+        if (activeSocial.length > 0) {
+          html += '<div style="margin-top: 12px;">';
+          activeSocial.forEach(([platform, data], index) => {
+            if (index > 0) html += ' | ';
+            html += `<a href="${data.url}" style="color: ${primaryColor}; text-decoration: none;">${platform.charAt(0).toUpperCase() + platform.slice(1)}</a>`;
+          });
+          html += '</div>';
+        }
+      }
+    } else if (layout === 'minimal') {
+      // Minimal layout - compact single line format
+      let parts = [];
+      
+      if (fields.name.show && name) {
+        parts.push(`<span style="font-weight: bold;">${name}</span>`);
+      }
+      if (fields.title.show && fields.title.value) {
+        parts.push(fields.title.value);
+      }
+      if (fields.company.show && company) {
+        parts.push(company);
+      }
+      
+      if (parts.length > 0) {
+        html += `<div style="margin-bottom: 5px;">${parts.join(' • ')}</div>`;
+      }
+      
+      parts = [];
+      if (fields.email.show && email) {
+        parts.push(`<a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a>`);
+      }
+      if (fields.phone.show && phone) {
+        parts.push(`<a href="tel:${phone}" style="color: #333; text-decoration: none;">${phone}</a>`);
+      }
+      
+      if (parts.length > 0) {
+        html += `<div style="font-size: 0.9em;">${parts.join(' • ')}</div>`;
+      }
+      
+      // Minimal social links
+      if (signature.includeSocial) {
+        const activeSocial = Object.entries(social).filter(([_, data]) => data.show && data.url);
+        if (activeSocial.length > 0) {
+          html += '<div style="margin-top: 8px; font-size: 0.85em;">';
+          activeSocial.forEach(([platform, data], index) => {
+            if (index > 0) html += ' • ';
+            html += `<a href="${data.url}" style="color: ${primaryColor}; text-decoration: none;">${platform.charAt(0).toUpperCase() + platform.slice(1)}</a>`;
+          });
+          html += '</div>';
+        }
+      }
     }
     
     html += '</div>';
