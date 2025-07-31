@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
-const { User, Contact } = require('../models');
+const { User, Contact, UserProfile } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const emailService = require('../services/emailService');
 
@@ -38,11 +38,17 @@ router.post('/send', authMiddleware, validateSendEmail, async (req, res) => {
       return res.status(400).json({ error: 'Contact does not have an email address' });
     }
 
-    // Get user details
-    const user = await User.findByPk(userId);
+    // Get user details with profile
+    const user = await User.findByPk(userId, {
+      include: [{ model: UserProfile, as: 'profile' }]
+    });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
+
+    // Get the user's first name
+    const firstName = user.profile?.firstName || user.email.split('@')[0];
+    const fullName = user.profile ? `${user.profile.firstName} ${user.profile.lastName}`.trim() : user.email.split('@')[0];
 
     // Send email using the email service
     const result = await emailService.sendEmail({
@@ -50,8 +56,9 @@ router.post('/send', authMiddleware, validateSendEmail, async (req, res) => {
       contactId,
       subject,
       message,
-      userName: user.email.split('@')[0], // Use email prefix as name
+      userName: fullName,
       userEmail: user.email,
+      userFirstName: firstName.toLowerCase(),
       contactEmail: contact.email
     });
 

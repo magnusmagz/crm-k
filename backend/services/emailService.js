@@ -8,6 +8,7 @@ class EmailService {
     const apiKey = process.env.POSTMARK_API_KEY || 'POSTMARK_API_TEST';
     this.client = new postmark.ServerClient(apiKey);
     this.emailDomain = process.env.EMAIL_DOMAIN || 'notifications.crmapp.io';
+    this.fromEmail = process.env.FROM_EMAIL || `noreply@${this.emailDomain}`;
     this.appUrl = process.env.APP_URL || 'http://localhost:5000';
   }
 
@@ -320,7 +321,7 @@ class EmailService {
     return text;
   }
 
-  async sendEmail({ userId, contactId, subject, message, userName, userEmail, contactEmail, enableTracking = true }) {
+  async sendEmail({ userId, contactId, subject, message, userName, userEmail, userFirstName, contactEmail, enableTracking = true }) {
     let emailRecord;
     
     try {
@@ -373,7 +374,7 @@ class EmailService {
 
       // Prepare email data
       const emailData = {
-        From: `${userName} <noreply@${this.emailDomain}>`,
+        From: `${userName} <${userFirstName}@${this.emailDomain}>`,
         To: contactEmail,
         Subject: subject,
         HtmlBody: htmlBody,
