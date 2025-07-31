@@ -64,6 +64,14 @@ export const userAPI = {
     api.put('/users/change-password', { currentPassword, newPassword }),
   
   deleteAccount: () => api.delete('/users/account'),
+  
+  // Email signature endpoints
+  getEmailSignature: () => api.get('/users/email-signature'),
+  
+  updateEmailSignature: (emailSignature: any) => 
+    api.put('/users/email-signature', { emailSignature }),
+  
+  generateEmailSignature: () => api.post('/users/email-signature/generate'),
 };
 
 // Contacts API
