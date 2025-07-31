@@ -19,7 +19,7 @@ const automationRoutes = require('./routes/automations');
 const emailRoutes = require('./routes/emails');
 const webhookRoutes = require('./routes/webhooks');
 const trackingRoutes = require('./routes/tracking');
-// const analyticsRoutes = require('./routes/analytics');
+const analyticsRoutes = require('./routes/analytics');
 const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
@@ -61,7 +61,7 @@ app.use('/api/deal-custom-fields', require('./routes/dealCustomFields'));
 app.use('/api/emails', emailRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api', trackingRoutes);
-// app.use('/api/analytics', analyticsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

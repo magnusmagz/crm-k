@@ -216,4 +216,19 @@ export const automationsAPI = {
   validateWorkflow: (id: string) => api.post(`/automations/${id}/validate`),
 };
 
+// Email Analytics API
+export const analyticsAPI = {
+  getOverview: (params?: { startDate?: string; endDate?: string }) =>
+    api.get('/analytics/overview', { params }),
+  
+  getContactAnalytics: (contactId: string) =>
+    api.get(`/analytics/contact/${contactId}`),
+  
+  getCampaignPerformance: (period: '24h' | '7d' | '30d' | '90d' = '7d') =>
+    api.get('/analytics/campaign-performance', { params: { period } }),
+  
+  getLinkAnalytics: (limit: number = 20) =>
+    api.get('/analytics/links', { params: { limit } }),
+};
+
 export default api;

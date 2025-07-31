@@ -79,7 +79,8 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
     }
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    // More comprehensive email validation that allows + and other valid characters
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Invalid email address';
     }
     
@@ -109,6 +110,8 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
         ...formData,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
       };
+      
+      console.log('Sending contact data:', JSON.stringify(data, null, 2));
       
       let result;
       if (contact) {

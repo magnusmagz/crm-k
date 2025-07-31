@@ -1,12 +1,12 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const { sequelize, EmailSend, EmailEvent, EmailLink, Contact } = require('../models');
-const { authenticate } = require('../middleware/authenticate');
+const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Get email analytics overview
-router.get('/overview', authenticate, async (req, res) => {
+router.get('/overview', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const { startDate, endDate } = req.query;
@@ -106,7 +106,7 @@ router.get('/overview', authenticate, async (req, res) => {
 });
 
 // Get contact-specific email analytics
-router.get('/contact/:contactId', authenticate, async (req, res) => {
+router.get('/contact/:contactId', authMiddleware, async (req, res) => {
   try {
     const { contactId } = req.params;
     const userId = req.user.id;
@@ -197,7 +197,7 @@ router.get('/contact/:contactId', authenticate, async (req, res) => {
 });
 
 // Get campaign performance over time
-router.get('/campaign-performance', authenticate, async (req, res) => {
+router.get('/campaign-performance', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const { period = '7d' } = req.query;
@@ -267,7 +267,7 @@ router.get('/campaign-performance', authenticate, async (req, res) => {
 });
 
 // Get link click analytics
-router.get('/links', authenticate, async (req, res) => {
+router.get('/links', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const { limit = 20 } = req.query;

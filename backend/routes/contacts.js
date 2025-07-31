@@ -11,15 +11,15 @@ const router = express.Router();
 
 // Validation middleware
 const validateContact = [
-  body('firstName').notEmpty().trim(),
-  body('lastName').notEmpty().trim(),
-  body('email').optional().isEmail().normalizeEmail(),
-  body('phone').optional().matches(/^[\d\s\-\+\(\)]+$/),
-  body('company').optional().trim(),
-  body('position').optional().trim(),
-  body('tags').optional().isArray(),
-  body('notes').optional().trim(),
-  body('customFields').optional().isObject()
+  body('firstName').notEmpty().trim().withMessage('First name is required'),
+  body('lastName').notEmpty().trim().withMessage('Last name is required'),
+  body('email').optional({ nullable: true, checkFalsy: false }).isEmail().normalizeEmail().withMessage('Invalid email format'),
+  body('phone').optional({ nullable: true, checkFalsy: false }).matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format'),
+  body('company').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('position').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('tags').optional({ nullable: true, checkFalsy: false }).isArray().withMessage('Tags must be an array'),
+  body('notes').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('customFields').optional({ nullable: true, checkFalsy: false }).isObject().withMessage('Custom fields must be an object')
 ];
 
 // Get all contacts for the user with filtering
@@ -224,9 +224,12 @@ router.post('/', authMiddleware, validateContact, async (req, res) => {
 // Update contact
 router.put('/:id', authMiddleware, validateContact, async (req, res) => {
   try {
+    console.log('Update contact request body:', JSON.stringify(req.body, null, 2));
+    console.log('Contact ID:', req.params.id);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.error('Validation errors:', errors.array());
+      console.error('Express validator errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -243,14 +246,23 @@ router.put('/:id', authMiddleware, validateContact, async (req, res) => {
 
     // Validate custom fields (same as create)
     if (req.body.customFields) {
+      console.log('Custom fields in request:', req.body.customFields);
+      
       const customFields = await CustomField.findAll({
         where: { userId: req.user.id }
       });
+      
+      console.log('User custom field definitions:', customFields.map(f => ({ 
+        name: f.name, 
+        type: f.type, 
+        required: f.required 
+      })));
 
       for (const field of customFields) {
         const value = req.body.customFields[field.name];
         
         if (field.required && !value && value !== 0 && value !== false) {
+          console.error(`Required field '${field.label}' is missing. Value:`, value);
           return res.status(400).json({ 
             error: `Custom field '${field.label}' is required` 
           });
@@ -314,6 +326,7 @@ router.put('/:id', authMiddleware, validateContact, async (req, res) => {
     });
   } catch (error) {
     console.error('Update contact error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ error: 'Failed to update contact' });
   }
 });
