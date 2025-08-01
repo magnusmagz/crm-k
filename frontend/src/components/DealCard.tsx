@@ -51,7 +51,7 @@ const DealCard: React.FC<DealCardProps> = ({
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger onClick if clicking checkbox
-    if ((e.target as HTMLElement).type === 'checkbox') {
+    if ((e.target as HTMLInputElement).type === 'checkbox') {
       return;
     }
     onClick();
