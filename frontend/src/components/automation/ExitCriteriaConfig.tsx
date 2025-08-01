@@ -4,7 +4,7 @@ import React from 'react';
 interface ExitCriteriaConfigProps {
   automationId?: string;
   exitCriteria?: any;
-  maxDurationDays?: number;
+  maxDurationDays?: number | null;
   safetyExitEnabled?: boolean;
   onChange: (exitCriteria: any, maxDurationDays: number | null, safetyExitEnabled: boolean) => void;
   isReadOnly?: boolean;
