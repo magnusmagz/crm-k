@@ -22,6 +22,10 @@ const validateContact = [
   body('customFields').optional({ nullable: true, checkFalsy: false }).isObject().withMessage('Custom fields must be an object')
 ];
 
+// ================================
+// STATIC ROUTES (must come first)
+// ================================
+
 // Get all contacts for the user with filtering
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -113,7 +117,6 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-
 // Create new contact
 router.post('/', authMiddleware, validateContact, async (req, res) => {
   try {
@@ -198,136 +201,6 @@ router.post('/', authMiddleware, validateContact, async (req, res) => {
   } catch (error) {
     console.error('Create contact error:', error);
     res.status(500).json({ error: 'Failed to create contact' });
-  }
-});
-
-// Update contact
-router.put('/:id', authMiddleware, validateContact, async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const contact = await Contact.findOne({
-      where: {
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-
-    if (!contact) {
-      return res.status(404).json({ error: 'Contact not found' });
-    }
-
-    // Validate custom fields (same as create)
-    if (req.body.customFields) {
-      const customFields = await CustomField.findAll({
-        where: { userId: req.user.id }
-      });
-
-      for (const field of customFields) {
-        const value = req.body.customFields[field.name];
-        
-        if (field.required && !value && value !== 0 && value !== false) {
-          return res.status(400).json({ 
-            error: `Custom field '${field.label}' is required` 
-          });
-        }
-
-        if (value) {
-          switch (field.type) {
-            case 'number':
-              if (isNaN(value)) {
-                return res.status(400).json({ 
-                  error: `Custom field '${field.label}' must be a number` 
-                });
-              }
-              break;
-            case 'date':
-              if (isNaN(Date.parse(value))) {
-                return res.status(400).json({ 
-                  error: `Custom field '${field.label}' must be a valid date` 
-                });
-              }
-              break;
-            case 'url':
-              try {
-                new URL(value);
-              } catch {
-                return res.status(400).json({ 
-                  error: `Custom field '${field.label}' must be a valid URL` 
-                });
-              }
-              break;
-            case 'select':
-              if (!field.options.includes(value)) {
-                return res.status(400).json({ 
-                  error: `Custom field '${field.label}' must be one of: ${field.options.join(', ')}` 
-                });
-              }
-              break;
-            case 'checkbox':
-              if (typeof value !== 'boolean') {
-                return res.status(400).json({ 
-                  error: `Custom field '${field.label}' must be true or false` 
-                });
-              }
-              break;
-          }
-        }
-      }
-    }
-
-    // Track changed fields
-    const changedFields = Object.keys(req.body);
-    
-    await contact.update(req.body);
-
-    // Emit event for automations
-    automationEmitter.emitContactUpdated(req.user.id, contact.toJSON(), changedFields);
-
-    res.json({
-      message: 'Contact updated successfully',
-      contact
-    });
-  } catch (error) {
-    console.error('Update contact error:', error);
-    
-    // Handle Sequelize validation errors
-    if (error.name === 'SequelizeValidationError') {
-      const validationErrors = error.errors.map(err => ({
-        field: err.path,
-        message: err.message
-      }));
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        validationErrors 
-      });
-    }
-    
-    res.status(500).json({ error: 'Failed to update contact' });
-  }
-});
-
-// Delete contact
-router.delete('/:id', authMiddleware, async (req, res) => {
-  try {
-    const result = await Contact.destroy({
-      where: {
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-
-    if (result === 0) {
-      return res.status(404).json({ error: 'Contact not found' });
-    }
-
-    res.json({ message: 'Contact deleted successfully' });
-  } catch (error) {
-    console.error('Delete contact error:', error);
-    res.status(500).json({ error: 'Failed to delete contact' });
   }
 });
 
@@ -596,27 +469,6 @@ router.get('/export', authMiddleware, async (req, res) => {
   }
 });
 
-// Get single contact
-router.get('/:id', authMiddleware, async (req, res) => {
-  try {
-    const contact = await Contact.findOne({
-      where: {
-        id: req.params.id,
-        userId: req.user.id
-      }
-    });
-
-    if (!contact) {
-      return res.status(404).json({ error: 'Contact not found' });
-    }
-
-    res.json({ contact });
-  } catch (error) {
-    console.error('Get contact error:', error);
-    res.status(500).json({ error: 'Failed to get contact' });
-  }
-});
-
 // CSV Import - Parse headers and preview
 router.post('/import/preview', authMiddleware, upload.single('file'), async (req, res) => {
   try {
@@ -832,7 +684,6 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
   }
 });
 
-
 // Merge contacts
 router.post('/merge', authMiddleware, async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -986,6 +837,161 @@ router.post('/merge', authMiddleware, async (req, res) => {
     await transaction.rollback();
     console.error('Merge contacts error:', error);
     res.status(500).json({ error: 'Failed to merge contacts' });
+  }
+});
+
+// ================================
+// DYNAMIC ROUTES (must come last)
+// ================================
+
+// Get single contact
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const contact = await Contact.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!contact) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    res.json({ contact });
+  } catch (error) {
+    console.error('Get contact error:', error);
+    res.status(500).json({ error: 'Failed to get contact' });
+  }
+});
+
+// Update contact
+router.put('/:id', authMiddleware, validateContact, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const contact = await Contact.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (!contact) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    // Validate custom fields (same as create)
+    if (req.body.customFields) {
+      const customFields = await CustomField.findAll({
+        where: { userId: req.user.id }
+      });
+
+      for (const field of customFields) {
+        const value = req.body.customFields[field.name];
+        
+        if (field.required && !value && value !== 0 && value !== false) {
+          return res.status(400).json({ 
+            error: `Custom field '${field.label}' is required` 
+          });
+        }
+
+        if (value) {
+          switch (field.type) {
+            case 'number':
+              if (isNaN(value)) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a number` 
+                });
+              }
+              break;
+            case 'date':
+              if (isNaN(Date.parse(value))) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a valid date` 
+                });
+              }
+              break;
+            case 'url':
+              try {
+                new URL(value);
+              } catch {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be a valid URL` 
+                });
+              }
+              break;
+            case 'select':
+              if (!field.options.includes(value)) {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be one of: ${field.options.join(', ')}` 
+                });
+              }
+              break;
+            case 'checkbox':
+              if (typeof value !== 'boolean') {
+                return res.status(400).json({ 
+                  error: `Custom field '${field.label}' must be true or false` 
+                });
+              }
+              break;
+          }
+        }
+      }
+    }
+
+    // Track changed fields
+    const changedFields = Object.keys(req.body);
+    
+    await contact.update(req.body);
+
+    // Emit event for automations
+    automationEmitter.emitContactUpdated(req.user.id, contact.toJSON(), changedFields);
+
+    res.json({
+      message: 'Contact updated successfully',
+      contact
+    });
+  } catch (error) {
+    console.error('Update contact error:', error);
+    
+    // Handle Sequelize validation errors
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(err => ({
+        field: err.path,
+        message: err.message
+      }));
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        validationErrors 
+      });
+    }
+    
+    res.status(500).json({ error: 'Failed to update contact' });
+  }
+});
+
+// Delete contact
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const result = await Contact.destroy({
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      }
+    });
+
+    if (result === 0) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    res.json({ message: 'Contact deleted successfully' });
+  } catch (error) {
+    console.error('Delete contact error:', error);
+    res.status(500).json({ error: 'Failed to delete contact' });
   }
 });
 
