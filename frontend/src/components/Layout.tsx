@@ -12,7 +12,7 @@ const navigation = [
   { name: 'Contacts', href: '/contacts' },
   { name: 'Pipeline', href: '/pipeline' },
   { name: 'Actions', href: '/automations' },
-  { name: 'Email Analytics', href: '/email-analytics' },
+  { name: 'Metrics', href: '/email-analytics' },
   { name: 'Custom Fields', href: '/custom-fields' },
 ];
 

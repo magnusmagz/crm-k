@@ -111,7 +111,7 @@ export default function EmailAnalytics() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Email Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Metrics</h1>
         
         {/* Period Selector */}
         <div className="flex items-center space-x-2">

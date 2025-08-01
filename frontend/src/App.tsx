@@ -17,7 +17,7 @@ const Pipeline = lazy(() => import('./pages/Pipeline'));
 const Automations = lazy(() => import('./pages/Automations'));
 const AutomationBuilder = lazy(() => import('./pages/AutomationBuilder'));
 const WorkflowBuilder = lazy(() => import('./pages/WorkflowBuilder'));
-const EmailAnalytics = lazy(() => import('./pages/EmailAnalytics'));
+const Metrics = lazy(() => import('./pages/EmailAnalytics'));
 
 // Loading component
 const PageLoader = () => (
@@ -44,7 +44,7 @@ function App() {
               <Route path="automations" element={<Automations />} />
               <Route path="automations/:id" element={<AutomationBuilder />} />
               <Route path="automations/workflow/:id" element={<WorkflowBuilder />} />
-              <Route path="email-analytics" element={<EmailAnalytics />} />
+              <Route path="email-analytics" element={<Metrics />} />
               <Route path="profile" element={<Profile />} />
               <Route path="custom-fields" element={<CustomFields />} />
             </Route>
