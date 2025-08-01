@@ -347,7 +347,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <span className="btn-mobile bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer font-medium">
+                <span className="btn-mobile bg-primary text-white rounded-lg hover:bg-primary-dark cursor-pointer font-medium">
                   Choose File
                 </span>
               </label>
@@ -362,7 +362,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                 <div className="flex items-center gap-2 text-blue-800">
                   <FileText className="w-5 h-5" />
                   <span className="font-medium">{file?.name}</span>
-                  <span className="text-blue-600">• {preview.totalRows} rows</span>
+                  <span className="text-primary">• {preview.totalRows} rows</span>
                 </div>
               </div>
 
@@ -569,7 +569,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                           >
                             {header}
                             {fieldMapping[header] && (
-                              <div className="text-blue-600 normal-case mt-1">
+                              <div className="text-primary normal-case mt-1">
                                 → {standardFields.find(f => f.value === fieldMapping[header])?.label || 
                                    preview.customFields.find(f => f.name === fieldMapping[header])?.label}
                               </div>
@@ -600,7 +600,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
             <div>
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                   <h3 className="text-xl font-medium">Importing Deals...</h3>
                 </div>
                 
@@ -611,7 +611,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div 
-                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                      className="bg-primary h-3 rounded-full transition-all duration-300"
                       style={{ width: `${importJob.progress}%` }}
                     ></div>
                   </div>
@@ -744,7 +744,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
                   <button
                     onClick={handleImport}
                     disabled={importing || !Object.values(fieldMapping).includes('name')}
-                    className="btn-mobile bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="btn-mobile bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     <span className="hidden sm:inline">{importing ? 'Importing...' : `Import ${preview?.totalRows} Deals`}</span>
                     <span className="sm:hidden">{importing ? 'Importing...' : 'Import'}</span>
@@ -754,7 +754,7 @@ const DealImport: React.FC<DealImportProps> = ({ onClose }) => {
               {step === 'results' && (
                 <button
                   onClick={onClose || (() => window.location.reload())}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
                 >
                   View Deals
                 </button>

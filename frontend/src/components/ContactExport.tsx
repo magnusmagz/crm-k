@@ -190,7 +190,7 @@ const ContactExport: React.FC<ContactExportProps> = ({
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <>
@@ -202,14 +202,14 @@ const ContactExport: React.FC<ContactExportProps> = ({
                 <div className="flex gap-2 mb-4">
                   <button
                     onClick={selectAll}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-sm text-primary hover:text-blue-700 font-medium"
                   >
                     Select All
                   </button>
                   <span className="text-gray-400">|</span>
                   <button
                     onClick={clearAll}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-sm text-primary hover:text-blue-700 font-medium"
                   >
                     Clear All
                   </button>
@@ -231,7 +231,7 @@ const ContactExport: React.FC<ContactExportProps> = ({
                           className="flex-shrink-0"
                         >
                           {field.checked ? (
-                            <CheckSquare className="h-5 w-5 text-blue-600" />
+                            <CheckSquare className="h-5 w-5 text-primary" />
                           ) : (
                             <Square className="h-5 w-5 text-gray-400" />
                           )}
@@ -257,7 +257,7 @@ const ContactExport: React.FC<ContactExportProps> = ({
                             className="flex-shrink-0"
                           >
                             {field.checked ? (
-                              <CheckSquare className="h-5 w-5 text-blue-600" />
+                              <CheckSquare className="h-5 w-5 text-primary" />
                             ) : (
                               <Square className="h-5 w-5 text-gray-400" />
                             )}

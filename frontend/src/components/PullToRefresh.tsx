@@ -110,7 +110,7 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
             }}
           >
             <ArrowPathIcon 
-              className={`h-6 w-6 text-blue-600 ${isRefreshing ? 'animate-spin' : ''}`}
+              className={`h-6 w-6 text-primary ${isRefreshing ? 'animate-spin' : ''}`}
               style={{
                 transform: !isRefreshing ? `rotate(${pullDistance * 2}deg)` : undefined
               }}

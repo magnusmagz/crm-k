@@ -295,7 +295,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <span className="btn-mobile bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer font-medium">
+                <span className="btn-mobile bg-primary text-white rounded-lg hover:bg-primary-dark cursor-pointer font-medium">
                   Choose File
                 </span>
               </label>
@@ -310,7 +310,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                 <div className="flex items-center gap-2 text-blue-800">
                   <FileText className="w-5 h-5" />
                   <span className="font-medium">{file?.name}</span>
-                  <span className="text-blue-600">• {preview.totalRows} rows</span>
+                  <span className="text-primary">• {preview.totalRows} rows</span>
                 </div>
               </div>
 
@@ -416,7 +416,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                           >
                             {header}
                             {fieldMapping[header] && (
-                              <div className="text-blue-600 normal-case mt-1">
+                              <div className="text-primary normal-case mt-1">
                                 → {standardFields.find(f => f.value === fieldMapping[header])?.label || 
                                    preview.customFields.find(f => f.name === fieldMapping[header])?.label}
                               </div>
@@ -447,7 +447,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
             <div>
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                   <h3 className="text-xl font-medium">Importing Contacts...</h3>
                 </div>
                 
@@ -458,7 +458,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div 
-                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                      className="bg-primary h-3 rounded-full transition-all duration-300"
                       style={{ width: `${importJob.progress}%` }}
                     ></div>
                   </div>
@@ -591,7 +591,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                   <button
                     onClick={handleImport}
                     disabled={importing || !Object.keys(fieldMapping).some(k => fieldMapping[k])}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {importing ? 'Importing...' : `Import ${preview?.totalRows} Contacts`}
                   </button>
@@ -600,7 +600,7 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
               {step === 'results' && (
                 <button
                   onClick={onClose || (() => window.location.reload())}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
                 >
                   View Contacts
                 </button>

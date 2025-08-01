@@ -47,12 +47,14 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
   };
 
   const fieldOptions = [
-    { value: 'status', label: 'Status' },
-    { value: 'leadScore', label: 'Lead Score' },
-    { value: 'lifecycleStage', label: 'Lifecycle Stage' },
+    { value: 'firstName', label: 'First Name' },
+    { value: 'lastName', label: 'Last Name' },
     { value: 'email', label: 'Email' },
     { value: 'phone', label: 'Phone' },
-    { value: 'company', label: 'Company' }
+    { value: 'company', label: 'Company' },
+    { value: 'position', label: 'Position' },
+    { value: 'notes', label: 'Notes' },
+    { value: 'isUnsubscribed', label: 'Unsubscribed Status' }
   ];
 
   const operatorOptions = [

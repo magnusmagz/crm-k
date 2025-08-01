@@ -88,7 +88,7 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
           <div className="text-sm text-gray-500">Total Enrolled</div>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
-          <div className="text-2xl font-bold text-blue-600">{summary.active}</div>
+          <div className="text-2xl font-bold text-primary">{summary.active}</div>
           <div className="text-sm text-blue-700">Active</div>
         </div>
         <div className="bg-green-50 p-4 rounded-lg shadow-sm border border-green-200">

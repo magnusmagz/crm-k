@@ -56,7 +56,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
             <div className="flex items-center gap-2 truncate flex-1">
               <a 
                 href={`mailto:${contact.email}`}
-                className={`text-blue-600 hover:text-blue-800 ${contact.isUnsubscribed ? 'line-through opacity-60' : ''}`}
+                className={`text-primary hover:text-primary-dark ${contact.isUnsubscribed ? 'line-through opacity-60' : ''}`}
               >
                 {contact.email}
               </a>
@@ -77,7 +77,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
             <PhoneIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
             <a 
               href={`tel:${contact.phone}`}
-              className="truncate text-blue-600 hover:text-blue-800"
+              className="truncate text-primary hover:text-primary-dark"
             >
               {contact.phone}
             </a>
@@ -136,7 +136,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
       <div className="flex justify-end mt-4 pt-3 border-t border-gray-100">
         <Link
           to={`/contacts/${contact.id}`}
-          className="text-mobile-sm font-medium text-blue-600 hover:text-blue-800"
+          className="text-mobile-sm font-medium text-primary hover:text-primary-dark"
         >
           View
         </Link>

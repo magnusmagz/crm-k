@@ -173,7 +173,7 @@ const ContactComparisonModal: React.FC<ContactComparisonModalProps> = ({
                 key={`${field}-${contact.id}`}
                 className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                   isSelected 
-                    ? 'border-blue-500 bg-blue-50' 
+                    ? 'border-primary bg-blue-50' 
                     : 'border-gray-200 hover:border-gray-300'
                 } ${isEmpty ? 'opacity-50' : ''}`}
                 onClick={() => handleFieldChoice(field, contact.id)}
@@ -183,7 +183,7 @@ const ContactComparisonModal: React.FC<ContactComparisonModalProps> = ({
                   name={field}
                   checked={isSelected}
                   onChange={() => handleFieldChoice(field, contact.id)}
-                  className="h-4 w-4 text-blue-600"
+                  className="h-4 w-4 text-primary"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -191,7 +191,7 @@ const ContactComparisonModal: React.FC<ContactComparisonModalProps> = ({
                       {contact.firstName} {contact.lastName}
                     </span>
                     {contact.id === mergeData.primaryId && (
-                      <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded-full">
+                      <span className="px-2 py-1 text-xs bg-primary text-white rounded-full">
                         Primary
                       </span>
                     )}
@@ -205,7 +205,7 @@ const ContactComparisonModal: React.FC<ContactComparisonModalProps> = ({
                   </div>
                 </div>
                 {isSelected && (
-                  <Check className="h-5 w-5 text-blue-600" />
+                  <Check className="h-5 w-5 text-primary" />
                 )}
               </div>
             );
@@ -227,7 +227,7 @@ const ContactComparisonModal: React.FC<ContactComparisonModalProps> = ({
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0">
-                  <Users className="h-6 w-6 text-blue-600" />
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">
@@ -268,7 +268,7 @@ const ContactComparisonModal: React.FC<ContactComparisonModalProps> = ({
                       value={contact.id}
                       checked={mergeData.primaryId === contact.id}
                       onChange={(e) => handlePrimaryChange(e.target.value)}
-                      className="h-4 w-4 text-blue-600"
+                      className="h-4 w-4 text-primary"
                     />
                     <div>
                       <div className="font-medium">

@@ -214,12 +214,12 @@ const Automations: React.FC = () => {
                           className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                           title={`${automation.activeEnrollments || 0} currently active`}
                         >
-                          <UserIcon className="h-5 w-5 text-blue-600 mr-2" />
+                          <UserIcon className="h-5 w-5 text-primary mr-2" />
                           <div className="text-left">
                             <p className="text-sm font-medium text-primary-dark">
                               {automation.enrolledCount || 0}
                               {automation.activeEnrollments > 0 && (
-                                <span className="text-xs text-blue-600 ml-1">
+                                <span className="text-xs text-primary ml-1">
                                   ({automation.activeEnrollments} active)
                                 </span>
                               )}
@@ -316,7 +316,7 @@ const Automations: React.FC = () => {
                                   item.type === 'contact' ? 'bg-blue-100' : 'bg-green-100'
                                 }`}>
                                   {item.type === 'contact' ? (
-                                    <UserIcon className="h-4 w-4 text-blue-600" />
+                                    <UserIcon className="h-4 w-4 text-primary" />
                                   ) : (
                                     <CurrencyDollarIcon className="h-4 w-4 text-green-600" />
                                   )}
@@ -344,7 +344,7 @@ const Automations: React.FC = () => {
                             <div className="pt-2">
                               <button
                                 onClick={() => navigate(`/automations/${automation.id}`)}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                                className="text-sm font-medium text-primary hover:text-blue-700"
                               >
                                 View all {enrolledEntities[automation.id].length} enrolled entities →
                               </button>

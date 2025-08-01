@@ -203,7 +203,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, index)}
             className={`group relative bg-white border rounded-lg p-3 sm:p-4 cursor-move transition-all ${
-              dragOverIndex === index ? 'border-blue-500 shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+              dragOverIndex === index ? 'border-primary shadow-lg transform scale-105' : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
             }`}
           >
             {/* Drag Handle */}

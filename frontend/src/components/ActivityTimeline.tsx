@@ -75,7 +75,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
   const getActivityIcon = (activity: TimelineActivity) => {
     switch (activity.type) {
       case 'note':
-        return <DocumentTextIcon className="h-5 w-5 text-blue-600" />;
+        return <DocumentTextIcon className="h-5 w-5 text-primary" />;
       case 'deal':
         if (activity.subtype === 'won') {
           return <CheckCircleIcon className="h-5 w-5 text-green-600" />;
@@ -146,7 +146,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
           {onRefresh && (
             <button
               onClick={onRefresh}
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="text-sm text-primary hover:text-blue-700"
             >
               Refresh
             </button>
@@ -265,7 +265,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
               <div className="text-center pt-4">
                 <button
                   onClick={() => setPage(page + 1)}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-primary hover:text-blue-700 font-medium"
                 >
                   Load more activities
                 </button>

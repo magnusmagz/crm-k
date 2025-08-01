@@ -152,7 +152,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   {stageDeals.length > DEALS_PER_STAGE_LIMIT && (
                     <button
                       onClick={() => toggleStageExpansion(stage.id)}
-                      className="w-full mt-3 py-2 text-mobile-sm text-blue-600 hover:text-blue-800 font-medium border border-gray-200 rounded-md hover:bg-gray-50 transition-colors touch-target"
+                      className="w-full mt-3 py-2 text-mobile-sm text-primary hover:text-blue-800 font-medium border border-gray-200 rounded-md hover:bg-gray-50 transition-colors touch-target"
                     >
                       {expandedStages.has(stage.id) 
                         ? 'Show less' 
