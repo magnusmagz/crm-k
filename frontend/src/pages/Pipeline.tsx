@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Stage, Deal } from '../types';
 import { stagesAPI, dealsAPI } from '../services/api';
+import api from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import KanbanBoard from '../components/KanbanBoard';
 import MobilePipeline from '../components/MobilePipeline';
@@ -9,6 +10,7 @@ import DealForm from '../components/DealForm';
 import StageManager from '../components/StageManager';
 import DealDebugModal from '../components/DealDebugModal';
 import DealImport from '../components/DealImport';
+import BulkOperations from '../components/BulkOperations';
 import useDebounce from '../hooks/useDebounce';
 import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, FunnelIcon, CurrencyDollarIcon, ChartBarIcon, TrophyIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
@@ -41,10 +43,24 @@ const Pipeline: React.FC = () => {
     lost: 0,
     lostValue: 0
   });
+  
+  // Bulk operations
+  const [selectedDeals, setSelectedDeals] = useState<Set<string>>(new Set());
+  const [customFields, setCustomFields] = useState<any[]>([]);
 
   useEffect(() => {
     loadPipelineData();
+    fetchCustomFields();
   }, [debouncedSearchQuery, statusFilter]);
+
+  const fetchCustomFields = async () => {
+    try {
+      const response = await api.get('/custom-fields');
+      setCustomFields(response.data.fields.filter((field: any) => field.entityType === 'deal'));
+    } catch (error) {
+      console.error('Failed to fetch custom fields:', error);
+    }
+  };
 
   const loadPipelineData = async () => {
     // Show searching indicator only if we have a search query
@@ -181,6 +197,29 @@ const Pipeline: React.FC = () => {
       open: openDeals.length,
       openValue
     };
+  };
+
+  // Bulk selection functions
+  const toggleDealSelection = (dealId: string) => {
+    const newSelected = new Set(selectedDeals);
+    if (newSelected.has(dealId)) {
+      newSelected.delete(dealId);
+    } else {
+      newSelected.add(dealId);
+    }
+    setSelectedDeals(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedDeals.size === deals.length) {
+      setSelectedDeals(new Set());
+    } else {
+      setSelectedDeals(new Set(deals.map(d => d.id)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedDeals(new Set());
   };
   
   const displayedAnalytics = calculateDisplayedAnalytics();
@@ -437,6 +476,8 @@ const Pipeline: React.FC = () => {
             setShowDealForm(true);
           }}
           onDealDelete={handleDealDelete}
+          selectedDeals={selectedDeals}
+          onDealToggleSelect={toggleDealSelection}
         />
       </div>
 
@@ -452,6 +493,8 @@ const Pipeline: React.FC = () => {
               setShowDealForm(true);
             }}
             onDealDelete={handleDealDelete}
+            selectedDeals={selectedDeals}
+            onDealToggleSelect={toggleDealSelection}
           />
         </PullToRefresh>
       </div>
@@ -506,6 +549,17 @@ const Pipeline: React.FC = () => {
           loadPipelineData();
         }} />
       )}
+
+      {/* Bulk Operations */}
+      <BulkOperations
+        entityType="deals"
+        selectedItems={selectedDeals}
+        allItems={deals}
+        onClearSelection={clearSelection}
+        onRefresh={loadPipelineData}
+        customFields={customFields}
+        stages={stages}
+      />
 
       <Toaster position="top-right" />
     </div>

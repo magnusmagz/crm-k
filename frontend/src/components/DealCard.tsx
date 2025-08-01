@@ -8,6 +8,8 @@ interface DealCardProps {
   onDragEnd: () => void;
   onClick: () => void;
   onDelete: () => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const DealCard: React.FC<DealCardProps> = ({
@@ -15,7 +17,9 @@ const DealCard: React.FC<DealCardProps> = ({
   onDragStart,
   onDragEnd,
   onClick,
-  onDelete
+  onDelete,
+  isSelected = false,
+  onToggleSelect
 }) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -38,21 +42,49 @@ const DealCard: React.FC<DealCardProps> = ({
     onDelete();
   };
 
+  const handleToggleSelect = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleSelect) {
+      onToggleSelect();
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't trigger onClick if clicking checkbox
+    if ((e.target as HTMLElement).type === 'checkbox') {
+      return;
+    }
+    onClick();
+  };
+
   return (
     <div
       className={`p-3 sm:p-4 rounded-md shadow-sm border cursor-pointer hover:shadow-md transition-shadow group ${
+        isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+      } ${
         deal.status === 'won' 
           ? 'bg-green-50 border-green-200' 
           : deal.status === 'lost'
           ? 'bg-red-50 border-red-200'
+          : isSelected
+          ? 'bg-blue-50 border-blue-300'
           : 'bg-white border-gray-200'
       }`}
       draggable
       onDragStart={(e) => onDragStart(e, deal)}
       onDragEnd={onDragEnd}
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       <div className="flex items-start justify-between">
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={handleToggleSelect}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1 mr-3 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+          />
+        )}
         <div className="flex-1 min-w-0">
           <h4 className="text-mobile-sm font-medium text-primary-dark truncate">
             {deal.name}

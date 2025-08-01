@@ -421,6 +421,92 @@ export default function EmailAnalytics() {
           </div>
         </div>
       )}
+
+      {/* Unsubscribe Analytics Section */}
+      {unsubscribeAnalytics && unsubscribeAnalytics.summary.totalUnsubscribes > 0 && (
+        <>
+          <div className="border-t border-gray-200 pt-8">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              Unsubscribe Analytics
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Unsubscribe Trend Chart */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Unsubscribe Trend
+              </h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={unsubscribeAnalytics.trend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      stroke="#6b7280"
+                    />
+                    <YAxis stroke="#6b7280" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                        border: 'none',
+                        borderRadius: '4px',
+                        color: 'white'
+                      }}
+                      labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="unsubscribes" 
+                      stroke="#f97316" 
+                      name="Unsubscribes"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Recent Unsubscribes */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Recent Unsubscribes
+              </h3>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {unsubscribeAnalytics.recent.map((unsub) => (
+                  <div key={unsub.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {unsub.email}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(unsub.unsubscribedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                      {unsub.reason.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                ))}
+                {unsubscribeAnalytics.recent.length === 0 && (
+                  <div className="text-center py-8">
+                    <NoSymbolIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      No recent unsubscribes
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

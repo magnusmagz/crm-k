@@ -1,6 +1,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
+import api from '../services/api';
 import { Contact } from '../types';
 import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
@@ -12,6 +13,7 @@ import ContactCardSkeleton from '../components/ContactCardSkeleton';
 import ContactImport from '../components/ContactImport';
 import ContactExport from '../components/ContactExport';
 import Pagination from '../components/Pagination';
+import BulkOperations from '../components/BulkOperations';
 import { Dialog, Transition } from '@headlessui/react';
 
 const Contacts: React.FC = () => {
@@ -25,10 +27,22 @@ const Contacts: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [customFields, setCustomFields] = useState<any[]>([]);
 
   useEffect(() => {
     fetchContacts();
+    fetchCustomFields();
   }, [search, currentPage, pageSize]);
+
+  const fetchCustomFields = async () => {
+    try {
+      const response = await api.get('/custom-fields');
+      setCustomFields(response.data.fields.filter((field: any) => field.entityType === 'contact'));
+    } catch (error) {
+      console.error('Failed to fetch custom fields:', error);
+    }
+  };
 
   const fetchContacts = async () => {
     setIsLoading(true);
@@ -71,6 +85,28 @@ const Contacts: React.FC = () => {
 
   const handleRefresh = async () => {
     await fetchContacts();
+  };
+
+  const toggleContactSelection = (contactId: string) => {
+    const newSelected = new Set(selectedContacts);
+    if (newSelected.has(contactId)) {
+      newSelected.delete(contactId);
+    } else {
+      newSelected.add(contactId);
+    }
+    setSelectedContacts(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedContacts.size === contacts.length) {
+      setSelectedContacts(new Set());
+    } else {
+      setSelectedContacts(new Set(contacts.map(c => c.id)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedContacts(new Set());
   };
 
   return (
@@ -255,6 +291,14 @@ const Contacts: React.FC = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-primary-dark sm:pl-6">
+                        <input
+                          type="checkbox"
+                          checked={selectedContacts.size === contacts.length && contacts.length > 0}
+                          onChange={toggleSelectAll}
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        />
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Name
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
@@ -282,8 +326,16 @@ const Contacts: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {contacts.map((contact) => (
-                      <tr key={contact.id}>
+                      <tr key={contact.id} className={selectedContacts.has(contact.id) ? 'bg-blue-50' : ''}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-dark sm:pl-6">
+                          <input
+                            type="checkbox"
+                            checked={selectedContacts.has(contact.id)}
+                            onChange={() => toggleContactSelection(contact.id)}
+                            className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-primary-dark">
                           <Link to={`/contacts/${contact.id}`} className="hover:text-primary">
                             {contact.firstName} {contact.lastName}
                           </Link>
@@ -398,6 +450,16 @@ const Contacts: React.FC = () => {
           totalContacts={total}
         />
       )}
+
+      {/* Bulk Operations */}
+      <BulkOperations
+        entityType="contacts"
+        selectedItems={selectedContacts}
+        allItems={contacts}
+        onClearSelection={clearSelection}
+        onRefresh={fetchContacts}
+        customFields={customFields}
+      />
     </div>
   );
 };

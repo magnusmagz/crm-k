@@ -90,6 +90,17 @@ export const contactsAPI = {
   bulkDelete: (ids: string[]) => api.post('/contacts/bulk-delete', { ids }),
   
   getTags: () => api.get('/contacts/tags/all'),
+  
+  // Duplicate and merge operations
+  searchDuplicates: (search: string) => api.get(`/contacts/duplicates?search=${encodeURIComponent(search)}`),
+  
+  merge: (data: { primaryId: string; mergeIds: string[] }) => api.post('/contacts/merge', data),
+  
+  mergeWithFieldSelection: (data: { 
+    primaryId: string; 
+    mergeIds: string[]; 
+    mergedData: any 
+  }) => api.post('/contacts/merge-with-fields', data),
 };
 
 // Custom Fields API

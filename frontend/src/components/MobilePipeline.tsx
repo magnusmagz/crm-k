@@ -9,6 +9,8 @@ interface MobilePipelineProps {
   onDealMove: (dealId: string, stageId: string) => void;
   onDealClick: (deal: Deal) => void;
   onDealDelete: (dealId: string) => void;
+  selectedDeals?: Set<string>;
+  onDealToggleSelect?: (dealId: string) => void;
 }
 
 const MobilePipeline: React.FC<MobilePipelineProps> = ({
@@ -16,7 +18,9 @@ const MobilePipeline: React.FC<MobilePipelineProps> = ({
   deals,
   onDealMove,
   onDealClick,
-  onDealDelete
+  onDealDelete,
+  selectedDeals = new Set(),
+  onDealToggleSelect
 }) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set());
@@ -179,6 +183,8 @@ const MobilePipeline: React.FC<MobilePipelineProps> = ({
                     onDragEnd={() => {}}
                     onClick={() => onDealClick(deal)}
                     onDelete={() => onDealDelete(deal.id)}
+                    isSelected={selectedDeals.has(deal.id)}
+                    onToggleSelect={onDealToggleSelect ? () => onDealToggleSelect(deal.id) : undefined}
                   />
                 ))
               }

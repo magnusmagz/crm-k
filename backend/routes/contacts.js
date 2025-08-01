@@ -899,7 +899,118 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
   }
 });
 
-// Merge contacts
+// Merge contacts with field selection
+router.post('/merge-with-fields', authMiddleware, async (req, res) => {
+  const transaction = await sequelize.transaction();
+  
+  try {
+    const { primaryId, mergeIds, mergedData } = req.body;
+    
+    if (!primaryId || !mergeIds || !Array.isArray(mergeIds) || mergeIds.length === 0 || !mergedData) {
+      return res.status(400).json({ 
+        error: 'Primary contact ID, merge IDs array, and merged data are required' 
+      });
+    }
+
+    // Ensure primary is not in merge list
+    if (mergeIds.includes(primaryId)) {
+      return res.status(400).json({ 
+        error: 'Primary contact cannot be in the merge list' 
+      });
+    }
+
+    // Get all contacts (primary + merge targets)
+    const allIds = [primaryId, ...mergeIds];
+    const contacts = await Contact.findAll({
+      where: {
+        id: { [Op.in]: allIds },
+        userId: req.user.id
+      },
+      transaction
+    });
+
+    // Verify all contacts exist and belong to user
+    if (contacts.length !== allIds.length) {
+      await transaction.rollback();
+      return res.status(404).json({ error: 'One or more contacts not found' });
+    }
+
+    // Find primary contact
+    const primaryContact = contacts.find(c => c.id === primaryId);
+
+    // Update primary contact with merged data
+    const allowedFields = ['firstName', 'lastName', 'email', 'phone', 'company', 'position', 'notes', 'tags', 'customFields'];
+    const updateData = {};
+    
+    allowedFields.forEach(field => {
+      if (mergedData[field] !== undefined) {
+        updateData[field] = mergedData[field];
+      }
+    });
+
+    await primaryContact.update(updateData, { transaction });
+
+    // Reassign all deals from merge contacts to primary
+    await Deal.update(
+      { contactId: primaryId },
+      {
+        where: {
+          contactId: { [Op.in]: mergeIds },
+          userId: req.user.id
+        },
+        transaction
+      }
+    );
+
+    // Reassign all notes from merge contacts to primary
+    await Note.update(
+      { contactId: primaryId },
+      {
+        where: {
+          contactId: { [Op.in]: mergeIds },
+          userId: req.user.id
+        },
+        transaction
+      }
+    );
+
+    // Delete merged contacts
+    await Contact.destroy({
+      where: {
+        id: { [Op.in]: mergeIds },
+        userId: req.user.id
+      },
+      transaction
+    });
+
+    await transaction.commit();
+
+    // Get updated primary contact with deal count
+    const updatedPrimary = await Contact.findOne({
+      where: { id: primaryId, userId: req.user.id }
+    });
+
+    const dealCount = await Deal.count({
+      where: { contactId: primaryId, userId: req.user.id }
+    });
+
+    res.json({
+      message: `Successfully merged ${mergeIds.length} contacts into primary contact`,
+      contact: {
+        ...updatedPrimary.toJSON(),
+        dealCount
+      },
+      mergedCount: mergeIds.length
+    });
+
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Merge contacts with fields error:', error);
+    res.status(500).json({ error: 'Failed to merge contacts' });
+  }
+});
+
+// Merge contacts (original endpoint for backward compatibility)
 router.post('/merge', authMiddleware, async (req, res) => {
   const transaction = await sequelize.transaction();
   

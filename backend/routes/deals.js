@@ -269,6 +269,245 @@ router.post('/', authMiddleware, validateDeal, async (req, res) => {
   }
 });
 
+// Bulk operations
+router.post('/bulk-delete', authMiddleware, 
+  body('ids').isArray().notEmpty(),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { ids } = req.body;
+
+      const result = await Deal.destroy({
+        where: {
+          id: { [Op.in]: ids },
+          userId: req.user.id
+        }
+      });
+
+      res.json({ 
+        message: `${result} deals deleted successfully`,
+        deletedCount: result 
+      });
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      res.status(500).json({ error: 'Failed to delete deals' });
+    }
+  }
+);
+
+// Bulk edit deals
+router.post('/bulk-edit', authMiddleware,
+  body('ids').isArray().notEmpty().withMessage('Deal IDs array is required'),
+  body('updates').isObject().notEmpty().withMessage('Updates object is required'),
+  async (req, res) => {
+    const transaction = await sequelize.transaction();
+    
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { ids, updates } = req.body;
+
+      // Validate that all deals belong to the user
+      const deals = await Deal.findAll({
+        where: {
+          id: { [Op.in]: ids },
+          userId: req.user.id
+        },
+        transaction
+      });
+
+      if (deals.length !== ids.length) {
+        await transaction.rollback();
+        return res.status(404).json({ error: 'Some deals not found or do not belong to user' });
+      }
+
+      // Validate stage if being updated
+      if (updates.stageId) {
+        const stage = await Stage.findOne({
+          where: {
+            id: updates.stageId,
+            userId: req.user.id
+          }
+        });
+
+        if (!stage) {
+          await transaction.rollback();
+          return res.status(400).json({ error: 'Invalid stage' });
+        }
+      }
+
+      // Validate custom fields if they're being updated
+      if (updates.customFields) {
+        const customFields = await CustomField.findAll({
+          where: { 
+            userId: req.user.id,
+            entityType: 'deal'
+          }
+        });
+
+        for (const field of customFields) {
+          const value = updates.customFields[field.name];
+          
+          if (value !== undefined && value !== null) {
+            switch (field.type) {
+              case 'number':
+                if (value !== '' && isNaN(value)) {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be a number` 
+                  });
+                }
+                break;
+              case 'date':
+                if (value !== '' && isNaN(Date.parse(value))) {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be a valid date` 
+                  });
+                }
+                break;
+              case 'url':
+                if (value !== '') {
+                  try {
+                    new URL(value);
+                  } catch {
+                    return res.status(400).json({ 
+                      error: `Custom field '${field.label}' must be a valid URL` 
+                    });
+                  }
+                }
+                break;
+              case 'select':
+                if (value !== '' && !field.options.includes(value)) {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be one of: ${field.options.join(', ')}` 
+                  });
+                }
+                break;
+              case 'checkbox':
+                if (typeof value !== 'boolean') {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be true or false` 
+                  });
+                }
+                break;
+            }
+          }
+        }
+      }
+
+      // Prepare update data - only include non-empty values unless explicitly clearing
+      const updateData = {};
+      const allowedFields = ['name', 'value', 'status', 'stageId', 'expectedCloseDate', 'notes', 'tags', 'customFields'];
+      
+      for (const field of allowedFields) {
+        if (updates[field] !== undefined) {
+          if (field === 'tags') {
+            // Handle tag operations
+            if (updates.tagOperation === 'add') {
+              // Add tags to existing tags - handled separately for each deal
+            } else if (updates.tagOperation === 'remove') {
+              // Remove tags from existing tags - handled separately for each deal
+            } else {
+              // Replace tags
+              updateData[field] = updates[field];
+            }
+          } else if (field === 'customFields') {
+            // Merge custom fields with existing ones
+            for (const deal of deals) {
+              const existingCustomFields = deal.customFields || {};
+              const mergedCustomFields = { ...existingCustomFields };
+              
+              Object.entries(updates.customFields).forEach(([key, value]) => {
+                if (value === '' || value === null) {
+                  delete mergedCustomFields[key]; // Remove empty fields
+                } else {
+                  mergedCustomFields[key] = value;
+                }
+              });
+
+              await deal.update({ customFields: mergedCustomFields }, { transaction });
+            }
+            continue; // Skip the bulk update for custom fields
+          } else {
+            // Only update if value is provided and not empty (unless explicitly clearing)
+            if (updates[field] !== '' || updates.clearField === field) {
+              updateData[field] = updates[field];
+            }
+          }
+        }
+      }
+
+      // Perform bulk update (excluding custom fields which are handled above)
+      let updatedCount = 0;
+      if (Object.keys(updateData).length > 0) {
+        if (updateData.tags && updates.tagOperation === 'add') {
+          // Handle tag addition separately for each deal
+          for (const deal of deals) {
+            const existingTags = deal.tags || [];
+            const newTags = updates.tags || [];
+            const mergedTags = [...new Set([...existingTags, ...newTags])];
+            
+            await deal.update({ tags: mergedTags }, { transaction });
+            updatedCount++;
+          }
+        } else if (updateData.tags && updates.tagOperation === 'remove') {
+          // Handle tag removal separately for each deal
+          for (const deal of deals) {
+            const existingTags = deal.tags || [];
+            const tagsToRemove = updates.tags || [];
+            const filteredTags = existingTags.filter(tag => !tagsToRemove.includes(tag));
+            
+            await deal.update({ tags: filteredTags }, { transaction });
+            updatedCount++;
+          }
+        } else {
+          // Standard bulk update
+          const result = await Deal.update(updateData, {
+            where: {
+              id: { [Op.in]: ids },
+              userId: req.user.id
+            },
+            transaction
+          });
+          updatedCount = result[0];
+        }
+      } else if (updates.customFields) {
+        // If only custom fields were updated
+        updatedCount = deals.length;
+      }
+
+      await transaction.commit();
+
+      // Emit automation events for updated deals
+      for (const deal of deals) {
+        const updatedDeal = await Deal.findByPk(deal.id);
+        automationEmitter.emitDealUpdated(
+          req.user.id, 
+          updatedDeal.toJSON(), 
+          Object.keys(updateData)
+        );
+      }
+
+      res.json({
+        message: `${updatedCount} deals updated successfully`,
+        updatedCount,
+        totalSelected: ids.length
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Bulk edit error:', error);
+      res.status(500).json({ error: 'Failed to update deals' });
+    }
+  }
+);
+
 // Update deal
 router.put('/:id', authMiddleware, validateDeal, async (req, res) => {
   try {

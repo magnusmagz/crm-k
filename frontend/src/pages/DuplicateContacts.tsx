@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { Search, Users, Check, X, Loader } from 'lucide-react';
-import api from '../services/api';
+import { Search, Users, Loader } from 'lucide-react';
+import { contactsAPI } from '../services/api';
 import { Contact } from '../types';
 import useDebounce from '../hooks/useDebounce';
+import ContactComparisonModal from '../components/ContactComparisonModal';
 
 interface ContactWithStats extends Contact {
   dealCount: number;
@@ -11,12 +12,11 @@ interface ContactWithStats extends Contact {
 const DuplicateContacts: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [isMerging, setIsMerging] = useState(false);
   const [contacts, setContacts] = useState<ContactWithStats[]>([]);
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
-  const [primaryId, setPrimaryId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showComparisonModal, setShowComparisonModal] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -30,7 +30,7 @@ const DuplicateContacts: React.FC = () => {
     setError(null);
     
     try {
-      const response = await api.get(`/contacts/duplicates?search=${encodeURIComponent(debouncedSearch)}`);
+      const response = await contactsAPI.searchDuplicates(debouncedSearch);
       setContacts(response.data.contacts);
     } catch (error: any) {
       setError(error.response?.data?.error || 'Failed to search contacts');
@@ -49,9 +49,6 @@ const DuplicateContacts: React.FC = () => {
     
     if (newSelected.has(contactId)) {
       newSelected.delete(contactId);
-      if (primaryId === contactId) {
-        setPrimaryId(null);
-      }
     } else {
       newSelected.add(contactId);
     }
@@ -59,73 +56,45 @@ const DuplicateContacts: React.FC = () => {
     setSelectedContacts(newSelected);
   };
 
-  const setPrimaryContact = (contactId: string) => {
-    if (!selectedContacts.has(contactId)) {
-      const newSelected = new Set(selectedContacts);
-      newSelected.add(contactId);
-      setSelectedContacts(newSelected);
+  const handleMerge = () => {
+    if (selectedContacts.size < 2) {
+      setError('Please select at least 2 contacts to compare and merge');
+      return;
     }
-    setPrimaryId(contactId);
+
+    if (selectedContacts.size > 8) {
+      setError('You can only compare up to 8 contacts at once');
+      return;
+    }
+
+    setError(null);
+    setShowComparisonModal(true);
   };
 
-  const handleMerge = async () => {
-    if (!primaryId || selectedContacts.size < 2) {
-      setError('Please select at least 2 contacts and choose a primary contact');
-      return;
-    }
-
-    const mergeIds = Array.from(selectedContacts).filter(id => id !== primaryId);
+  const handleMergeComplete = (mergedContact: ContactWithStats) => {
+    const mergeIds = Array.from(selectedContacts).filter(id => id !== mergedContact.id);
     
-    if (mergeIds.length === 0) {
-      setError('Please select at least one contact to merge into the primary');
-      return;
-    }
-
-    if (!window.confirm(`Are you sure you want to merge ${mergeIds.length} contact(s) into the primary contact? This action cannot be undone.`)) {
-      return;
-    }
-
-    setIsMerging(true);
-    setError(null);
-    setSuccessMessage(null);
-
-    try {
-      const response = await api.post('/contacts/merge', {
-        primaryId,
-        mergeIds
-      });
-
-      setSuccessMessage(response.data.message);
-      
-      // Remove merged contacts from the list
-      setContacts(contacts.filter(c => !mergeIds.includes(c.id)));
-      
-      // Update primary contact with new data
-      setContacts(contacts.map(c => 
-        c.id === primaryId ? response.data.contact : c
-      ));
-      
-      // Reset selection
-      setSelectedContacts(new Set());
-      setPrimaryId(null);
-      
-    } catch (error: any) {
-      setError(error.response?.data?.error || 'Failed to merge contacts');
-    } finally {
-      setIsMerging(false);
-    }
+    setSuccessMessage(`Successfully merged ${mergeIds.length + 1} contacts`);
+    
+    // Remove merged contacts from the list and update the primary
+    setContacts(contacts.filter(c => !mergeIds.includes(c.id)).map(c => 
+      c.id === mergedContact.id ? mergedContact : c
+    ));
+    
+    // Reset selection
+    setSelectedContacts(new Set());
+    setShowComparisonModal(false);
   };
 
   const clearSelection = () => {
     setSelectedContacts(new Set());
-    setPrimaryId(null);
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find & Merge Duplicates</h1>
-        <p className="text-gray-600">Search for potential duplicate contacts and merge them together</p>
+        <p className="text-gray-600">Search for potential duplicate contacts and merge them together (up to 8 contacts at once)</p>
       </div>
 
       {/* Search Bar */}
@@ -168,11 +137,9 @@ const DuplicateContacts: React.FC = () => {
             <span className="text-blue-700">
               {selectedContacts.size} contact{selectedContacts.size > 1 ? 's' : ''} selected
             </span>
-            {primaryId && (
-              <span className="text-blue-600 text-sm">
-                Primary: {contacts.find(c => c.id === primaryId)?.firstName} {contacts.find(c => c.id === primaryId)?.lastName}
-              </span>
-            )}
+            <span className="text-blue-600 text-sm">
+              Ready to compare and merge
+            </span>
           </div>
           <div className="flex gap-2">
             <button
@@ -183,20 +150,11 @@ const DuplicateContacts: React.FC = () => {
             </button>
             <button
               onClick={handleMerge}
-              disabled={!primaryId || selectedContacts.size < 2 || isMerging}
+              disabled={selectedContacts.size < 2}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {isMerging ? (
-                <>
-                  <Loader className="h-4 w-4 animate-spin" />
-                  Merging...
-                </>
-              ) : (
-                <>
-                  <Users className="h-4 w-4" />
-                  Merge Selected
-                </>
-              )}
+              <Users className="h-4 w-4" />
+              Compare & Merge
             </button>
           </div>
         </div>
@@ -227,11 +185,6 @@ const DuplicateContacts: React.FC = () => {
                       <h3 className="font-semibold text-gray-900">
                         {contact.firstName} {contact.lastName}
                       </h3>
-                      {primaryId === contact.id && (
-                        <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded-full">
-                          Primary
-                        </span>
-                      )}
                     </div>
                     <div className="space-y-1 text-sm text-gray-600">
                       {contact.email && (
@@ -249,23 +202,6 @@ const DuplicateContacts: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
-                {selectedContacts.has(contact.id) && (
-                  <button
-                    onClick={() => setPrimaryContact(contact.id)}
-                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      primaryId === contact.id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {primaryId === contact.id ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      'Set as Primary'
-                    )}
-                  </button>
-                )}
               </div>
             </div>
           ))}
@@ -279,6 +215,14 @@ const DuplicateContacts: React.FC = () => {
           Start typing to search for duplicate contacts
         </div>
       ) : null}
+
+      {/* Comparison Modal */}
+      <ContactComparisonModal
+        isOpen={showComparisonModal}
+        onClose={() => setShowComparisonModal(false)}
+        contacts={contacts.filter(c => selectedContacts.has(c.id))}
+        onMergeComplete={handleMergeComplete}
+      />
     </div>
   );
 };

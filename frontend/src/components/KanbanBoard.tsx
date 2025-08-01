@@ -8,6 +8,8 @@ interface KanbanBoardProps {
   onDealMove: (dealId: string, stageId: string) => void;
   onDealClick: (deal: Deal) => void;
   onDealDelete: (dealId: string) => void;
+  selectedDeals?: Set<string>;
+  onDealToggleSelect?: (dealId: string) => void;
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -15,7 +17,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   deals,
   onDealMove,
   onDealClick,
-  onDealDelete
+  onDealDelete,
+  selectedDeals = new Set(),
+  onDealToggleSelect
 }) => {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
@@ -138,6 +142,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                         onDragEnd={handleDragEnd}
                         onClick={() => onDealClick(deal)}
                         onDelete={() => onDealDelete(deal.id)}
+                        isSelected={selectedDeals.has(deal.id)}
+                        onToggleSelect={onDealToggleSelect ? () => onDealToggleSelect(deal.id) : undefined}
                       />
                     ))
                   }
