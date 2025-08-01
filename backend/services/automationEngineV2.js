@@ -76,6 +76,23 @@ class AutomationEngineV2 {
         throw new Error('Automation not loaded with enrollment');
       }
       
+      // Check exit criteria before processing
+      const exitCriteriaEvaluator = require('./exitCriteriaEvaluator');
+      exitCriteriaEvaluator.setDebugSession(debugSessionId);
+      
+      const entity = await this.getEntity(enrollment);
+      const exitCheck = await exitCriteriaEvaluator.checkExitCriteria(enrollment, automation, entity);
+      
+      if (exitCheck.shouldExit) {
+        automationDebugger.log(debugSessionId, 'EXIT_CRITERIA_TRIGGERED', {
+          reason: exitCheck.reason,
+          enrollmentId: enrollment.id
+        });
+        
+        await this.exitEnrollment(enrollment, 'criteria_met', exitCheck.reason);
+        return;
+      }
+      
       if (automation.isMultiStep && automation.steps && automation.steps.length > 0) {
         // Multi-step workflow
         const currentStep = automation.steps.find(s => s.stepIndex === enrollment.currentStepIndex);
@@ -92,6 +109,16 @@ class AutomationEngineV2 {
         const result = await this.executeStep(currentStep, enrollment);
         
         if (result.success) {
+          // Check if automation was stopped by an action
+          if (result.stopped) {
+            automationDebugger.log(debugSessionId, 'AUTOMATION_STOPPED_BY_ACTION', {
+              reason: result.reason,
+              enrollmentId: enrollment.id
+            });
+            // Exit was already handled by the action
+            return;
+          }
+          
           // Determine next step
           const nextStepIndex = this.determineNextStep(currentStep, result);
           
@@ -205,7 +232,16 @@ class AutomationEngineV2 {
         });
         
         try {
-          await this.executeAction(action, entity, enrollment);
+          const result = await this.executeAction(action, entity, enrollment);
+          
+          // Check if action requested to stop the automation
+          if (result && result.stopAutomation) {
+            automationDebugger.log(debugSessionId, 'AUTOMATION_STOP_REQUESTED', {
+              reason: result.reason
+            });
+            return { success: true, stopped: true, reason: result.reason };
+          }
+          
           automationDebugger.logActionExecution(debugSessionId, action, entity, true);
         } catch (actionError) {
           automationDebugger.log(debugSessionId, 'ACTION_ERROR', {
@@ -473,6 +509,11 @@ class AutomationEngineV2 {
     }
     
     return { success: true };
+  }
+
+  // Evaluate a single condition (helper for evaluateSingleCondition)
+  async evaluateSingleCondition(condition, enrollment, entity) {
+    return await this.evaluateCondition(condition, entity);
   }
 
   // Evaluate a single condition

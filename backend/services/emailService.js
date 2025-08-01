@@ -29,7 +29,13 @@ class EmailService {
 
     $('a').each((index, element) => {
       const href = $(element).attr('href');
-      if (href && !href.startsWith('mailto:') && !href.startsWith('tel:') && !href.startsWith('#')) {
+      // Skip tracking for mailto, tel, anchors, and Postmark tokens
+      if (href && 
+          !href.startsWith('mailto:') && 
+          !href.startsWith('tel:') && 
+          !href.startsWith('#') &&
+          !href.includes('{{{') && // Skip Postmark merge tags
+          !href.includes('pm:')) { // Skip Postmark tokens
         const linkId = crypto.randomBytes(8).toString('hex');
         const trackingUrl = `${this.appUrl}/api/track/click/${trackingId}/${linkId}`;
         
@@ -538,7 +544,7 @@ class EmailService {
       const unsubscribeFooterHtml = `
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; font-size: 12px; color: #666;">
           <p>
-            <a href="{{{pm:unsubscribe_url}}}" style="color: #666; text-decoration: underline;">Unsubscribe</a>
+            <a href="{{{ pm:unsubscribe_url }}}" style="color: #666; text-decoration: underline;">Unsubscribe</a>
           </p>
         </div>
       `;
@@ -546,7 +552,7 @@ class EmailService {
       const unsubscribeFooterText = `
 
 --
-Unsubscribe: {{{pm:unsubscribe_url}}}
+Unsubscribe: {{{ pm:unsubscribe_url }}}
 `;
 
       // Insert footer before closing body tag or append to end

@@ -32,8 +32,7 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
     if (typeFilter.includes('note')) {
       const notes = await Note.findAll({
         where: {
-          contactId: contactId,
-          userId: req.user.id
+          contactId: contactId
         },
         attributes: ['id', 'content', 'createdAt', 'updatedAt'],
         raw: true
@@ -58,13 +57,13 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
           contactId: contactId,
           userId: req.user.id
         },
-        attributes: ['id', 'name', 'value', 'status', 'createdAt', 'updatedAt', 'closedAt'],
+        attributes: ['id', 'name', 'value', 'status', 'createdAt', 'updatedAt', 'closedAt', 'stageId'],
         include: [{
           model: Stage,
           as: 'stage',
-          attributes: ['name', 'color']
-        }],
-        raw: false
+          attributes: ['name', 'color'],
+          required: false
+        }]
       });
 
       deals.forEach(deal => {
@@ -111,14 +110,7 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
           contactId: contactId,
           userId: req.user.id
         },
-        attributes: ['id', 'subject', 'preview', 'sentAt', 'openedAt', 'clickedAt'],
-        include: [{
-          model: EmailEvent,
-          as: 'events',
-          attributes: ['eventType', 'timestamp'],
-          order: [['timestamp', 'DESC']]
-        }],
-        raw: false
+        attributes: ['id', 'subject', 'preview', 'sentAt', 'openedAt', 'clickedAt']
       });
 
       emails.forEach(email => {
@@ -248,8 +240,7 @@ router.get('/contact/:contactId/summary', authMiddleware, async (req, res) => {
     const [noteCount, dealCount, emailCount] = await Promise.all([
       Note.count({
         where: {
-          contactId: contactId,
-          userId: req.user.id
+          contactId: contactId
         }
       }),
       Deal.count({
@@ -269,7 +260,7 @@ router.get('/contact/:contactId/summary', authMiddleware, async (req, res) => {
     // Get last activity date
     const lastActivities = await Promise.all([
       Note.findOne({
-        where: { contactId, userId: req.user.id },
+        where: { contactId },
         order: [['createdAt', 'DESC']],
         attributes: ['createdAt']
       }),

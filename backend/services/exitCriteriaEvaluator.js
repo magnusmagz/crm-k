@@ -1,6 +1,6 @@
 const { Contact, Deal, AutomationEnrollment, EmailSuppression } = require('../models');
 const { Op } = require('sequelize');
-const automationDebugger = require('../utils/automationDebugger');
+const automationDebugger = require('./automationDebugger');
 
 class ExitCriteriaEvaluator {
   constructor() {
