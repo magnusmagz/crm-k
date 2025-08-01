@@ -13,8 +13,8 @@ const DuplicateContacts: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
   const [contacts, setContacts] = useState<ContactWithStats[]>([]);
-  const [selectedContacts, setSelectedContacts] = useState<Set<number>>(new Set());
-  const [masterId, setMasterId] = useState<number | null>(null);
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [masterId, setMasterId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -44,7 +44,7 @@ const DuplicateContacts: React.FC = () => {
     searchDuplicates();
   }, [searchDuplicates]);
 
-  const toggleContactSelection = (contactId: number) => {
+  const toggleContactSelection = (contactId: string) => {
     const newSelected = new Set(selectedContacts);
     
     if (newSelected.has(contactId)) {
@@ -59,7 +59,7 @@ const DuplicateContacts: React.FC = () => {
     setSelectedContacts(newSelected);
   };
 
-  const setMasterContact = (contactId: number) => {
+  const setMasterContact = (contactId: string) => {
     if (!selectedContacts.has(contactId)) {
       const newSelected = new Set(selectedContacts);
       newSelected.add(contactId);
