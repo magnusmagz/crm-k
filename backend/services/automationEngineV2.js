@@ -403,6 +403,34 @@ class AutomationEngineV2 {
         });
         break;
         
+      case 'stop_automation':
+        // Exit the automation with specified reason
+        const exitReason = action.config.reason || 'Manual stop action';
+        await this.exitEnrollment(enrollment, 'manual_stop', exitReason);
+        automationDebugger.log(debugSessionId, 'AUTOMATION_STOPPED', {
+          reason: exitReason,
+          enrollmentId: enrollment.id
+        });
+        // Return special flag to indicate automation should stop
+        return { stopAutomation: true, reason: exitReason };
+        
+      case 'conditional_exit':
+        // Evaluate condition and exit if met
+        if (action.config.condition) {
+          const conditionMet = await this.evaluateSingleCondition(action.config.condition, enrollment, entity);
+          if (conditionMet) {
+            const exitReason = action.config.reason || 'Conditional exit criteria met';
+            await this.exitEnrollment(enrollment, 'condition_met', exitReason);
+            automationDebugger.log(debugSessionId, 'CONDITIONAL_EXIT', {
+              condition: action.config.condition,
+              reason: exitReason,
+              enrollmentId: enrollment.id
+            });
+            return { stopAutomation: true, reason: exitReason };
+          }
+        }
+        break;
+        
       default:
         throw new Error(`Unknown action type: ${action.type}`);
     }
@@ -777,6 +805,43 @@ class AutomationEngineV2 {
       
       const automation = await Automation.findByPk(automationId);
       await automation.decrement('activeEnrollments');
+    }
+  }
+
+  // Exit an enrollment with a specific reason
+  async exitEnrollment(enrollment, exitType, reason) {
+    try {
+      await enrollment.update({
+        status: 'exited',
+        exitReason: reason,
+        exitedAt: new Date()
+      });
+      
+      // Update automation counters
+      const automation = await Automation.findByPk(enrollment.automationId);
+      if (automation) {
+        await automation.decrement('activeEnrollments');
+      }
+      
+      // Log the exit event
+      await AutomationLog.create({
+        automationId: enrollment.automationId,
+        enrollmentId: enrollment.id,
+        entityType: enrollment.entityType,
+        entityId: enrollment.entityId,
+        action: 'enrollment_exited',
+        status: 'success',
+        details: {
+          exitType,
+          reason,
+          exitedAt: new Date()
+        }
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error exiting enrollment:', error);
+      return false;
     }
   }
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const { Contact, Deal, Note, EmailSend, EmailEvent, sequelize } = require('../models');
+const { Contact, Deal, Note, EmailSend, EmailEvent, Stage, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 
@@ -60,7 +60,7 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
         },
         attributes: ['id', 'name', 'value', 'status', 'createdAt', 'updatedAt', 'closedAt'],
         include: [{
-          model: require('../models').Stage(sequelize, sequelize.Sequelize.DataTypes),
+          model: Stage,
           as: 'stage',
           attributes: ['name', 'color']
         }],
@@ -221,6 +221,8 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error('Get timeline error:', error);
+    console.error('Error details:', error.message);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({ error: 'Failed to get timeline' });
   }
 });
