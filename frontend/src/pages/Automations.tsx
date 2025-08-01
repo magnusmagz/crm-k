@@ -22,6 +22,7 @@ import {
   ArrowsPointingOutIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid';
+import ExitStatsView from '../components/automation/ExitStatsView';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
@@ -351,6 +352,11 @@ const Automations: React.FC = () => {
                           )}
                         </div>
                       )}
+                      
+                      {/* Exit Statistics */}
+                      <div className="mt-6">
+                        <ExitStatsView automationId={automation.id} />
+                      </div>
                     </div>
                   )}
                 </div>

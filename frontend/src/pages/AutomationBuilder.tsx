@@ -345,7 +345,8 @@ const AutomationBuilder: React.FC = () => {
             </div>
           </div>
 
-          {/* Exit Criteria */}
+          {/* Exit Criteria - Temporarily disabled */}
+          {/*
           <div className="mb-8">
             <ExitCriteriaConfig
               automationId={isEditing ? id : undefined}
@@ -355,6 +356,7 @@ const AutomationBuilder: React.FC = () => {
               onChange={handleExitCriteriaChange}
             />
           </div>
+          */}
 
           {/* Actions */}
           <div className="flex justify-between">
