@@ -14,7 +14,7 @@ const DuplicateContacts: React.FC = () => {
   const [isMerging, setIsMerging] = useState(false);
   const [contacts, setContacts] = useState<ContactWithStats[]>([]);
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
-  const [masterId, setMasterId] = useState<string | null>(null);
+  const [primaryId, setPrimaryId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -49,8 +49,8 @@ const DuplicateContacts: React.FC = () => {
     
     if (newSelected.has(contactId)) {
       newSelected.delete(contactId);
-      if (masterId === contactId) {
-        setMasterId(null);
+      if (primaryId === contactId) {
+        setPrimaryId(null);
       }
     } else {
       newSelected.add(contactId);
@@ -59,29 +59,29 @@ const DuplicateContacts: React.FC = () => {
     setSelectedContacts(newSelected);
   };
 
-  const setMasterContact = (contactId: string) => {
+  const setPrimaryContact = (contactId: string) => {
     if (!selectedContacts.has(contactId)) {
       const newSelected = new Set(selectedContacts);
       newSelected.add(contactId);
       setSelectedContacts(newSelected);
     }
-    setMasterId(contactId);
+    setPrimaryId(contactId);
   };
 
   const handleMerge = async () => {
-    if (!masterId || selectedContacts.size < 2) {
-      setError('Please select at least 2 contacts and choose a master contact');
+    if (!primaryId || selectedContacts.size < 2) {
+      setError('Please select at least 2 contacts and choose a primary contact');
       return;
     }
 
-    const mergeIds = Array.from(selectedContacts).filter(id => id !== masterId);
+    const mergeIds = Array.from(selectedContacts).filter(id => id !== primaryId);
     
     if (mergeIds.length === 0) {
-      setError('Please select at least one contact to merge into the master');
+      setError('Please select at least one contact to merge into the primary');
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to merge ${mergeIds.length} contact(s) into the master contact? This action cannot be undone.`)) {
+    if (!window.confirm(`Are you sure you want to merge ${mergeIds.length} contact(s) into the primary contact? This action cannot be undone.`)) {
       return;
     }
 
@@ -91,7 +91,7 @@ const DuplicateContacts: React.FC = () => {
 
     try {
       const response = await api.post('/contacts/merge', {
-        masterId,
+        primaryId,
         mergeIds
       });
 
@@ -100,14 +100,14 @@ const DuplicateContacts: React.FC = () => {
       // Remove merged contacts from the list
       setContacts(contacts.filter(c => !mergeIds.includes(c.id)));
       
-      // Update master contact with new data
+      // Update primary contact with new data
       setContacts(contacts.map(c => 
-        c.id === masterId ? response.data.contact : c
+        c.id === primaryId ? response.data.contact : c
       ));
       
       // Reset selection
       setSelectedContacts(new Set());
-      setMasterId(null);
+      setPrimaryId(null);
       
     } catch (error: any) {
       setError(error.response?.data?.error || 'Failed to merge contacts');
@@ -118,7 +118,7 @@ const DuplicateContacts: React.FC = () => {
 
   const clearSelection = () => {
     setSelectedContacts(new Set());
-    setMasterId(null);
+    setPrimaryId(null);
   };
 
   return (
@@ -168,9 +168,9 @@ const DuplicateContacts: React.FC = () => {
             <span className="text-blue-700">
               {selectedContacts.size} contact{selectedContacts.size > 1 ? 's' : ''} selected
             </span>
-            {masterId && (
+            {primaryId && (
               <span className="text-blue-600 text-sm">
-                Master: {contacts.find(c => c.id === masterId)?.firstName} {contacts.find(c => c.id === masterId)?.lastName}
+                Primary: {contacts.find(c => c.id === primaryId)?.firstName} {contacts.find(c => c.id === primaryId)?.lastName}
               </span>
             )}
           </div>
@@ -183,7 +183,7 @@ const DuplicateContacts: React.FC = () => {
             </button>
             <button
               onClick={handleMerge}
-              disabled={!masterId || selectedContacts.size < 2 || isMerging}
+              disabled={!primaryId || selectedContacts.size < 2 || isMerging}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isMerging ? (
@@ -227,9 +227,9 @@ const DuplicateContacts: React.FC = () => {
                       <h3 className="font-semibold text-gray-900">
                         {contact.firstName} {contact.lastName}
                       </h3>
-                      {masterId === contact.id && (
+                      {primaryId === contact.id && (
                         <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded-full">
-                          Master
+                          Primary
                         </span>
                       )}
                     </div>
@@ -252,17 +252,17 @@ const DuplicateContacts: React.FC = () => {
                 
                 {selectedContacts.has(contact.id) && (
                   <button
-                    onClick={() => setMasterContact(contact.id)}
+                    onClick={() => setPrimaryContact(contact.id)}
                     className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      masterId === contact.id
+                      primaryId === contact.id
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                   >
-                    {masterId === contact.id ? (
+                    {primaryId === contact.id ? (
                       <Check className="h-4 w-4" />
                     ) : (
-                      'Set as Master'
+                      'Set as Primary'
                     )}
                   </button>
                 )}

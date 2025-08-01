@@ -289,7 +289,19 @@ const Contacts: React.FC = () => {
                           </Link>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {contact.email}
+                          <div className="flex items-center gap-2">
+                            <span className={contact.isUnsubscribed ? 'line-through text-gray-400' : ''}>
+                              {contact.email}
+                            </span>
+                            {contact.isUnsubscribed && (
+                              <span 
+                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                                title={`Unsubscribed: ${contact.unsubscribeReason || 'Unknown reason'}`}
+                              >
+                                Unsubscribed
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {contact.phone}

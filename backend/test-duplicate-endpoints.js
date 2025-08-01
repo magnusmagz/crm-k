@@ -60,7 +60,7 @@ async function testDuplicateEndpoints() {
 
     try {
       await api.post('/contacts/merge', {
-        masterId: 1,
+        primaryId: 1,
         mergeIds: []
       });
       console.log('❌ Should have failed with empty merge IDs');
@@ -72,13 +72,13 @@ async function testDuplicateEndpoints() {
 
     try {
       await api.post('/contacts/merge', {
-        masterId: 1,
+        primaryId: 1,
         mergeIds: [1, 2]
       });
-      console.log('❌ Should have failed with master in merge list');
+      console.log('❌ Should have failed with primary in merge list');
     } catch (error) {
       if (error.response?.status === 400) {
-        console.log('✅ Correctly rejected master ID in merge list');
+        console.log('✅ Correctly rejected primary ID in merge list');
       }
     }
 
@@ -90,7 +90,7 @@ async function testDuplicateEndpoints() {
     console.log('- POST /api/contacts/merge');
     console.log('\nMerge request format:');
     console.log(JSON.stringify({
-      masterId: 123,
+      primaryId: 123,
       mergeIds: [456, 789]
     }, null, 2));
 

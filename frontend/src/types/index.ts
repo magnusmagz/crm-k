@@ -52,6 +52,8 @@ export interface Contact {
     openDeals: number;
     openValue: number;
   };
+  isUnsubscribed?: boolean;
+  unsubscribeReason?: string | null;
 }
 
 export interface CustomField {

@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Contact, CustomField, Deal, Note, sequelize } = require('../models');
+const { Contact, CustomField, Deal, Note, EmailSuppression, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
@@ -99,10 +99,29 @@ router.get('/', authMiddleware, async (req, res) => {
       return map;
     }, {});
     
-    // Add deal stats to contacts
+    // Get suppression status for contacts with email addresses
+    const contactEmails = contacts.rows
+      .filter(contact => contact.email)
+      .map(contact => contact.email.toLowerCase());
+    
+    const suppressions = await EmailSuppression.findAll({
+      where: {
+        email: { [Op.in]: contactEmails }
+      },
+      attributes: ['email', 'reason']
+    });
+    
+    const suppressionMap = suppressions.reduce((map, suppression) => {
+      map[suppression.email] = suppression.reason;
+      return map;
+    }, {});
+    
+    // Add deal stats and suppression status to contacts
     const contactsWithStats = contacts.rows.map(contact => ({
       ...contact.toJSON(),
-      dealStats: dealStatsMap[contact.id] || { dealCount: 0, totalValue: 0, wonDeals: 0, openDeals: 0, openValue: 0 }
+      dealStats: dealStatsMap[contact.id] || { dealCount: 0, totalValue: 0, wonDeals: 0, openDeals: 0, openValue: 0 },
+      isUnsubscribed: contact.email ? !!suppressionMap[contact.email.toLowerCase()] : false,
+      unsubscribeReason: contact.email ? suppressionMap[contact.email.toLowerCase()] || null : null
     }));
 
     res.json({
@@ -230,6 +249,202 @@ router.post('/bulk-delete', authMiddleware,
     } catch (error) {
       console.error('Bulk delete error:', error);
       res.status(500).json({ error: 'Failed to delete contacts' });
+    }
+  }
+);
+
+// Bulk edit contacts
+router.post('/bulk-edit', authMiddleware,
+  body('ids').isArray().notEmpty().withMessage('Contact IDs array is required'),
+  body('updates').isObject().notEmpty().withMessage('Updates object is required'),
+  async (req, res) => {
+    const transaction = await sequelize.transaction();
+    
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { ids, updates } = req.body;
+
+      // Validate that all contacts belong to the user
+      const contacts = await Contact.findAll({
+        where: {
+          id: { [Op.in]: ids },
+          userId: req.user.id
+        },
+        transaction
+      });
+
+      if (contacts.length !== ids.length) {
+        await transaction.rollback();
+        return res.status(404).json({ error: 'Some contacts not found or do not belong to user' });
+      }
+
+      // Validate custom fields if they're being updated
+      if (updates.customFields) {
+        const customFields = await CustomField.findAll({
+          where: { 
+            userId: req.user.id,
+            entityType: 'contact'
+          }
+        });
+
+        for (const field of customFields) {
+          const value = updates.customFields[field.name];
+          
+          if (value !== undefined && value !== null) {
+            switch (field.type) {
+              case 'number':
+                if (value !== '' && isNaN(value)) {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be a number` 
+                  });
+                }
+                break;
+              case 'date':
+                if (value !== '' && isNaN(Date.parse(value))) {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be a valid date` 
+                  });
+                }
+                break;
+              case 'url':
+                if (value !== '') {
+                  try {
+                    new URL(value);
+                  } catch {
+                    return res.status(400).json({ 
+                      error: `Custom field '${field.label}' must be a valid URL` 
+                    });
+                  }
+                }
+                break;
+              case 'select':
+                if (value !== '' && !field.options.includes(value)) {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be one of: ${field.options.join(', ')}` 
+                  });
+                }
+                break;
+              case 'checkbox':
+                if (typeof value !== 'boolean') {
+                  return res.status(400).json({ 
+                    error: `Custom field '${field.label}' must be true or false` 
+                  });
+                }
+                break;
+            }
+          }
+        }
+      }
+
+      // Prepare update data - only include non-empty values unless explicitly clearing
+      const updateData = {};
+      const allowedFields = ['firstName', 'lastName', 'email', 'phone', 'company', 'position', 'notes', 'tags', 'customFields'];
+      
+      for (const field of allowedFields) {
+        if (updates[field] !== undefined) {
+          if (field === 'tags') {
+            // Handle tag operations
+            if (updates.tagOperation === 'add') {
+              // Add tags to existing tags
+              updateData[field] = sequelize.fn('array_cat', sequelize.col('tags'), updates[field]);
+            } else if (updates.tagOperation === 'remove') {
+              // Remove tags from existing tags
+              updateData[field] = sequelize.fn('array_remove', sequelize.col('tags'), updates[field][0]);
+            } else {
+              // Replace tags
+              updateData[field] = updates[field];
+            }
+          } else if (field === 'customFields') {
+            // Merge custom fields with existing ones
+            for (const contact of contacts) {
+              const existingCustomFields = contact.customFields || {};
+              const mergedCustomFields = { ...existingCustomFields };
+              
+              Object.entries(updates.customFields).forEach(([key, value]) => {
+                if (value === '' || value === null) {
+                  delete mergedCustomFields[key]; // Remove empty fields
+                } else {
+                  mergedCustomFields[key] = value;
+                }
+              });
+
+              await contact.update({ customFields: mergedCustomFields }, { transaction });
+            }
+            continue; // Skip the bulk update for custom fields
+          } else {
+            // Only update if value is provided and not empty (unless explicitly clearing)
+            if (updates[field] !== '' || updates.clearField === field) {
+              updateData[field] = updates[field];
+            }
+          }
+        }
+      }
+
+      // Perform bulk update (excluding custom fields which are handled above)
+      let updatedCount = 0;
+      if (Object.keys(updateData).length > 0) {
+        if (updateData.tags && updates.tagOperation === 'add') {
+          // Handle tag addition separately for each contact
+          for (const contact of contacts) {
+            const existingTags = contact.tags || [];
+            const newTags = updates.tags || [];
+            const mergedTags = [...new Set([...existingTags, ...newTags])];
+            
+            await contact.update({ tags: mergedTags }, { transaction });
+            updatedCount++;
+          }
+        } else if (updateData.tags && updates.tagOperation === 'remove') {
+          // Handle tag removal separately for each contact
+          for (const contact of contacts) {
+            const existingTags = contact.tags || [];
+            const tagsToRemove = updates.tags || [];
+            const filteredTags = existingTags.filter(tag => !tagsToRemove.includes(tag));
+            
+            await contact.update({ tags: filteredTags }, { transaction });
+            updatedCount++;
+          }
+        } else {
+          // Standard bulk update
+          const result = await Contact.update(updateData, {
+            where: {
+              id: { [Op.in]: ids },
+              userId: req.user.id
+            },
+            transaction
+          });
+          updatedCount = result[0];
+        }
+      } else if (updates.customFields) {
+        // If only custom fields were updated
+        updatedCount = contacts.length;
+      }
+
+      await transaction.commit();
+
+      // Emit automation events for updated contacts
+      for (const contact of contacts) {
+        const updatedContact = await Contact.findByPk(contact.id);
+        automationEmitter.emitContactUpdated(
+          req.user.id, 
+          updatedContact.toJSON(), 
+          Object.keys(updateData)
+        );
+      }
+
+      res.json({
+        message: `${updatedCount} contacts updated successfully`,
+        updatedCount,
+        totalSelected: ids.length
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Bulk edit error:', error);
+      res.status(500).json({ error: 'Failed to update contacts' });
     }
   }
 );
@@ -689,23 +904,23 @@ router.post('/merge', authMiddleware, async (req, res) => {
   const transaction = await sequelize.transaction();
   
   try {
-    const { masterId, mergeIds } = req.body;
+    const { primaryId, mergeIds } = req.body;
     
-    if (!masterId || !mergeIds || !Array.isArray(mergeIds) || mergeIds.length === 0) {
+    if (!primaryId || !mergeIds || !Array.isArray(mergeIds) || mergeIds.length === 0) {
       return res.status(400).json({ 
-        error: 'Master contact ID and array of merge IDs are required' 
+        error: 'Primary contact ID and array of merge IDs are required' 
       });
     }
 
-    // Ensure master is not in merge list
-    if (mergeIds.includes(masterId)) {
+    // Ensure primary is not in merge list
+    if (mergeIds.includes(primaryId)) {
       return res.status(400).json({ 
-        error: 'Master contact cannot be in the merge list' 
+        error: 'Primary contact cannot be in the merge list' 
       });
     }
 
-    // Get all contacts (master + merge targets)
-    const allIds = [masterId, ...mergeIds];
+    // Get all contacts (primary + merge targets)
+    const allIds = [primaryId, ...mergeIds];
     const contacts = await Contact.findAll({
       where: {
         id: { [Op.in]: allIds },
@@ -720,16 +935,16 @@ router.post('/merge', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'One or more contacts not found' });
     }
 
-    // Find master contact
-    const masterContact = contacts.find(c => c.id === masterId);
-    const mergeContacts = contacts.filter(c => c.id !== masterId);
+    // Find primary contact
+    const primaryContact = contacts.find(c => c.id === primaryId);
+    const mergeContacts = contacts.filter(c => c.id !== primaryId);
 
-    // Merge data into master (only fill empty fields)
+    // Merge data into primary (only fill empty fields)
     const updates = {};
     const fieldsToMerge = ['email', 'phone', 'company', 'position', 'notes'];
     
     for (const field of fieldsToMerge) {
-      if (!masterContact[field] || masterContact[field] === '') {
+      if (!primaryContact[field] || primaryContact[field] === '') {
         // Find first non-empty value from merge contacts
         for (const mergeContact of mergeContacts) {
           if (mergeContact[field] && mergeContact[field] !== '') {
@@ -741,18 +956,18 @@ router.post('/merge', authMiddleware, async (req, res) => {
     }
 
     // Merge notes (concatenate if both have notes)
-    if (masterContact.notes) {
+    if (primaryContact.notes) {
       const additionalNotes = mergeContacts
         .filter(c => c.notes && c.notes !== '')
         .map(c => c.notes);
       
       if (additionalNotes.length > 0) {
-        updates.notes = [masterContact.notes, ...additionalNotes].join('\n\n---\n\n');
+        updates.notes = [primaryContact.notes, ...additionalNotes].join('\n\n---\n\n');
       }
     }
 
     // Merge tags (combine unique tags)
-    const allTags = new Set(masterContact.tags || []);
+    const allTags = new Set(primaryContact.tags || []);
     mergeContacts.forEach(contact => {
       (contact.tags || []).forEach(tag => allTags.add(tag));
     });
@@ -761,7 +976,7 @@ router.post('/merge', authMiddleware, async (req, res) => {
     }
 
     // Merge custom fields (only fill empty fields)
-    const customFieldUpdates = { ...(masterContact.customFields || {}) };
+    const customFieldUpdates = { ...(primaryContact.customFields || {}) };
     mergeContacts.forEach(contact => {
       if (contact.customFields) {
         Object.entries(contact.customFields).forEach(([key, value]) => {
@@ -775,14 +990,14 @@ router.post('/merge', authMiddleware, async (req, res) => {
       updates.customFields = customFieldUpdates;
     }
 
-    // Update master contact if there are changes
+    // Update primary contact if there are changes
     if (Object.keys(updates).length > 0) {
-      await masterContact.update(updates, { transaction });
+      await primaryContact.update(updates, { transaction });
     }
 
-    // Reassign all deals from merge contacts to master
+    // Reassign all deals from merge contacts to primary
     await Deal.update(
-      { contactId: masterId },
+      { contactId: primaryId },
       {
         where: {
           contactId: { [Op.in]: mergeIds },
@@ -792,9 +1007,9 @@ router.post('/merge', authMiddleware, async (req, res) => {
       }
     );
 
-    // Reassign all notes from merge contacts to master
+    // Reassign all notes from merge contacts to primary
     await Note.update(
-      { contactId: masterId },
+      { contactId: primaryId },
       {
         where: {
           contactId: { [Op.in]: mergeIds },
@@ -815,19 +1030,19 @@ router.post('/merge', authMiddleware, async (req, res) => {
 
     await transaction.commit();
 
-    // Get updated master contact with deal count
-    const updatedMaster = await Contact.findOne({
-      where: { id: masterId, userId: req.user.id }
+    // Get updated primary contact with deal count
+    const updatedPrimary = await Contact.findOne({
+      where: { id: primaryId, userId: req.user.id }
     });
 
     const dealCount = await Deal.count({
-      where: { contactId: masterId, userId: req.user.id }
+      where: { contactId: primaryId, userId: req.user.id }
     });
 
     res.json({
-      message: `Successfully merged ${mergeIds.length} contacts into master contact`,
+      message: `Successfully merged ${mergeIds.length} contacts into primary contact`,
       contact: {
-        ...updatedMaster.toJSON(),
+        ...updatedPrimary.toJSON(),
         dealCount
       },
       mergedCount: mergeIds.length

@@ -159,10 +159,16 @@ const ContactDetail: React.FC = () => {
             {contact.email && (
               <button
                 onClick={() => setShowEmailModal(true)}
-                className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                disabled={contact.isUnsubscribed}
+                className={`inline-flex items-center px-4 py-3 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  contact.isUnsubscribed 
+                    ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed opacity-60' 
+                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-primary'
+                }`}
+                title={contact.isUnsubscribed ? 'Cannot send email - contact is unsubscribed' : 'Send email'}
               >
                 <EnvelopeIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                Email
+                {contact.isUnsubscribed ? 'Unsubscribed' : 'Email'}
               </button>
             )}
             <button
@@ -192,7 +198,23 @@ const ContactDetail: React.FC = () => {
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Email address</dt>
               <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
-                {contact.email || 'Not provided'}
+                {contact.email ? (
+                  <div className="flex items-center gap-3">
+                    <span className={contact.isUnsubscribed ? 'line-through text-gray-400' : ''}>
+                      {contact.email}
+                    </span>
+                    {contact.isUnsubscribed && (
+                      <span 
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                        title={`Unsubscribed: ${contact.unsubscribeReason || 'Unknown reason'}`}
+                      >
+                        Unsubscribed
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  'Not provided'
+                )}
               </dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

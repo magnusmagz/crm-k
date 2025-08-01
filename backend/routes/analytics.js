@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { sequelize, EmailSend, EmailEvent, EmailLink, Contact } = require('../models');
+const { sequelize, EmailSend, EmailEvent, EmailLink, Contact, EmailSuppression } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -71,11 +71,31 @@ router.get('/overview', authMiddleware, async (req, res) => {
       }]
     });
     
+    // Get unsubscribe stats
+    const unsubscribeFilter = { userId };
+    if (dateFilter.createdAt) {
+      unsubscribeFilter.createdAt = dateFilter.createdAt;
+    }
+    
+    const unsubscribeStats = await EmailSuppression.findAll({
+      where: unsubscribeFilter,
+      attributes: [
+        'reason',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      group: ['reason']
+    });
+    
+    const totalUnsubscribes = await EmailSuppression.count({
+      where: unsubscribeFilter
+    });
+    
     // Calculate rates
     const openRate = totalSent > 0 ? (engagementStats.dataValues.totalOpened / totalSent * 100).toFixed(2) : 0;
     const clickRate = totalSent > 0 ? (engagementStats.dataValues.totalClicked / totalSent * 100).toFixed(2) : 0;
     const bounceRate = totalSent > 0 ? (bounceStats / totalSent * 100).toFixed(2) : 0;
     const complaintRate = totalSent > 0 ? (complaintStats / totalSent * 100).toFixed(2) : 0;
+    const unsubscribeRate = totalSent > 0 ? (totalUnsubscribes / totalSent * 100).toFixed(2) : 0;
     
     res.json({
       totalSent,
@@ -96,6 +116,14 @@ router.get('/overview', authMiddleware, async (req, res) => {
         bounceRate: parseFloat(bounceRate),
         complaintCount: complaintStats,
         complaintRate: parseFloat(complaintRate)
+      },
+      unsubscribes: {
+        totalUnsubscribes,
+        unsubscribeRate: parseFloat(unsubscribeRate),
+        byReason: unsubscribeStats.reduce((acc, stat) => {
+          acc[stat.reason] = parseInt(stat.dataValues.count);
+          return acc;
+        }, {})
       }
     });
     
@@ -301,6 +329,93 @@ router.get('/links', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching link analytics:', error);
     res.status(500).json({ message: 'Error fetching link analytics' });
+  }
+});
+
+// Get unsubscribe analytics
+router.get('/unsubscribes', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { startDate, endDate, limit = 50 } = req.query;
+    
+    // Build date filter
+    const whereClause = { userId };
+    if (startDate) {
+      whereClause.createdAt = { [Op.gte]: new Date(startDate) };
+    }
+    if (endDate) {
+      whereClause.createdAt = { ...whereClause.createdAt, [Op.lte]: new Date(endDate) };
+    }
+    
+    // Get unsubscribe stats by reason
+    const reasonStats = await EmailSuppression.findAll({
+      where: whereClause,
+      attributes: [
+        'reason',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      group: ['reason'],
+      order: [[sequelize.literal('count'), 'DESC']]
+    });
+    
+    // Get unsubscribe trend over time
+    const trendData = await sequelize.query(`
+      SELECT 
+        DATE_TRUNC('day', created_at) as date,
+        COUNT(*) as unsubscribes,
+        reason
+      FROM email_suppressions
+      WHERE user_id = :userId
+        ${startDate ? 'AND created_at >= :startDate' : ''}
+        ${endDate ? 'AND created_at <= :endDate' : ''}
+      GROUP BY DATE_TRUNC('day', created_at), reason
+      ORDER BY date ASC
+    `, {
+      replacements: { 
+        userId, 
+        ...(startDate && { startDate: new Date(startDate) }),
+        ...(endDate && { endDate: new Date(endDate) })
+      },
+      type: sequelize.QueryTypes.SELECT
+    });
+    
+    // Get recent unsubscribes with contact info
+    const recentUnsubscribes = await EmailSuppression.findAll({
+      where: whereClause,
+      attributes: ['id', 'email', 'reason', 'createdAt'],
+      order: [['createdAt', 'DESC']],
+      limit: parseInt(limit)
+    });
+    
+    // Get total count
+    const totalUnsubscribes = await EmailSuppression.count({
+      where: whereClause
+    });
+    
+    res.json({
+      summary: {
+        totalUnsubscribes,
+        byReason: reasonStats.reduce((acc, stat) => {
+          acc[stat.reason] = parseInt(stat.dataValues.count);
+          return acc;
+        }, {})
+      },
+      trend: trendData.map(row => ({
+        date: row.date,
+        unsubscribes: parseInt(row.unsubscribes),
+        reason: row.reason
+      })),
+      recent: recentUnsubscribes.map(unsub => ({
+        id: unsub.id,
+        email: unsub.email,
+        reason: unsub.reason,
+        unsubscribedAt: unsub.createdAt
+      }))
+    });
+    
+  } catch (error) {
+    console.error('Error fetching unsubscribe analytics:', error);
+    res.status(500).json({ message: 'Error fetching unsubscribe analytics' });
   }
 });
 

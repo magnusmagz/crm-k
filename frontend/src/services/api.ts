@@ -243,6 +243,9 @@ export const analyticsAPI = {
   
   getLinkAnalytics: (limit: number = 20) =>
     api.get('/analytics/links', { params: { limit } }),
+  
+  getUnsubscribeAnalytics: (params?: { startDate?: string; endDate?: string; limit?: number }) =>
+    api.get('/analytics/unsubscribes', { params }),
 };
 
 // Notes API

@@ -53,14 +53,22 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
         {contact.email && (
           <div className="flex items-center text-mobile-sm text-gray-600">
             <EnvelopeIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-            <span className="truncate">
+            <div className="flex items-center gap-2 truncate flex-1">
               <a 
                 href={`mailto:${contact.email}`}
-                className="text-blue-600 hover:text-blue-800"
+                className={`text-blue-600 hover:text-blue-800 ${contact.isUnsubscribed ? 'line-through opacity-60' : ''}`}
               >
                 {contact.email}
               </a>
-            </span>
+              {contact.isUnsubscribed && (
+                <span 
+                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 flex-shrink-0"
+                  title={`Unsubscribed: ${contact.unsubscribeReason || 'Unknown reason'}`}
+                >
+                  Unsubscribed
+                </span>
+              )}
+            </div>
           </div>
         )}
         

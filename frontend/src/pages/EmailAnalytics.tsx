@@ -6,6 +6,7 @@ import {
   CursorArrowRaysIcon,
   ArrowTrendingUpIcon,
   CalendarIcon,
+  NoSymbolIcon,
 } from '@heroicons/react/24/outline';
 import {
   LineChart,
@@ -41,6 +42,11 @@ interface OverviewStats {
     complaintCount: number;
     complaintRate: number;
   };
+  unsubscribes: {
+    totalUnsubscribes: number;
+    unsubscribeRate: number;
+    byReason: Record<string, number>;
+  };
 }
 
 interface PerformanceData {
@@ -55,10 +61,29 @@ interface PerformanceData {
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'];
 
+interface UnsubscribeAnalytics {
+  summary: {
+    totalUnsubscribes: number;
+    byReason: Record<string, number>;
+  };
+  trend: Array<{
+    date: string;
+    unsubscribes: number;
+    reason: string;
+  }>;
+  recent: Array<{
+    id: string;
+    email: string;
+    reason: string;
+    unsubscribedAt: string;
+  }>;
+}
+
 export default function EmailAnalytics() {
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<OverviewStats | null>(null);
   const [performance, setPerformance] = useState<PerformanceData[]>([]);
+  const [unsubscribeAnalytics, setUnsubscribeAnalytics] = useState<UnsubscribeAnalytics | null>(null);
   const [period, setPeriod] = useState<'24h' | '7d' | '30d' | '90d'>('7d');
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>({
     start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
@@ -83,6 +108,14 @@ export default function EmailAnalytics() {
       // Fetch performance data
       const performanceRes = await analyticsAPI.getCampaignPerformance(period);
       setPerformance(performanceRes.data.data);
+
+      // Fetch unsubscribe analytics
+      const unsubscribeRes = await analyticsAPI.getUnsubscribeAnalytics({
+        startDate: dateRange.start.toISOString(),
+        endDate: dateRange.end.toISOString(),
+        limit: 10,
+      });
+      setUnsubscribeAnalytics(unsubscribeRes.data);
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
@@ -192,6 +225,56 @@ export default function EmailAnalytics() {
           </div>
         </div>
       </div>
+
+      {/* Unsubscribes Row */}
+      {overview?.unsubscribes && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Unsubscribe Rate */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Unsubscribe Rate</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {overview.unsubscribes.unsubscribeRate}%
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {overview.unsubscribes.totalUnsubscribes} unsubscribed
+                </p>
+              </div>
+              <NoSymbolIcon className="h-8 w-8 text-orange-500" />
+            </div>
+          </div>
+
+          {/* Unsubscribe Reasons */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 lg:col-span-2">
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">Unsubscribe Reasons</h3>
+            <div className="space-y-2">
+              {Object.entries(overview.unsubscribes.byReason).map(([reason, count]) => (
+                <div key={reason} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
+                    {reason.replace(/_/g, ' ')}
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                      <div
+                        className="bg-orange-500 h-2 rounded-full"
+                        style={{ 
+                          width: `${overview.unsubscribes.totalUnsubscribes > 0 
+                            ? (count / overview.unsubscribes.totalUnsubscribes) * 100 
+                            : 0}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {count}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
