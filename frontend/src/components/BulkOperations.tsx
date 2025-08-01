@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { X, Edit3, Tags, Plus, Minus, Trash2, Loader } from 'lucide-react';
+import { X, Edit3, Plus, Minus, Trash2, Loader } from 'lucide-react';
 import { Contact, Deal } from '../types';
 import api from '../services/api';
 
