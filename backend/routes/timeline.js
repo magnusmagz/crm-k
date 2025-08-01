@@ -30,137 +30,161 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
 
     // Fetch notes
     if (typeFilter.includes('note')) {
-      const notes = await Note.findAll({
-        where: {
-          contactId: contactId
-        },
-        attributes: ['id', 'content', 'createdAt', 'updatedAt'],
-        raw: true
-      });
-
-      notes.forEach(note => {
-        activities.push({
-          id: `note_${note.id}`,
-          type: 'note',
-          title: 'Note added',
-          description: note.content,
-          timestamp: note.createdAt,
-          data: note
+      try {
+        const notes = await Note.findAll({
+          where: {
+            contactId: contactId
+          },
+          attributes: ['id', 'content', 'createdAt', 'updatedAt'],
+          raw: true
         });
-      });
+
+        if (notes && Array.isArray(notes)) {
+          notes.forEach(note => {
+            if (note && note.id) {
+              activities.push({
+                id: `note_${note.id}`,
+                type: 'note',
+                title: 'Note added',
+                description: note.content || '',
+                timestamp: note.createdAt,
+                data: note
+              });
+            }
+          });
+        }
+      } catch (noteError) {
+        console.error('Error fetching notes for timeline:', noteError);
+      }
     }
 
     // Fetch deals and deal updates
     if (typeFilter.includes('deal')) {
-      const deals = await Deal.findAll({
-        where: {
-          contactId: contactId,
-          userId: req.user.id
-        },
-        attributes: ['id', 'name', 'value', 'status', 'createdAt', 'updatedAt', 'closedAt', 'stageId'],
-        include: [{
-          model: Stage,
-          as: 'stage',
-          attributes: ['name', 'color'],
-          required: false
-        }]
-      });
-
-      deals.forEach(deal => {
-        // Deal created
-        activities.push({
-          id: `deal_created_${deal.id}`,
-          type: 'deal',
-          subtype: 'created',
-          title: 'Deal created',
-          description: `${deal.name} - $${deal.value}`,
-          timestamp: deal.createdAt,
-          data: {
-            dealId: deal.id,
-            name: deal.name,
-            value: deal.value,
-            stage: deal.stage
-          }
+      try {
+        const deals = await Deal.findAll({
+          where: {
+            contactId: contactId,
+            userId: req.user.id
+          },
+          attributes: ['id', 'name', 'value', 'status', 'createdAt', 'updatedAt', 'closedAt', 'stageId'],
+          include: [{
+            model: Stage,
+            as: 'stage',
+            attributes: ['name', 'color'],
+            required: false
+          }]
         });
 
-        // Deal closed (if applicable)
-        if (deal.status !== 'open' && deal.closedAt) {
-          activities.push({
-            id: `deal_${deal.status}_${deal.id}`,
-            type: 'deal',
-            subtype: deal.status,
-            title: `Deal ${deal.status}`,
-            description: `${deal.name} - $${deal.value}`,
-            timestamp: deal.closedAt,
-            data: {
-              dealId: deal.id,
-              name: deal.name,
-              value: deal.value,
-              status: deal.status
+        if (deals && Array.isArray(deals)) {
+          deals.forEach(deal => {
+            if (deal && deal.id) {
+              // Deal created
+              activities.push({
+                id: `deal_created_${deal.id}`,
+                type: 'deal',
+                subtype: 'created',
+                title: 'Deal created',
+                description: `${deal.name || 'Untitled'} - $${deal.value || 0}`,
+                timestamp: deal.createdAt,
+                data: {
+                  dealId: deal.id,
+                  name: deal.name,
+                  value: deal.value,
+                  stage: deal.stage || null
+                }
+              });
+
+              // Deal closed (if applicable)
+              if (deal.status !== 'open' && deal.closedAt) {
+                activities.push({
+                  id: `deal_${deal.status}_${deal.id}`,
+                  type: 'deal',
+                  subtype: deal.status,
+                  title: `Deal ${deal.status}`,
+                  description: `${deal.name || 'Untitled'} - $${deal.value || 0}`,
+                  timestamp: deal.closedAt,
+                  data: {
+                    dealId: deal.id,
+                    name: deal.name,
+                    value: deal.value,
+                    status: deal.status
+                  }
+                });
+              }
             }
           });
         }
-      });
+      } catch (dealError) {
+        console.error('Error fetching deals for timeline:', dealError);
+      }
     }
 
     // Fetch emails
     if (typeFilter.includes('email')) {
-      const emails = await EmailSend.findAll({
-        where: {
-          contactId: contactId,
-          userId: req.user.id
-        },
-        attributes: ['id', 'subject', 'preview', 'sentAt', 'openedAt', 'clickedAt']
-      });
-
-      emails.forEach(email => {
-        // Email sent
-        activities.push({
-          id: `email_sent_${email.id}`,
-          type: 'email',
-          subtype: 'sent',
-          title: 'Email sent',
-          description: email.subject || 'No subject',
-          preview: email.preview,
-          timestamp: email.sentAt,
-          data: {
-            emailId: email.id,
-            subject: email.subject
-          }
+      try {
+        const emails = await EmailSend.findAll({
+          where: {
+            contactId: contactId,
+            userId: req.user.id
+          },
+          attributes: ['id', 'subject', 'preview', 'sentAt', 'openedAt', 'clickedAt']
         });
 
-        // Email opened
-        if (email.openedAt) {
-          activities.push({
-            id: `email_opened_${email.id}`,
-            type: 'email',
-            subtype: 'opened',
-            title: 'Email opened',
-            description: email.subject || 'No subject',
-            timestamp: email.openedAt,
-            data: {
-              emailId: email.id,
-              subject: email.subject
-            }
-          });
-        }
+        if (emails && Array.isArray(emails)) {
+          emails.forEach(email => {
+            if (email && email.id && email.sentAt) {
+              // Email sent
+              activities.push({
+                id: `email_sent_${email.id}`,
+                type: 'email',
+                subtype: 'sent',
+                title: 'Email sent',
+                description: email.subject || 'No subject',
+                preview: email.preview,
+                timestamp: email.sentAt,
+                data: {
+                  emailId: email.id,
+                  subject: email.subject
+                }
+              });
 
-        // Email clicked
-        if (email.clickedAt) {
-          activities.push({
-            id: `email_clicked_${email.id}`,
-            type: 'email',
-            subtype: 'clicked',
-            title: 'Email link clicked',
-            description: email.subject || 'No subject',
-            timestamp: email.clickedAt,
-            data: {
-              emailId: email.id,
-              subject: email.subject
+              // Email opened
+              if (email.openedAt) {
+                activities.push({
+                  id: `email_opened_${email.id}`,
+                  type: 'email',
+                  subtype: 'opened',
+                  title: 'Email opened',
+                  description: email.subject || 'No subject',
+                  timestamp: email.openedAt,
+                  data: {
+                    emailId: email.id,
+                    subject: email.subject
+                  }
+                });
+              }
+
+              // Email clicked
+              if (email.clickedAt) {
+                activities.push({
+                  id: `email_clicked_${email.id}`,
+                  type: 'email',
+                  subtype: 'clicked',
+                  title: 'Email link clicked',
+                  description: email.subject || 'No subject',
+                  timestamp: email.clickedAt,
+                  data: {
+                    emailId: email.id,
+                    subject: email.subject
+                  }
+                });
+              }
             }
           });
         }
-      });
+      } catch (emailError) {
+        console.error('Error fetching emails for timeline:', emailError);
+      }
     }
 
     // Contact updates
@@ -196,7 +220,13 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
     }
 
     // Sort activities by timestamp (newest first)
-    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    if (activities && activities.length > 0) {
+      activities.sort((a, b) => {
+        const timeA = new Date(a.timestamp).getTime();
+        const timeB = new Date(b.timestamp).getTime();
+        return timeB - timeA;
+      });
+    }
 
     // Apply pagination
     const paginatedActivities = activities.slice(
@@ -205,8 +235,8 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
     );
 
     res.json({
-      activities: paginatedActivities,
-      total: activities.length,
+      activities: paginatedActivities || [],
+      total: activities.length || 0,
       limit: parseInt(limit),
       offset: parseInt(offset)
     });
@@ -237,25 +267,31 @@ router.get('/contact/:contactId/summary', authMiddleware, async (req, res) => {
     }
 
     // Get counts for each activity type
-    const [noteCount, dealCount, emailCount] = await Promise.all([
-      Note.count({
-        where: {
-          contactId: contactId
-        }
-      }),
-      Deal.count({
-        where: {
-          contactId: contactId,
-          userId: req.user.id
-        }
-      }),
-      EmailSend.count({
-        where: {
-          contactId: contactId,
-          userId: req.user.id
-        }
-      })
-    ]);
+    let noteCount = 0, dealCount = 0, emailCount = 0;
+    
+    try {
+      [noteCount, dealCount, emailCount] = await Promise.all([
+        Note.count({
+          where: {
+            contactId: contactId
+          }
+        }).catch(() => 0),
+        Deal.count({
+          where: {
+            contactId: contactId,
+            userId: req.user.id
+          }
+        }).catch(() => 0),
+        EmailSend.count({
+          where: {
+            contactId: contactId,
+            userId: req.user.id
+          }
+        }).catch(() => 0)
+      ]);
+    } catch (countError) {
+      console.error('Error getting activity counts:', countError);
+    }
 
     // Get last activity date
     const lastActivities = await Promise.all([

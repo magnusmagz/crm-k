@@ -281,9 +281,9 @@ router.get('/duplicates', authMiddleware, async (req, res) => {
           sequelize.where(
             sequelize.fn('LOWER', 
               sequelize.fn('CONCAT', 
-                sequelize.col('firstName'), 
+                sequelize.col('first_name'), 
                 ' ', 
-                sequelize.col('lastName')
+                sequelize.col('last_name')
               )
             ),
             { [Op.iLike]: `%${searchTerm}%` }
