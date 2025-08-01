@@ -68,7 +68,7 @@ const TimeBasedExits: React.FC<TimeBasedExitsProps> = ({
                 placeholder="No limit"
                 min="1"
                 max="365"
-                className="w-24 text-sm rounded-md border-gray-300"
+                className="w-24 px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
               />
               <span className="text-sm text-gray-600">days</span>
               {maxDurationDays && (
@@ -129,7 +129,7 @@ const TimeBasedExits: React.FC<TimeBasedExitsProps> = ({
                         disabled={isReadOnly}
                         min="1"
                         max="365"
-                        className="w-20 text-sm rounded-md border-gray-300"
+                        className="w-20 px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                       />
                       <span className="text-sm text-gray-600">days in automation</span>
                     </div>
@@ -147,7 +147,7 @@ const TimeBasedExits: React.FC<TimeBasedExitsProps> = ({
                           })}
                           disabled={isReadOnly}
                           min="1"
-                          className="w-20 text-sm rounded-md border-gray-300"
+                          className="w-20 px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                         />
                         <span className="text-sm text-gray-600">activities</span>
                       </div>
@@ -175,14 +175,14 @@ const TimeBasedExits: React.FC<TimeBasedExitsProps> = ({
       </div>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <div className="flex">
           <div className="flex-shrink-0">
-            <ClockIcon className="h-5 w-5 text-blue-400" />
+            <ClockIcon className="h-5 w-5 text-gray-400" />
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">Time-Based Exit Best Practices</h3>
-            <div className="mt-2 text-sm text-blue-700">
+            <h3 className="text-sm font-medium text-primary-dark">Time-Based Exit Best Practices</h3>
+            <div className="mt-2 text-sm text-gray-700">
               <ul className="list-disc list-inside space-y-1">
                 <li>Set reasonable time limits to prevent contacts from being stuck in automations</li>
                 <li>Consider your typical sales cycle when setting maximum duration</li>

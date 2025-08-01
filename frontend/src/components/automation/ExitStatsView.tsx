@@ -54,7 +54,7 @@ const ExitStatsView: React.FC<ExitStatsViewProps> = ({ automationId }) => {
       return <FlagIcon className="h-4 w-4 text-green-500" />;
     }
     if (reason.includes('time') || reason.includes('duration') || reason.includes('days')) {
-      return <ClockIcon className="h-4 w-4 text-blue-500" />;
+      return <ClockIcon className="h-4 w-4 text-primary" />;
     }
     if (reason.includes('safety') || reason.includes('error') || reason.includes('Safety')) {
       return <ExclamationTriangleIcon className="h-4 w-4 text-red-500" />;
@@ -67,7 +67,7 @@ const ExitStatsView: React.FC<ExitStatsViewProps> = ({ automationId }) => {
       return 'bg-green-100 text-green-800';
     }
     if (reason.includes('time') || reason.includes('duration') || reason.includes('days')) {
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-primary-light text-primary-dark';
     }
     if (reason.includes('safety') || reason.includes('error') || reason.includes('Safety')) {
       return 'bg-red-100 text-red-800';

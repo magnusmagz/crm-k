@@ -134,7 +134,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                     value={goal.field || ''}
                     onChange={(e) => updateGoal(index, { field: e.target.value })}
                     disabled={isReadOnly}
-                    className="text-sm rounded-md border-gray-300"
+                    className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                   >
                     <option value="">Select field</option>
                     {fieldOptions.map(opt => (
@@ -145,7 +145,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                     value={goal.operator || ''}
                     onChange={(e) => updateGoal(index, { operator: e.target.value })}
                     disabled={isReadOnly}
-                    className="text-sm rounded-md border-gray-300"
+                    className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                   >
                     <option value="">Select operator</option>
                     {operatorOptions.map(opt => (
@@ -159,7 +159,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                       onChange={(e) => updateGoal(index, { value: e.target.value })}
                       disabled={isReadOnly}
                       placeholder="Value"
-                      className="text-sm rounded-md border-gray-300"
+                      className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                     />
                   )}
                 </div>
@@ -179,7 +179,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                     })}
                     disabled={isReadOnly}
                     placeholder="e.g., vip, priority, customer"
-                    className="w-full text-sm rounded-md border-gray-300"
+                    className="w-full px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
                 <div className="flex items-center space-x-4">
@@ -217,7 +217,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                   value={goal.operator || ''}
                   onChange={(e) => updateGoal(index, { operator: e.target.value })}
                   disabled={isReadOnly}
-                  className="text-sm rounded-md border-gray-300"
+                  className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                 >
                   <option value="">Select operator</option>
                   <option value="greater_than">Greater Than</option>
@@ -232,7 +232,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                   onChange={(e) => updateGoal(index, { value: parseFloat(e.target.value) })}
                   disabled={isReadOnly}
                   placeholder="Amount"
-                  className="text-sm rounded-md border-gray-300"
+                  className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                 />
               </div>
             )}
@@ -253,7 +253,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                     value={goal.operator || ''}
                     onChange={(e) => updateGoal(index, { operator: e.target.value })}
                     disabled={isReadOnly}
-                    className="text-sm rounded-md border-gray-300"
+                    className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                   >
                     <option value="">Select operator</option>
                     {operatorOptions.map(opt => (
@@ -267,7 +267,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                       onChange={(e) => updateGoal(index, { value: e.target.value })}
                       disabled={isReadOnly}
                       placeholder="Value"
-                      className="text-sm rounded-md border-gray-300"
+                      className="px-4 py-3 text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                     />
                   )}
                 </div>
@@ -291,19 +291,19 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
 
       {/* Add New Goal Form */}
       {showAddGoal && !isReadOnly && (
-        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
           <div className="flex justify-between items-center mb-3">
-            <h5 className="text-sm font-medium text-blue-900">Add New Goal</h5>
+            <h5 className="text-sm font-medium text-primary-dark">Add New Goal</h5>
             <button
               onClick={() => setShowAddGoal(false)}
-              className="text-blue-600 hover:text-blue-800 text-sm"
+              className="text-primary hover:text-primary-dark text-sm"
             >
               Cancel
             </button>
           </div>
           <button
             onClick={addGoal}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+            className="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-dark text-sm font-medium"
           >
             Add Goal Condition
           </button>

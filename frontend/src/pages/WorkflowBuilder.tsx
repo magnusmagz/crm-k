@@ -5,6 +5,7 @@ import { automationsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import ActionConfig from '../components/workflow/ActionConfig';
 import { FormField, FormSelect, FormTextarea } from '../components/ui/FormField';
+import ExitCriteriaConfig from '../components/automation/ExitCriteriaConfig';
 import {
   PlusIcon,
   TrashIcon,
@@ -45,6 +46,21 @@ const WorkflowBuilder: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [validationWarnings, setValidationWarnings] = useState<string[]>([]);
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
+  const [exitCriteria, setExitCriteria] = useState<any>({});
+  const [maxDurationDays, setMaxDurationDays] = useState<number | null>(null);
+  const [safetyExitEnabled, setSafetyExitEnabled] = useState(true);
+
+  const handleExitCriteriaChange = (criteria: any) => {
+    setExitCriteria(criteria);
+  };
+
+  const handleMaxDurationChange = (days: number | null) => {
+    setMaxDurationDays(days);
+  };
+
+  const handleSafetyExitChange = (enabled: boolean) => {
+    setSafetyExitEnabled(enabled);
+  };
 
   useEffect(() => {
     if (isEditing) {
@@ -60,6 +76,9 @@ const WorkflowBuilder: React.FC = () => {
       if (response.data.automation.steps && response.data.automation.steps.length > 0) {
         setSteps(response.data.automation.steps);
       }
+      setExitCriteria(response.data.automation.exitCriteria || {});
+      setMaxDurationDays(response.data.automation.maxDurationDays || null);
+      setSafetyExitEnabled(response.data.automation.safetyExitEnabled !== false);
     } catch (error) {
       toast.error('Failed to load automation');
       navigate('/automations');
@@ -224,6 +243,9 @@ const WorkflowBuilder: React.FC = () => {
       const data = {
         ...automation,
         steps,
+        exitCriteria,
+        maxDurationDays,
+        safetyExitEnabled,
       };
 
       if (isEditing) {
@@ -381,6 +403,25 @@ const WorkflowBuilder: React.FC = () => {
               <option value="deal_stage_changed">When Deal Stage Changes</option>
             </FormSelect>
           </div>
+        </div>
+      </div>
+
+      {/* Exit Criteria */}
+      <div className="bg-white shadow sm:rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h2 className="text-lg font-medium text-primary-dark mb-4">Exit Criteria</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Define when contacts should automatically exit this workflow
+          </p>
+          <ExitCriteriaConfig
+            exitCriteria={exitCriteria}
+            maxDurationDays={maxDurationDays}
+            safetyExitEnabled={safetyExitEnabled}
+            onExitCriteriaChange={handleExitCriteriaChange}
+            onMaxDurationChange={handleMaxDurationChange}
+            onSafetyExitChange={handleSafetyExitChange}
+            entityType={automation.trigger?.type.includes('contact') ? 'contact' : 'deal'}
+          />
         </div>
       </div>
 
