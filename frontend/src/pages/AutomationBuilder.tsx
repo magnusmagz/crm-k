@@ -9,7 +9,6 @@ import ConditionBuilder from '../components/automation/ConditionBuilder';
 import ActionBuilder from '../components/automation/ActionBuilder';
 import EnrollmentView from '../components/automation/EnrollmentView';
 import DebugView from '../components/automation/DebugView';
-import ExitCriteriaConfig from '../components/automation/ExitCriteriaConfig';
 
 const AutomationBuilder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
