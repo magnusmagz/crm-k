@@ -10,6 +10,7 @@ import PullToRefresh from '../components/PullToRefresh';
 import LazyLoadWrapper from '../components/LazyLoadWrapper';
 import ContactCardSkeleton from '../components/ContactCardSkeleton';
 import ContactImport from '../components/ContactImport';
+import ContactExport from '../components/ContactExport';
 import Pagination from '../components/Pagination';
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -20,6 +21,7 @@ const Contacts: React.FC = () => {
   const [search, setSearch] = useState('');
   const [showNewContact, setShowNewContact] = useState(searchParams.get('new') === 'true');
   const [showImport, setShowImport] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -81,6 +83,16 @@ const Contacts: React.FC = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
+          <button
+            type="button"
+            onClick={() => setShowExport(true)}
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+          </button>
           <button
             type="button"
             onClick={() => setShowImport(true)}
@@ -358,6 +370,14 @@ const Contacts: React.FC = () => {
           setShowImport(false);
           fetchContacts();
         }} />
+      )}
+
+      {showExport && (
+        <ContactExport
+          onClose={() => setShowExport(false)}
+          searchQuery={search}
+          totalContacts={total}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Contact, CustomField, Deal, sequelize } = require('../models');
+const { Contact, CustomField, Deal, Note, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
@@ -613,6 +613,377 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
   } catch (error) {
     console.error('CSV import error:', error);
     res.status(500).json({ error: 'Failed to import contacts' });
+  }
+});
+
+// Search for duplicate contacts
+router.get('/duplicates', authMiddleware, async (req, res) => {
+  try {
+    const { search } = req.query;
+    
+    if (!search || search.trim().length < 2) {
+      return res.status(400).json({ error: 'Search query must be at least 2 characters' });
+    }
+
+    const searchTerm = search.trim().toLowerCase();
+    
+    // Search by email (exact match) or name (fuzzy match)
+    const contacts = await Contact.findAll({
+      where: {
+        userId: req.user.id,
+        [Op.or]: [
+          // Email exact match (case-insensitive)
+          sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('email')),
+            searchTerm
+          ),
+          // Email contains
+          { email: { [Op.iLike]: `%${searchTerm}%` } },
+          // Name fuzzy match
+          sequelize.where(
+            sequelize.fn('LOWER', 
+              sequelize.fn('CONCAT', 
+                sequelize.col('firstName'), 
+                ' ', 
+                sequelize.col('lastName')
+              )
+            ),
+            { [Op.like]: `%${searchTerm}%` }
+          ),
+          // First name only
+          { firstName: { [Op.iLike]: `%${searchTerm}%` } },
+          // Last name only
+          { lastName: { [Op.iLike]: `%${searchTerm}%` } }
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      limit: 50
+    });
+
+    // Get deal counts for each contact
+    const contactIds = contacts.map(c => c.id);
+    const dealCounts = await Deal.findAll({
+      where: { 
+        contactId: contactIds,
+        userId: req.user.id 
+      },
+      attributes: [
+        'contactId',
+        [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'dealCount']
+      ],
+      group: ['contactId'],
+      raw: true
+    });
+    
+    const dealCountMap = dealCounts.reduce((map, stat) => {
+      map[stat.contactId] = parseInt(stat.dealCount) || 0;
+      return map;
+    }, {});
+
+    // Add deal count to contacts
+    const contactsWithStats = contacts.map(contact => ({
+      ...contact.toJSON(),
+      dealCount: dealCountMap[contact.id] || 0
+    }));
+
+    res.json({ 
+      contacts: contactsWithStats,
+      query: search
+    });
+  } catch (error) {
+    console.error('Search duplicates error:', error);
+    res.status(500).json({ error: 'Failed to search for duplicates' });
+  }
+});
+
+// Merge contacts
+router.post('/merge', authMiddleware, async (req, res) => {
+  const transaction = await sequelize.transaction();
+  
+  try {
+    const { masterId, mergeIds } = req.body;
+    
+    if (!masterId || !mergeIds || !Array.isArray(mergeIds) || mergeIds.length === 0) {
+      return res.status(400).json({ 
+        error: 'Master contact ID and array of merge IDs are required' 
+      });
+    }
+
+    // Ensure master is not in merge list
+    if (mergeIds.includes(masterId)) {
+      return res.status(400).json({ 
+        error: 'Master contact cannot be in the merge list' 
+      });
+    }
+
+    // Get all contacts (master + merge targets)
+    const allIds = [masterId, ...mergeIds];
+    const contacts = await Contact.findAll({
+      where: {
+        id: { [Op.in]: allIds },
+        userId: req.user.id
+      },
+      transaction
+    });
+
+    // Verify all contacts exist and belong to user
+    if (contacts.length !== allIds.length) {
+      await transaction.rollback();
+      return res.status(404).json({ error: 'One or more contacts not found' });
+    }
+
+    // Find master contact
+    const masterContact = contacts.find(c => c.id === masterId);
+    const mergeContacts = contacts.filter(c => c.id !== masterId);
+
+    // Merge data into master (only fill empty fields)
+    const updates = {};
+    const fieldsToMerge = ['email', 'phone', 'company', 'position', 'notes'];
+    
+    for (const field of fieldsToMerge) {
+      if (!masterContact[field] || masterContact[field] === '') {
+        // Find first non-empty value from merge contacts
+        for (const mergeContact of mergeContacts) {
+          if (mergeContact[field] && mergeContact[field] !== '') {
+            updates[field] = mergeContact[field];
+            break;
+          }
+        }
+      }
+    }
+
+    // Merge notes (concatenate if both have notes)
+    if (masterContact.notes) {
+      const additionalNotes = mergeContacts
+        .filter(c => c.notes && c.notes !== '')
+        .map(c => c.notes);
+      
+      if (additionalNotes.length > 0) {
+        updates.notes = [masterContact.notes, ...additionalNotes].join('\n\n---\n\n');
+      }
+    }
+
+    // Merge tags (combine unique tags)
+    const allTags = new Set(masterContact.tags || []);
+    mergeContacts.forEach(contact => {
+      (contact.tags || []).forEach(tag => allTags.add(tag));
+    });
+    if (allTags.size > 0) {
+      updates.tags = Array.from(allTags);
+    }
+
+    // Merge custom fields (only fill empty fields)
+    const customFieldUpdates = { ...(masterContact.customFields || {}) };
+    mergeContacts.forEach(contact => {
+      if (contact.customFields) {
+        Object.entries(contact.customFields).forEach(([key, value]) => {
+          if (!customFieldUpdates[key] && value) {
+            customFieldUpdates[key] = value;
+          }
+        });
+      }
+    });
+    if (Object.keys(customFieldUpdates).length > 0) {
+      updates.customFields = customFieldUpdates;
+    }
+
+    // Update master contact if there are changes
+    if (Object.keys(updates).length > 0) {
+      await masterContact.update(updates, { transaction });
+    }
+
+    // Reassign all deals from merge contacts to master
+    await Deal.update(
+      { contactId: masterId },
+      {
+        where: {
+          contactId: { [Op.in]: mergeIds },
+          userId: req.user.id
+        },
+        transaction
+      }
+    );
+
+    // Reassign all notes from merge contacts to master
+    await Note.update(
+      { contactId: masterId },
+      {
+        where: {
+          contactId: { [Op.in]: mergeIds },
+          userId: req.user.id
+        },
+        transaction
+      }
+    );
+
+    // Delete merged contacts
+    await Contact.destroy({
+      where: {
+        id: { [Op.in]: mergeIds },
+        userId: req.user.id
+      },
+      transaction
+    });
+
+    await transaction.commit();
+
+    // Get updated master contact with deal count
+    const updatedMaster = await Contact.findOne({
+      where: { id: masterId, userId: req.user.id }
+    });
+
+    const dealCount = await Deal.count({
+      where: { contactId: masterId, userId: req.user.id }
+    });
+
+    res.json({
+      message: `Successfully merged ${mergeIds.length} contacts into master contact`,
+      contact: {
+        ...updatedMaster.toJSON(),
+        dealCount
+      },
+      mergedCount: mergeIds.length
+    });
+
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Merge contacts error:', error);
+    res.status(500).json({ error: 'Failed to merge contacts' });
+  }
+});
+
+// Export contacts to CSV
+router.get('/export', authMiddleware, async (req, res) => {
+  try {
+    const {
+      fields = 'firstName,lastName,email,phone,company,position',
+      search,
+      tags,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      format = 'csv'
+    } = req.query;
+
+    // Parse fields
+    const requestedFields = fields.split(',').map(f => f.trim());
+    
+    // Build query with same filters as the GET / endpoint
+    const where = { userId: req.user.id };
+
+    // Search functionality
+    if (search) {
+      where[Op.or] = [
+        { firstName: { [Op.iLike]: `%${search}%` } },
+        { lastName: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } },
+        { company: { [Op.iLike]: `%${search}%` } },
+        { position: { [Op.iLike]: `%${search}%` } },
+        { notes: { [Op.iLike]: `%${search}%` } },
+        { tags: { [Op.contains]: [search] } }
+      ];
+    }
+
+    // Tag filtering
+    if (tags) {
+      const tagArray = tags.split(',').map(tag => tag.trim());
+      where.tags = { [Op.contains]: tagArray };
+    }
+
+    // Fetch contacts with a limit of 10,000
+    const contacts = await Contact.findAll({
+      where,
+      order: [[sortBy, sortOrder]],
+      limit: 10000,
+      raw: true
+    });
+
+    // Get custom fields for the user
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: 'contact'
+      },
+      order: [['order', 'ASC']]
+    });
+
+    // Build CSV field definitions
+    const csvFields = [];
+    const fieldMap = {
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      email: 'Email',
+      phone: 'Phone',
+      company: 'Company',
+      position: 'Position',
+      tags: 'Tags',
+      notes: 'Notes',
+      createdAt: 'Created Date',
+      updatedAt: 'Updated Date'
+    };
+
+    // Add standard fields
+    requestedFields.forEach(field => {
+      if (fieldMap[field]) {
+        csvFields.push({
+          label: fieldMap[field],
+          value: (row) => {
+            if (field === 'tags') {
+              return Array.isArray(row.tags) ? row.tags.join(', ') : '';
+            }
+            if (field === 'createdAt' || field === 'updatedAt') {
+              return row[field] ? new Date(row[field]).toISOString() : '';
+            }
+            return row[field] || '';
+          }
+        });
+      }
+    });
+
+    // Add custom fields
+    customFields.forEach(customField => {
+      const fieldKey = `customFields.${customField.name}`;
+      if (requestedFields.includes(fieldKey)) {
+        csvFields.push({
+          label: customField.label,
+          value: (row) => {
+            const value = row.customFields?.[customField.name];
+            if (value === null || value === undefined) return '';
+            if (customField.type === 'checkbox') return value ? 'Yes' : 'No';
+            if (customField.type === 'date' && value) {
+              return new Date(value).toISOString().split('T')[0];
+            }
+            return String(value);
+          }
+        });
+      }
+    });
+
+    // Generate CSV using the csvExporter utility
+    const { generateCSV } = require('../utils/csvExporter');
+    
+    // Transform data for CSV generation
+    const csvData = contacts.map(contact => {
+      const row = {};
+      csvFields.forEach(field => {
+        row[field.label] = field.value(contact);
+      });
+      return row;
+    });
+
+    const csv = generateCSV(csvData);
+
+    // Set response headers
+    const filename = `contacts-export-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('X-Total-Count', contacts.length.toString());
+
+    res.send(csv);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({ error: 'Failed to export contacts' });
   }
 });
 
