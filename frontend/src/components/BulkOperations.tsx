@@ -161,7 +161,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 disabled={isSubmitting}
-                className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-1"
+                className="px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-primary-dark disabled:bg-gray-400 flex items-center gap-1"
               >
                 <Edit3 className="h-4 w-4" />
                 Bulk Edit
@@ -196,7 +196,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
                 onClick={() => setActiveTab('basic')}
                 className={`px-3 py-2 text-sm font-medium border-b-2 ${
                   activeTab === 'basic'
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -206,7 +206,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
                 onClick={() => setActiveTab('tags')}
                 className={`px-3 py-2 text-sm font-medium border-b-2 ${
                   activeTab === 'tags'
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -217,7 +217,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
                   onClick={() => setActiveTab('custom')}
                   className={`px-3 py-2 text-sm font-medium border-b-2 ${
                     activeTab === 'custom'
-                      ? 'border-blue-500 text-blue-600'
+                      ? 'border-primary text-primary'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
@@ -363,7 +363,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
                     />
                     <button
                       onClick={addTag}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-1"
+                      className="px-3 py-2 bg-primary text-white rounded-md hover:bg-primary-dark flex items-center gap-1"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -463,7 +463,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
               <button
                 onClick={handleBulkUpdate}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-white text-sm rounded-md hover:bg-primary-dark disabled:bg-gray-400 flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <>

@@ -60,14 +60,14 @@ const DealCard: React.FC<DealCardProps> = ({
   return (
     <div
       className={`p-3 sm:p-4 rounded-md shadow-sm border cursor-pointer hover:shadow-md transition-shadow group ${
-        isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+        isSelected ? 'ring-2 ring-primary bg-gray-50' : ''
       } ${
         deal.status === 'won' 
           ? 'bg-green-50 border-green-200' 
           : deal.status === 'lost'
           ? 'bg-red-50 border-red-200'
           : isSelected
-          ? 'bg-blue-50 border-blue-300'
+          ? 'bg-gray-50 border-primary'
           : 'bg-white border-gray-200'
       }`}
       draggable
@@ -82,7 +82,7 @@ const DealCard: React.FC<DealCardProps> = ({
             checked={isSelected}
             onChange={handleToggleSelect}
             onClick={(e) => e.stopPropagation()}
-            className="mt-1 mr-3 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+            className="mt-1 mr-3 h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
           />
         )}
         <div className="flex-1 min-w-0">

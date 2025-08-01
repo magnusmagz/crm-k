@@ -106,7 +106,7 @@ const DuplicateContacts: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name or email..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           {isSearching && (
             <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 animate-spin" />
@@ -132,12 +132,12 @@ const DuplicateContacts: React.FC = () => {
 
       {/* Action Bar */}
       {selectedContacts.size > 0 && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+        <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-blue-700">
+            <span className="text-primary-dark">
               {selectedContacts.size} contact{selectedContacts.size > 1 ? 's' : ''} selected
             </span>
-            <span className="text-blue-600 text-sm">
+            <span className="text-primary text-sm">
               Ready to compare and merge
             </span>
           </div>
@@ -151,7 +151,7 @@ const DuplicateContacts: React.FC = () => {
             <button
               onClick={handleMerge}
               disabled={selectedContacts.size < 2}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <Users className="h-4 w-4" />
               Compare & Merge
@@ -168,7 +168,7 @@ const DuplicateContacts: React.FC = () => {
               key={contact.id}
               className={`border rounded-lg p-4 transition-all ${
                 selectedContacts.has(contact.id)
-                  ? 'border-blue-500 bg-blue-50'
+                  ? 'border-primary bg-gray-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
@@ -178,7 +178,7 @@ const DuplicateContacts: React.FC = () => {
                     type="checkbox"
                     checked={selectedContacts.has(contact.id)}
                     onChange={() => toggleContactSelection(contact.id)}
-                    className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    className="mt-1 h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">

@@ -252,7 +252,7 @@ const Pipeline: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search deals or contacts..."
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                 />
                 {/* Searching indicator */}
                 {isSearching && (
@@ -269,7 +269,7 @@ const Pipeline: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
               >
                 <option value="all">All Deals</option>
                 <option value="open">Open Deals</option>
@@ -282,7 +282,7 @@ const Pipeline: React.FC = () => {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium ${
                   showFilters 
-                    ? 'border-blue-500 text-blue-700 bg-blue-50' 
+                    ? 'border-primary text-primary bg-gray-50' 
                     : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
                 }`}
               >
@@ -316,8 +316,8 @@ const Pipeline: React.FC = () => {
             {/* Total Pipeline Card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow duration-200 cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors duration-200">
-                  <CurrencyDollarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors duration-200">
+                  <CurrencyDollarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
               </div>
               <div className="space-y-1">
