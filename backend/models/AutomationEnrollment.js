@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     status: {
-      type: DataTypes.ENUM('active', 'completed', 'failed', 'unenrolled'),
+      type: DataTypes.ENUM('active', 'completed', 'failed', 'unenrolled', 'exited'),
       defaultValue: 'active',
       allowNull: false
     },
@@ -56,6 +56,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSONB,
       defaultValue: {},
       allowNull: false
+    },
+    exitReason: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    exitedAt: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     tableName: 'automation_enrollments',

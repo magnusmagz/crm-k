@@ -91,6 +91,20 @@ module.exports = (sequelize, DataTypes) => {
     lastExecutedAt: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    exitCriteria: {
+      type: DataTypes.JSONB,
+      defaultValue: {},
+      allowNull: false
+    },
+    maxDurationDays: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    safetyExitEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: false
     }
   }, {
     tableName: 'automations',

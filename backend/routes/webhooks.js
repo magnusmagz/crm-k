@@ -144,6 +144,57 @@ router.post('/postmark', async (req, res) => {
             });
             break;
             
+          case 'SubscriptionChange':
+            // Handle unsubscribes through Postmark
+            console.log('SubscriptionChange event:', {
+              Email: event.Email,
+              SuppressionReason: event.SuppressionReason,
+              SuppressionInactive: event.SuppressionInactive
+            });
+            
+            if (event.SuppressionInactive === false) {
+              // Reactivated - remove from suppression list
+              await EmailSuppression.destroy({
+                where: { email: event.Email.toLowerCase() }
+              });
+              console.log(`Removed ${event.Email} from suppression list (reactivated)`);
+            } else {
+              // Suppressed - add to our list
+              let reason = 'manual';
+              if (event.SuppressionReason === 'Customer') reason = 'unsubscribe';
+              if (event.SuppressionReason === 'SpamComplaint') reason = 'spam_complaint';
+              if (event.SuppressionReason === 'HardBounce') reason = 'hard_bounce';
+              
+              await EmailSuppression.findOrCreate({
+                where: { email: event.Email.toLowerCase() },
+                defaults: {
+                  email: event.Email.toLowerCase(),
+                  reason: reason,
+                  userId: emailSend ? emailSend.userId : null
+                }
+              });
+              
+              // Update email send record if we have it
+              if (emailSend && reason === 'unsubscribe') {
+                await emailSend.update({
+                  unsubscribedAt: new Date()
+                });
+              }
+              
+              // Log the event
+              if (emailSend) {
+                await EmailEvent.create({
+                  emailSendId: emailSend.id,
+                  eventType: 'unsubscribe',
+                  eventData: event,
+                  occurredAt: new Date()
+                });
+              }
+              
+              console.log(`Added ${event.Email} to suppression list (${reason})`);
+            }
+            break;
+            
           default:
             console.log(`Unhandled Postmark event type: ${RecordType}`);
         }
