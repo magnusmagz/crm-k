@@ -513,7 +513,7 @@ class EmailService {
 
       // Prepare email data
       const emailData = {
-        From: `${userName} <${this.fromEmail}>`,
+        From: `${userName} <${userFirstName}@${this.emailDomain}>`,
         To: contactEmail,
         Subject: subject,
         HtmlBody: htmlBody,
