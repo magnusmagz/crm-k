@@ -417,10 +417,11 @@ const WorkflowBuilder: React.FC = () => {
             exitCriteria={exitCriteria}
             maxDurationDays={maxDurationDays}
             safetyExitEnabled={safetyExitEnabled}
-            onExitCriteriaChange={handleExitCriteriaChange}
-            onMaxDurationChange={handleMaxDurationChange}
-            onSafetyExitChange={handleSafetyExitChange}
-            entityType={automation.trigger?.type.includes('contact') ? 'contact' : 'deal'}
+            onChange={(criteria, maxDays, safetyEnabled) => {
+              setExitCriteria(criteria);
+              setMaxDurationDays(maxDays);
+              setSafetyExitEnabled(safetyEnabled);
+            }}
           />
         </div>
       </div>
