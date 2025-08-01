@@ -27,6 +27,7 @@ const EmailSend = require('./EmailSend')(sequelize, Sequelize.DataTypes);
 const EmailEvent = require('./EmailEvent')(sequelize, Sequelize.DataTypes);
 const EmailLink = require('./EmailLink')(sequelize, Sequelize.DataTypes);
 const EmailSuppression = require('./EmailSuppression')(sequelize, Sequelize.DataTypes);
+const Note = require('./Note')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
@@ -83,6 +84,13 @@ EmailLink.belongsTo(EmailSend, { foreignKey: 'email_send_id' });
 User.hasMany(EmailSuppression, { foreignKey: 'user_id', as: 'emailSuppressions' });
 EmailSuppression.belongsTo(User, { foreignKey: 'user_id' });
 
+// Note associations
+User.hasMany(Note, { foreignKey: 'user_id', as: 'notes' });
+Note.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+Contact.hasMany(Note, { foreignKey: 'contact_id', as: 'notes' });
+Note.belongsTo(Contact, { foreignKey: 'contact_id', as: 'contact' });
+
 module.exports = {
   sequelize,
   User,
@@ -98,5 +106,6 @@ module.exports = {
   EmailSend,
   EmailEvent,
   EmailLink,
-  EmailSuppression
+  EmailSuppression,
+  Note
 };
