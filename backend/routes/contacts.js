@@ -89,12 +89,14 @@ router.get('/', authMiddleware, async (req, res) => {
     
     // Create a map for quick lookup
     const dealStatsMap = dealStats.reduce((map, stat) => {
+      const totalValue = parseFloat(stat.totalValue) || 0;
+      const openValue = parseFloat(stat.openValue) || 0;
       map[stat.contactId] = {
         dealCount: parseInt(stat.dealCount) || 0,
-        totalValue: parseFloat(stat.totalValue) || 0,
+        totalValue: isNaN(totalValue) ? 0 : totalValue,
         wonDeals: parseInt(stat.wonDeals) || 0,
         openDeals: parseInt(stat.openDeals) || 0,
-        openValue: parseFloat(stat.openValue) || 0
+        openValue: isNaN(openValue) ? 0 : openValue
       };
       return map;
     }, {});
