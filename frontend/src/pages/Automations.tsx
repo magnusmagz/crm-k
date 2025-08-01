@@ -211,7 +211,7 @@ const Automations: React.FC = () => {
                       <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <button
                           onClick={() => toggleEnrollmentView(automation.id)}
-                          className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                          className="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-gray-100 transition-colors"
                           title={`${automation.activeEnrollments || 0} currently active`}
                         >
                           <UserIcon className="h-5 w-5 text-primary mr-2" />
@@ -313,7 +313,7 @@ const Automations: React.FC = () => {
                             <div key={item.enrollment.id} className="flex items-center justify-between bg-white rounded-lg px-4 py-3 shadow-sm">
                               <div className="flex items-center">
                                 <div className={`p-2 rounded-lg ${
-                                  item.type === 'contact' ? 'bg-blue-100' : 'bg-green-100'
+                                  item.type === 'contact' ? 'bg-gray-100' : 'bg-green-100'
                                 }`}>
                                   {item.type === 'contact' ? (
                                     <UserIcon className="h-4 w-4 text-primary" />
@@ -344,7 +344,7 @@ const Automations: React.FC = () => {
                             <div className="pt-2">
                               <button
                                 onClick={() => navigate(`/automations/${automation.id}`)}
-                                className="text-sm font-medium text-primary hover:text-blue-700"
+                                className="text-sm font-medium text-primary hover:text-primary-dark"
                               >
                                 View all {enrolledEntities[automation.id].length} enrolled entities →
                               </button>

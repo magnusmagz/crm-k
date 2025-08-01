@@ -100,7 +100,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
   const getActivityColor = (activity: TimelineActivity) => {
     switch (activity.type) {
       case 'note':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-blue-50 border-gray-200';
       case 'deal':
         if (activity.subtype === 'won') return 'bg-green-50 border-green-200';
         if (activity.subtype === 'lost') return 'bg-red-50 border-red-200';
@@ -146,7 +146,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
           {onRefresh && (
             <button
               onClick={onRefresh}
-              className="text-sm text-primary hover:text-blue-700"
+              className="text-sm text-primary hover:text-primary-dark"
             >
               Refresh
             </button>
@@ -159,7 +159,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
             onClick={() => toggleFilter('note')}
             className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
               filter.includes('note')
-                ? 'bg-blue-100 text-blue-700'
+                ? 'bg-gray-100 text-primary-dark'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -265,7 +265,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
               <div className="text-center pt-4">
                 <button
                   onClick={() => setPage(page + 1)}
-                  className="text-sm text-primary hover:text-blue-700 font-medium"
+                  className="text-sm text-primary hover:text-primary-dark font-medium"
                 >
                   Load more activities
                 </button>

@@ -48,7 +48,7 @@ const DebugView: React.FC<DebugViewProps> = ({ automationId }) => {
     if (level === 'error') return <XCircleIcon className="h-5 w-5 text-red-500" />;
     if (event.includes('SUCCESS') || event.includes('COMPLETED')) return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
     if (event.includes('FAILED')) return <XCircleIcon className="h-5 w-5 text-red-500" />;
-    return <InformationCircleIcon className="h-5 w-5 text-blue-500" />;
+    return <InformationCircleIcon className="h-5 w-5 text-primary" />;
   };
 
   const getEventColor = (event: string, level: string) => {
@@ -56,7 +56,7 @@ const DebugView: React.FC<DebugViewProps> = ({ automationId }) => {
     if (event.includes('SUCCESS') || event.includes('COMPLETED')) return 'bg-green-50 border-green-200';
     if (event.includes('FAILED')) return 'bg-red-50 border-red-200';
     if (event.includes('WARNING')) return 'bg-yellow-50 border-yellow-200';
-    return 'bg-blue-50 border-blue-200';
+    return 'bg-blue-50 border-gray-200';
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -93,7 +93,7 @@ const DebugView: React.FC<DebugViewProps> = ({ automationId }) => {
             {recentEnrollments.slice(0, 5).map((enrollment: any) => (
               <div key={enrollment.id} className="flex items-center text-sm bg-gray-50 p-2 rounded">
                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  enrollment.status === 'active' ? 'bg-blue-100 text-blue-800' :
+                  enrollment.status === 'active' ? 'bg-gray-100 text-primary-dark' :
                   enrollment.status === 'completed' ? 'bg-green-100 text-green-800' :
                   enrollment.status === 'failed' ? 'bg-red-100 text-red-800' :
                   'bg-gray-100 text-primary'

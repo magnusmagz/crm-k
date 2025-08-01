@@ -189,7 +189,7 @@ export default function EmailAnalytics() {
                 {overview?.engagement.totalOpened || 0} opened
               </p>
             </div>
-            <EyeIcon className="h-8 w-8 text-blue-500" />
+            <EyeIcon className="h-8 w-8 text-primary" />
           </div>
         </div>
 

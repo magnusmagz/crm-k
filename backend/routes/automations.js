@@ -778,7 +778,10 @@ router.post('/multi-step', authMiddleware, [
   body('name').notEmpty().trim(),
   body('trigger').isObject(),
   body('steps').isArray({ min: 1 }),
-  body('description').optional().trim()
+  body('description').optional().trim(),
+  body('exitCriteria').optional().isObject(),
+  body('maxDurationDays').optional().isInt({ min: 1, max: 365 }),
+  body('safetyExitEnabled').optional().isBoolean()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -786,7 +789,7 @@ router.post('/multi-step', authMiddleware, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, trigger, steps, description } = req.body;
+    const { name, trigger, steps, description, exitCriteria, maxDurationDays, safetyExitEnabled } = req.body;
     
     // Create the automation
     const automation = await Automation.create({
@@ -797,6 +800,9 @@ router.post('/multi-step', authMiddleware, [
       isMultiStep: true,
       type: 'multi_step',
       description,
+      exitCriteria: exitCriteria || {},
+      maxDurationDays: maxDurationDays || null,
+      safetyExitEnabled: safetyExitEnabled !== false, // Default to true
       userId: req.user.id
     });
 
@@ -841,7 +847,10 @@ router.put('/:id/multi-step', authMiddleware, [
   body('trigger').optional().isObject(),
   body('steps').optional().isArray({ min: 1 }),
   body('description').optional().trim(),
-  body('isActive').optional().isBoolean()
+  body('isActive').optional().isBoolean(),
+  body('exitCriteria').optional().isObject(),
+  body('maxDurationDays').optional().isInt({ min: 1, max: 365 }),
+  body('safetyExitEnabled').optional().isBoolean()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -867,6 +876,9 @@ router.put('/:id/multi-step', authMiddleware, [
     if (req.body.trigger !== undefined) updates.trigger = req.body.trigger;
     if (req.body.description !== undefined) updates.description = req.body.description;
     if (req.body.isActive !== undefined) updates.isActive = req.body.isActive;
+    if (req.body.exitCriteria !== undefined) updates.exitCriteria = req.body.exitCriteria;
+    if (req.body.maxDurationDays !== undefined) updates.maxDurationDays = req.body.maxDurationDays;
+    if (req.body.safetyExitEnabled !== undefined) updates.safetyExitEnabled = req.body.safetyExitEnabled;
     
     if (Object.keys(updates).length > 0) {
       await automation.update(updates);

@@ -306,8 +306,8 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
           {/* Step 2: Mapping */}
           {step === 'mapping' && preview && (
             <div>
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center gap-2 text-blue-800">
+              <div className="mb-6 p-4 bg-blue-50 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-2 text-primary-dark">
                   <FileText className="w-5 h-5" />
                   <span className="font-medium">{file?.name}</span>
                   <span className="text-primary">• {preview.totalRows} rows</span>
@@ -469,9 +469,9 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                     <div className="text-2xl font-bold text-green-800">{importJob.created}</div>
                     <div className="text-green-700">Created</div>
                   </div>
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-800">{importJob.updated}</div>
-                    <div className="text-blue-700">Updated</div>
+                  <div className="p-4 bg-blue-50 border border-gray-200 rounded-lg">
+                    <div className="text-2xl font-bold text-primary-dark">{importJob.updated}</div>
+                    <div className="text-primary-dark">Updated</div>
                   </div>
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <div className="text-2xl font-bold text-primary">{importJob.skipped}</div>
@@ -504,9 +504,9 @@ const ContactImport: React.FC<ContactImportProps> = ({ onClose }) => {
                     <div className="text-2xl font-bold text-green-800">{results.created}</div>
                     <div className="text-green-700">Contacts Created</div>
                   </div>
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-800">{results.updated}</div>
-                    <div className="text-blue-700">Contacts Updated</div>
+                  <div className="p-4 bg-blue-50 border border-gray-200 rounded-lg">
+                    <div className="text-2xl font-bold text-primary-dark">{results.updated}</div>
+                    <div className="text-primary-dark">Contacts Updated</div>
                   </div>
                   <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <div className="text-2xl font-bold text-primary">{results.skipped}</div>

@@ -59,7 +59,7 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <ArrowPathIcon className="h-4 w-4 text-blue-500" />;
+        return <ArrowPathIcon className="h-4 w-4 text-primary" />;
       case 'completed':
         return <CheckCircleIcon className="h-4 w-4 text-green-500" />;
       case 'failed':
@@ -87,9 +87,9 @@ const EnrollmentView: React.FC<EnrollmentViewProps> = ({ automationId, isActive 
           <div className="text-2xl font-bold text-primary-dark">{summary.total}</div>
           <div className="text-sm text-gray-500">Total Enrolled</div>
         </div>
-        <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200">
+        <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="text-2xl font-bold text-primary">{summary.active}</div>
-          <div className="text-sm text-blue-700">Active</div>
+          <div className="text-sm text-primary-dark">Active</div>
         </div>
         <div className="bg-green-50 p-4 rounded-lg shadow-sm border border-green-200">
           <div className="text-2xl font-bold text-green-600">{summary.completed}</div>

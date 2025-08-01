@@ -202,14 +202,14 @@ const ContactExport: React.FC<ContactExportProps> = ({
                 <div className="flex gap-2 mb-4">
                   <button
                     onClick={selectAll}
-                    className="text-sm text-primary hover:text-blue-700 font-medium"
+                    className="text-sm text-primary hover:text-primary-dark font-medium"
                   >
                     Select All
                   </button>
                   <span className="text-gray-400">|</span>
                   <button
                     onClick={clearAll}
-                    className="text-sm text-primary hover:text-blue-700 font-medium"
+                    className="text-sm text-primary hover:text-primary-dark font-medium"
                   >
                     Clear All
                   </button>

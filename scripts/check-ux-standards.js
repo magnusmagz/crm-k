@@ -21,14 +21,39 @@ const UX_VIOLATIONS = [
     message: 'Use hover:bg-primary-dark instead of blue hover states'
   },
   {
+    pattern: /hover:text-blue-[78]\d{2}/g,
+    replacement: 'hover:text-primary-dark',
+    message: 'Use hover:text-primary-dark instead of blue hover text'
+  },
+  {
     pattern: /text-blue-6\d{2}/g,
     replacement: 'text-primary',
     message: 'Use text-primary instead of blue text'
   },
   {
-    pattern: /border-blue-[56]\d{2}/g,
-    replacement: 'border-primary',
-    message: 'Use border-primary instead of blue borders'
+    pattern: /text-blue-[78]\d{2}/g,
+    replacement: 'text-primary-dark',
+    message: 'Use text-primary-dark instead of dark blue text'
+  },
+  {
+    pattern: /text-blue-5\d{2}/g,
+    replacement: 'text-primary',
+    message: 'Use text-primary instead of blue text'
+  },
+  {
+    pattern: /bg-blue-5\d{2}/g,
+    replacement: 'bg-gray-50',
+    message: 'Use bg-gray-50 instead of light blue info backgrounds'
+  },
+  {
+    pattern: /bg-blue-1\d{2}/g,
+    replacement: 'bg-gray-100',
+    message: 'Use bg-gray-100 instead of light blue info backgrounds'
+  },
+  {
+    pattern: /border-blue-[2-6]\d{2}/g,
+    replacement: 'border-gray-200',
+    message: 'Use border-gray-200 instead of blue borders for info sections'
   },
   {
     pattern: /focus:ring-blue-[56]\d{2}/g,

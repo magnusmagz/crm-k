@@ -279,7 +279,7 @@ const WorkflowBuilder: React.FC = () => {
   const getStepColor = (type: AutomationStep['type']) => {
     switch (type) {
       case 'action':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-gray-100 text-primary-dark';
       case 'delay':
         return 'bg-yellow-100 text-yellow-800';
       case 'condition':

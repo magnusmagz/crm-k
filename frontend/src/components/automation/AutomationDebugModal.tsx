@@ -199,7 +199,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                                     </div>
                                     <button
                                       onClick={() => {/* TODO: Process enrollment */}}
-                                      className="text-sm text-primary hover:text-blue-800"
+                                      className="text-sm text-primary hover:text-primary-dark"
                                     >
                                       Process Now
                                     </button>
