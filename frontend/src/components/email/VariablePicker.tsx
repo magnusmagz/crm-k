@@ -18,11 +18,7 @@ const VariablePicker: React.FC<VariablePickerProps> = ({ onVariableSelect, conta
     { label: 'Email', value: '{{email}}', preview: contact.email },
     { label: 'Phone', value: '{{phone}}', preview: contact.phone || '(555) 123-4567' },
     { label: 'Company', value: '{{company}}', preview: contact.company || 'Acme Corp' },
-    { label: 'Title', value: '{{title}}', preview: contact.title || 'Manager' },
-    { label: 'Location', value: '{{location}}', preview: contact.location || 'New York, NY' },
-    { label: 'LinkedIn URL', value: '{{linkedinUrl}}', preview: contact.linkedinUrl || 'linkedin.com/in/example' },
-    { label: 'Twitter Handle', value: '{{twitterHandle}}', preview: contact.twitterHandle || '@example' },
-    { label: 'Website', value: '{{website}}', preview: contact.website || 'example.com' },
+    { label: 'Position', value: '{{position}}', preview: contact.position || 'Manager' },
   ];
 
   // Add custom fields if they exist

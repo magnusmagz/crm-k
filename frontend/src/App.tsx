@@ -18,6 +18,7 @@ const Automations = lazy(() => import('./pages/Automations'));
 const AutomationBuilder = lazy(() => import('./pages/AutomationBuilder'));
 const WorkflowBuilder = lazy(() => import('./pages/WorkflowBuilder'));
 const Metrics = lazy(() => import('./pages/EmailAnalytics'));
+const DuplicateContacts = lazy(() => import('./pages/DuplicateContacts'));
 
 // Loading component
 const PageLoader = () => (
@@ -47,6 +48,7 @@ function App() {
               <Route path="email-analytics" element={<Metrics />} />
               <Route path="profile" element={<Profile />} />
               <Route path="custom-fields" element={<CustomFields />} />
+              <Route path="duplicates" element={<DuplicateContacts />} />
             </Route>
             </Routes>
           </Suspense>

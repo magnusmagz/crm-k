@@ -470,11 +470,7 @@ class EmailService {
       .replace(/\{\{email\}\}/g, contactData.email || '')
       .replace(/\{\{phone\}\}/g, contactData.phone || '')
       .replace(/\{\{company\}\}/g, contactData.company || '')
-      .replace(/\{\{title\}\}/g, contactData.title || '')
-      .replace(/\{\{location\}\}/g, contactData.location || '')
-      .replace(/\{\{linkedinUrl\}\}/g, contactData.linkedinUrl || '')
-      .replace(/\{\{twitterHandle\}\}/g, contactData.twitterHandle || '')
-      .replace(/\{\{website\}\}/g, contactData.website || '');
+      .replace(/\{\{position\}\}/g, contactData.position || '');
     
     // Replace custom fields
     if (contactData.customFields) {
