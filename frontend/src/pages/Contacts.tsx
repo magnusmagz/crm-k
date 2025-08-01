@@ -259,7 +259,7 @@ const Contacts: React.FC = () => {
           <div className="md:hidden mt-4">
             <PullToRefresh onRefresh={handleRefresh}>
               {/* Swipe hint - shown only once */}
-              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-mobile-sm text-blue-800">
+              <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-mobile-sm text-gray-700">
                 <p className="flex items-center gap-2">
                   <span>💡</span>
                   <span>Tip: Swipe left to delete • Pull down to refresh</span>
@@ -295,7 +295,7 @@ const Contacts: React.FC = () => {
                           type="checkbox"
                           checked={selectedContacts.size === contacts.length && contacts.length > 0}
                           onChange={toggleSelectAll}
-                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                         />
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
@@ -326,13 +326,13 @@ const Contacts: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {contacts.map((contact) => (
-                      <tr key={contact.id} className={selectedContacts.has(contact.id) ? 'bg-blue-50' : ''}>
+                      <tr key={contact.id} className={selectedContacts.has(contact.id) ? 'bg-gray-50' : ''}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-dark sm:pl-6">
                           <input
                             type="checkbox"
                             checked={selectedContacts.has(contact.id)}
                             onChange={() => toggleContactSelection(contact.id)}
-                            className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-primary-dark">
