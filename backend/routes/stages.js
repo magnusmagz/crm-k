@@ -27,7 +27,7 @@ router.get('/', authMiddleware, async (req, res) => {
       return {
         ...stageData,
         dealCount: allDeals.length,
-        totalValue: allDeals.reduce((sum, deal) => sum + parseFloat(deal.value || 0), 0),
+        totalValue: allDeals.reduce((sum, deal) => sum + (parseFloat(deal.value) || 0), 0),
         deals: undefined // Remove the deals array from response to reduce payload
       };
     });

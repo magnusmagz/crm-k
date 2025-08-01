@@ -78,10 +78,10 @@ router.get('/', authMiddleware, async (req, res) => {
       attributes: [
         'contactId',
         [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'dealCount'],
-        [Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 'totalValue'],
+        [Deal.sequelize.fn('COALESCE', Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 0), 'totalValue'],
         [Deal.sequelize.fn('COUNT', Deal.sequelize.literal("CASE WHEN status = 'won' THEN 1 END")), 'wonDeals'],
         [Deal.sequelize.fn('COUNT', Deal.sequelize.literal("CASE WHEN status = 'open' THEN 1 END")), 'openDeals'],
-        [Deal.sequelize.fn('SUM', Deal.sequelize.literal("CASE WHEN status = 'open' THEN value ELSE 0 END")), 'openValue']
+        [Deal.sequelize.fn('COALESCE', Deal.sequelize.fn('SUM', Deal.sequelize.literal("CASE WHEN status = 'open' THEN value ELSE 0 END")), 0), 'openValue']
       ],
       group: ['contactId'],
       raw: true

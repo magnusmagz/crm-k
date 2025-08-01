@@ -81,7 +81,7 @@ router.get('/', authMiddleware, async (req, res) => {
       attributes: [
         'status',
         [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'count'],
-        [Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 'totalValue']
+        [Deal.sequelize.fn('COALESCE', Deal.sequelize.fn('SUM', Deal.sequelize.col('value')), 0), 'totalValue']
       ],
       group: ['status']
     });
@@ -98,12 +98,12 @@ router.get('/', authMiddleware, async (req, res) => {
     };
 
     analytics.forEach(stat => {
-      const count = parseInt(stat.dataValues.count);
-      const value = parseFloat(stat.dataValues.totalValue || 0);
+      const count = parseInt(stat.dataValues.count) || 0;
+      const value = parseFloat(stat.dataValues.totalValue) || 0;
       analyticsData.total += count;
-      analyticsData.totalValue += value;
+      analyticsData.totalValue += isNaN(value) ? 0 : value;
       analyticsData[stat.status] = count;
-      analyticsData[`${stat.status}Value`] = value;
+      analyticsData[`${stat.status}Value`] = isNaN(value) ? 0 : value;
     });
 
     res.json({
