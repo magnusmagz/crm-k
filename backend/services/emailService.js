@@ -534,6 +534,29 @@ class EmailService {
       htmlBody = signatureResult.html;
       textBody = signatureResult.text;
 
+      // Add simple unsubscribe footer (Postmark will replace the URL)
+      const unsubscribeFooterHtml = `
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; font-size: 12px; color: #666;">
+          <p>
+            <a href="{{{pm:unsubscribe_url}}}" style="color: #666; text-decoration: underline;">Unsubscribe</a>
+          </p>
+        </div>
+      `;
+      
+      const unsubscribeFooterText = `
+
+--
+Unsubscribe: {{{pm:unsubscribe_url}}}
+`;
+
+      // Insert footer before closing body tag or append to end
+      if (htmlBody.includes('</body>')) {
+        htmlBody = htmlBody.replace('</body>', `${unsubscribeFooterHtml}</body>`);
+      } else {
+        htmlBody += unsubscribeFooterHtml;
+      }
+      textBody += unsubscribeFooterText;
+
       if (enableTracking) {
         // Wrap links for click tracking
         htmlBody = await this.wrapLinksForTracking(htmlBody, emailRecord.id, trackingId);
@@ -557,7 +580,18 @@ class EmailService {
         Metadata: {
           trackingId,
           emailSendId: emailRecord.id
-        }
+        },
+        // Add Postmark unsubscribe handling
+        Headers: [
+          {
+            Name: "List-Unsubscribe",
+            Value: "<{{{pm:unsubscribe_url}}}>"
+          },
+          {
+            Name: "List-Unsubscribe-Post",
+            Value: "List-Unsubscribe=One-Click"
+          }
+        ]
       };
 
       console.log('Sending email with data:', {

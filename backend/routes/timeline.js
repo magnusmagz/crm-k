@@ -1,0 +1,313 @@
+const express = require('express');
+const { Contact, Deal, Note, EmailSend, EmailEvent, sequelize } = require('../models');
+const { authMiddleware } = require('../middleware/auth');
+const { Op } = require('sequelize');
+
+const router = express.Router();
+
+// Get timeline for a contact
+router.get('/contact/:contactId', authMiddleware, async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    const { limit = 50, offset = 0, types } = req.query;
+    
+    // Verify contact belongs to user
+    const contact = await Contact.findOne({
+      where: {
+        id: contactId,
+        userId: req.user.id
+      }
+    });
+
+    if (!contact) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    // Build filter for activity types
+    const typeFilter = types ? types.split(',') : ['note', 'deal', 'email', 'contact'];
+    
+    const activities = [];
+
+    // Fetch notes
+    if (typeFilter.includes('note')) {
+      const notes = await Note.findAll({
+        where: {
+          contactId: contactId,
+          userId: req.user.id
+        },
+        attributes: ['id', 'content', 'createdAt', 'updatedAt'],
+        raw: true
+      });
+
+      notes.forEach(note => {
+        activities.push({
+          id: `note_${note.id}`,
+          type: 'note',
+          title: 'Note added',
+          description: note.content,
+          timestamp: note.createdAt,
+          data: note
+        });
+      });
+    }
+
+    // Fetch deals and deal updates
+    if (typeFilter.includes('deal')) {
+      const deals = await Deal.findAll({
+        where: {
+          contactId: contactId,
+          userId: req.user.id
+        },
+        attributes: ['id', 'name', 'value', 'status', 'createdAt', 'updatedAt', 'closedAt'],
+        include: [{
+          model: require('../models').Stage(sequelize, sequelize.Sequelize.DataTypes),
+          as: 'stage',
+          attributes: ['name', 'color']
+        }],
+        raw: false
+      });
+
+      deals.forEach(deal => {
+        // Deal created
+        activities.push({
+          id: `deal_created_${deal.id}`,
+          type: 'deal',
+          subtype: 'created',
+          title: 'Deal created',
+          description: `${deal.name} - $${deal.value}`,
+          timestamp: deal.createdAt,
+          data: {
+            dealId: deal.id,
+            name: deal.name,
+            value: deal.value,
+            stage: deal.stage
+          }
+        });
+
+        // Deal closed (if applicable)
+        if (deal.status !== 'open' && deal.closedAt) {
+          activities.push({
+            id: `deal_${deal.status}_${deal.id}`,
+            type: 'deal',
+            subtype: deal.status,
+            title: `Deal ${deal.status}`,
+            description: `${deal.name} - $${deal.value}`,
+            timestamp: deal.closedAt,
+            data: {
+              dealId: deal.id,
+              name: deal.name,
+              value: deal.value,
+              status: deal.status
+            }
+          });
+        }
+      });
+    }
+
+    // Fetch emails
+    if (typeFilter.includes('email')) {
+      const emails = await EmailSend.findAll({
+        where: {
+          contactId: contactId,
+          userId: req.user.id
+        },
+        attributes: ['id', 'subject', 'preview', 'sentAt', 'openedAt', 'clickedAt'],
+        include: [{
+          model: EmailEvent,
+          as: 'events',
+          attributes: ['eventType', 'timestamp'],
+          order: [['timestamp', 'DESC']]
+        }],
+        raw: false
+      });
+
+      emails.forEach(email => {
+        // Email sent
+        activities.push({
+          id: `email_sent_${email.id}`,
+          type: 'email',
+          subtype: 'sent',
+          title: 'Email sent',
+          description: email.subject || 'No subject',
+          preview: email.preview,
+          timestamp: email.sentAt,
+          data: {
+            emailId: email.id,
+            subject: email.subject
+          }
+        });
+
+        // Email opened
+        if (email.openedAt) {
+          activities.push({
+            id: `email_opened_${email.id}`,
+            type: 'email',
+            subtype: 'opened',
+            title: 'Email opened',
+            description: email.subject || 'No subject',
+            timestamp: email.openedAt,
+            data: {
+              emailId: email.id,
+              subject: email.subject
+            }
+          });
+        }
+
+        // Email clicked
+        if (email.clickedAt) {
+          activities.push({
+            id: `email_clicked_${email.id}`,
+            type: 'email',
+            subtype: 'clicked',
+            title: 'Email link clicked',
+            description: email.subject || 'No subject',
+            timestamp: email.clickedAt,
+            data: {
+              emailId: email.id,
+              subject: email.subject
+            }
+          });
+        }
+      });
+    }
+
+    // Contact updates
+    if (typeFilter.includes('contact')) {
+      // Contact created
+      activities.push({
+        id: `contact_created_${contact.id}`,
+        type: 'contact',
+        subtype: 'created',
+        title: 'Contact created',
+        description: `${contact.firstName} ${contact.lastName} added to contacts`,
+        timestamp: contact.createdAt,
+        data: {
+          contactId: contact.id,
+          name: `${contact.firstName} ${contact.lastName}`
+        }
+      });
+
+      // Contact updated (if updated after creation)
+      if (contact.updatedAt > contact.createdAt) {
+        activities.push({
+          id: `contact_updated_${contact.id}`,
+          type: 'contact',
+          subtype: 'updated',
+          title: 'Contact updated',
+          description: 'Contact information was updated',
+          timestamp: contact.updatedAt,
+          data: {
+            contactId: contact.id
+          }
+        });
+      }
+    }
+
+    // Sort activities by timestamp (newest first)
+    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    // Apply pagination
+    const paginatedActivities = activities.slice(
+      parseInt(offset), 
+      parseInt(offset) + parseInt(limit)
+    );
+
+    res.json({
+      activities: paginatedActivities,
+      total: activities.length,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+  } catch (error) {
+    console.error('Get timeline error:', error);
+    res.status(500).json({ error: 'Failed to get timeline' });
+  }
+});
+
+// Get timeline summary for a contact
+router.get('/contact/:contactId/summary', authMiddleware, async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    
+    // Verify contact belongs to user
+    const contact = await Contact.findOne({
+      where: {
+        id: contactId,
+        userId: req.user.id
+      }
+    });
+
+    if (!contact) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+
+    // Get counts for each activity type
+    const [noteCount, dealCount, emailCount] = await Promise.all([
+      Note.count({
+        where: {
+          contactId: contactId,
+          userId: req.user.id
+        }
+      }),
+      Deal.count({
+        where: {
+          contactId: contactId,
+          userId: req.user.id
+        }
+      }),
+      EmailSend.count({
+        where: {
+          contactId: contactId,
+          userId: req.user.id
+        }
+      })
+    ]);
+
+    // Get last activity date
+    const lastActivities = await Promise.all([
+      Note.findOne({
+        where: { contactId, userId: req.user.id },
+        order: [['createdAt', 'DESC']],
+        attributes: ['createdAt']
+      }),
+      Deal.findOne({
+        where: { contactId, userId: req.user.id },
+        order: [['updatedAt', 'DESC']],
+        attributes: ['updatedAt']
+      }),
+      EmailSend.findOne({
+        where: { contactId, userId: req.user.id },
+        order: [['sentAt', 'DESC']],
+        attributes: ['sentAt']
+      })
+    ]);
+
+    const lastActivityDates = [
+      lastActivities[0]?.createdAt,
+      lastActivities[1]?.updatedAt,
+      lastActivities[2]?.sentAt
+    ].filter(Boolean);
+
+    const lastActivity = lastActivityDates.length > 0 
+      ? new Date(Math.max(...lastActivityDates.map(d => new Date(d).getTime())))
+      : null;
+
+    res.json({
+      summary: {
+        totalActivities: noteCount + dealCount + emailCount,
+        noteCount,
+        dealCount,
+        emailCount,
+        lastActivity,
+        contactCreated: contact.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Get timeline summary error:', error);
+    res.status(500).json({ error: 'Failed to get timeline summary' });
+  }
+});
+
+module.exports = router;

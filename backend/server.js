@@ -63,6 +63,7 @@ app.use('/api/webhooks', webhookRoutes);
 app.use('/api', trackingRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notes', require('./routes/notes'));
+app.use('/api/timeline', require('./routes/timeline'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

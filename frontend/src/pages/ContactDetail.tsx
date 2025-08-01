@@ -9,6 +9,7 @@ import EmailModal from '../components/email/EmailModal';
 import EmailHistory from '../components/email/EmailHistory';
 import ContactEmailEngagement from '../components/email/ContactEmailEngagement';
 import NoteWidget from '../components/notes/NoteWidget';
+import ActivityTimeline from '../components/ActivityTimeline';
 import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -247,6 +248,18 @@ const ContactDetail: React.FC = () => {
             </div>
           </dl>
         </div>
+      </div>
+
+      {/* Activity Timeline */}
+      <div className="mt-8">
+        <ActivityTimeline 
+          contactId={contact.id} 
+          onRefresh={() => {
+            fetchContact();
+            fetchContactDeals();
+            setEmailRefresh(!emailRefresh);
+          }}
+        />
       </div>
 
       {/* Notes Section */}
