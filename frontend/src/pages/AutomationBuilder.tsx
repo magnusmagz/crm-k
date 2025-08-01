@@ -9,6 +9,7 @@ import ConditionBuilder from '../components/automation/ConditionBuilder';
 import ActionBuilder from '../components/automation/ActionBuilder';
 import EnrollmentView from '../components/automation/EnrollmentView';
 import DebugView from '../components/automation/DebugView';
+import ExitCriteriaConfig from '../components/automation/ExitCriteriaConfig';
 
 const AutomationBuilder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -344,8 +345,7 @@ const AutomationBuilder: React.FC = () => {
             </div>
           </div>
 
-          {/* Exit Criteria - Temporarily disabled */}
-          {/*
+          {/* Exit Criteria */}
           <div className="mb-8">
             <ExitCriteriaConfig
               automationId={isEditing ? id : undefined}
@@ -355,7 +355,6 @@ const AutomationBuilder: React.FC = () => {
               onChange={handleExitCriteriaChange}
             />
           </div>
-          */}
 
           {/* Actions */}
           <div className="flex justify-between">
