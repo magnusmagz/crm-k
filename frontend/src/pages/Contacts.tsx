@@ -81,6 +81,13 @@ const Contacts: React.FC = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-3">
+          <Link
+            to="/duplicates"
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            <UserGroupIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            Find Duplicates
+          </Link>
           <button
             type="button"
             onClick={() => setShowImport(true)}

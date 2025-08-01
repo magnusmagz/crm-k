@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Search, Users, Check, X, Loader } from 'lucide-react';
 import api from '../services/api';
 import { Contact } from '../types';
-import { useDebounce } from '../hooks/useDebounce';
+import useDebounce from '../hooks/useDebounce';
 
 interface ContactWithStats extends Contact {
   dealCount: number;
