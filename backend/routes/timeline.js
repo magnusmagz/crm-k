@@ -127,20 +127,28 @@ router.get('/contact/:contactId', authMiddleware, async (req, res) => {
             contactId: contactId,
             userId: req.user.id
           },
-          attributes: ['id', 'subject', 'preview', 'sentAt', 'openedAt', 'clickedAt']
+          attributes: ['id', 'subject', 'message', 'sentAt', 'openedAt', 'clickedAt']
         });
 
         if (emails && Array.isArray(emails)) {
           emails.forEach(email => {
             if (email && email.id && email.sentAt) {
               // Email sent
+              // Create preview from message (strip HTML and truncate)
+              let preview = '';
+              if (email.message) {
+                // Strip HTML tags and get first 100 characters
+                preview = email.message.replace(/<[^>]*>/g, '').substring(0, 100);
+                if (email.message.length > 100) preview += '...';
+              }
+              
               activities.push({
                 id: `email_sent_${email.id}`,
                 type: 'email',
                 subtype: 'sent',
                 title: 'Email sent',
                 description: email.subject || 'No subject',
-                preview: email.preview,
+                preview: preview,
                 timestamp: email.sentAt,
                 data: {
                   emailId: email.id,
