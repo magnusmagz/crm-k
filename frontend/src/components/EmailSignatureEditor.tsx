@@ -56,6 +56,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
   // Default values from profile
   const defaultValues = {
     name: `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim(),
+    title: profile?.title || '',
     email: user?.email || '',
     phone: profile?.phone || '',
     company: profile?.companyName || '',
@@ -173,7 +174,7 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
       const fieldOrder = sig.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address'];
       const fieldValues: Record<string, string> = {
         name,
-        title: fields.title.value,
+        title: fields.title.value || defaultValues.title,
         email,
         phone,
         company,
@@ -248,8 +249,9 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
       if (fields.name.show && name) {
         html += `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 2px;">${name}</div>`;
       }
-      if (fields.title.show && fields.title.value) {
-        html += `<div style="color: #666; margin-bottom: 8px;">${fields.title.value}</div>`;
+      const titleValue = fields.title.value || defaultValues.title;
+      if (fields.title.show && titleValue) {
+        html += `<div style="color: #666; margin-bottom: 8px;">${titleValue}</div>`;
       }
       
       if (fields.company.show && company) {
@@ -291,8 +293,9 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
       if (fields.name.show && name) {
         parts.push(`<span style="font-weight: bold;">${name}</span>`);
       }
-      if (fields.title.show && fields.title.value) {
-        parts.push(fields.title.value);
+      const titleVal = fields.title.value || defaultValues.title;
+      if (fields.title.show && titleVal) {
+        parts.push(titleVal);
       }
       if (fields.company.show && company) {
         parts.push(company);
@@ -349,8 +352,9 @@ const EmailSignatureEditor: React.FC<Props> = ({ profile, user, onSave }) => {
       if (fields.name.show && name) {
         html += `<div style="margin: 0 0 5px 0; font-size: 28px; font-weight: bold; color: #2c3e50; font-family: Georgia, serif; line-height: 32px;">${name}</div>`;
       }
-      if (fields.title.show && fields.title.value) {
-        html += `<div style="margin: 0 0 5px 0; font-size: 16px; color: #7f8c8d; font-weight: 500; line-height: 20px;">${fields.title.value}</div>`;
+      const profTitle = fields.title.value || defaultValues.title;
+      if (fields.title.show && profTitle) {
+        html += `<div style="margin: 0 0 5px 0; font-size: 16px; color: #7f8c8d; font-weight: 500; line-height: 20px;">${profTitle}</div>`;
       }
       if (fields.company.show && company) {
         const department = fields.department?.show && fields.department?.value ? ` | ${fields.department.value}` : '';

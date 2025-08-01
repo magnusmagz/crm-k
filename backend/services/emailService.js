@@ -112,6 +112,7 @@ class EmailService {
 
     // Fill in default values from profile if not set in signature
     const name = fields.name.value || `${profile.firstName} ${profile.lastName}`.trim();
+    const title = fields.title.value || profile.title;
     const email = fields.email.value || profile.email;
     const phone = fields.phone.value || profile.phone;
     const company = fields.company.value || profile.companyName;
@@ -136,7 +137,7 @@ class EmailService {
       const fieldOrder = signature.fieldOrder || ['name', 'title', 'email', 'phone', 'company', 'address'];
       const fieldValues = {
         name,
-        title: fields.title.value,
+        title,
         email,
         phone,
         company,
@@ -208,8 +209,8 @@ class EmailService {
       if (fields.name.show && name) {
         html += `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 2px;">${name}</div>`;
       }
-      if (fields.title.show && fields.title.value) {
-        html += `<div style="color: #666; margin-bottom: 8px;">${fields.title.value}</div>`;
+      if (fields.title.show && title) {
+        html += `<div style="color: #666; margin-bottom: 8px;">${title}</div>`;
       }
       
       if (fields.company.show && company) {
@@ -251,8 +252,8 @@ class EmailService {
       if (fields.name.show && name) {
         parts.push(`<span style="font-weight: bold;">${name}</span>`);
       }
-      if (fields.title.show && fields.title.value) {
-        parts.push(fields.title.value);
+      if (fields.title.show && title) {
+        parts.push(title);
       }
       if (fields.company.show && company) {
         parts.push(company);
@@ -309,8 +310,8 @@ class EmailService {
       if (fields.name.show && name) {
         html += `<div style="margin: 0 0 5px 0; font-size: 28px; font-weight: bold; color: #2c3e50; font-family: Georgia, serif; line-height: 32px;">${name}</div>`;
       }
-      if (fields.title.show && fields.title.value) {
-        html += `<div style="margin: 0 0 5px 0; font-size: 16px; color: #7f8c8d; font-weight: 500; line-height: 20px;">${fields.title.value}</div>`;
+      if (fields.title.show && title) {
+        html += `<div style="margin: 0 0 5px 0; font-size: 16px; color: #7f8c8d; font-weight: 500; line-height: 20px;">${title}</div>`;
       }
       if (fields.company.show && company) {
         const department = fields.department?.show && fields.department?.value ? ` | ${fields.department.value}` : '';
@@ -415,6 +416,7 @@ class EmailService {
     
     // Fill in default values from profile if not set in signature
     const name = fields.name.value || `${profile.firstName} ${profile.lastName}`.trim();
+    const title = fields.title.value || profile.title;
     const email = fields.email.value || profile.email;
     const phone = fields.phone.value || profile.phone;
     const company = fields.company.value || profile.companyName;
@@ -424,8 +426,8 @@ class EmailService {
     if (fields.name.show && name) {
       text += `${name}\n`;
     }
-    if (fields.title.show && fields.title.value) {
-      text += `${fields.title.value}\n`;
+    if (fields.title.show && title) {
+      text += `${title}\n`;
     }
     text += '\n';
     
@@ -511,7 +513,7 @@ class EmailService {
 
       // Prepare email data
       const emailData = {
-        From: `${userName} <${userFirstName}@${this.emailDomain}>`,
+        From: `${userName} <${this.fromEmail}>`,
         To: contactEmail,
         Subject: subject,
         HtmlBody: htmlBody,
@@ -551,6 +553,18 @@ class EmailService {
 
     } catch (error) {
       console.error('Error sending email:', error);
+      console.error('Full error details:', {
+        message: error.message,
+        code: error.code,
+        statusCode: error.statusCode,
+        response: error.response
+      });
+      
+      // Log Postmark-specific error details
+      if (error.ErrorCode) {
+        console.error('Postmark Error Code:', error.ErrorCode);
+        console.error('Postmark Message:', error.Message);
+      }
       
       // If we created a record but failed to send, update status
       if (emailRecord) {
@@ -576,7 +590,7 @@ class EmailService {
           'subject',
           'message',
           'status',
-          ['sentAt', 'sentAt'],
+          'sentAt',
           'openedAt',
           'bouncedAt'
         ]

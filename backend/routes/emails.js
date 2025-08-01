@@ -117,4 +117,33 @@ router.get('/contact/:contactId', authMiddleware, [
   }
 });
 
+// Test email configuration endpoint
+router.get('/test-config', authMiddleware, async (req, res) => {
+  try {
+    const config = {
+      POSTMARK_API_KEY: process.env.POSTMARK_API_KEY ? 'Set (hidden)' : 'NOT SET',
+      EMAIL_DOMAIN: process.env.EMAIL_DOMAIN || 'NOT SET',
+      FROM_EMAIL: process.env.FROM_EMAIL || 'NOT SET',
+      APP_URL: process.env.APP_URL || 'NOT SET',
+      emailServiceConfig: {
+        emailDomain: emailService.emailDomain,
+        fromEmail: emailService.fromEmail,
+        appUrl: emailService.appUrl,
+        hasPostmarkClient: !!emailService.client
+      }
+    };
+    
+    res.json({ 
+      success: true, 
+      config,
+      message: 'Configuration retrieved successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to get configuration',
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;
