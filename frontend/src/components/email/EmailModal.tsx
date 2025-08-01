@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { emailAPI, SendEmailData } from '../../services/emailAPI';
 import { Contact } from '../../types';
+import VariablePicker from './VariablePicker';
 
 interface EmailModalProps {
   isOpen: boolean;
@@ -15,6 +16,30 @@ const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, contact, onSuc
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleVariableInsert = (variable: string) => {
+    if (messageTextareaRef.current) {
+      const textarea = messageTextareaRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentValue = message;
+      
+      // Insert the variable at the cursor position
+      const newValue = 
+        currentValue.substring(0, start) + 
+        variable + 
+        currentValue.substring(end);
+      
+      setMessage(newValue);
+      
+      // Set cursor position after the inserted variable
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + variable.length, start + variable.length);
+      }, 0);
+    }
+  };
 
   const handleSend = async () => {
     if (!subject.trim() || !message.trim()) {
@@ -114,10 +139,14 @@ const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, contact, onSuc
           </div>
 
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-              Message
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                Message
+              </label>
+              <VariablePicker onVariableSelect={handleVariableInsert} contact={contact} />
+            </div>
             <textarea
+              ref={messageTextareaRef}
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -128,6 +157,9 @@ const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, contact, onSuc
             />
             <p className="text-xs text-gray-500 mt-1">
               {message.length} characters
+              {message.includes('{{') && (
+                <span className="ml-2 text-primary">• Contains variables</span>
+              )}
             </p>
           </div>
         </div>

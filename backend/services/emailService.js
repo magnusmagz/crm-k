@@ -460,7 +460,34 @@ class EmailService {
     return text;
   }
 
-  async sendEmail({ userId, contactId, subject, message, userName, userEmail, userFirstName, contactEmail, enableTracking = true }) {
+  replaceVariables(text, contactData) {
+    if (!text || !contactData) return text;
+    
+    // Replace standard contact fields
+    let replacedText = text
+      .replace(/\{\{firstName\}\}/g, contactData.firstName || '')
+      .replace(/\{\{lastName\}\}/g, contactData.lastName || '')
+      .replace(/\{\{email\}\}/g, contactData.email || '')
+      .replace(/\{\{phone\}\}/g, contactData.phone || '')
+      .replace(/\{\{company\}\}/g, contactData.company || '')
+      .replace(/\{\{title\}\}/g, contactData.title || '')
+      .replace(/\{\{location\}\}/g, contactData.location || '')
+      .replace(/\{\{linkedinUrl\}\}/g, contactData.linkedinUrl || '')
+      .replace(/\{\{twitterHandle\}\}/g, contactData.twitterHandle || '')
+      .replace(/\{\{website\}\}/g, contactData.website || '');
+    
+    // Replace custom fields
+    if (contactData.customFields) {
+      Object.entries(contactData.customFields).forEach(([key, value]) => {
+        const regex = new RegExp(`\\{\\{customFields\\.${key}\\}\\}`, 'g');
+        replacedText = replacedText.replace(regex, value || '');
+      });
+    }
+    
+    return replacedText;
+  }
+
+  async sendEmail({ userId, contactId, subject, message, userName, userEmail, userFirstName, contactEmail, contactData, enableTracking = true }) {
     let emailRecord;
     
     try {
@@ -473,28 +500,36 @@ class EmailService {
       // Generate tracking ID
       const trackingId = this.generateTrackingId();
 
+      // Replace variables in subject and message if contact data is provided
+      let processedSubject = subject;
+      let processedMessage = message;
+      
+      if (contactData) {
+        processedSubject = this.replaceVariables(subject, contactData);
+        processedMessage = this.replaceVariables(message, contactData);
+      }
+
       // Create email record first
       emailRecord = await EmailSend.create({
         userId,
         contactId,
-        subject,
-        message,
+        subject: processedSubject,
+        message: processedMessage,
         status: 'sent',
         trackingId
       });
 
       // Process message for tracking if enabled
-      let processedMessage = message;
-      let htmlBody = message;
-      let textBody = message;
+      let htmlBody = processedMessage;
+      let textBody = processedMessage;
       
       // Convert plain text to HTML if needed
-      if (!message.includes('<') || !message.includes('>')) {
-        htmlBody = `<html><body>${message.replace(/\n/g, '<br>')}</body></html>`;
-        textBody = message;
+      if (!processedMessage.includes('<') || !processedMessage.includes('>')) {
+        htmlBody = `<html><body>${processedMessage.replace(/\n/g, '<br>')}</body></html>`;
+        textBody = processedMessage;
       } else {
         // Extract text from HTML for plain text version
-        const $ = cheerio.load(message);
+        const $ = cheerio.load(processedMessage);
         textBody = $.text();
       }
 
@@ -515,7 +550,7 @@ class EmailService {
       const emailData = {
         From: `${userName} <${userFirstName}@${this.emailDomain}>`,
         To: contactEmail,
-        Subject: subject,
+        Subject: processedSubject,
         HtmlBody: htmlBody,
         TextBody: textBody,
         ReplyTo: userEmail,

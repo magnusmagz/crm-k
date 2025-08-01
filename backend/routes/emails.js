@@ -59,7 +59,8 @@ router.post('/send', authMiddleware, validateSendEmail, async (req, res) => {
       userName: fullName,
       userEmail: user.email,
       userFirstName: firstName.toLowerCase(),
-      contactEmail: contact.email
+      contactEmail: contact.email,
+      contactData: contact.get({ plain: true }) // Pass full contact data for variable replacement
     });
 
     res.json(result);
