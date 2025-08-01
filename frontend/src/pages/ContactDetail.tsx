@@ -8,6 +8,7 @@ import EntityDebugView from '../components/automation/EntityDebugView';
 import EmailModal from '../components/email/EmailModal';
 import EmailHistory from '../components/email/EmailHistory';
 import ContactEmailEngagement from '../components/email/ContactEmailEngagement';
+import NoteWidget from '../components/notes/NoteWidget';
 import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -246,6 +247,11 @@ const ContactDetail: React.FC = () => {
             </div>
           </dl>
         </div>
+      </div>
+
+      {/* Notes Section */}
+      <div className="mt-8">
+        <NoteWidget contactId={contact.id} />
       </div>
 
       {/* Deals Section */}

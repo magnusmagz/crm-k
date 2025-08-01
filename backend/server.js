@@ -62,6 +62,7 @@ app.use('/api/emails', emailRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api', trackingRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notes', require('./routes/notes'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

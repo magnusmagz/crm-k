@@ -231,4 +231,19 @@ export const analyticsAPI = {
     api.get('/analytics/links', { params: { limit } }),
 };
 
+// Notes API
+export const notesAPI = {
+  getContactNotes: (contactId: string) =>
+    api.get(`/notes/contact/${contactId}`),
+  
+  createNote: (data: { contactId: string; content: string }) =>
+    api.post('/notes', data),
+  
+  updateNote: (id: string, data: { content?: string; isPinned?: boolean }) =>
+    api.put(`/notes/${id}`, data),
+  
+  deleteNote: (id: string) =>
+    api.delete(`/notes/${id}`),
+};
+
 export default api;
