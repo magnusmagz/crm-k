@@ -580,8 +580,8 @@ Unsubscribe: {{{ pm:unsubscribe_url }}}
         TextBody: textBody,
         ReplyTo: userEmail,
         Tag: 'crm-email',
-        TrackOpens: false, // We're using our own tracking
-        TrackLinks: 'None',
+        TrackOpens: true, // Let Postmark track opens
+        TrackLinks: 'HtmlAndText', // Enable Postmark link tracking for unsubscribe
         MessageStream: 'outbound',
         Metadata: {
           trackingId,
@@ -591,7 +591,7 @@ Unsubscribe: {{{ pm:unsubscribe_url }}}
         Headers: [
           {
             Name: "List-Unsubscribe",
-            Value: "<{{{pm:unsubscribe_url}}}>"
+            Value: "<{{{ pm:unsubscribe_url }}}>"
           },
           {
             Name: "List-Unsubscribe-Post",
