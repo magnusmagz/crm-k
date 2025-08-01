@@ -42,7 +42,7 @@ const DealCard: React.FC<DealCardProps> = ({
     onDelete();
   };
 
-  const handleToggleSelect = (e: React.MouseEvent) => {
+  const handleToggleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     if (onToggleSelect) {
       onToggleSelect();
