@@ -85,10 +85,10 @@ User.hasMany(EmailSuppression, { foreignKey: 'user_id', as: 'emailSuppressions' 
 EmailSuppression.belongsTo(User, { foreignKey: 'user_id' });
 
 // Note associations
-User.hasMany(Note, { foreignKey: 'user_id', as: 'notes' });
+User.hasMany(Note, { foreignKey: 'user_id', as: 'userNotes' });
 Note.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
-Contact.hasMany(Note, { foreignKey: 'contact_id', as: 'notes' });
+Contact.hasMany(Note, { foreignKey: 'contact_id', as: 'contactNotes' });
 Note.belongsTo(Contact, { foreignKey: 'contact_id', as: 'contact' });
 
 module.exports = {
