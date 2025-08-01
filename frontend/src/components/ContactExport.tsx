@@ -97,7 +97,7 @@ const ContactExport: React.FC<ContactExportProps> = ({
   };
 
   const getSelectedFields = () => {
-    const selected = [];
+    const selected: string[] = [];
     
     // Add standard fields
     standardFields.forEach(field => {
