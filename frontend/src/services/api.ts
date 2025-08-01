@@ -214,6 +214,20 @@ export const automationsAPI = {
   getWithSteps: (id: string) => api.get(`/automations/${id}/with-steps`),
   
   validateWorkflow: (id: string) => api.post(`/automations/${id}/validate`),
+  
+  // Exit criteria endpoints
+  getExitCriteria: (id: string) => api.get(`/automations/${id}/exit-criteria`),
+  
+  updateExitCriteria: (id: string, data: {
+    exitCriteria: any;
+    maxDurationDays?: number;
+    safetyExitEnabled?: boolean;
+  }) => api.post(`/automations/${id}/exit-criteria`, data),
+  
+  testExitConditions: (id: string, entityType: 'contact' | 'deal', entityId: string) =>
+    api.post(`/automations/${id}/test-exit`, { entityType, entityId }),
+  
+  getExitStats: (id: string) => api.get(`/automations/${id}/exit-stats`),
 };
 
 // Email Analytics API

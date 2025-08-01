@@ -174,6 +174,12 @@ const AutomationBuilder: React.FC = () => {
     setActions(actions.filter((_, i) => i !== index));
   };
 
+  const handleExitCriteriaChange = (newCriteria: any, newMaxDuration: number | null, newSafetyEnabled: boolean) => {
+    setExitCriteria(newCriteria);
+    setMaxDurationDays(newMaxDuration);
+    setSafetyExitEnabled(newSafetyEnabled);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -337,6 +343,17 @@ const AutomationBuilder: React.FC = () => {
                 />
               ))}
             </div>
+          </div>
+
+          {/* Exit Criteria */}
+          <div className="mb-8">
+            <ExitCriteriaConfig
+              automationId={isEditing ? id : undefined}
+              exitCriteria={exitCriteria}
+              maxDurationDays={maxDurationDays}
+              safetyExitEnabled={safetyExitEnabled}
+              onChange={handleExitCriteriaChange}
+            />
           </div>
 
           {/* Actions */}
