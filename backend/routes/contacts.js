@@ -648,7 +648,7 @@ router.get('/duplicates', authMiddleware, async (req, res) => {
                 sequelize.col('lastName')
               )
             ),
-            { [Op.like]: `%${searchTerm}%` }
+            { [Op.iLike]: `%${searchTerm}%` }
           ),
           // First name only
           { firstName: { [Op.iLike]: `%${searchTerm}%` } },
