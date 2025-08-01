@@ -116,9 +116,9 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
             <div className="flex items-center gap-3">
               <span>
                 <span className="font-medium">{contact.dealStats.openDeals || 0}</span> open
-                {contact.dealStats.openValue > 0 && (
+                {!isNaN(contact.dealStats.openValue) && contact.dealStats.openValue > 0 && (
                   <span className="text-xs text-gray-500 ml-1">
-                    (${contact.dealStats.openValue.toLocaleString()})
+                    (${(isNaN(contact.dealStats.openValue) ? 0 : contact.dealStats.openValue).toLocaleString()})
                   </span>
                 )}
               </span>

@@ -171,12 +171,14 @@ const Pipeline: React.FC = () => {
   };
 
   const formatCurrency = (value: number) => {
+    // Ensure value is a valid number
+    const numValue = isNaN(value) ? 0 : value;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(value);
+    }).format(numValue);
   };
 
   // Calculate won/lost totals from actual deals in view

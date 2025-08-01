@@ -383,7 +383,7 @@ const Contacts: React.FC = () => {
                             <div>
                               <span className="font-medium">{contact.dealStats.openDeals || 0}</span> open
                               <div className="text-xs text-gray-400">
-                                ${(contact.dealStats.openValue || 0).toLocaleString()}
+                                ${(isNaN(contact.dealStats.openValue) ? 0 : contact.dealStats.openValue || 0).toLocaleString()}
                               </div>
                               {contact.dealStats.wonDeals > 0 && (
                                 <div className="text-xs text-green-600">
