@@ -852,4 +852,139 @@ router.post('/merge', authMiddleware, async (req, res) => {
   }
 });
 
+// Export contacts to CSV
+router.get('/export', authMiddleware, async (req, res) => {
+  try {
+    const {
+      fields = 'firstName,lastName,email,phone,company,position',
+      search,
+      tags,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      format = 'csv'
+    } = req.query;
+
+    // Parse fields
+    const requestedFields = fields.split(',').map(f => f.trim());
+    
+    // Build query with same filters as the GET / endpoint
+    const where = { userId: req.user.id };
+
+    // Search functionality
+    if (search) {
+      where[Op.or] = [
+        { firstName: { [Op.iLike]: `%${search}%` } },
+        { lastName: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } },
+        { company: { [Op.iLike]: `%${search}%` } },
+        { position: { [Op.iLike]: `%${search}%` } },
+        { notes: { [Op.iLike]: `%${search}%` } },
+        { tags: { [Op.contains]: [search] } }
+      ];
+    }
+
+    // Tag filtering
+    if (tags) {
+      const tagArray = tags.split(',').map(tag => tag.trim());
+      where.tags = { [Op.contains]: tagArray };
+    }
+
+    // Fetch contacts with a limit of 10,000
+    const contacts = await Contact.findAll({
+      where,
+      order: [[sortBy, sortOrder]],
+      limit: 10000,
+      raw: true
+    });
+
+    // Get custom fields for the user
+    const customFields = await CustomField.findAll({
+      where: { 
+        userId: req.user.id,
+        entityType: 'contact'
+      },
+      order: [['order', 'ASC']]
+    });
+
+    // Build CSV field definitions
+    const csvFields = [];
+    const fieldMap = {
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      email: 'Email',
+      phone: 'Phone',
+      company: 'Company',
+      position: 'Position',
+      tags: 'Tags',
+      notes: 'Notes',
+      createdAt: 'Created Date',
+      updatedAt: 'Updated Date'
+    };
+
+    // Add standard fields
+    requestedFields.forEach(field => {
+      if (fieldMap[field]) {
+        csvFields.push({
+          label: fieldMap[field],
+          value: (row) => {
+            if (field === 'tags') {
+              return Array.isArray(row.tags) ? row.tags.join(', ') : '';
+            }
+            if (field === 'createdAt' || field === 'updatedAt') {
+              return row[field] ? new Date(row[field]).toISOString() : '';
+            }
+            return row[field] || '';
+          }
+        });
+      }
+    });
+
+    // Add custom fields
+    customFields.forEach(customField => {
+      const fieldKey = `customFields.${customField.name}`;
+      if (requestedFields.includes(fieldKey)) {
+        csvFields.push({
+          label: customField.label,
+          value: (row) => {
+            const value = row.customFields?.[customField.name];
+            if (value === null || value === undefined) return '';
+            if (customField.type === 'checkbox') return value ? 'Yes' : 'No';
+            if (customField.type === 'date' && value) {
+              return new Date(value).toISOString().split('T')[0];
+            }
+            return String(value);
+          }
+        });
+      }
+    });
+
+    // Generate CSV using the csvExporter utility
+    const { generateCSV } = require('../utils/csvExporter');
+    
+    // Transform data for CSV generation
+    const csvData = contacts.map(contact => {
+      const row = {};
+      csvFields.forEach(field => {
+        row[field.label] = field.value(contact);
+      });
+      return row;
+    });
+
+    const csv = generateCSV(csvData);
+
+    // Set response headers
+    const filename = `contacts-export-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('X-Total-Count', contacts.length.toString());
+
+    res.send(csv);
+
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({ error: 'Failed to export contacts' });
+  }
+});
+
 module.exports = router;
