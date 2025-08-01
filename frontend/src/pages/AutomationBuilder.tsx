@@ -9,6 +9,7 @@ import ConditionBuilder from '../components/automation/ConditionBuilder';
 import ActionBuilder from '../components/automation/ActionBuilder';
 import EnrollmentView from '../components/automation/EnrollmentView';
 import DebugView from '../components/automation/DebugView';
+import ExitCriteriaConfig from '../components/automation/ExitCriteriaConfig';
 
 const AutomationBuilder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +26,9 @@ const AutomationBuilder: React.FC = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [showEnrollments, setShowEnrollments] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
+  const [exitCriteria, setExitCriteria] = useState<any>({});
+  const [maxDurationDays, setMaxDurationDays] = useState<number | null>(null);
+  const [safetyExitEnabled, setSafetyExitEnabled] = useState(true);
 
   useEffect(() => {
     fetchStages();
@@ -52,6 +56,9 @@ const AutomationBuilder: React.FC = () => {
       setTrigger(automation.trigger);
       setConditions(automation.conditions || []);
       setActions(automation.actions || []);
+      setExitCriteria(automation.exitCriteria || {});
+      setMaxDurationDays(automation.maxDurationDays || null);
+      setSafetyExitEnabled(automation.safetyExitEnabled !== false);
     } catch (error) {
       toast.error('Failed to load automation');
       navigate('/automations');
@@ -78,7 +85,10 @@ const AutomationBuilder: React.FC = () => {
         description,
         trigger,
         conditions,
-        actions
+        actions,
+        exitCriteria,
+        maxDurationDays,
+        safetyExitEnabled
       };
 
       if (isEditing) {
