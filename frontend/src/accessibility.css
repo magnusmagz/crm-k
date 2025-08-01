@@ -113,30 +113,30 @@ input[type="radio"] {
 
 /* Better focus indicators using our primary color */
 :focus {
-  outline: 3px solid #1f2937;
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* Override Tailwind's default checkbox colors */
+/* Override Tailwind's default checkbox colors with theme colors */
 input[type="checkbox"]:checked {
-  background-color: #1f2937 !important;
-  border-color: #1f2937 !important;
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
 }
 
 input[type="checkbox"]:focus {
-  --tw-ring-color: #1f2937 !important;
-  border-color: #1f2937 !important;
+  --tw-ring-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
 }
 
 /* Ensure checkbox check mark uses our color */
 input[type="checkbox"]:checked:hover {
-  background-color: #374151 !important;
-  border-color: #374151 !important;
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
 }
 
 input[type="checkbox"]:checked:focus {
-  background-color: #1f2937 !important;
-  border-color: #1f2937 !important;
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
 }
 
 /* High contrast mode support */

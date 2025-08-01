@@ -243,7 +243,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                         }
                       }
                     }}
-                    className="w-full px-3 py-1 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     autoFocus
                   />
                 ) : (
@@ -267,7 +267,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
                   >
                     <span className="font-medium text-mobile-base">{stage.name}</span>
                     {(stage.name === 'Closed Won' || stage.name === 'Closed Lost') && (
-                      <span className="text-mobile-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                      <span className="text-mobile-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
                         System
                       </span>
                     )}
@@ -327,7 +327,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
             value={newStageName}
             onChange={(e) => setNewStageName(e.target.value)}
             placeholder="Enter new stage name..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
             onKeyPress={(e) => {
               if (e.key === 'Enter' && newStageName.trim()) {
                 handleAddStage();
@@ -337,7 +337,7 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
           <button
             onClick={handleAddStage}
             disabled={isLoading || !newStageName.trim()}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <PlusIcon className="h-5 w-5 mr-1" />
             Add Stage
