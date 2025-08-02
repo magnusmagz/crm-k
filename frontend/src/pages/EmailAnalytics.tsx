@@ -152,7 +152,7 @@ export default function EmailAnalytics() {
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value as any)}
-            className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+            className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary focus:ring-primary"
           >
             <option value="24h">Last 24 Hours</option>
             <option value="7d">Last 7 Days</option>

@@ -106,7 +106,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
     if (event.includes('SUCCESS') || event.includes('COMPLETED')) return 'bg-green-50 border-green-200';
     if (event.includes('FAILED')) return 'bg-red-50 border-red-200';
     if (event.includes('WARNING')) return 'bg-yellow-50 border-yellow-200';
-    return 'bg-blue-50 border-gray-200';
+    return 'bg-gray-50 border-gray-200';
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -154,7 +154,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
               <div
                 key={enrollment.id}
                 className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                  selectedEnrollment === enrollment.id ? 'bg-blue-50 border-gray-200' : 'bg-white hover:bg-gray-50'
+                  selectedEnrollment === enrollment.id ? 'bg-gray-50 border-gray-200' : 'bg-white hover:bg-gray-50'
                 }`}
                 onClick={() => setSelectedEnrollment(selectedEnrollment === enrollment.id ? null : enrollment.id)}
               >
@@ -180,7 +180,7 @@ const EntityDebugView: React.FC<EntityDebugViewProps> = ({ entityType, entityId 
                           processEnrollment(enrollment);
                         }}
                         disabled={processingEnrollment === enrollment.id}
-                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-gray-100 text-primary-dark hover:bg-blue-200 disabled:opacity-50"
+                        className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-gray-100 text-primary-dark hover:bg-gray-200 disabled:opacity-50"
                       >
                         <PlayIcon className="h-3 w-3 mr-1" />
                         {processingEnrollment === enrollment.id ? 'Processing...' : 'Process Now'}

@@ -89,7 +89,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
         } else if (activity.subtype === 'clicked') {
           return <CursorArrowRaysIcon className="h-5 w-5 text-green-600" />;
         }
-        return <EnvelopeIcon className="h-5 w-5 text-indigo-600" />;
+        return <EnvelopeIcon className="h-5 w-5 text-primary" />;
       case 'contact':
         return <UserIcon className="h-5 w-5 text-gray-600" />;
       default:
@@ -108,7 +108,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
       case 'email':
         if (activity.subtype === 'opened') return 'bg-orange-50 border-orange-200';
         if (activity.subtype === 'clicked') return 'bg-green-50 border-green-200';
-        return 'bg-indigo-50 border-indigo-200';
+        return 'bg-gray-50 border-gray-200';
       case 'contact':
         return 'bg-gray-50 border-gray-200';
       default:
@@ -179,7 +179,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, onRefres
             onClick={() => toggleFilter('email')}
             className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
               filter.includes('email')
-                ? 'bg-indigo-100 text-indigo-700'
+                ? 'bg-gray-100 text-primary-dark'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >

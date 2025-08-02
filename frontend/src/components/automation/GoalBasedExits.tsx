@@ -248,7 +248,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                   onChange={(e) => updateGoal(index, { fieldName: e.target.value })}
                   disabled={isReadOnly}
                   placeholder="Custom field name"
-                  className="w-full text-sm rounded-md border-gray-300"
+                  className="w-full text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <select
@@ -284,7 +284,7 @@ const GoalBasedExits: React.FC<GoalBasedExitsProps> = ({
                 onChange={(e) => updateGoal(index, { description: e.target.value })}
                 disabled={isReadOnly}
                 placeholder="Description (optional)"
-                className="w-full text-sm rounded-md border-gray-300"
+                className="w-full text-sm rounded-md border-gray-300 focus:ring-1 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>

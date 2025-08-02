@@ -182,7 +182,7 @@ const AutomationDebugModal: React.FC<AutomationDebugModalProps> = ({
                           ) : (
                             <div className="space-y-3">
                               {debugInfo.enrollments.map((enrollment) => (
-                                <div key={enrollment.id} className="bg-blue-50 rounded-lg p-4">
+                                <div key={enrollment.id} className="bg-gray-50 rounded-lg p-4">
                                   <div className="flex items-start justify-between">
                                     <div>
                                       <p className="font-medium text-primary-dark">

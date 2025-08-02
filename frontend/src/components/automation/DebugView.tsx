@@ -56,7 +56,7 @@ const DebugView: React.FC<DebugViewProps> = ({ automationId }) => {
     if (event.includes('SUCCESS') || event.includes('COMPLETED')) return 'bg-green-50 border-green-200';
     if (event.includes('FAILED')) return 'bg-red-50 border-red-200';
     if (event.includes('WARNING')) return 'bg-yellow-50 border-yellow-200';
-    return 'bg-blue-50 border-gray-200';
+    return 'bg-gray-50 border-gray-200';
   };
 
   const formatTimestamp = (timestamp: string) => {

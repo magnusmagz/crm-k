@@ -11,6 +11,26 @@ const glob = require('glob');
 // Define prohibited patterns and their replacements
 const UX_VIOLATIONS = [
   {
+    pattern: /text-indigo-[456]\d{2}/g,
+    replacement: 'text-primary',
+    message: 'Use text-primary instead of indigo text colors'
+  },
+  {
+    pattern: /bg-indigo-[456]\d{2}/g,
+    replacement: 'bg-primary',
+    message: 'Use bg-primary instead of indigo backgrounds'
+  },
+  {
+    pattern: /border-indigo-[456]\d{2}/g,
+    replacement: 'border-primary',
+    message: 'Use border-primary instead of indigo borders'
+  },
+  {
+    pattern: /hover:text-indigo-[456]\d{2}/g,
+    replacement: 'hover:text-primary-dark',
+    message: 'Use hover:text-primary-dark instead of indigo hover states'
+  },
+  {
     pattern: /bg-blue-6\d{2}/g,
     replacement: 'bg-primary',
     message: 'Use bg-primary instead of blue backgrounds'

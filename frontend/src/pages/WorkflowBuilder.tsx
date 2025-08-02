@@ -522,7 +522,7 @@ const WorkflowBuilder: React.FC = () => {
                           updated[index] = { ...step, actions: newActions as AutomationAction[] };
                           setSteps(updated);
                         }}
-                        className="mt-3 text-sm text-indigo-600 hover:text-indigo-500"
+                        className="mt-3 text-sm text-primary hover:text-primary-dark"
                       >
                         + Add Action
                       </button>
@@ -584,7 +584,7 @@ const WorkflowBuilder: React.FC = () => {
                         Define conditions to determine the workflow path
                       </p>
                       {/* Condition configuration will be added here */}
-                      <button className="text-sm text-indigo-600 hover:text-indigo-500">
+                      <button className="text-sm text-primary hover:text-primary-dark">
                         + Add Condition
                       </button>
                     </div>
@@ -596,7 +596,7 @@ const WorkflowBuilder: React.FC = () => {
                         Create multiple paths based on different conditions
                       </p>
                       {/* Branch configuration will be added here */}
-                      <button className="text-sm text-indigo-600 hover:text-indigo-500">
+                      <button className="text-sm text-primary hover:text-primary-dark">
                         + Add Branch
                       </button>
                     </div>
