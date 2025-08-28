@@ -119,21 +119,8 @@ const Pipeline: React.FC = () => {
         }
         
         const pipelinesResponse = await recruitingAPI.getAll(params);
-        console.log('Recruiting pipelines response:', pipelinesResponse.data);
-        console.log('Raw response keys:', Object.keys(pipelinesResponse.data));
-        console.log('Pipelines in response:', pipelinesResponse.data.pipelines);
-        console.log('Stages:', stagesData);
-        console.log('First pipeline stageId:', pipelinesResponse.data.pipelines?.[0]?.stageId);
-        console.log('First stage id:', stagesData?.[0]?.id);
-        
-        // Check if pipelines exist and have the correct structure
         const pipelines = pipelinesResponse.data.pipelines || [];
-        console.log('Number of pipelines:', pipelines.length);
-        if (pipelines.length > 0) {
-          console.log('First pipeline full data:', pipelines[0]);
-          console.log('Pipeline stageIds:', pipelines.map((p: any) => p.stageId));
-          console.log('Stage ids:', stagesData.map((s: Stage) => s.id));
-        }
+        console.log(`Loaded ${pipelines.length} candidates for recruiting pipeline`);
         
         setRecruitingPipelines(pipelines);
         

@@ -21,14 +21,7 @@ const RecruitingKanbanBoard: React.FC<RecruitingKanbanBoardProps> = ({
   selectedCandidates = new Set(),
   onCandidateToggleSelect
 }) => {
-  console.log('RecruitingKanbanBoard props:', { stages, pipelines });
-  console.log('Pipeline count:', pipelines.length);
-  console.log('Stage count:', stages.length);
-  if (pipelines.length > 0) {
-    console.log('First pipeline:', pipelines[0]);
-    console.log('First pipeline stageId:', pipelines[0].stageId);
-    console.log('All stage IDs from stages:', stages.map(s => s.id));
-  }
+  // Debug logging removed - component is working correctly
   
   const [draggedCandidate, setDraggedCandidate] = useState<RecruitingPipeline | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
@@ -37,11 +30,7 @@ const RecruitingKanbanBoard: React.FC<RecruitingKanbanBoardProps> = ({
   const CANDIDATES_PER_STAGE_LIMIT = 20;
 
   const getCandidatesByStage = (stageId: string) => {
-    const filtered = pipelines.filter(pipeline => pipeline.stageId === stageId);
-    if (pipelines.length > 0 && filtered.length === 0) {
-      console.log(`No matches for stage ${stageId}. Pipeline stageIds:`, pipelines.map(p => p.stageId));
-    }
-    return filtered;
+    return pipelines.filter(pipeline => pipeline.stageId === stageId);
   };
   
   const toggleStageExpansion = (stageId: string) => {
