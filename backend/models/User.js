@@ -74,6 +74,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: true,
       field: 'isActive'
+    },
+    // Super Admin field for platform-wide access
+    isSuperAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'isSuperAdmin'
     }
   }, {
     tableName: 'users',

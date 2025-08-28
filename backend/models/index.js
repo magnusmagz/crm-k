@@ -13,6 +13,7 @@ const sequelize = new Sequelize(dbConfig.url, {
 });
 
 // Import models
+const Organization = require('./Organization')(sequelize, Sequelize.DataTypes);
 const User = require('./User')(sequelize, Sequelize.DataTypes);
 const UserProfile = require('./UserProfile')(sequelize, Sequelize.DataTypes);
 const Contact = require('./Contact')(sequelize, Sequelize.DataTypes);
@@ -32,6 +33,14 @@ const Position = require('./Position')(sequelize, Sequelize.DataTypes);
 const RecruitingPipeline = require('./RecruitingPipeline')(sequelize, Sequelize.DataTypes);
 
 // Define associations
+// Organization associations
+Organization.hasMany(User, { foreignKey: 'organizationId', as: 'users' });
+User.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
+
+Organization.hasMany(Contact, { foreignKey: 'organizationId', as: 'contacts' });
+Contact.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
+
+// User associations
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
 UserProfile.belongsTo(User, { foreignKey: 'user_id' });
 
@@ -116,6 +125,7 @@ RecruitingPipeline.belongsTo(Stage, { foreignKey: 'stage_id' });
 
 module.exports = {
   sequelize,
+  Organization,
   User,
   UserProfile,
   Contact,

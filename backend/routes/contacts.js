@@ -9,38 +9,6 @@ const { parseCSV, getCSVHeaders, validateContactRecord, mapCSVToContact, autoDet
 
 const router = express.Router();
 
-// Debug notes endpoint - TEMPORARY FOR PRODUCTION DEBUGGING
-router.get('/debug-notes', authMiddleware, async (req, res) => {
-  try {
-    const contact = await Contact.findOne({
-      where: { userId: req.user.id },
-      order: [['updatedAt', 'DESC']],
-      limit: 1
-    });
-    
-    if (!contact) {
-      return res.json({ error: 'No contacts found', debug: 'USER_HAS_NO_CONTACTS' });
-    }
-    
-    const rawData = contact.dataValues;
-    const jsonData = contact.toJSON();
-    
-    res.json({
-      debug: 'CONTACT_NOTES_CHECK',
-      contactId: contact.id,
-      name: `${contact.firstName} ${contact.lastName}`,
-      rawKeys: Object.keys(rawData),
-      jsonKeys: Object.keys(jsonData),
-      notesRaw: rawData.notes,
-      notesJson: jsonData.notes,
-      notesType: typeof contact.notes,
-      notesLength: contact.notes ? contact.notes.length : null,
-      notesTrimmed: contact.notes && contact.notes.trim ? contact.notes.trim() : null
-    });
-  } catch (error) {
-    res.json({ error: error.message, debug: 'ENDPOINT_ERROR' });
-  }
-});
 
 // Validation middleware
 const validateContact = [

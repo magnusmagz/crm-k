@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { Op } = require('sequelize');
 const { body, validationResult } = require('express-validator');
 const { User, UserProfile } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
@@ -200,7 +201,7 @@ router.post('/reset-password',
       const user = await User.findOne({
         where: {
           resetToken: token,
-          resetTokenExpiry: { [User.sequelize.Op.gt]: new Date() }
+          resetTokenExpiry: { [Op.gt]: new Date() }
         }
       });
 

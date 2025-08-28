@@ -23,7 +23,9 @@ const trackingRoutes = require('./routes/tracking');
 const analyticsRoutes = require('./routes/analytics');
 const roundRobinRoutes = require('./routes/roundRobin');
 const emailTemplatesRoutes = require('./routes/emailTemplates');
-const { initializeAutomations } = require('./services/automationInitializer');
+const organizationRoutes = require('./routes/organizations');
+const superAdminRoutes = require('./routes/superAdmin');
+// const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -72,6 +74,8 @@ app.use('/api', trackingRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/round-robin', roundRobinRoutes);
 app.use('/api/email-templates', emailTemplatesRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/timeline', require('./routes/timeline'));
 app.use('/api/positions', require('./routes/positions'));
@@ -107,11 +111,11 @@ async function startServer() {
     console.log('Database connection established successfully.');
     
     // Sync database models
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log('Database synced successfully.');
     
     // Initialize automation system
-    initializeAutomations();
+    // initializeAutomations();
     
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
