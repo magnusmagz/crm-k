@@ -194,7 +194,7 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
                 <button
                   onClick={handleAddToPool}
                   disabled={isSubmitting}
-                  className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-1"
+                  className="px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-primary-dark disabled:bg-gray-400 flex items-center gap-1"
                 >
                   {isSubmitting ? (
                     <Loader className="h-4 w-4 animate-spin" />
