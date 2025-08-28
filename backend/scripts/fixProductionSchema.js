@@ -68,8 +68,8 @@ async function fixProductionSchema() {
     // 5. Create a default organization for existing users
     console.log('📝 Creating default organization...');
     const [orgResult] = await sequelize.query(`
-      INSERT INTO organizations (name, crm_name, is_active, settings)
-      VALUES ('Default Organization', 'CRM Killer', true, '{
+      INSERT INTO organizations (id, name, crm_name, is_active, settings)
+      VALUES (gen_random_uuid(), 'Default Organization', 'CRM Killer', true, '{
         "allowUserRegistration": false,
         "requireEmailVerification": true,
         "defaultUserRole": "user",
@@ -81,7 +81,7 @@ async function fixProductionSchema() {
           "recruiting": true
         }
       }'::jsonb)
-      ON CONFLICT DO NOTHING
+      ON CONFLICT (name) DO NOTHING
       RETURNING id;
     `);
     
