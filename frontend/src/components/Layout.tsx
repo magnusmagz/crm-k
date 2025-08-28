@@ -4,13 +4,16 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAppMode } from '../contexts/AppModeContext';
 import FixedFAB from './FixedFAB';
 import MobileNav from './MobileNav';
+import { BriefcaseIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Contacts', href: '/contacts' },
   { name: 'Pipeline', href: '/pipeline' },
+  { name: 'Round-Robin', href: '/round-robin' },
   { name: 'Actions', href: '/automations' },
   { name: 'Metrics', href: '/email-analytics' },
   { name: 'Custom Fields', href: '/custom-fields' },
@@ -25,6 +28,7 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const { profile, logout } = useAuth();
   const { crmName, primaryColor } = useTheme();
+  const { mode, toggleMode } = useAppMode();
 
   const handleLogout = () => {
     logout();
@@ -64,6 +68,24 @@ const Layout: React.FC = () => {
                   </div>
                   <div className="hidden md:block">
                     <div className="ml-4 flex items-center md:ml-6">
+                      {/* Mode Toggle Button */}
+                      <button
+                        onClick={toggleMode}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white transition-colors mr-4"
+                        title={`Switch to ${mode === 'sales' ? 'Recruiting' : 'Sales'} Mode`}
+                      >
+                        {mode === 'sales' ? (
+                          <>
+                            <BriefcaseIcon className="h-5 w-5" />
+                            <span className="text-sm font-medium">Sales Mode</span>
+                          </>
+                        ) : (
+                          <>
+                            <UserGroupIcon className="h-5 w-5" />
+                            <span className="text-sm font-medium">Recruiting Mode</span>
+                          </>
+                        )}
+                      </button>
                       <Menu as="div" className="relative ml-3">
                         <div>
                           <Menu.Button className="flex max-w-xs items-center rounded-full bg-primary text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">

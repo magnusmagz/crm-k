@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AppModeProvider } from './contexts/AppModeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 
@@ -20,6 +21,13 @@ const WorkflowBuilder = lazy(() => import('./pages/WorkflowBuilder'));
 const Metrics = lazy(() => import('./pages/EmailAnalytics'));
 const DuplicateContacts = lazy(() => import('./pages/DuplicateContacts'));
 
+// Round-Robin pages
+const AssignmentDashboard = lazy(() => import('./pages/RoundRobin/AssignmentDashboard'));
+const AssignmentRules = lazy(() => import('./pages/RoundRobin/AssignmentRules'));
+const RuleBuilder = lazy(() => import('./pages/RoundRobin/RuleBuilder'));
+const ManualAssignment = lazy(() => import('./pages/RoundRobin/ManualAssignment'));
+const AssignmentHistory = lazy(() => import('./pages/RoundRobin/AssignmentHistory'));
+
 // Loading component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -32,7 +40,8 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          <Suspense fallback={<PageLoader />}>
+          <AppModeProvider>
+            <Suspense fallback={<PageLoader />}>
             <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -49,9 +58,15 @@ function App() {
               <Route path="profile" element={<Profile />} />
               <Route path="custom-fields" element={<CustomFields />} />
               <Route path="duplicates" element={<DuplicateContacts />} />
+              <Route path="round-robin" element={<AssignmentDashboard />} />
+              <Route path="round-robin/rules" element={<AssignmentRules />} />
+              <Route path="round-robin/rules/new" element={<RuleBuilder />} />
+              <Route path="round-robin/assign" element={<ManualAssignment />} />
+              <Route path="round-robin/history" element={<AssignmentHistory />} />
             </Route>
             </Routes>
           </Suspense>
+          </AppModeProvider>
         </ThemeProvider>
       </AuthProvider>
     </Router>
