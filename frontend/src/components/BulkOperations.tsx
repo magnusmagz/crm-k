@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { X, Edit3, Plus, Minus, Trash2, Loader } from 'lucide-react';
+import { X, Edit3, Plus, Minus, Trash2, Loader, UserPlus } from 'lucide-react';
 import { Contact, Deal } from '../types';
 import api from '../services/api';
 
@@ -110,6 +110,30 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
     }
   }, [selectedItems, entityType, onClearSelection, onRefresh, selectedCount]);
 
+  const handleAddToPool = useCallback(async () => {
+    if (selectedCount === 0 || entityType !== 'contacts') return;
+
+    const confirmMessage = `Add ${selectedCount} contact${selectedCount > 1 ? 's' : ''} to the Round Robin assignment pool?\n\nThis will remove their current assignments and make them available for redistribution.`;
+    if (!window.confirm(confirmMessage)) return;
+
+    setIsSubmitting(true);
+    try {
+      const ids = Array.from(selectedItems);
+      const response = await api.post('/contacts/bulk-add-to-pool', { 
+        ids,
+        autoAssign: false // Don't auto-assign, just add to pool
+      });
+
+      alert(response.data.message);
+      onClearSelection();
+      onRefresh();
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Failed to add contacts to pool');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [selectedItems, selectedCount, onClearSelection, onRefresh]);
+
   const addTag = () => {
     if (!newTag.trim()) return;
     
@@ -166,6 +190,20 @@ const BulkOperations: React.FC<BulkOperationsProps> = ({
                 <Edit3 className="h-4 w-4" />
                 Bulk Edit
               </button>
+              {entityType === 'contacts' && (
+                <button
+                  onClick={handleAddToPool}
+                  disabled={isSubmitting}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-400 flex items-center gap-1"
+                >
+                  {isSubmitting ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="h-4 w-4" />
+                  )}
+                  Add to Pool
+                </button>
+              )}
               <button
                 onClick={handleBulkDelete}
                 disabled={isSubmitting}
