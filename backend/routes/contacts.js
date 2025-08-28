@@ -9,6 +9,39 @@ const { parseCSV, getCSVHeaders, validateContactRecord, mapCSVToContact, autoDet
 
 const router = express.Router();
 
+// Debug notes endpoint - TEMPORARY FOR PRODUCTION DEBUGGING
+router.get('/debug-notes', authMiddleware, async (req, res) => {
+  try {
+    const contact = await Contact.findOne({
+      where: { userId: req.user.id },
+      order: [['updatedAt', 'DESC']],
+      limit: 1
+    });
+    
+    if (!contact) {
+      return res.json({ error: 'No contacts found', debug: 'USER_HAS_NO_CONTACTS' });
+    }
+    
+    const rawData = contact.dataValues;
+    const jsonData = contact.toJSON();
+    
+    res.json({
+      debug: 'CONTACT_NOTES_CHECK',
+      contactId: contact.id,
+      name: `${contact.firstName} ${contact.lastName}`,
+      rawKeys: Object.keys(rawData),
+      jsonKeys: Object.keys(jsonData),
+      notesRaw: rawData.notes,
+      notesJson: jsonData.notes,
+      notesType: typeof contact.notes,
+      notesLength: contact.notes ? contact.notes.length : null,
+      notesTrimmed: contact.notes && contact.notes.trim ? contact.notes.trim() : null
+    });
+  } catch (error) {
+    res.json({ error: error.message, debug: 'ENDPOINT_ERROR' });
+  }
+});
+
 // Validation middleware
 const validateContact = [
   body('firstName').notEmpty().trim().withMessage('First name is required'),
@@ -447,6 +480,114 @@ router.post('/bulk-edit', authMiddleware,
       await transaction.rollback();
       console.error('Bulk edit error:', error);
       res.status(500).json({ error: 'Failed to update contacts' });
+    }
+  }
+);
+
+// Bulk add contacts to Round Robin pool
+router.post('/bulk-add-to-pool', authMiddleware,
+  body('ids').isArray().notEmpty().withMessage('Contact IDs array is required'),
+  body('autoAssign').optional().isBoolean(),
+  async (req, res) => {
+    const transaction = await sequelize.transaction();
+    
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { ids, autoAssign = false } = req.body;
+
+      // Validate that all contacts belong to the user's organization
+      // Note: Using userId for now since contacts are user-scoped
+      const contacts = await Contact.findAll({
+        where: {
+          id: { [Op.in]: ids },
+          userId: req.user.id
+        },
+        transaction
+      });
+
+      if (contacts.length === 0) {
+        await transaction.rollback();
+        return res.status(404).json({ error: 'No contacts found' });
+      }
+
+      if (contacts.length !== ids.length) {
+        await transaction.rollback();
+        return res.status(403).json({ 
+          error: `${ids.length - contacts.length} contact(s) not found or not accessible` 
+        });
+      }
+
+      // Remove assignment from all selected contacts (add to pool)
+      const result = await Contact.update(
+        { 
+          assignedTo: null,
+          assignedAt: null
+        },
+        {
+          where: {
+            id: { [Op.in]: ids },
+            userId: req.user.id
+          },
+          transaction
+        }
+      );
+
+      await transaction.commit();
+
+      // Log the action for audit purposes
+      console.log(`User ${req.user.email} added ${result[0]} contacts to Round Robin pool`);
+
+      // If auto-assign requested, trigger Round Robin assignment
+      let assignedCount = 0;
+      if (autoAssign && result[0] > 0) {
+        try {
+          const assignmentEngine = require('../services/assignmentEngine');
+          const unassignedContacts = await Contact.findAll({
+            where: {
+              id: { [Op.in]: ids },
+              assignedTo: null,
+              userId: req.user.id
+            }
+          });
+
+          // Get the user's organizationId for Round Robin processing
+          const user = await req.user;
+          const organizationId = user.organizationId || user.id; // Fallback to userId if no org
+
+          for (const contact of unassignedContacts) {
+            const assignment = await assignmentEngine.processIncomingLead(
+              contact,
+              organizationId
+            );
+            if (assignment) {
+              assignedCount++;
+            }
+          }
+        } catch (assignError) {
+          console.error('Error during auto-assignment:', assignError);
+          // Don't fail the whole operation if auto-assignment fails
+        }
+      }
+
+      let message = `Successfully added ${result[0]} contact${result[0] !== 1 ? 's' : ''} to the assignment pool`;
+      if (assignedCount > 0) {
+        message += ` and assigned ${assignedCount} via Round Robin`;
+      }
+
+      res.json({
+        message,
+        count: result[0],
+        assignedCount
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Bulk add to pool error:', error);
+      res.status(500).json({ error: 'Failed to add contacts to pool' });
     }
   }
 );
