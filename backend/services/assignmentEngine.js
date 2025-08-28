@@ -1,4 +1,5 @@
 const { Contact, User, UserProfile, sequelize } = require('../models');
+const { Op } = require('sequelize');
 const { v4: uuidv4 } = require('uuid');
 
 class AssignmentEngine {
@@ -334,7 +335,7 @@ class AssignmentEngine {
       
       const contacts = await Contact.findAll({
         where: {
-          userId: { [sequelize.Op.in]: userIds },
+          userId: { [Op.in]: userIds },
           assignedTo: null
         },
         order: [['createdAt', 'DESC']],
