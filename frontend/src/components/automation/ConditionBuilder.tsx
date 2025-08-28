@@ -36,7 +36,15 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   const fetchFields = async () => {
     if (!triggerType) return;
     
-    const entityType = triggerType.includes('contact') ? 'contact' : 'deal';
+    let entityType: 'contact' | 'deal' = 'contact';
+    if (triggerType.includes('deal')) {
+      entityType = 'deal';
+    } else if (triggerType.includes('candidate') || triggerType.includes('position') || triggerType.includes('interview')) {
+      // For recruiting triggers, we'll use candidate fields
+      setFields(getDefaultFields());
+      return;
+    }
+    
     setIsLoadingFields(true);
     
     try {
@@ -52,7 +60,33 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   };
 
   const getDefaultFields = () => {
-    if (triggerType.includes('contact')) {
+    if (triggerType.includes('candidate') || triggerType.includes('interview')) {
+      return [
+        { name: 'candidate.firstName', label: 'Candidate First Name', type: 'text' },
+        { name: 'candidate.lastName', label: 'Candidate Last Name', type: 'text' },
+        { name: 'candidate.email', label: 'Candidate Email', type: 'email' },
+        { name: 'candidate.phone', label: 'Candidate Phone', type: 'text' },
+        { name: 'candidate.skills', label: 'Skills', type: 'array' },
+        { name: 'candidate.experienceYears', label: 'Years of Experience', type: 'number' },
+        { name: 'candidate.currentEmployer', label: 'Current Employer', type: 'text' },
+        { name: 'candidate.currentRole', label: 'Current Role', type: 'text' },
+        { name: 'pipeline.status', label: 'Pipeline Status', type: 'select', options: ['active', 'hired', 'passed', 'withdrawn'] },
+        { name: 'pipeline.rating', label: 'Candidate Rating', type: 'number' },
+        { name: 'position.title', label: 'Position Title', type: 'text' },
+        { name: 'position.department', label: 'Department', type: 'text' },
+        { name: 'position.location', label: 'Location', type: 'text' },
+        { name: 'stage.name', label: 'Stage Name', type: 'text' },
+      ];
+    } else if (triggerType.includes('position')) {
+      return [
+        { name: 'position.title', label: 'Position Title', type: 'text' },
+        { name: 'position.department', label: 'Department', type: 'text' },
+        { name: 'position.location', label: 'Location', type: 'text' },
+        { name: 'position.type', label: 'Employment Type', type: 'select', options: ['full-time', 'part-time', 'contract', 'internship'] },
+        { name: 'position.remote', label: 'Work Arrangement', type: 'select', options: ['onsite', 'remote', 'hybrid'] },
+        { name: 'position.status', label: 'Position Status', type: 'select', options: ['open', 'closed', 'on-hold'] },
+      ];
+    } else if (triggerType.includes('contact')) {
       return [
         { name: 'firstName', label: 'First Name', type: 'text' },
         { name: 'lastName', label: 'Last Name', type: 'text' },

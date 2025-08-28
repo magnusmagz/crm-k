@@ -9,30 +9,49 @@ const router = express.Router();
 // Get all stages for the user
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const stages = await Stage.findAll({
-      where: { userId: req.user.id },
-      order: [['order', 'ASC']],
-      include: [{
-        model: Deal,
-        as: 'deals',
-        attributes: ['id', 'value', 'status'],
-        required: false
-      }]
-    });
+    const { pipelineType = 'sales' } = req.query;
+    
+    // For recruiting stages, don't include deals
+    if (pipelineType === 'recruiting') {
+      const stages = await Stage.findAll({
+        where: { 
+          userId: req.user.id,
+          pipelineType: 'recruiting'
+        },
+        order: [['order', 'ASC']]
+      });
+      
+      res.json({ stages });
+    } else {
+      // For sales stages, include deals
+      const stages = await Stage.findAll({
+        where: { 
+          userId: req.user.id,
+          pipelineType: 'sales'
+        },
+        order: [['order', 'ASC']],
+        include: [{
+          model: Deal,
+          as: 'deals',
+          attributes: ['id', 'value', 'status'],
+          required: false
+        }]
+      });
 
-    // Calculate totals for each stage
-    const stagesWithTotals = stages.map(stage => {
-      const stageData = stage.toJSON();
-      const allDeals = stageData.deals || [];
-      return {
-        ...stageData,
-        dealCount: allDeals.length,
-        totalValue: allDeals.reduce((sum, deal) => sum + (parseFloat(deal.value) || 0), 0),
-        deals: undefined // Remove the deals array from response to reduce payload
-      };
-    });
+      // Calculate totals for each stage
+      const stagesWithTotals = stages.map(stage => {
+        const stageData = stage.toJSON();
+        const allDeals = stageData.deals || [];
+        return {
+          ...stageData,
+          dealCount: allDeals.length,
+          totalValue: allDeals.reduce((sum, deal) => sum + (parseFloat(deal.value) || 0), 0),
+          deals: undefined // Remove the deals array from response to reduce payload
+        };
+      });
 
-    res.json({ stages: stagesWithTotals });
+      res.json({ stages: stagesWithTotals });
+    }
   } catch (error) {
     console.error('Get stages error:', error);
     res.status(500).json({ error: 'Failed to get stages' });
@@ -43,7 +62,8 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, [
   body('name').notEmpty().trim(),
   body('color').optional().matches(/^#[0-9A-F]{6}$/i),
-  body('order').optional().isInt({ min: 0 })
+  body('order').optional().isInt({ min: 0 }),
+  body('pipelineType').optional().isIn(['sales', 'recruiting'])
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -51,15 +71,21 @@ router.post('/', authMiddleware, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    // Get the highest order value
+    const pipelineType = req.body.pipelineType || 'sales';
+
+    // Get the highest order value for this pipeline type
     const maxOrderStage = await Stage.findOne({
-      where: { userId: req.user.id },
+      where: { 
+        userId: req.user.id,
+        pipelineType
+      },
       order: [['order', 'DESC']]
     });
 
     const stage = await Stage.create({
       ...req.body,
       userId: req.user.id,
+      pipelineType,
       order: req.body.order !== undefined ? req.body.order : (maxOrderStage ? maxOrderStage.order + 1 : 0)
     });
 
@@ -190,21 +216,30 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 // Initialize default stages for new users
 router.post('/initialize', authMiddleware, async (req, res) => {
   try {
-    // Check if user already has stages
+    const { pipelineType = 'sales' } = req.body;
+    
+    // Check if user already has stages for this pipeline type
     const existingStages = await Stage.count({
-      where: { userId: req.user.id }
+      where: { 
+        userId: req.user.id,
+        pipelineType
+      }
     });
 
     if (existingStages > 0) {
-      return res.status(400).json({ error: 'Stages already initialized' });
+      return res.status(400).json({ error: `Stages already initialized for ${pipelineType} pipeline` });
     }
 
-    const defaultStages = Stage.getDefaultStages();
+    const defaultStages = pipelineType === 'recruiting' 
+      ? Stage.getDefaultRecruitingStages()
+      : Stage.getDefaultStages();
+      
     const stages = await Promise.all(
       defaultStages.map(stage => 
         Stage.create({
           ...stage,
-          userId: req.user.id
+          userId: req.user.id,
+          pipelineType
         })
       )
     );

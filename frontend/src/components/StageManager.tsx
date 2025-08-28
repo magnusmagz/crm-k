@@ -8,9 +8,10 @@ interface StageManagerProps {
   stages: Stage[];
   onUpdate: () => void;
   onClose: () => void;
+  pipelineType?: 'sales' | 'recruiting';
 }
 
-const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }) => {
+const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose, pipelineType = 'sales' }) => {
   const [stageList, setStageList] = useState<Stage[]>([...stages]);
   const [newStageName, setNewStageName] = useState('');
   const [editingStage, setEditingStage] = useState<string | null>(null);
@@ -52,7 +53,8 @@ const StageManager: React.FC<StageManagerProps> = ({ stages, onUpdate, onClose }
     try {
       const response = await stagesAPI.create({
         name: newStageName,
-        color: colors[stageList.length % colors.length].value
+        color: colors[stageList.length % colors.length].value,
+        pipelineType
       });
       setStageList([...stageList, response.data.stage]);
       setNewStageName('');

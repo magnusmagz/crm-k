@@ -1,4 +1,4 @@
-const { Automation, AutomationLog, Contact, Deal, Stage } = require('../models');
+const { Automation, AutomationLog, Contact, Deal, Stage, RecruitingPipeline, Position } = require('../models');
 const { Op } = require('sequelize');
 
 class AutomationEngine {
@@ -8,7 +8,14 @@ class AutomationEngine {
       'add_contact_tag': this.addContactTag.bind(this),
       'update_deal_field': this.updateDealField.bind(this),
       'move_deal_to_stage': this.moveDealToStage.bind(this),
-      'update_custom_field': this.updateCustomField.bind(this)
+      'update_custom_field': this.updateCustomField.bind(this),
+      // Recruiting actions
+      'update_candidate_status': this.updateCandidateStatus.bind(this),
+      'move_candidate_to_stage': this.moveCandidateToStage.bind(this),
+      'update_candidate_rating': this.updateCandidateRating.bind(this),
+      'add_candidate_note': this.addCandidateNote.bind(this),
+      'schedule_interview': this.scheduleInterview.bind(this),
+      'assign_to_position': this.assignToPosition.bind(this)
     };
   }
 
@@ -347,6 +354,150 @@ class AutomationEngine {
     const customFields = entity.customFields || {};
     customFields[fieldName] = value;
     await entity.update({ customFields });
+  }
+
+  // Recruiting Pipeline Actions
+  async updateCandidateStatus(config, eventData, userId) {
+    const { pipelineId, status } = config;
+    const targetPipelineId = pipelineId || eventData.pipeline?.id;
+
+    if (!targetPipelineId) {
+      throw new Error('No pipeline ID available for update');
+    }
+
+    const pipeline = await RecruitingPipeline.findOne({
+      where: { id: targetPipelineId, userId }
+    });
+
+    if (!pipeline) {
+      throw new Error('Recruiting pipeline entry not found');
+    }
+
+    await pipeline.update({ status });
+  }
+
+  async moveCandidateToStage(config, eventData, userId) {
+    const { pipelineId, stageId } = config;
+    const targetPipelineId = pipelineId || eventData.pipeline?.id;
+
+    if (!targetPipelineId) {
+      throw new Error('No pipeline ID available for update');
+    }
+
+    const pipeline = await RecruitingPipeline.findOne({
+      where: { id: targetPipelineId, userId }
+    });
+
+    if (!pipeline) {
+      throw new Error('Recruiting pipeline entry not found');
+    }
+
+    // Verify stage exists and is a recruiting stage
+    const stage = await Stage.findOne({
+      where: { 
+        id: stageId, 
+        userId,
+        pipelineType: 'recruiting'
+      }
+    });
+
+    if (!stage) {
+      throw new Error('Stage not found or not a recruiting stage');
+    }
+
+    await pipeline.update({ stageId });
+  }
+
+  async updateCandidateRating(config, eventData, userId) {
+    const { pipelineId, rating } = config;
+    const targetPipelineId = pipelineId || eventData.pipeline?.id;
+
+    if (!targetPipelineId) {
+      throw new Error('No pipeline ID available for update');
+    }
+
+    const pipeline = await RecruitingPipeline.findOne({
+      where: { id: targetPipelineId, userId }
+    });
+
+    if (!pipeline) {
+      throw new Error('Recruiting pipeline entry not found');
+    }
+
+    await pipeline.update({ rating });
+  }
+
+  async addCandidateNote(config, eventData, userId) {
+    const { pipelineId, note } = config;
+    const targetPipelineId = pipelineId || eventData.pipeline?.id;
+
+    if (!targetPipelineId) {
+      throw new Error('No pipeline ID available for update');
+    }
+
+    const pipeline = await RecruitingPipeline.findOne({
+      where: { id: targetPipelineId, userId }
+    });
+
+    if (!pipeline) {
+      throw new Error('Recruiting pipeline entry not found');
+    }
+
+    // Append to existing notes
+    const existingNotes = pipeline.notes || '';
+    const timestamp = new Date().toISOString();
+    const newNotes = existingNotes 
+      ? `${existingNotes}\n\n[${timestamp}] ${note}`
+      : `[${timestamp}] ${note}`;
+
+    await pipeline.update({ notes: newNotes });
+  }
+
+  async scheduleInterview(config, eventData, userId) {
+    const { pipelineId, interviewDate } = config;
+    const targetPipelineId = pipelineId || eventData.pipeline?.id;
+
+    if (!targetPipelineId) {
+      throw new Error('No pipeline ID available for update');
+    }
+
+    const pipeline = await RecruitingPipeline.findOne({
+      where: { id: targetPipelineId, userId }
+    });
+
+    if (!pipeline) {
+      throw new Error('Recruiting pipeline entry not found');
+    }
+
+    await pipeline.update({ interviewDate: new Date(interviewDate) });
+  }
+
+  async assignToPosition(config, eventData, userId) {
+    const { pipelineId, positionId } = config;
+    const targetPipelineId = pipelineId || eventData.pipeline?.id;
+
+    if (!targetPipelineId) {
+      throw new Error('No pipeline ID available for update');
+    }
+
+    const pipeline = await RecruitingPipeline.findOne({
+      where: { id: targetPipelineId, userId }
+    });
+
+    if (!pipeline) {
+      throw new Error('Recruiting pipeline entry not found');
+    }
+
+    // Verify position exists
+    const position = await Position.findOne({
+      where: { id: positionId, userId }
+    });
+
+    if (!position) {
+      throw new Error('Position not found');
+    }
+
+    await pipeline.update({ positionId });
   }
 }
 

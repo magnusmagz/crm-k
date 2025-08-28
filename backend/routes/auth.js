@@ -76,17 +76,37 @@ router.post('/login', validateLogin, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Login validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
     const { email, password } = req.body;
+    console.log('Login attempt for email:', email);
 
     const user = await User.findOne({ 
       where: { email },
       include: [{ model: UserProfile, as: 'profile' }]
     });
 
-    if (!user || !(await user.comparePassword(password))) {
+    console.log('User found:', user ? 'Yes' : 'No');
+    
+    if (!user) {
+      console.log('No user found with email:', email);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    console.log('Stored password hash:', user.password ? `${user.password.substring(0, 20)}...` : 'NO PASSWORD');
+    console.log('Input password:', password);
+    
+    const passwordValid = await user.comparePassword(password);
+    console.log('Password valid:', passwordValid);
+
+    if (!passwordValid) {
+      console.log('Invalid password for user:', email);
+      // Let's also test with a known working password
+      const testHash = await require('bcryptjs').hash('password123', 10);
+      const testCompare = await require('bcryptjs').compare('password123', testHash);
+      console.log('Test hash/compare works:', testCompare);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

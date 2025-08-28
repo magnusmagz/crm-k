@@ -1,6 +1,7 @@
 import React from 'react';
 import { AutomationTrigger } from '../../types';
-import { UserIcon, UserPlusIcon, CurrencyDollarIcon, ArrowPathIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { UserIcon, UserPlusIcon, CurrencyDollarIcon, ArrowPathIcon, ChartBarIcon, UserGroupIcon, AcademicCapIcon, CalendarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useAppMode } from '../../contexts/AppModeContext';
 
 interface TriggerSelectorProps {
   trigger: AutomationTrigger;
@@ -8,7 +9,9 @@ interface TriggerSelectorProps {
 }
 
 const TriggerSelector: React.FC<TriggerSelectorProps> = ({ trigger, onChange }) => {
-  const triggers = [
+  const { mode } = useAppMode();
+  
+  const salesTriggers = [
     {
       type: 'contact_created',
       label: 'Contact Created',
@@ -40,6 +43,53 @@ const TriggerSelector: React.FC<TriggerSelectorProps> = ({ trigger, onChange }) 
       icon: ChartBarIcon,
     },
   ];
+  
+  const recruitingTriggers = [
+    {
+      type: 'candidate_added',
+      label: 'Candidate Added',
+      description: 'When a candidate applies for a position',
+      icon: UserPlusIcon,
+    },
+    {
+      type: 'candidate_updated',
+      label: 'Candidate Updated',
+      description: 'When candidate information is modified',
+      icon: UserIcon,
+    },
+    {
+      type: 'candidate_stage_changed',
+      label: 'Candidate Stage Changed',
+      description: 'When a candidate moves to a different stage',
+      icon: ChartBarIcon,
+    },
+    {
+      type: 'candidate_hired',
+      label: 'Candidate Hired',
+      description: 'When a candidate is marked as hired',
+      icon: CheckCircleIcon,
+    },
+    {
+      type: 'candidate_passed',
+      label: 'Candidate Passed',
+      description: 'When a candidate is passed on',
+      icon: UserGroupIcon,
+    },
+    {
+      type: 'interview_scheduled',
+      label: 'Interview Scheduled',
+      description: 'When an interview is scheduled',
+      icon: CalendarIcon,
+    },
+    {
+      type: 'position_created',
+      label: 'Position Created',
+      description: 'When a new position is created',
+      icon: AcademicCapIcon,
+    },
+  ];
+  
+  const triggers = mode === 'recruiting' ? recruitingTriggers : salesTriggers;
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

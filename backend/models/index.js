@@ -28,6 +28,8 @@ const EmailEvent = require('./EmailEvent')(sequelize, Sequelize.DataTypes);
 const EmailLink = require('./EmailLink')(sequelize, Sequelize.DataTypes);
 const EmailSuppression = require('./EmailSuppression')(sequelize, Sequelize.DataTypes);
 const Note = require('./Note')(sequelize, Sequelize.DataTypes);
+const Position = require('./Position')(sequelize, Sequelize.DataTypes);
+const RecruitingPipeline = require('./RecruitingPipeline')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
@@ -35,6 +37,10 @@ UserProfile.belongsTo(User, { foreignKey: 'user_id' });
 
 User.hasMany(Contact, { foreignKey: 'user_id', as: 'contacts' });
 Contact.belongsTo(User, { foreignKey: 'user_id' });
+
+// Assignment relationship - who the contact is assigned to
+Contact.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignedUser' });
+User.hasMany(Contact, { foreignKey: 'assignedTo', as: 'assignedContacts' });
 
 User.hasMany(CustomField, { foreignKey: 'user_id', as: 'customFields' });
 CustomField.belongsTo(User, { foreignKey: 'user_id' });
@@ -91,6 +97,23 @@ Note.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Contact.hasMany(Note, { foreignKey: 'contact_id', as: 'contactNotes' });
 Note.belongsTo(Contact, { foreignKey: 'contact_id', as: 'contact' });
 
+// Position associations
+User.hasMany(Position, { foreignKey: 'user_id', as: 'positions' });
+Position.belongsTo(User, { foreignKey: 'user_id' });
+
+// RecruitingPipeline associations
+User.hasMany(RecruitingPipeline, { foreignKey: 'user_id', as: 'recruitingPipelines' });
+RecruitingPipeline.belongsTo(User, { foreignKey: 'user_id' });
+
+Contact.hasMany(RecruitingPipeline, { foreignKey: 'candidate_id', as: 'applications' });
+RecruitingPipeline.belongsTo(Contact, { foreignKey: 'candidate_id', as: 'candidate' });
+
+Position.hasMany(RecruitingPipeline, { foreignKey: 'position_id', as: 'candidates' });
+RecruitingPipeline.belongsTo(Position, { foreignKey: 'position_id' });
+
+Stage.hasMany(RecruitingPipeline, { foreignKey: 'stage_id', as: 'recruitingPipelines' });
+RecruitingPipeline.belongsTo(Stage, { foreignKey: 'stage_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -107,5 +130,7 @@ module.exports = {
   EmailEvent,
   EmailLink,
   EmailSuppression,
-  Note
+  Note,
+  Position,
+  RecruitingPipeline
 };

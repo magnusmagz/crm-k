@@ -40,6 +40,28 @@ module.exports = (sequelize, DataTypes) => {
     lastLogin: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    // Multi-tenant fields
+    organizationId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'organizationId'
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      field: 'isAdmin'
+    },
+    isLoanOfficer: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      field: 'isLoanOfficer'
+    },
+    licensedStates: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+      field: 'licensedStates'
     }
   }, {
     tableName: 'users',

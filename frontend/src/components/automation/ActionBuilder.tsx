@@ -35,6 +35,13 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
   }, [triggerType]);
 
   const fetchFields = async () => {
+    // Skip fetching for recruiting triggers as they use different field structures
+    if (triggerType.includes('candidate') || triggerType.includes('position') || triggerType.includes('interview')) {
+      setContactFields([]);
+      setDealFields([]);
+      return;
+    }
+    
     setIsLoadingFields(true);
     
     try {
@@ -64,12 +71,23 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
       { value: 'update_deal_field', label: 'Update Deal Field' },
       { value: 'move_deal_to_stage', label: 'Move Deal to Stage' },
     ];
+    
+    const recruitingActions = [
+      { value: 'update_candidate_status', label: 'Update Candidate Status' },
+      { value: 'move_candidate_to_stage', label: 'Move Candidate to Stage' },
+      { value: 'update_candidate_rating', label: 'Update Candidate Rating' },
+      { value: 'add_candidate_note', label: 'Add Note to Candidate' },
+      { value: 'schedule_interview', label: 'Schedule Interview' },
+      { value: 'assign_to_position', label: 'Assign to Position' },
+    ];
 
     const customFieldAction = [
       { value: 'update_custom_field', label: 'Update Custom Field' },
     ];
 
-    if (triggerType.includes('contact')) {
+    if (triggerType.includes('candidate') || triggerType.includes('position') || triggerType.includes('interview')) {
+      return [...recruitingActions, ...customFieldAction];
+    } else if (triggerType.includes('contact')) {
       return [...contactActions, ...customFieldAction];
     } else if (triggerType.includes('deal')) {
       return [...dealActions, ...contactActions, ...customFieldAction];
@@ -252,12 +270,113 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
             className="px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
           >
             <option value="">Select stage</option>
-            {stages.map((stage) => (
+            {stages.filter(s => s.pipelineType === 'sales').map((stage) => (
               <option key={stage.id} value={stage.id}>
                 {stage.name}
               </option>
             ))}
           </select>
+        );
+        
+      // Recruiting Actions
+      case 'update_candidate_status':
+        return (
+          <select
+            value={action.config.status || ''}
+            onChange={(e) => onChange({
+              ...action,
+              config: { ...action.config, status: e.target.value }
+            })}
+            className="px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+          >
+            <option value="">Select status</option>
+            <option value="active">Active</option>
+            <option value="hired">Hired</option>
+            <option value="passed">Passed</option>
+            <option value="withdrawn">Withdrawn</option>
+          </select>
+        );
+        
+      case 'move_candidate_to_stage':
+        return (
+          <select
+            value={action.config.stageId || ''}
+            onChange={(e) => onChange({
+              ...action,
+              config: { ...action.config, stageId: e.target.value }
+            })}
+            className="px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+          >
+            <option value="">Select stage</option>
+            {stages.filter(s => s.pipelineType === 'recruiting').map((stage) => (
+              <option key={stage.id} value={stage.id}>
+                {stage.name}
+              </option>
+            ))}
+          </select>
+        );
+        
+      case 'update_candidate_rating':
+        return (
+          <select
+            value={action.config.rating || ''}
+            onChange={(e) => onChange({
+              ...action,
+              config: { ...action.config, rating: parseInt(e.target.value) }
+            })}
+            className="px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+          >
+            <option value="">Select rating</option>
+            <option value="1">1 Star</option>
+            <option value="2">2 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="5">5 Stars</option>
+          </select>
+        );
+        
+      case 'add_candidate_note':
+        return (
+          <textarea
+            value={action.config.note || ''}
+            onChange={(e) => onChange({
+              ...action,
+              config: { ...action.config, note: e.target.value }
+            })}
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+            placeholder="Enter note to add to candidate"
+            rows={3}
+          />
+        );
+        
+      case 'schedule_interview':
+        return (
+          <input
+            type="datetime-local"
+            value={action.config.interviewDate || ''}
+            onChange={(e) => onChange({
+              ...action,
+              config: { ...action.config, interviewDate: e.target.value }
+            })}
+            className="px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+          />
+        );
+        
+      case 'assign_to_position':
+        return (
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Position ID:</p>
+            <input
+              type="text"
+              value={action.config.positionId || ''}
+              onChange={(e) => onChange({
+                ...action,
+                config: { ...action.config, positionId: e.target.value }
+              })}
+              className="px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+              placeholder="Enter position ID"
+            />
+          </div>
         );
 
       case 'update_custom_field':

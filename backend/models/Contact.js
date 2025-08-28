@@ -76,6 +76,82 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSONB,
       defaultValue: {},
       allowNull: false
+    },
+    // Multi-tenant fields
+    organizationId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'organizationId'
+    },
+    assignedTo: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'assignedTo'
+    },
+    assignedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'assignedAt'
+    },
+    source: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    contactType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 'contact',
+      field: 'contactType'
+    },
+    // Recruiting-specific fields
+    resumeUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'resumeUrl'
+    },
+    linkedinUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'linkedinUrl'
+    },
+    githubUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'githubUrl'
+    },
+    skills: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+      allowNull: false
+    },
+    experienceYears: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'experienceYears'
+    },
+    salaryExpectation: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
+      field: 'salaryExpectation'
+    },
+    availability: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    currentEmployer: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'currentEmployer'
+    },
+    currentRole: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'currentRole'
     }
   }, {
     tableName: 'contacts',
@@ -101,6 +177,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       {
         fields: ['position']
+      },
+      {
+        fields: ['skills'],
+        using: 'gin'
       }
     ]
   });
