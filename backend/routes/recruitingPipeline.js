@@ -9,8 +9,6 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     const { positionId, status, stageId, search, limit = 50, offset = 0 } = req.query;
     
-    console.log('Fetching recruiting pipeline for user:', req.user.id, req.user.email);
-    
     let whereConditions = [`rp."userId" = :userId`];
     const replacements = { 
       userId: req.user.id,
@@ -50,24 +48,24 @@ router.get('/', authMiddleware, async (req, res) => {
     const rawPipelines = await sequelize.query(
       `SELECT 
         rp.*,
-        c.id as "candidateId",
-        c.first_name as "candidateFirstName",
-        c.last_name as "candidateLastName",
-        c.email as "candidateEmail",
-        c.phone as "candidatePhone",
-        c."currentRole",
-        c."currentEmployer",
-        c."experienceYears",
-        c.skills,
-        c."salaryExpectation",
-        c."linkedinUrl",
-        c."githubUrl",
-        p.id as "positionIdFull",
-        p.title as "positionTitle",
-        p.department as "positionDepartment",
-        p.location as "positionLocation",
-        s.name as "stageName",
-        s.color as "stageColor"
+        c.id as candidateid,
+        c.first_name as candidatefirstname,
+        c.last_name as candidatelastname,
+        c.email as candidateemail,
+        c.phone as candidatephone,
+        c."currentRole" as currentrole,
+        c."currentEmployer" as currentemployer,
+        c."experienceYears" as experienceyears,
+        c.skills as skills,
+        c."salaryExpectation" as salaryexpectation,
+        c."linkedinUrl" as linkedinurl,
+        c."githubUrl" as githuburl,
+        p.id as positionidfull,
+        p.title as positiontitle,
+        p.department as positiondepartment,
+        p.location as positionlocation,
+        s.name as stagename,
+        s.color as stagecolor
       FROM "RecruitingPipeline" rp
       LEFT JOIN contacts c ON rp."candidateId" = c.id
       LEFT JOIN positions p ON rp."positionId" = p.id
@@ -101,40 +99,32 @@ router.get('/', authMiddleware, async (req, res) => {
       customFields: p.customFields,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
-      candidate: p.candidateFirstName ? {
-        id: p.candidateId,
-        firstName: p.candidateFirstName,
-        lastName: p.candidateLastName,
-        email: p.candidateEmail,
-        phone: p.candidatePhone,
-        currentRole: p.currentRole,
-        currentEmployer: p.currentEmployer,
-        experienceYears: p.experienceYears,
+      candidate: p.candidatefirstname ? {
+        id: p.candidateid,
+        firstName: p.candidatefirstname,
+        lastName: p.candidatelastname,
+        email: p.candidateemail,
+        phone: p.candidatephone,
+        currentRole: p.currentrole,
+        currentEmployer: p.currentemployer,
+        experienceYears: p.experienceyears,
         skills: p.skills,
-        salaryExpectation: p.salaryExpectation,
-        linkedinUrl: p.linkedinUrl,
-        githubUrl: p.githubUrl
+        salaryExpectation: p.salaryexpectation,
+        linkedinUrl: p.linkedinurl,
+        githubUrl: p.githuburl
       } : null,
-      Position: p.positionTitle ? {
-        id: p.positionIdFull || p.positionId,
-        title: p.positionTitle,
-        department: p.positionDepartment,
-        location: p.positionLocation
+      Position: p.positiontitle ? {
+        id: p.positionidfull,
+        title: p.positiontitle,
+        department: p.positiondepartment,
+        location: p.positionlocation
       } : null,
-      Stage: p.stageName ? {
-        name: p.stageName,
-        color: p.stageColor
+      Stage: p.stagename ? {
+        name: p.stagename,
+        color: p.stagecolor
       } : null
     }));
     
-    console.log(`Found ${pipelines.length} pipelines for user ${req.user.email}`);
-    if (pipelines.length > 0) {
-      console.log('First pipeline sample:', {
-        id: pipelines[0].id,
-        stageId: pipelines[0].stageId,
-        candidateName: pipelines[0].candidate?.firstName + ' ' + pipelines[0].candidate?.lastName
-      });
-    }
     
     // Get total count
     const [countResult] = await sequelize.query(
