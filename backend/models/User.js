@@ -27,19 +27,23 @@ module.exports = (sequelize, DataTypes) => {
     },
     isVerified: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
+      field: 'is_verified'
     },
     resetToken: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
+      field: 'reset_token'
     },
     resetTokenExpiry: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      field: 'reset_token_expiry'
     },
     lastLogin: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      field: 'last_login'
     },
     // Multi-tenant fields
     organizationId: {
@@ -80,7 +84,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-      field: 'isSuperAdmin'
+      field: 'is_super_admin'
     }
   }, {
     tableName: 'users',
