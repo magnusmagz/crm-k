@@ -2,6 +2,9 @@ export interface User {
   id: string;
   email: string;
   isVerified: boolean;
+  isAdmin?: boolean;
+  isLoanOfficer?: boolean;
+  organizationId?: string;
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -54,6 +57,21 @@ export interface Contact {
   };
   isUnsubscribed?: boolean;
   unsubscribeReason?: string | null;
+  // Recruiting fields
+  contactType?: 'contact' | 'candidate';
+  resumeUrl?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  skills?: string[];
+  experienceYears?: number;
+  salaryExpectation?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
+  availability?: string;
+  currentEmployer?: string;
+  currentRole?: string;
 }
 
 export interface CustomField {
@@ -77,6 +95,7 @@ export interface Stage {
   order: number;
   color: string;
   isActive: boolean;
+  pipelineType?: 'sales' | 'recruiting';
   createdAt: Date;
   updatedAt: Date;
   dealCount?: number;
@@ -103,7 +122,9 @@ export interface Deal {
 }
 
 export interface AutomationTrigger {
-  type: 'contact_created' | 'contact_updated' | 'deal_created' | 'deal_updated' | 'deal_stage_changed';
+  type: 'contact_created' | 'contact_updated' | 'deal_created' | 'deal_updated' | 'deal_stage_changed' |
+        'candidate_added' | 'candidate_stage_changed' | 'candidate_hired' | 'candidate_rejected' | 
+        'interview_scheduled' | 'position_created' | 'position_closed';
   config?: any;
 }
 
@@ -115,7 +136,9 @@ export interface AutomationCondition {
 }
 
 export interface AutomationAction {
-  type: 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage' | 'update_custom_field';
+  type: 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage' | 'update_custom_field' |
+        'update_candidate_status' | 'schedule_interview' | 'send_offer' | 'update_candidate_rating' |
+        'add_candidate_note' | 'move_candidate_to_stage' | 'assign_to_position' | 'send_rejection_email';
   config: any;
 }
 
@@ -201,6 +224,53 @@ export interface EnrollmentSummary {
   failed: number;
   unenrolled: number;
   recentEnrollments: AutomationEnrollment[];
+}
+
+export interface Position {
+  id: string;
+  userId: string;
+  title: string;
+  department?: string;
+  location?: string;
+  type: 'full-time' | 'part-time' | 'contract' | 'internship';
+  remote: 'onsite' | 'remote' | 'hybrid';
+  salaryRange?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
+  requirements?: string;
+  description?: string;
+  status: 'open' | 'closed' | 'on-hold';
+  customFields?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RecruitingPipeline {
+  id: string;
+  userId: string;
+  candidateId: string;
+  positionId: string;
+  stageId: string;
+  status: 'active' | 'hired' | 'passed' | 'withdrawn';
+  rating?: number;
+  notes?: string;
+  interviewDate?: Date;
+  offerDetails?: {
+    salary?: number;
+    startDate?: Date;
+    benefits?: string[];
+  };
+  rejectionReason?: string;
+  appliedAt: Date;
+  hiredAt?: Date;
+  customFields?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+  Candidate?: Contact;
+  Position?: Position;
+  Stage?: Stage;
 }
 
 export interface AuthState {
