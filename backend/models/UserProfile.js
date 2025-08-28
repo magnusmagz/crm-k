@@ -148,6 +148,58 @@ module.exports = (sequelize, DataTypes) => {
         customHtml: null
       },
       field: 'email_signature'
+    },
+    nmlsId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'nmls_id',
+      validate: {
+        isValidNmlsId(value) {
+          if (value && value.trim() !== '') {
+            // NMLS IDs are typically numeric but stored as string
+            if (!/^\d+$/.test(value)) {
+              throw new Error('NMLS ID must contain only numbers');
+            }
+          }
+        }
+      }
+    },
+    stateLicenses: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: [],
+      field: 'state_licenses',
+      validate: {
+        isValidStateLicenses(value) {
+          if (value && Array.isArray(value)) {
+            const validStates = [
+              'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+              'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+              'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+              'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+              'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'
+            ];
+            
+            const seenStates = new Set();
+            
+            for (const license of value) {
+              if (!license.state || !license.licenseNumber) {
+                throw new Error('Each license must have a state and license number');
+              }
+              
+              if (!validStates.includes(license.state)) {
+                throw new Error(`Invalid state code: ${license.state}`);
+              }
+              
+              if (seenStates.has(license.state)) {
+                throw new Error(`Duplicate state license: ${license.state}`);
+              }
+              
+              seenStates.add(license.state);
+            }
+          }
+        }
+      }
     }
   }, {
     tableName: 'user_profiles',

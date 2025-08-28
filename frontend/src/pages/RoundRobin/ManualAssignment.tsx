@@ -31,6 +31,8 @@ interface Officer {
   firstName: string;
   lastName: string;
   licensedStates: string[];
+  nmlsId?: string;
+  stateLicenses?: Array<{ state: string; licenseNumber: string; }>;
   active_contacts: number;
   total_assignments: number;
 }
@@ -137,8 +139,13 @@ const ManualAssignment: React.FC = () => {
     
     if (states.length === 0) return { compatible: true, percentage: 100 };
     
+    // Use new stateLicenses if available, otherwise fall back to licensedStates
+    const officerStates = officer.stateLicenses 
+      ? officer.stateLicenses.map(sl => sl.state)
+      : officer.licensedStates;
+    
     const compatibleStates = states.filter(state => 
-      officer.licensedStates.includes(state)
+      officerStates.includes(state)
     );
     
     return {
@@ -345,9 +352,16 @@ const ManualAssignment: React.FC = () => {
                                 ? `${officer.firstName} ${officer.lastName}`
                                 : officer.email.split('@')[0]}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex flex-col gap-1 mt-1">
+                              {officer.nmlsId && (
+                                <span className="text-xs text-gray-600 font-medium">
+                                  NMLS: {officer.nmlsId}
+                                </span>
+                              )}
                               <span className="text-xs text-gray-500">
-                                States: {officer.licensedStates.join(', ')}
+                                States: {officer.stateLicenses 
+                                  ? officer.stateLicenses.map(sl => `${sl.state} (${sl.licenseNumber})`).join(', ')
+                                  : officer.licensedStates.join(', ')}
                               </span>
                             </div>
                           </div>

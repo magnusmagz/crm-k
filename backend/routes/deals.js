@@ -50,26 +50,38 @@ router.get('/', authMiddleware, async (req, res) => {
       where.contactId = contactId;
     }
 
-    // Search functionality
+    // Search functionality - including contact search
+    const includeOptions = [
+      {
+        model: Contact,
+        attributes: ['id', 'firstName', 'lastName', 'email', 'company', 'notes'],
+        where: {} // Will be populated if searching contacts
+      },
+      {
+        model: Stage,
+        attributes: ['id', 'name', 'color', 'order']
+      }
+    ];
+
     if (search) {
+      // Search in both deals and contacts
       where[Op.or] = [
         { name: { [Op.iLike]: `%${search}%` } },
-        { notes: { [Op.iLike]: `%${search}%` } }
+        { notes: { [Op.iLike]: `%${search}%` } },
+        { '$Contact.firstName$': { [Op.iLike]: `%${search}%` } },
+        { '$Contact.lastName$': { [Op.iLike]: `%${search}%` } },
+        { '$Contact.email$': { [Op.iLike]: `%${search}%` } },
+        { '$Contact.company$': { [Op.iLike]: `%${search}%` } },
+        { '$Contact.notes$': { [Op.iLike]: `%${search}%` } }
       ];
+      // Remove the empty where clause from Contact to allow the search to work
+      includeOptions[0].required = false;
+      delete includeOptions[0].where;
     }
 
     const deals = await Deal.findAndCountAll({
       where,
-      include: [
-        {
-          model: Contact,
-          attributes: ['id', 'firstName', 'lastName', 'email', 'company']
-        },
-        {
-          model: Stage,
-          attributes: ['id', 'name', 'color', 'order']
-        }
-      ],
+      include: includeOptions,
       order: [[sortBy, sortOrder]],
       limit: parseInt(limit),
       offset: parseInt(offset)

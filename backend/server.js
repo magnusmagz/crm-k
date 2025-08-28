@@ -22,6 +22,7 @@ const webhookRoutes = require('./routes/webhooks');
 const trackingRoutes = require('./routes/tracking');
 const analyticsRoutes = require('./routes/analytics');
 const roundRobinRoutes = require('./routes/roundRobin');
+const emailTemplatesRoutes = require('./routes/emailTemplates');
 const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
@@ -70,10 +71,12 @@ app.use('/api/webhooks', webhookRoutes);
 app.use('/api', trackingRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/round-robin', roundRobinRoutes);
+app.use('/api/email-templates', emailTemplatesRoutes);
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/timeline', require('./routes/timeline'));
 app.use('/api/positions', require('./routes/positions'));
 app.use('/api/recruiting-pipeline', require('./routes/recruitingPipeline'));
+app.use('/api/search', require('./routes/search'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

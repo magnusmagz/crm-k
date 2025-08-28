@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { customFieldsAPI } from '../services/api';
 import { CustomField } from '../types';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -6,11 +7,22 @@ import CustomFieldForm from '../components/CustomFieldForm';
 import DealCustomFieldsSettings from '../components/DealCustomFieldsSettings';
 
 const CustomFields: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'contacts' | 'deals'>('contacts');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'deal' ? 'deals' : 'contacts';
+  const [activeTab, setActiveTab] = useState<'contacts' | 'deals'>(initialTab);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingField, setEditingField] = useState<CustomField | null>(null);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'deal') {
+      setActiveTab('deals');
+    } else if (tab === 'contact' || tab === null) {
+      setActiveTab('contacts');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (activeTab === 'contacts') {

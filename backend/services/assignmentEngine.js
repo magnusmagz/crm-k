@@ -1,4 +1,4 @@
-const { Contact, User, sequelize } = require('../models');
+const { Contact, User, UserProfile, sequelize } = require('../models');
 const { v4: uuidv4 } = require('uuid');
 
 class AssignmentEngine {
@@ -93,17 +93,29 @@ class AssignmentEngine {
       let replacements = { ruleId };
 
       if (requireStateMatch && contactState) {
-        stateCondition = `AND :state = ANY(u."licensedStates")`;
+        // Check both old licensedStates and new state_licenses
+        stateCondition = `AND (
+          :state = ANY(u."licensedStates") 
+          OR EXISTS (
+            SELECT 1 FROM user_profiles p 
+            WHERE p.user_id = u.id 
+            AND p.state_licenses @> :stateLicense::jsonb
+          )
+        )`;
         replacements.state = contactState;
+        replacements.stateLicense = JSON.stringify([{state: contactState}]);
       }
 
       // Get officers in queue ordered by assignment count and last assignment time
       const officers = await sequelize.query(`
         SELECT 
-          u.id, u.email, u."isLoanOfficer", u."licensedStates",
+          u.id, u.email, u."isLoanOfficer", 
+          COALESCE(u."licensedStates", ARRAY[]::VARCHAR[]) as "licensedStates",
+          p.state_licenses as "stateLicenses",
           q."assignmentCount", q."lastAssignedAt"
         FROM round_robin_queues q
         JOIN users u ON q."userId" = u.id
+        LEFT JOIN user_profiles p ON u.id = p.user_id
         WHERE q."ruleId" = :ruleId
         AND q."isActive" = true
         AND u."isLoanOfficer" = true

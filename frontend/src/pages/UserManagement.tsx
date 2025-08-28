@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import StateLicenseManager from '../components/StateLicenseManager';
+import { StateLicense } from '../types';
 import { 
   UserPlusIcon, 
   PencilIcon, 
@@ -23,6 +25,13 @@ interface User {
   isActive?: boolean;
   createdAt: string;
   lastLogin?: string;
+  profile?: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    nmlsId?: string;
+    stateLicenses?: StateLicense[];
+  };
   stats?: {
     contactCount: number;
     dealCount: number;
@@ -36,6 +45,8 @@ interface NewUserForm {
   lastName: string;
   isLoanOfficer: boolean;
   licensedStates: string[];
+  nmlsId?: string;
+  stateLicenses?: StateLicense[];
 }
 
 const UserManagement: React.FC = () => {
@@ -51,7 +62,9 @@ const UserManagement: React.FC = () => {
     firstName: '',
     lastName: '',
     isLoanOfficer: false,
-    licensedStates: []
+    licensedStates: [],
+    nmlsId: '',
+    stateLicenses: []
   });
 
   // Check if current user is admin
@@ -109,12 +122,14 @@ const UserManagement: React.FC = () => {
 
   const handleUpdateUser = async (userId: string, updates: Partial<User>) => {
     try {
+      console.log('Updating user with data:', updates);
       await api.put(`/user-management/${userId}`, updates);
       toast.success('User updated successfully');
       fetchUsers();
       setShowEditModal(false);
       setSelectedUser(null);
     } catch (error: any) {
+      console.error('Update error:', error.response?.data);
       toast.error(error.response?.data?.error || 'Failed to update user');
     }
   };
@@ -269,6 +284,11 @@ const UserManagement: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="text-sm font-medium text-gray-900">
+                      {user.profile?.firstName && user.profile?.lastName 
+                        ? `${user.profile.firstName} ${user.profile.lastName}`
+                        : user.email.split('@')[0]}
+                    </div>
+                    <div className="text-sm text-gray-500">
                       {user.email}
                     </div>
                     <div className="text-sm text-gray-500">
@@ -439,10 +459,10 @@ const UserManagement: React.FC = () => {
 
       {/* Edit User Modal */}
       {showEditModal && selectedUser && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Edit User: {selectedUser.email}</h3>
+              <h3 className="text-lg font-medium">Edit User</h3>
               <button
                 onClick={() => {
                   setShowEditModal(false);
@@ -455,39 +475,155 @@ const UserManagement: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              <div>
-                <label className="flex items-center">
+              {/* Basic Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={selectedUser.isAdmin}
-                    onChange={(e) => setSelectedUser({ ...selectedUser, isAdmin: e.target.checked })}
-                    disabled={selectedUser.id === currentUser?.id}
-                    className="mr-2 rounded text-primary focus:ring-primary"
+                    type="text"
+                    value={selectedUser.profile?.firstName || ''}
+                    onChange={(e) => setSelectedUser({
+                      ...selectedUser,
+                      profile: {
+                        ...selectedUser.profile,
+                        firstName: e.target.value
+                      }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                   />
-                  <span className="text-sm font-medium text-gray-700">
-                    Administrator
-                  </span>
-                </label>
-                {selectedUser.id === currentUser?.id && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    You cannot remove your own admin privileges
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <label className="flex items-center">
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={selectedUser.isLoanOfficer}
-                    onChange={(e) => setSelectedUser({ ...selectedUser, isLoanOfficer: e.target.checked })}
-                    className="mr-2 rounded text-primary focus:ring-primary"
+                    type="text"
+                    value={selectedUser.profile?.lastName || ''}
+                    onChange={(e) => setSelectedUser({
+                      ...selectedUser,
+                      profile: {
+                        ...selectedUser.profile,
+                        lastName: e.target.value
+                      }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                   />
-                  <span className="text-sm font-medium text-gray-700">
-                    Loan Officer
-                  </span>
-                </label>
+                </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={selectedUser.email}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={selectedUser.profile?.phone || ''}
+                  onChange={(e) => setSelectedUser({
+                    ...selectedUser,
+                    profile: {
+                      ...selectedUser.profile,
+                      phone: e.target.value
+                    }
+                  })}
+                  placeholder="e.g., (555) 123-4567"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                />
+              </div>
+
+              {/* Roles Section */}
+              <div className="pt-4 border-t">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">User Roles</h4>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUser.isAdmin}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, isAdmin: e.target.checked })}
+                        disabled={selectedUser.id === currentUser?.id}
+                        className="mr-2 rounded text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Administrator
+                      </span>
+                    </label>
+                    {selectedUser.id === currentUser?.id && (
+                      <p className="text-xs text-gray-500 mt-1 ml-6">
+                        You cannot remove your own admin privileges
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUser.isLoanOfficer}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, isLoanOfficer: e.target.checked })}
+                        className="mr-2 rounded text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Loan Officer
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Loan Officer Fields */}
+              {selectedUser.isLoanOfficer && (
+                <>
+                  <div className="pt-4 border-t">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      NMLS ID
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedUser.profile?.nmlsId || ''}
+                      onChange={(e) => setSelectedUser({
+                        ...selectedUser,
+                        profile: {
+                          ...selectedUser.profile,
+                          nmlsId: e.target.value
+                        }
+                      })}
+                      placeholder="e.g., 123456"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">National Mortgage Licensing System ID</p>
+                  </div>
+
+                  <div className="pt-4">
+                    <StateLicenseManager
+                      licenses={selectedUser.profile?.stateLicenses || []}
+                      onChange={(licenses) => setSelectedUser({
+                        ...selectedUser,
+                        profile: {
+                          ...selectedUser.profile,
+                          stateLicenses: licenses
+                        }
+                      })}
+                      disabled={false}
+                    />
+                  </div>
+                </>
+              )}
               
               <div>
                 <label className="flex items-center">

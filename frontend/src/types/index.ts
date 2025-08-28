@@ -10,6 +10,11 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface StateLicense {
+  state: string;
+  licenseNumber: string;
+}
+
 export interface UserProfile {
   id: string;
   userId: string;
@@ -29,6 +34,8 @@ export interface UserProfile {
   companyLogo?: string;
   primaryColor?: string;
   crmName?: string;
+  nmlsId?: string;
+  stateLicenses?: StateLicense[];
   createdAt: Date;
   updatedAt: Date;
 }

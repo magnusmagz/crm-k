@@ -17,7 +17,11 @@ const validateProfileUpdate = [
   body('address.state').optional().trim(),
   body('address.zipCode').optional({ checkFalsy: true }).matches(/^\d{5}(-\d{4})?$/),
   body('primaryColor').optional({ checkFalsy: true }).matches(/^#[0-9A-Fa-f]{6}$/i).withMessage('Invalid hex color format'),
-  body('crmName').optional({ checkFalsy: true }).trim().isLength({ min: 1, max: 50 }).withMessage('CRM name must be between 1 and 50 characters')
+  body('crmName').optional({ checkFalsy: true }).trim().isLength({ min: 1, max: 50 }).withMessage('CRM name must be between 1 and 50 characters'),
+  body('nmlsId').optional({ checkFalsy: true }).matches(/^\d+$/).withMessage('NMLS ID must contain only numbers'),
+  body('stateLicenses').optional().isArray().withMessage('State licenses must be an array'),
+  body('stateLicenses.*.state').if(body('stateLicenses').exists()).notEmpty().isIn(['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']).withMessage('Invalid state code'),
+  body('stateLicenses.*.licenseNumber').if(body('stateLicenses').exists()).notEmpty().withMessage('License number is required')
 ];
 
 // Get user profile
@@ -62,7 +66,7 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address', 'profilePhoto', 'companyLogo', 'primaryColor', 'crmName', 'emailSignature'];
+    const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address', 'profilePhoto', 'companyLogo', 'primaryColor', 'crmName', 'emailSignature', 'nmlsId', 'stateLicenses'];
     const updates = {};
 
     allowedFields.forEach(field => {

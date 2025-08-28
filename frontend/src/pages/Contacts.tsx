@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
 import api from '../services/api';
 import { Contact } from '../types';
-import { PlusIcon, MagnifyingGlassIcon, UserGroupIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, UserGroupIcon, ArrowUpTrayIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
 import SwipeableContactCard from '../components/SwipeableContactCard';
@@ -20,7 +20,7 @@ const Contacts: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const search = searchParams.get('search') || '';
   const [showNewContact, setShowNewContact] = useState(searchParams.get('new') === 'true');
   const [showImport, setShowImport] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -126,6 +126,13 @@ const Contacts: React.FC = () => {
             <UserGroupIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Find Duplicates
           </Link>
+          <Link
+            to="/custom-fields"
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            <AdjustmentsHorizontalIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            Custom Fields
+          </Link>
           <button
             type="button"
             onClick={() => setShowExport(true)}
@@ -156,23 +163,6 @@ const Contacts: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-          </div>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1); // Reset to first page on search
-            }}
-            className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
-            placeholder="Search contacts..."
-          />
-        </div>
-      </div>
 
       <Transition.Root show={showNewContact} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setShowNewContact}>

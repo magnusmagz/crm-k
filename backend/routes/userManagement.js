@@ -1,11 +1,12 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { User, Contact, Deal, sequelize } = require('../models');
+const { User, Contact, Deal, UserProfile, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const emailService = require('../services/emailService');
 const bcrypt = require('bcryptjs');
+const { Op } = require('sequelize');
 
 const router = express.Router();
 
@@ -51,6 +52,18 @@ router.get('/', authMiddleware, requireAdmin, async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
+    // Get profiles for all users
+    const userIds = users.map(u => u.id);
+    const profiles = await UserProfile.findAll({
+      where: { userId: userIds },
+      attributes: ['userId', 'firstName', 'lastName', 'phone', 'nmlsId', 'stateLicenses']
+    });
+    
+    const profileMap = profiles.reduce((acc, profile) => {
+      acc[profile.userId] = profile;
+      return acc;
+    }, {});
+
     // Get stats for each user
     const userStats = await Promise.all(users.map(async (user) => {
       const contactCount = await Contact.count({
@@ -68,6 +81,13 @@ router.get('/', authMiddleware, requireAdmin, async (req, res) => {
 
       return {
         ...user.toJSON(),
+        profile: profileMap[user.id] ? {
+          firstName: profileMap[user.id].firstName,
+          lastName: profileMap[user.id].lastName,
+          phone: profileMap[user.id].phone,
+          nmlsId: profileMap[user.id].nmlsId,
+          stateLicenses: profileMap[user.id].stateLicenses
+        } : null,
         stats: {
           contactCount,
           dealCount: parseInt(dealStats?.count || 0),
@@ -206,15 +226,36 @@ router.put('/:id',
   authMiddleware,
   requireAdmin,
   [
+    body('email').optional().isEmail(),
     body('isAdmin').optional().isBoolean(),
     body('isLoanOfficer').optional().isBoolean(),
     body('licensedStates').optional().isArray(),
-    body('isActive').optional().isBoolean()
+    body('isActive').optional().isBoolean(),
+    body('profile.firstName').optional().notEmpty(),
+    body('profile.lastName').optional().notEmpty(),
+    body('profile.phone').optional(),
+    body('profile.nmlsId').optional().matches(/^\d*$/).withMessage('NMLS ID must contain only numbers'),
+    body('profile.stateLicenses').optional().isArray(),
+    body('profile.stateLicenses.*.state').optional().isIn(['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']),
+    body('profile.stateLicenses.*.licenseNumber').optional().notEmpty()
   ],
   async (req, res) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log('Validation errors:', errors.array());
+        return res.status(400).json({ errors: errors.array() });
+      }
+
       const { id } = req.params;
-      const updates = req.body;
+      const { profile, ...userUpdates } = req.body;
+      
+      console.log('Update user request:', {
+        userId: id,
+        profile,
+        userUpdates,
+        fullBody: req.body
+      });
 
       // Get admin's organization
       const adminUser = await User.findByPk(req.userId, {
@@ -234,12 +275,64 @@ router.put('/:id',
       }
 
       // Prevent admin from removing their own admin status
-      if (id === req.userId && updates.isAdmin === false) {
+      if (id === req.userId && userUpdates.isAdmin === false) {
         return res.status(400).json({ error: 'Cannot remove your own admin privileges' });
       }
 
-      // Update user
-      await user.update(updates);
+      // Update user - including email if provided
+      if (userUpdates.email) {
+        // Check if email is already taken by another user
+        const existingUser = await User.findOne({
+          where: { 
+            email: userUpdates.email,
+            id: { [Op.ne]: id }
+          }
+        });
+        if (existingUser) {
+          return res.status(400).json({ error: 'Email already in use' });
+        }
+      }
+      
+      await user.update(userUpdates);
+
+      // Update profile if any profile fields are provided
+      if (profile && (
+        profile.firstName !== undefined || 
+        profile.lastName !== undefined || 
+        profile.phone !== undefined ||
+        profile.nmlsId !== undefined || 
+        profile.stateLicenses !== undefined
+      )) {
+        const [userProfile] = await UserProfile.findOrCreate({
+          where: { userId: user.id },
+          defaults: { 
+            userId: user.id,
+            firstName: profile.firstName || 'Unknown',
+            lastName: profile.lastName || 'User'
+          }
+        });
+        
+        const profileUpdates = {};
+        if (profile.firstName !== undefined) {
+          profileUpdates.firstName = profile.firstName;
+        }
+        if (profile.lastName !== undefined) {
+          profileUpdates.lastName = profile.lastName;
+        }
+        if (profile.phone !== undefined) {
+          profileUpdates.phone = profile.phone;
+        }
+        if (profile.nmlsId !== undefined) {
+          profileUpdates.nmlsId = profile.nmlsId;
+        }
+        if (profile.stateLicenses !== undefined) {
+          profileUpdates.stateLicenses = profile.stateLicenses;
+        }
+        
+        console.log('Updating profile with:', profileUpdates);
+        await userProfile.update(profileUpdates);
+        console.log('Profile updated:', userProfile.toJSON());
+      }
 
       res.json({
         message: 'User updated successfully',

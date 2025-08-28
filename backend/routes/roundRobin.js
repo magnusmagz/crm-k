@@ -355,9 +355,11 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
       SELECT 
         u.id,
         u.email,
-        u."licensedStates",
+        COALESCE(u."licensedStates", ARRAY[]::VARCHAR[]) as "licensedStates",
         COALESCE(p.first_name, SPLIT_PART(u.email, '@', 1)) as "firstName",
         COALESCE(p.last_name, '') as "lastName",
+        p.nmls_id as "nmlsId",
+        p.state_licenses as "stateLicenses",
         COUNT(DISTINCT c.id) as active_contacts,
         COUNT(DISTINCT a.id) as total_assignments
       FROM users u
@@ -366,7 +368,7 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
       LEFT JOIN assignments a ON u.id = a."assignedTo"
       WHERE u."organizationId" = :orgId
       AND u."isLoanOfficer" = true
-      GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name
+      GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
     `, {
       type: sequelize.QueryTypes.SELECT,
@@ -392,9 +394,11 @@ router.get('/officers', authMiddleware, async (req, res) => {
       SELECT 
         u.id,
         u.email,
-        u."licensedStates",
+        COALESCE(u."licensedStates", ARRAY[]::VARCHAR[]) as "licensedStates",
         COALESCE(p.first_name, SPLIT_PART(u.email, '@', 1)) as "firstName",
         COALESCE(p.last_name, '') as "lastName",
+        p.nmls_id as "nmlsId",
+        p.state_licenses as "stateLicenses",
         COUNT(DISTINCT c.id) as active_contacts,
         COUNT(DISTINCT a.id) as total_assignments
       FROM users u
@@ -403,7 +407,7 @@ router.get('/officers', authMiddleware, async (req, res) => {
       LEFT JOIN assignments a ON u.id = a."assignedTo"
       WHERE u."organizationId" = :orgId
       AND u."isLoanOfficer" = true
-      GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name
+      GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
     `, {
       type: sequelize.QueryTypes.SELECT,

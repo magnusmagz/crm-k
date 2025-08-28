@@ -1,73 +1,159 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
-const { RecruitingPipeline, Contact, Position, Stage, AutomationLog } = require('../models');
-const { Op } = require('sequelize');
-const automationEngine = require('../services/automationEngine');
+const { sequelize } = require('../models');
+const { v4: uuidv4 } = require('uuid');
 
 // Get all candidates in pipeline
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { positionId, status, stageId, search, limit = 100, offset = 0 } = req.query;
-    const where = { userId: req.user.id };
-
-    if (positionId) {
-      where.positionId = positionId;
-    }
-
-    if (status) {
-      where.status = status;
-    }
-
-    if (stageId) {
-      where.stageId = stageId;
-    }
-
-    const includeCandidate = {
-      model: Contact,
-      as: 'candidate',
-      where: {},
-      attributes: ['id', 'firstName', 'lastName', 'email', 'phone', 'skills', 
-                   'experienceYears', 'currentEmployer', 'currentRole', 'linkedinUrl']
-    };
-
-    if (search) {
-      includeCandidate.where[Op.or] = [
-        { firstName: { [Op.iLike]: `%${search}%` } },
-        { lastName: { [Op.iLike]: `%${search}%` } },
-        { email: { [Op.iLike]: `%${search}%` } },
-        { currentEmployer: { [Op.iLike]: `%${search}%` } }
-      ];
-    }
-
-    const pipelines = await RecruitingPipeline.findAll({
-      where,
-      include: [
-        includeCandidate,
-        {
-          model: Position,
-          attributes: ['id', 'title', 'department', 'location']
-        },
-        {
-          model: Stage,
-          attributes: ['id', 'name', 'color', 'order']
-        }
-      ],
+    const { positionId, status, stageId, search, limit = 50, offset = 0 } = req.query;
+    
+    console.log('Fetching recruiting pipeline for user:', req.user.id, req.user.email);
+    
+    let whereConditions = [`rp."userId" = :userId`];
+    const replacements = { 
+      userId: req.user.id,
       limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [['appliedAt', 'DESC']]
-    });
-
-    // Calculate analytics
-    const analytics = {
-      total: pipelines.length,
-      active: pipelines.filter(p => p.status === 'active').length,
-      hired: pipelines.filter(p => p.status === 'hired').length,
-      rejected: pipelines.filter(p => p.status === 'rejected').length,
-      withdrawn: pipelines.filter(p => p.status === 'withdrawn').length
+      offset: parseInt(offset)
     };
-
-    res.json({ pipelines, analytics });
+    
+    if (positionId) {
+      whereConditions.push(`rp."positionId" = :positionId`);
+      replacements.positionId = positionId;
+    }
+    
+    if (status) {
+      whereConditions.push(`rp.status = :status`);
+      replacements.status = status;
+    }
+    
+    if (stageId) {
+      whereConditions.push(`rp."stageId" = :stageId`);
+      replacements.stageId = stageId;
+    }
+    
+    if (search) {
+      whereConditions.push(`(
+        c.first_name ILIKE :search OR 
+        c.last_name ILIKE :search OR 
+        c.email ILIKE :search OR
+        c."currentRole" ILIKE :search OR
+        c."currentEmployer" ILIKE :search
+      )`);
+      replacements.search = `%${search}%`;
+    }
+    
+    const whereClause = whereConditions.join(' AND ');
+    
+    // Get pipeline entries with candidate and position details
+    const rawPipelines = await sequelize.query(
+      `SELECT 
+        rp.*,
+        c.id as "candidateId",
+        c.first_name as "candidateFirstName",
+        c.last_name as "candidateLastName",
+        c.email as "candidateEmail",
+        c.phone as "candidatePhone",
+        c."currentRole",
+        c."currentEmployer",
+        c."experienceYears",
+        c.skills,
+        c."salaryExpectation",
+        c."linkedinUrl",
+        c."githubUrl",
+        p.id as "positionIdFull",
+        p.title as "positionTitle",
+        p.department as "positionDepartment",
+        p.location as "positionLocation",
+        s.name as "stageName",
+        s.color as "stageColor"
+      FROM "RecruitingPipeline" rp
+      LEFT JOIN contacts c ON rp."candidateId" = c.id
+      LEFT JOIN positions p ON rp."positionId" = p.id
+      LEFT JOIN stages s ON rp."stageId" = s.id
+      WHERE ${whereClause}
+      ORDER BY rp."appliedAt" DESC
+      LIMIT :limit OFFSET :offset`,
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+    
+    // Transform flat data into nested structure expected by frontend
+    const pipelines = rawPipelines.map(p => ({
+      id: p.id,
+      userId: p.userId,
+      candidateId: p.candidateId,
+      positionId: p.positionId,
+      stageId: p.stageId,
+      status: p.status,
+      rating: p.rating,
+      notes: p.notes,
+      interviewDate: p.interviewDate,
+      appliedAt: p.appliedAt,
+      hiredAt: p.hiredAt,
+      rejectedAt: p.rejectedAt,
+      withdrawnAt: p.withdrawnAt,
+      offerDetails: p.offerDetails,
+      rejectionReason: p.rejectionReason,
+      customFields: p.customFields,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+      candidate: p.candidateFirstName ? {
+        id: p.candidateId,
+        firstName: p.candidateFirstName,
+        lastName: p.candidateLastName,
+        email: p.candidateEmail,
+        phone: p.candidatePhone,
+        currentRole: p.currentRole,
+        currentEmployer: p.currentEmployer,
+        experienceYears: p.experienceYears,
+        skills: p.skills,
+        salaryExpectation: p.salaryExpectation,
+        linkedinUrl: p.linkedinUrl,
+        githubUrl: p.githubUrl
+      } : null,
+      Position: p.positionTitle ? {
+        id: p.positionIdFull || p.positionId,
+        title: p.positionTitle,
+        department: p.positionDepartment,
+        location: p.positionLocation
+      } : null,
+      Stage: p.stageName ? {
+        name: p.stageName,
+        color: p.stageColor
+      } : null
+    }));
+    
+    console.log(`Found ${pipelines.length} pipelines for user ${req.user.email}`);
+    if (pipelines.length > 0) {
+      console.log('First pipeline sample:', {
+        id: pipelines[0].id,
+        stageId: pipelines[0].stageId,
+        candidateName: pipelines[0].candidate?.firstName + ' ' + pipelines[0].candidate?.lastName
+      });
+    }
+    
+    // Get total count
+    const [countResult] = await sequelize.query(
+      `SELECT COUNT(*) as count 
+      FROM "RecruitingPipeline" rp
+      LEFT JOIN contacts c ON rp."candidateId" = c.id
+      WHERE ${whereClause}`,
+      {
+        replacements,
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+    
+    res.json({
+      pipelines,
+      total: parseInt(countResult?.count || 0),
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
   } catch (error) {
     console.error('Error fetching recruiting pipeline:', error);
     res.status(500).json({ error: 'Failed to fetch recruiting pipeline' });
@@ -114,38 +200,39 @@ router.post('/', authMiddleware, async (req, res) => {
       candidateId,
       positionId,
       stageId,
-      status,
-      rating,
-      notes,
+      status = 'active',
+      rating = 0,
+      notes = '',
       interviewDate,
-      customFields
+      customFields = {}
     } = req.body;
 
-    // Verify candidate exists and set as candidate type
-    const candidate = await Contact.findOne({
-      where: { 
-        id: candidateId,
-        userId: req.user.id
+    console.log('Adding candidate to pipeline:', { candidateId, positionId, userId: req.user.id });
+
+    // Verify candidate exists
+    const [candidate] = await sequelize.query(
+      `SELECT id, user_id FROM contacts WHERE id = :candidateId AND user_id = :userId`,
+      {
+        replacements: { candidateId, userId: req.user.id },
+        type: sequelize.QueryTypes.SELECT
       }
-    });
+    );
 
     if (!candidate) {
       return res.status(404).json({ error: 'Candidate not found' });
     }
 
-    // Update contact type to candidate if not already
-    if (candidate.contactType !== 'candidate') {
-      await candidate.update({ contactType: 'candidate' });
-    }
-
     // Check if candidate is already in pipeline for this position
-    const existing = await RecruitingPipeline.findOne({
-      where: {
-        candidateId,
-        positionId,
-        userId: req.user.id
+    const [existing] = await sequelize.query(
+      `SELECT id FROM "RecruitingPipeline" 
+      WHERE "candidateId" = :candidateId 
+      AND "positionId" = :positionId 
+      AND "userId" = :userId`,
+      {
+        replacements: { candidateId, positionId, userId: req.user.id },
+        type: sequelize.QueryTypes.SELECT
       }
-    });
+    );
 
     if (existing) {
       return res.status(400).json({ error: 'Candidate already applied for this position' });
@@ -154,56 +241,78 @@ router.post('/', authMiddleware, async (req, res) => {
     // Get default stage if not provided
     let actualStageId = stageId;
     if (!actualStageId) {
-      const defaultStage = await Stage.findOne({
-        where: { 
-          userId: req.user.id,
-          pipelineType: 'recruiting',
-          order: 0
+      const [defaultStage] = await sequelize.query(
+        `SELECT id FROM stages 
+        WHERE user_id = :userId 
+        AND pipeline_type = 'recruiting'
+        ORDER BY "order" ASC 
+        LIMIT 1`,
+        {
+          replacements: { userId: req.user.id },
+          type: sequelize.QueryTypes.SELECT
         }
-      });
-      actualStageId = defaultStage?.id;
+      );
+      
+      if (defaultStage) {
+        actualStageId = defaultStage.id;
+      }
     }
 
-    const pipeline = await RecruitingPipeline.create({
-      userId: req.user.id,
-      candidateId,
-      positionId,
-      stageId: actualStageId,
-      status: status || 'active',
-      rating,
-      notes,
-      interviewDate,
-      customFields: customFields || {}
-    });
-
-    const result = await RecruitingPipeline.findOne({
-      where: { id: pipeline.id },
-      include: [
-        { model: Contact, as: 'candidate' },
-        { model: Position },
-        { model: Stage }
-      ]
-    });
-
-    // Trigger automation for candidate_added
-    await automationEngine.processEvent({
-      type: 'candidate_added',
-      userId: req.user.id,
-      data: {
-        pipeline: result,
-        candidate: result.candidate,
-        position: result.Position,
-        stage: result.Stage
+    const pipelineId = uuidv4();
+    
+    // Create pipeline entry
+    await sequelize.query(
+      `INSERT INTO "RecruitingPipeline" 
+      (id, "userId", "candidateId", "positionId", "stageId", status, rating, notes, "interviewDate", "customFields", "appliedAt", "createdAt", "updatedAt")
+      VALUES (:id, :userId, :candidateId, :positionId, :stageId, :status, :rating, :notes, :interviewDate, :customFields, NOW(), NOW(), NOW())`,
+      {
+        replacements: {
+          id: pipelineId,
+          userId: req.user.id,
+          candidateId,
+          positionId,
+          stageId: actualStageId,
+          status,
+          rating,
+          notes,
+          interviewDate: interviewDate || null,
+          customFields: JSON.stringify(customFields)
+        }
       }
-    });
+    );
 
-    // Log automation trigger
-    await logRecruitingAutomation(req.user.id, 'candidate_added', pipeline);
+    // Fetch the created entry with details
+    const [newPipeline] = await sequelize.query(
+      `SELECT 
+        rp.*,
+        c.first_name as "candidateFirstName",
+        c.last_name as "candidateLastName",
+        c.email as "candidateEmail",
+        p.title as "positionTitle",
+        s.name as "stageName"
+      FROM "RecruitingPipeline" rp
+      LEFT JOIN contacts c ON rp."candidateId" = c.id
+      LEFT JOIN positions p ON rp."positionId" = p.id
+      LEFT JOIN stages s ON rp."stageId" = s.id
+      WHERE rp.id = :id`,
+      {
+        replacements: { id: pipelineId },
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
 
-    res.status(201).json({ pipeline: result });
+    res.status(201).json({ pipeline: newPipeline });
   } catch (error) {
     console.error('Error adding candidate to pipeline:', error);
-    res.status(500).json({ error: 'Failed to add candidate to pipeline' });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      sql: error.sql
+    });
+    res.status(500).json({ 
+      error: 'Failed to add candidate to pipeline',
+      details: error.message 
+    });
   }
 });
 

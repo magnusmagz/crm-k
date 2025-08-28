@@ -22,6 +22,10 @@ const Metrics = lazy(() => import('./pages/EmailAnalytics'));
 const DuplicateContacts = lazy(() => import('./pages/DuplicateContacts'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
 
+// Email Template pages
+const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
+const EmailTemplateEditor = lazy(() => import('./pages/EmailTemplateEditor'));
+
 // Round-Robin pages
 const AssignmentDashboard = lazy(() => import('./pages/RoundRobin/AssignmentDashboard'));
 const AssignmentRules = lazy(() => import('./pages/RoundRobin/AssignmentRules'));
@@ -65,6 +69,10 @@ function App() {
               <Route path="round-robin/rules/new" element={<RuleBuilder />} />
               <Route path="round-robin/assign" element={<ManualAssignment />} />
               <Route path="round-robin/history" element={<AssignmentHistory />} />
+              <Route path="email-templates" element={<EmailTemplates />} />
+              <Route path="email-templates/new" element={<EmailTemplateEditor />} />
+              <Route path="email-templates/:id" element={<EmailTemplateEditor />} />
+              <Route path="email-templates/:id/preview" element={<EmailTemplateEditor />} />
             </Route>
             </Routes>
           </Suspense>

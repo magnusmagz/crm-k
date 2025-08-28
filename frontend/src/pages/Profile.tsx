@@ -5,6 +5,8 @@ import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/soli
 import { PhotoIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { FormField } from '../components/ui/FormField';
 import EmailSignatureEditor from '../components/EmailSignatureEditor';
+import StateLicenseManager from '../components/StateLicenseManager';
+import { StateLicense } from '../types';
 
 const Profile: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -28,6 +30,8 @@ const Profile: React.FC = () => {
     companyLogo: profile?.companyLogo || '',
     primaryColor: profile?.primaryColor || '#1f2937',
     crmName: profile?.crmName || 'CRM Killer',
+    nmlsId: profile?.nmlsId || '',
+    stateLicenses: profile?.stateLicenses || [],
   });
   const profilePhotoRef = useRef<HTMLInputElement>(null);
   const companyLogoRef = useRef<HTMLInputElement>(null);
@@ -454,6 +458,40 @@ const Profile: React.FC = () => {
                       />
                     </div>
                     </div>
+
+                  {/* Loan Officer Fields - Only show if user is a loan officer */}
+                  {user?.isLoanOfficer && (
+                    <>
+                      <div className="pt-6 border-t border-gray-200">
+                        <h4 className="text-base font-medium text-gray-900 mb-4">Loan Officer Information</h4>
+                        <div className="grid grid-cols-6 gap-6">
+                          <div className="col-span-6 sm:col-span-3">
+                            <label htmlFor="nmlsId" className="block text-sm font-medium text-gray-700">
+                              NMLS ID
+                            </label>
+                            <input
+                              type="text"
+                              name="nmlsId"
+                              id="nmlsId"
+                              value={formData.nmlsId}
+                              onChange={handleChange}
+                              placeholder="e.g. 123456"
+                              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Your National Mortgage Licensing System ID</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-6">
+                        <StateLicenseManager
+                          licenses={formData.stateLicenses}
+                          onChange={(licenses: StateLicense[]) => setFormData(prev => ({ ...prev, stateLicenses: licenses }))}
+                          disabled={false}
+                        />
+                      </div>
+                    </>
+                  )}
                   </div>
                 </div>
                 <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
@@ -560,6 +598,41 @@ const Profile: React.FC = () => {
                     </dd>
                   </div>
                 </dl>
+
+                {/* Loan Officer Information Display */}
+                {user?.isLoanOfficer && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h4 className="text-base font-medium text-gray-900 mb-4">Loan Officer Information</h4>
+                    <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">NMLS ID</dt>
+                        <dd className="mt-1 text-sm text-primary-dark">
+                          {profile?.nmlsId || 'Not specified'}
+                        </dd>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <dt className="text-sm font-medium text-gray-500 mb-2">State Licenses</dt>
+                        <dd className="text-sm text-primary-dark">
+                          {profile?.stateLicenses && profile.stateLicenses.length > 0 ? (
+                            <div className="space-y-1">
+                              {profile.stateLicenses.map((license: StateLicense) => (
+                                <div key={license.state} className="flex items-center gap-2">
+                                  <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-gray-700 bg-gray-100 rounded">
+                                    {license.state}
+                                  </span>
+                                  <span className="text-sm">{license.licenseNumber}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            'No state licenses specified'
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                )}
+
                 <div className="mt-6">
                   <button
                     onClick={() => setIsEditing(true)}

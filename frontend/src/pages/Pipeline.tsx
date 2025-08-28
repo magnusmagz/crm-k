@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Stage, Deal, RecruitingPipeline, Position } from '../types';
 import { stagesAPI, dealsAPI, recruitingAPI, positionsAPI, contactsAPI } from '../services/api';
 import api from '../services/api';
@@ -16,10 +17,11 @@ import DealImport from '../components/DealImport';
 import BulkOperations from '../components/BulkOperations';
 import useDebounce from '../hooks/useDebounce';
 import { useAppMode } from '../contexts/AppModeContext';
-import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, FunnelIcon, CurrencyDollarIcon, ChartBarIcon, TrophyIcon, XCircleIcon, BriefcaseIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { CogIcon, PlusIcon, BugAntIcon, ArrowUpTrayIcon, FunnelIcon, CurrencyDollarIcon, ChartBarIcon, TrophyIcon, XCircleIcon, BriefcaseIcon, UserGroupIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 const Pipeline: React.FC = () => {
   const { mode } = useAppMode();
+  const [searchParams] = useSearchParams();
   const [stages, setStages] = useState<Stage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   
@@ -41,7 +43,7 @@ const Pipeline: React.FC = () => {
   const [debugDeal, setDebugDeal] = useState<Deal | null>(null);
   
   // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchQuery = searchParams.get('search') || '';
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'won' | 'lost'>('all');
   const [showFilters, setShowFilters] = useState(false);
   
@@ -70,9 +72,11 @@ const Pipeline: React.FC = () => {
   const fetchCustomFields = async () => {
     try {
       const response = await api.get('/custom-fields');
-      setCustomFields(response.data.fields.filter((field: any) => field.entityType === 'deal'));
+      const fields = response.data?.fields || response.data || [];
+      setCustomFields(Array.isArray(fields) ? fields.filter((field: any) => field.entityType === 'deal') : []);
     } catch (error) {
       console.error('Failed to fetch custom fields:', error);
+      setCustomFields([]);
     }
   };
 
@@ -115,7 +119,23 @@ const Pipeline: React.FC = () => {
         }
         
         const pipelinesResponse = await recruitingAPI.getAll(params);
-        setRecruitingPipelines(pipelinesResponse.data.pipelines || []);
+        console.log('Recruiting pipelines response:', pipelinesResponse.data);
+        console.log('Raw response keys:', Object.keys(pipelinesResponse.data));
+        console.log('Pipelines in response:', pipelinesResponse.data.pipelines);
+        console.log('Stages:', stagesData);
+        console.log('First pipeline stageId:', pipelinesResponse.data.pipelines?.[0]?.stageId);
+        console.log('First stage id:', stagesData?.[0]?.id);
+        
+        // Check if pipelines exist and have the correct structure
+        const pipelines = pipelinesResponse.data.pipelines || [];
+        console.log('Number of pipelines:', pipelines.length);
+        if (pipelines.length > 0) {
+          console.log('First pipeline full data:', pipelines[0]);
+          console.log('Pipeline stageIds:', pipelines.map((p: any) => p.stageId));
+          console.log('Stage ids:', stagesData.map((s: Stage) => s.id));
+        }
+        
+        setRecruitingPipelines(pipelines);
         
         // Set analytics for recruiting
         setAnalytics(pipelinesResponse.data.analytics || {
@@ -270,58 +290,106 @@ const Pipeline: React.FC = () => {
   
   const handleCandidateCreate = async (data: any) => {
     try {
+      console.log('Creating candidate with data:', data);
+      
       // First, create or update the contact
       let contactId = data.candidate.candidateId;
       
       if (!contactId) {
-        // Create new contact
-        const contactResponse = await contactsAPI.create({
-          firstName: data.candidate.firstName,
-          lastName: data.candidate.lastName,
-          email: data.candidate.email,
-          phone: data.candidate.phone,
-          linkedinUrl: data.candidate.linkedinUrl,
-          githubUrl: data.candidate.githubUrl,
-          currentEmployer: data.candidate.currentEmployer,
-          currentRole: data.candidate.currentRole,
-          experienceYears: data.candidate.experienceYears,
-          skills: data.candidate.skills,
-          salaryExpectation: data.candidate.salaryExpectation,
-          source: 'Recruiting'
-        });
+        // Create new contact - store recruiting-specific fields in customFields
+        const contactData: any = {
+          firstName: data.candidate.firstName || '',
+          lastName: data.candidate.lastName || '',
+          source: 'Recruiting',
+          customFields: {
+            linkedinUrl: data.candidate.linkedinUrl || '',
+            githubUrl: data.candidate.githubUrl || '',
+            experienceYears: data.candidate.experienceYears || 0,
+            skills: data.candidate.skills || [],
+            salaryExpectation: data.candidate.salaryExpectation || null
+          }
+        };
+        
+        // Only add optional fields if they have values
+        if (data.candidate.email) {
+          contactData.email = data.candidate.email;
+        }
+        if (data.candidate.phone) {
+          contactData.phone = data.candidate.phone;
+        }
+        if (data.candidate.currentEmployer) {
+          contactData.company = data.candidate.currentEmployer;
+        }
+        if (data.candidate.currentRole) {
+          contactData.position = data.candidate.currentRole;
+        }
+        
+        // Validate required fields
+        if (!contactData.firstName || !contactData.lastName) {
+          throw new Error('First name and last name are required');
+        }
+        
+        console.log('Sending contact data:', contactData);
+        const contactResponse = await contactsAPI.create(contactData);
+        console.log('Contact created:', contactResponse.data);
         contactId = contactResponse.data.contact.id;
       }
       
       // Add candidate to recruiting pipeline
-      await recruitingAPI.addCandidate({
+      console.log('Adding to pipeline with data:', {
         candidateId: contactId,
         ...data.pipeline
       });
       
+      const addResponse = await recruitingAPI.addCandidate({
+        candidateId: contactId,
+        ...data.pipeline
+      });
+      
+      console.log('Candidate added response:', addResponse.data);
+      
       setShowCandidateForm(false);
       toast.success('Candidate added to pipeline');
-      loadPipelineData();
+      
+      // Force a reload of the pipeline data
+      console.log('Reloading pipeline data after adding candidate...');
+      await loadPipelineData();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to add candidate');
+      console.error('Error creating candidate:', error);
+      console.error('Error response:', error.response?.data);
+      if (error.response?.data?.errors) {
+        console.error('Validation errors:', error.response.data.errors);
+        const validationErrors = error.response.data.errors.map((e: any) => e.msg || e.message).join(', ');
+        toast.error(validationErrors);
+      } else {
+        const errorMessage = error.response?.data?.details || 
+                            error.response?.data?.error || 
+                            error.response?.data?.message || 
+                            'Failed to add candidate';
+        console.error('Error details:', error.response?.data?.details);
+        toast.error(errorMessage);
+      }
     }
   };
   
   const handleCandidateUpdate = async (pipelineId: string, data: any) => {
     try {
-      // Update contact information
+      // Update contact information - store recruiting-specific fields in customFields
       if (data.candidate.candidateId) {
         await contactsAPI.update(data.candidate.candidateId, {
           firstName: data.candidate.firstName,
           lastName: data.candidate.lastName,
           email: data.candidate.email,
           phone: data.candidate.phone,
-          linkedinUrl: data.candidate.linkedinUrl,
-          githubUrl: data.candidate.githubUrl,
-          currentEmployer: data.candidate.currentEmployer,
-          currentRole: data.candidate.currentRole,
-          experienceYears: data.candidate.experienceYears,
-          skills: data.candidate.skills,
-          salaryExpectation: data.candidate.salaryExpectation
+          company: data.candidate.currentEmployer, // Map to existing company field
+          position: data.candidate.currentRole,     // Map to existing position field
+          customFields: {
+            linkedinUrl: data.candidate.linkedinUrl,
+            githubUrl: data.candidate.githubUrl,
+            experienceYears: data.candidate.experienceYears,
+            skills: data.candidate.skills,
+            salaryExpectation: data.candidate.salaryExpectation
+          }
         });
       }
       
@@ -422,31 +490,9 @@ const Pipeline: React.FC = () => {
       
       {/* Header */}
       <div className="mb-6">
-        {/* Search and Filters */}
+        {/* Filters */}
         <div className="mb-4 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search Bar */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={mode === 'recruiting' ? "Search candidates..." : "Search deals or contacts..."}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
-                />
-                {/* Searching indicator */}
-                {isSearching && (
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
             {/* Filter Controls */}
             <div className="flex gap-2">
               {/* Status Filter - Only show in sales mode */}
@@ -729,6 +775,15 @@ const Pipeline: React.FC = () => {
                   </svg>
                 </div>
               </div>
+            )}
+            {mode === 'sales' && (
+              <Link
+                to="/custom-fields?tab=deal"
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              >
+                <AdjustmentsHorizontalIcon className="-ml-1 mr-2 h-5 w-5" />
+                Custom Fields
+              </Link>
             )}
             <button
               onClick={() => setShowImport(true)}

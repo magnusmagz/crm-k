@@ -20,7 +20,8 @@
     "lucide-react": "^0.456.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-hot-toast": "^2.4.1",
+    "react-email-editor": "^1.7.11",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.7.0",
     "react-scripts": "5.0.1",
     "react-window": "^1.8.11",
@@ -56,7 +57,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5050",
+  "proxy": "http://localhost:5001",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
