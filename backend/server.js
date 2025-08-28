@@ -20,6 +20,7 @@ const emailRoutes = require('./routes/emails');
 const webhookRoutes = require('./routes/webhooks');
 const trackingRoutes = require('./routes/tracking');
 const analyticsRoutes = require('./routes/analytics');
+const roundRobinRoutes = require('./routes/roundRobin');
 const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
@@ -32,14 +33,18 @@ app.use(compression());
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 1000 // limit each IP to 1000 requests per windowMs (increased for development)
 });
 app.use('/api/', limiter);
 
 // CORS configuration
 const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 app.use(cors(corsOptions));
 
@@ -62,8 +67,11 @@ app.use('/api/emails', emailRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api', trackingRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/round-robin', roundRobinRoutes);
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/timeline', require('./routes/timeline'));
+app.use('/api/positions', require('./routes/positions'));
+app.use('/api/recruiting-pipeline', require('./routes/recruitingPipeline'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
