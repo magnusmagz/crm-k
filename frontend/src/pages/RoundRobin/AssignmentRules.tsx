@@ -39,7 +39,7 @@ const AssignmentRules: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isAdmin = user?.isAdmin === true;
+  const isAdmin = user && 'isAdmin' in user && user.isAdmin === true;
 
   useEffect(() => {
     if (isAdmin) {

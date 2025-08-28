@@ -42,7 +42,7 @@ const AssignmentHistory: React.FC = () => {
     offset: 0
   });
 
-  const isAdmin = user?.isAdmin === true;
+  const isAdmin = user && 'isAdmin' in user && user.isAdmin === true;
 
   useEffect(() => {
     fetchHistory();

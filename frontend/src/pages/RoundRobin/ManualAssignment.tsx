@@ -48,7 +48,7 @@ const ManualAssignment: React.FC = () => {
   const [filterState, setFilterState] = useState<string>('all');
 
   // Check if user is admin
-  const isAdmin = user?.isAdmin === true;
+  const isAdmin = user && 'isAdmin' in user && user.isAdmin === true;
 
   useEffect(() => {
     if (isAdmin) {

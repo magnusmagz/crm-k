@@ -53,7 +53,7 @@ const AssignmentDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const isAdmin = user?.isAdmin === true;
+  const isAdmin = user && 'isAdmin' in user && user.isAdmin === true;
 
   useEffect(() => {
     fetchDashboardData();
