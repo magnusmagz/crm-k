@@ -336,5 +336,4 @@ export const recruitingAPI = {
     api.put('/recruiting-pipeline/bulk/move', { candidateIds, stageId }),
 };
 
-export { api };
 export default api;
