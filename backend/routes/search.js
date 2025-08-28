@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { Contact, Deal, Stage } = require('../models');
+const { Contact, Deal, Stage, Note } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const searchTerm = q.trim();
 
-    // Search contacts - using proper Sequelize field names
+    // Search contacts - including notes from Notes table
     const contactsPromise = Contact.findAll({
       where: {
         userId: req.user.id,
@@ -26,9 +26,17 @@ router.get('/', authMiddleware, async (req, res) => {
           { email: { [Op.iLike]: `%${searchTerm}%` } },
           { phone: { [Op.iLike]: `%${searchTerm}%` } },
           { company: { [Op.iLike]: `%${searchTerm}%` } },
-          { notes: { [Op.iLike]: `%${searchTerm}%` } }
+          { notes: { [Op.iLike]: `%${searchTerm}%` } }, // Legacy notes field
+          { '$contactNotes.content$': { [Op.iLike]: `%${searchTerm}%` } } // Search in Notes table
         ]
       },
+      include: [
+        {
+          model: Note,
+          as: 'contactNotes',
+          required: false
+        }
+      ],
       limit: parseInt(limit),
       order: [['updatedAt', 'DESC']]
     });
@@ -44,13 +52,21 @@ router.get('/', authMiddleware, async (req, res) => {
           { '$Contact.last_name$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.email$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.company$': { [Op.iLike]: `%${searchTerm}%` } },
-          { '$Contact.notes$': { [Op.iLike]: `%${searchTerm}%` } }
+          { '$Contact.notes$': { [Op.iLike]: `%${searchTerm}%` } }, // Legacy notes field
+          { '$Contact.contactNotes.content$': { [Op.iLike]: `%${searchTerm}%` } } // Search in Notes table
         ]
       },
       include: [
         {
           model: Contact,
-          required: false
+          required: false,
+          include: [
+            {
+              model: Note,
+              as: 'contactNotes',
+              required: false
+            }
+          ]
         },
         {
           model: Stage
