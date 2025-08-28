@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Activity - CRM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#1f2937',
+                            dark: '#111827',
+                            light: '#4b5563'
+                        }
+                    },
+                    fontSize: {
+                        'xs': ['16px', '20px'],
+                        'sm': ['16px', '20px'],
+                        'base': ['16px', '24px'],
+                        'lg': ['18px', '28px'],
+                        'xl': ['20px', '28px'],
+                        '2xl': ['24px', '32px'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for specific components -->
+    <style>
+        /* Custom font for headings */
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Live indicator animation */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(46, 125, 50, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);
+            }
+        }
+
+        .live-dot {
+            animation: pulse 2s infinite;
+        }
+
+        /* Slide in animation for new items */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 text-base">
+    <!-- Top Navigation -->
+    <nav class="bg-primary text-white py-3 px-5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="bg-white text-primary px-2 py-1 rounded font-heading font-semibold text-base">
+                    CRM
+                </div>
+                <div class="hidden md:flex gap-6">
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Dashboard</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Contacts</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Loan Pipeline</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Marketing</a>
+                    <a href="#" class="text-white font-medium opacity-100">Admin</a>
+                </div>
+            </div>
+            <div class="hidden md:block flex-1 max-w-lg mx-10">
+                <input type="text" class="w-full px-4 py-2 rounded-full bg-white bg-opacity-90 text-gray-900 placeholder-gray-500 text-sm" placeholder="Search...">
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-medium">
+                SM
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-5 py-5">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-heading font-semibold text-gray-900">Assignment Activity</h1>
+                <div class="flex gap-3 items-center">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-800">
+                        <div class="w-2 h-2 bg-gray-600 rounded-full live-dot"></div>
+                        <span>Live Updates</span>
+                    </div>
+                    <a href="round-robin-rules.html" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm transition-colors flex items-center gap-1">
+                        ⚙️ Manage Rules
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-5 py-5">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+            <!-- Activity Feed -->
+            <div class="xl:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-5 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-heading font-semibold text-gray-900">Recent Assignments</h2>
+                    <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer" id="ruleFilter">
+                        <option value="all">All Rules</option>
+                        <option value="redfin">Redfin Lead Distribution</option>
+                        <option value="zillow">Zillow Lead Assignment</option>
+                        <option value="website">Website Lead Router</option>
+                    </select>
+                </div>
+                
+                <div class="max-h-[calc(100vh-300px)] overflow-y-auto" id="activityList">
+                    <!-- Activity items will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Stats Sidebar -->
+            <div class="flex flex-col gap-5">
+                <!-- Today's Stats -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-6">
+                    <div class="text-3xl font-heading font-semibold text-gray-900 mb-2 leading-none" id="todayCount">42</div>
+                    <div class="text-sm font-medium text-gray-700 mb-1">Assignments Today</div>
+                    <div class="text-sm text-gray-500">↑ 15% from yesterday</div>
+                </div>
+
+                <!-- Response Time -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-6">
+                    <div class="text-3xl font-heading font-semibold text-gray-900 mb-2 leading-none">1.8m</div>
+                    <div class="text-sm font-medium text-gray-700 mb-1">Avg Response Time</div>
+                    <div class="text-sm text-gray-500">↓ 23% improvement</div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-5 py-5 border-b border-gray-200">
+                        <h3 class="text-base font-heading font-semibold text-gray-900">Top Recipients Today</h3>
+                    </div>
+                    <div>
+                        <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+                            <span class="text-base font-semibold text-primary min-w-5">1</span>
+                            <div class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">EW</div>
+                            <div class="flex-1">
+                                <div class="font-medium text-sm text-gray-900">Emma Williams</div>
+                                <div class="text-xs text-gray-600">1.2m avg response</div>
+                            </div>
+                            <div class="text-base font-semibold text-primary">8</div>
+                        </div>
+                        <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+                            <span class="text-base font-semibold text-primary min-w-5">2</span>
+                            <div class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">AT</div>
+                            <div class="flex-1">
+                                <div class="font-medium text-sm text-gray-900">Alex Thompson</div>
+                                <div class="text-xs text-gray-600">2.1m avg response</div>
+                            </div>
+                            <div class="text-base font-semibold text-primary">7</div>
+                        </div>
+                        <div class="px-5 py-4 flex items-center gap-3">
+                            <span class="text-base font-semibold text-primary min-w-5">3</span>
+                            <div class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">JC</div>
+                            <div class="flex-1">
+                                <div class="font-medium text-sm text-gray-900">Jessica Chen</div>
+                                <div class="text-xs text-gray-600">1.8m avg response</div>
+                            </div>
+                            <div class="text-base font-semibold text-primary">6</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample activity data (mixed assignments and contact attempts)
+        const activities = [
+            {
+                id: 1,
+                type: 'assignment',
+                leadName: 'Bob Jones',
+                officerName: 'Emma Williams',
+                officerInitials: 'EW',
+                timestamp: new Date(Date.now() - 3 * 60 * 1000), // 3 minutes ago
+                source: 'Redfin',
+                state: 'CA',
+                rule: 'Redfin Lead Distribution'
+            },
+            {
+                id: 2,
+                type: 'call',
+                leadName: 'Bob Jones',
+                officerName: 'Emma Williams',
+                officerInitials: 'EW',
+                timestamp: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
+                status: 'connected',
+                duration: '5:23',
+                note: 'Discussed loan options, scheduled follow-up'
+            },
+            {
+                id: 3,
+                type: 'assignment',
+                leadName: 'Sarah Thompson',
+                officerName: 'Alex Thompson',
+                officerInitials: 'AT',
+                timestamp: new Date(Date.now() - 7 * 60 * 1000), // 7 minutes ago
+                source: 'Redfin',
+                state: 'TX',
+                rule: 'Redfin Lead Distribution'
+            },
+            {
+                id: 4,
+                type: 'text',
+                leadName: 'Sarah Thompson',
+                officerName: 'Alex Thompson',
+                officerInitials: 'AT',
+                timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+                status: 'delivered',
+                note: 'Initial outreach - property inquiry'
+            },
+            {
+                id: 5,
+                type: 'assignment',
+                leadName: 'Michael Chen',
+                officerName: 'Jessica Chen',
+                officerInitials: 'JC',
+                timestamp: new Date(Date.now() - 12 * 60 * 1000), // 12 minutes ago
+                source: 'Website',
+                state: 'CA',
+                rule: 'Website Lead Router'
+            },
+            {
+                id: 6,
+                type: 'call',
+                leadName: 'Michael Chen',
+                officerName: 'Jessica Chen',
+                officerInitials: 'JC',
+                timestamp: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
+                status: 'no_answer',
+                attempts: 2,
+                note: 'Left voicemail, will try again after 2 PM'
+            },
+            {
+                id: 7,
+                type: 'assignment',
+                leadName: 'Emily Rodriguez',
+                officerName: 'Marcus Johnson',
+                officerInitials: 'MJ',
+                timestamp: new Date(Date.now() - 18 * 60 * 1000), // 18 minutes ago
+                source: 'Zillow',
+                state: 'FL',
+                rule: 'Zillow Lead Assignment'
+            },
+            {
+                id: 8,
+                type: 'note',
+                leadName: 'Emily Rodriguez',
+                officerName: 'Marcus Johnson',
+                officerInitials: 'MJ',
+                timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+                note: 'Client prefers email. Sent rate sheet and loan options.'
+            },
+            {
+                id: 9,
+                type: 'assignment',
+                leadName: 'David Park',
+                officerName: 'Daniel Kim',
+                officerInitials: 'DK',
+                timestamp: new Date(Date.now() - 25 * 60 * 1000), // 25 minutes ago
+                source: 'Redfin',
+                state: 'CA',
+                rule: 'Redfin Lead Distribution'
+            }
+        ];
+
+        let displayedActivities = [...activities];
+        let autoRefreshInterval;
+
+        // Initialize
+        function init() {
+            renderActivities();
+            startAutoRefresh();
+            setupEventListeners();
+        }
+
+        // Format time ago
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'just now';
+            if (diffMins === 1) return '1 minute ago';
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours === 1) return '1 hour ago';
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffDays === 1) return '1 day ago';
+            return `${diffDays} days ago`;
+        }
+
+        // Render activities
+        function renderActivities() {
+            const activityList = document.getElementById('activityList');
+            
+            if (displayedActivities.length === 0) {
+                activityList.innerHTML = `
+                    <div class="text-center py-15 text-gray-600">
+                        <div class="text-5xl mb-4 opacity-50">📭</div>
+                        <p>No assignment activity yet today</p>
+                    </div>
+                `;
+                return;
+            }
+
+            activityList.innerHTML = displayedActivities.map((activity, index) => {
+                let content = '';
+                
+                switch(activity.type) {
+                    case 'assignment':
+                        content = `
+                            <div class="px-5 py-5 border-b border-gray-100 transition-colors hover:bg-gray-50 ${index === 0 ? 'bg-gray-50 slide-in' : ''}">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-gray-100 text-primary rounded-full flex items-center justify-center text-lg">→</div>
+                                    <div class="flex-1">
+                                        <div class="text-sm text-gray-900 mb-1">
+                                            <strong class="font-semibold text-primary">${activity.leadName}</strong> assigned to <strong class="font-semibold text-primary">${activity.officerName}</strong>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm text-gray-600">
+                                            <span class="flex items-center gap-1">📍 ${activity.state}</span>
+                                            <span class="flex items-center gap-1">🏢 ${activity.source}</span>
+                                            <a href="round-robin-rules.html" class="inline-block bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs hover:bg-gray-300 transition-colors">${activity.rule}</a>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">${formatTimeAgo(activity.timestamp)}</div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'call':
+                        const callStatus = activity.status === 'connected' 
+                            ? `✅ Connected (${activity.duration})` 
+                            : `❌ No Answer${activity.attempts ? ` (Attempt #${activity.attempts})` : ''}`;
+                        content = `
+                            <div class="px-5 py-5 border-b border-gray-100 transition-colors hover:bg-gray-50 ${index === 0 ? 'bg-gray-50 slide-in' : ''}">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-lg">📞</div>
+                                    <div class="flex-1">
+                                        <div class="text-sm text-gray-900 mb-1">
+                                            <strong class="font-semibold text-primary">${activity.officerName}</strong> called <strong class="font-semibold text-primary">${activity.leadName}</strong>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm text-gray-600">
+                                            <span>${callStatus}</span>
+                                            ${activity.note ? `<span class="flex items-center gap-1">📝 ${activity.note}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">${formatTimeAgo(activity.timestamp)}</div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'text':
+                        content = `
+                            <div class="px-5 py-5 border-b border-gray-100 transition-colors hover:bg-gray-50 ${index === 0 ? 'bg-gray-50 slide-in' : ''}">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-lg">💬</div>
+                                    <div class="flex-1">
+                                        <div class="text-sm text-gray-900 mb-1">
+                                            <strong class="font-semibold text-primary">${activity.officerName}</strong> texted <strong class="font-semibold text-primary">${activity.leadName}</strong>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm text-gray-600">
+                                            <span>✓ ${activity.status}</span>
+                                            ${activity.note ? `<span class="flex items-center gap-1">📝 ${activity.note}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">${formatTimeAgo(activity.timestamp)}</div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'note':
+                        content = `
+                            <div class="px-5 py-5 border-b border-gray-100 transition-colors hover:bg-gray-50 ${index === 0 ? 'bg-gray-50 slide-in' : ''}">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center text-lg">📝</div>
+                                    <div class="flex-1">
+                                        <div class="text-sm text-gray-900 mb-1">
+                                            <strong class="font-semibold text-primary">${activity.officerName}</strong> added note for <strong class="font-semibold text-primary">${activity.leadName}</strong>
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            <span>"${activity.note}"</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">${formatTimeAgo(activity.timestamp)}</div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                }
+                
+                return content;
+            }).join('');
+        }
+
+        // Simulate new activity (assignments, calls, texts, notes)
+        function simulateNewAssignment() {
+            const officers = [
+                { name: 'Emma Williams', initials: 'EW' },
+                { name: 'Alex Thompson', initials: 'AT' },
+                { name: 'Jessica Chen', initials: 'JC' },
+                { name: 'Marcus Johnson', initials: 'MJ' },
+                { name: 'Daniel Kim', initials: 'DK' }
+            ];
+
+            const firstNames = ['James', 'Mary', 'Robert', 'Patricia', 'John', 'Jennifer', 'William', 'Linda'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'];
+            const sources = ['Redfin', 'Zillow', 'Website'];
+            const states = ['CA', 'TX', 'FL', 'NY', 'AZ'];
+            const rules = {
+                'Redfin': 'Redfin Lead Distribution',
+                'Zillow': 'Zillow Lead Assignment',
+                'Website': 'Website Lead Router'
+            };
+
+            // Randomly choose activity type
+            const activityTypes = ['assignment', 'call', 'text', 'note'];
+            const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+            
+            const officer = officers[Math.floor(Math.random() * officers.length)];
+            let leadName;
+            
+            // Sometimes use existing leads for follow-up activities
+            if (activityType !== 'assignment' && activities.length > 0 && Math.random() > 0.5) {
+                const recentAssignments = activities.filter(a => a.type === 'assignment').slice(0, 5);
+                if (recentAssignments.length > 0) {
+                    leadName = recentAssignments[Math.floor(Math.random() * recentAssignments.length)].leadName;
+                }
+            }
+            
+            if (!leadName) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                leadName = `${firstName} ${lastName}`;
+            }
+
+            let newActivity = {
+                id: Date.now(),
+                type: activityType,
+                leadName: leadName,
+                officerName: officer.name,
+                officerInitials: officer.initials,
+                timestamp: new Date()
+            };
+
+            switch(activityType) {
+                case 'assignment':
+                    const source = sources[Math.floor(Math.random() * sources.length)];
+                    const state = states[Math.floor(Math.random() * states.length)];
+                    newActivity = {...newActivity, source, state, rule: rules[source]};
+                    break;
+                    
+                case 'call':
+                    const callOutcomes = [
+                        { status: 'connected', duration: '3:45', note: 'Discussed rates and pre-approval process' },
+                        { status: 'connected', duration: '7:12', note: 'Qualified lead, sending application' },
+                        { status: 'no_answer', attempts: 1, note: 'Will try again this afternoon' },
+                        { status: 'no_answer', attempts: 2, note: 'Left voicemail' }
+                    ];
+                    const outcome = callOutcomes[Math.floor(Math.random() * callOutcomes.length)];
+                    newActivity = {...newActivity, ...outcome};
+                    break;
+                    
+                case 'text':
+                    const textScenarios = [
+                        { status: 'delivered', note: 'Initial outreach sent' },
+                        { status: 'delivered', note: 'Follow-up on property inquiry' },
+                        { status: 'read', note: 'Rate update sent' }
+                    ];
+                    const scenario = textScenarios[Math.floor(Math.random() * textScenarios.length)];
+                    newActivity = {...newActivity, ...scenario};
+                    break;
+                    
+                case 'note':
+                    const notes = [
+                        'Client interested in refinancing current home',
+                        'Needs jumbo loan for property over $1M',
+                        'First-time homebuyer, needs extra guidance',
+                        'Self-employed, will need additional documentation',
+                        'Pre-approved for $450K, looking in Austin area'
+                    ];
+                    newActivity = {...newActivity, note: notes[Math.floor(Math.random() * notes.length)]};
+                    break;
+            }
+
+            // Add to beginning of array
+            activities.unshift(newActivity);
+            displayedActivities.unshift(newActivity);
+
+            // Update display
+            renderActivities();
+
+            // Update today's count
+            const todayCount = document.getElementById('todayCount');
+            todayCount.textContent = parseInt(todayCount.textContent) + 1;
+
+            // Scroll to top
+            document.getElementById('activityList').scrollTop = 0;
+        }
+
+        // Start auto refresh
+        function startAutoRefresh() {
+            // Update time ago every minute
+            setInterval(() => {
+                renderActivities();
+            }, 60000);
+
+            // Simulate new assignments periodically
+            setInterval(() => {
+                if (Math.random() > 0.7) { // 30% chance
+                    simulateNewAssignment();
+                }
+            }, 15000); // Check every 15 seconds
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('ruleFilter').addEventListener('change', (e) => {
+                const filterValue = e.target.value;
+                
+                if (filterValue === 'all') {
+                    displayedActivities = [...activities];
+                } else {
+                    const ruleMap = {
+                        'redfin': 'Redfin Lead Distribution',
+                        'zillow': 'Zillow Lead Assignment',
+                        'website': 'Website Lead Router'
+                    };
+                    
+                    displayedActivities = activities.filter(a => a.rule === ruleMap[filterValue]);
+                }
+                
+                renderActivities();
+            });
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

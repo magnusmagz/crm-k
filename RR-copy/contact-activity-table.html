@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Activity Monitor - CRM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#1f2937',
+                            dark: '#111827',
+                            light: '#4b5563'
+                        }
+                    },
+                    fontSize: {
+                        'xs': ['16px', '20px'],
+                        'sm': ['16px', '20px'],
+                        'base': ['16px', '24px'],
+                        'lg': ['18px', '28px'],
+                        'xl': ['20px', '28px'],
+                        '2xl': ['24px', '32px'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for specific components -->
+    <style>
+        /* Custom font for headings */
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 text-base">
+    <!-- Top Navigation -->
+    <nav class="bg-primary text-white py-3 px-5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="bg-white text-primary px-2 py-1 rounded font-heading font-semibold text-base">
+                    CRM
+                </div>
+                <div class="hidden md:flex gap-6">
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Dashboard</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Contacts</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Loan Pipeline</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Marketing</a>
+                    <a href="#" class="text-white font-medium opacity-100">Admin</a>
+                </div>
+            </div>
+            <div class="hidden md:block flex-1 max-w-lg mx-10">
+                <input type="text" class="w-full px-4 py-2 rounded-full bg-white bg-opacity-90 text-gray-900 placeholder-gray-500 text-sm" placeholder="Search contacts...">
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-medium">
+                SM
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-5 py-5">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-heading font-semibold text-gray-900">Contact Activity Monitor (Table View)</h1>
+                <div class="flex gap-2">
+                    <a href="contact-activity-monitor.html" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm transition-colors flex items-center gap-1">← Timeline View</a>
+                    <a href="admin-dashboard.html" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm transition-colors flex items-center gap-1">← Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-5 py-5">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-5">
+            <div class="bg-white rounded-lg shadow-sm border-t-4 border-primary text-center p-4">
+                <div class="text-2xl font-heading font-semibold text-gray-900 mb-1 leading-none">287<span class="text-xs text-gray-600 ml-2">↑12%</span></div>
+                <div class="text-sm text-gray-600">Calls Today</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border-t-4 border-primary text-center p-4">
+                <div class="text-2xl font-heading font-semibold text-gray-900 mb-1 leading-none">423<span class="text-xs text-gray-600 ml-2">↑18%</span></div>
+                <div class="text-sm text-gray-600">Texts Sent</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border-t-4 border-primary text-center p-4">
+                <div class="text-2xl font-heading font-semibold text-gray-900 mb-1 leading-none">68%<span class="text-xs text-gray-600 ml-2">↑5%</span></div>
+                <div class="text-sm text-gray-600">Contact Rate</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border-t-4 border-primary text-center p-4">
+                <div class="text-2xl font-heading font-semibold text-gray-900 mb-1 leading-none">1.2m<span class="text-xs text-red-600 ml-2">↓23%</span></div>
+                <div class="text-sm text-gray-600">Response Time</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border-t-4 border-primary text-center p-4">
+                <div class="text-2xl font-heading font-semibold text-gray-900 mb-1 leading-none">156</div>
+                <div class="text-sm text-gray-600">Notes Added</div>
+            </div>
+        </div>
+
+        <!-- Activity Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[calc(100vh-340px)]">
+            <div class="px-5 py-4 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <h2 class="text-lg font-heading font-semibold text-gray-900">Activity Log</h2>
+                <div class="flex flex-wrap gap-3 items-center">
+                    <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer" id="officerFilter">
+                        <option value="all">All Loan Officers</option>
+                        <option value="1">Emma Williams</option>
+                        <option value="2">Alex Thompson</option>
+                        <option value="3">Jessica Chen</option>
+                        <option value="4">Marcus Johnson</option>
+                        <option value="5">Daniel Kim</option>
+                        <option value="6">Rachel Green</option>
+                        <option value="7">Sophia Martinez</option>
+                        <option value="8">Brian O'Connor</option>
+                    </select>
+                    
+                    <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer" id="activityFilter">
+                        <option value="all">All Activities</option>
+                        <option value="calls">Calls Only</option>
+                        <option value="texts">Texts Only</option>
+                        <option value="emails">Emails Only</option>
+                        <option value="notes">Notes Only</option>
+                    </select>
+                    
+                    <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" id="startDate">
+                    <span class="text-gray-500 hidden sm:inline">to</span>
+                    <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" id="endDate">
+                    
+                    <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm transition-colors" onclick="exportData()">Export CSV</button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Time</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-28">Type</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-44">Loan Officer</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-44">Contact</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Status</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTableBody" class="divide-y divide-gray-100">
+                        <!-- Activities will be dynamically populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data arrays for generating activities
+        const loanOfficers = [
+            { name: 'Emma Williams', initials: 'EW' },
+            { name: 'Alex Thompson', initials: 'AT' },
+            { name: 'Jessica Chen', initials: 'JC' },
+            { name: 'Marcus Johnson', initials: 'MJ' },
+            { name: 'Daniel Kim', initials: 'DK' },
+            { name: 'Rachel Green', initials: 'RG' },
+            { name: 'Sophia Martinez', initials: 'SM' },
+            { name: 'Brian O\'Connor', initials: 'BO' }
+        ];
+
+        const firstNames = ['James', 'Mary', 'Robert', 'Patricia', 'John', 'Jennifer', 'Michael', 'Linda', 
+                           'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica',
+                           'Thomas', 'Sarah', 'Christopher', 'Karen', 'Charles', 'Nancy', 'Daniel', 'Lisa',
+                           'Matthew', 'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra', 'Donald', 'Donna'];
+        
+        const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
+                          'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson',
+                          'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson',
+                          'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker'];
+
+        const callNotes = [
+            'Discussed loan options for property. Client interested in 30-year fixed.',
+            'Pre-approval documents requested. Follow-up scheduled.',
+            'Reviewed rate options. Client comparing with other lenders.',
+            'FHA loan discussion, gathering employment documentation.',
+            'Refinance inquiry. Current rate 6.5%, looking for better terms.',
+            'Investment property loan. Need 25% down payment confirmation.',
+            'VA loan eligible. Collecting service documentation.',
+            'Jumbo loan requirement. Property value over $1M.',
+            'First-time homebuyer. Explained down payment assistance programs.',
+            'Self-employed borrower. Need 2 years tax returns.',
+            'Credit score discussion. Suggested ways to improve before application.',
+            'Cash-out refinance inquiry. Needs funds for home renovation.',
+            'Discussed ARM vs fixed rate options. Client prefers stability.',
+            'Construction loan inquiry. Explained draw schedule process.',
+            'Reverse mortgage consultation for elderly parents.',
+            'Bridge loan needed for new home purchase before sale.'
+        ];
+
+        const textMessages = [
+            'Initial outreach - property inquiry',
+            'Automated follow-up - rate update sent',
+            'Documents reminder - still need bank statements',
+            'Appointment confirmation for tomorrow',
+            'Rate lock confirmation sent',
+            'Application link sent - please complete ASAP',
+            'Missing documents reminder',
+            'Closing date confirmation',
+            'Happy to help with your pre-approval!',
+            'New lower rates available - let\'s discuss',
+            'Following up on our conversation',
+            'Documents received - reviewing now',
+            'Pre-approval letter ready for pickup',
+            'Inspection contingency deadline reminder',
+            'Appraisal scheduled for next week',
+            'Clear to close! Congratulations!'
+        ];
+
+        const notes = [
+            'Client prefers email communication.',
+            'Needs co-signer due to credit score.',
+            'Shopping for investment property in Austin area.',
+            'Referred by existing client - high priority.',
+            'Works night shift - call after 4 PM only.',
+            'Spanish speaking preferred.',
+            'Has pre-approval from competitor at 6.25%.',
+            'Closing needed by end of month - rush.',
+            'Concerned about debt-to-income ratio.',
+            'May need gift funds for down payment.',
+            'Previous bankruptcy 3 years ago - explained.',
+            'Strong assets but variable income.',
+            'Looking at multiple properties this weekend.',
+            'Wants to lock rate today - very motivated.',
+            'Needs jumbo loan - high net worth client.',
+            'Teacher - qualifies for special program.'
+        ];
+
+        // Generate random activities
+        function generateActivities(count) {
+            const activities = [];
+            const now = new Date();
+            
+            for (let i = 0; i < count; i++) {
+                // Random time in the last 7 days
+                const hoursAgo = Math.floor(Math.random() * 168); // 7 days * 24 hours
+                const activityTime = new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
+                
+                // Random activity type
+                const types = ['call', 'text', 'email', 'note'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                // Random officer and contact
+                const officer = loanOfficers[Math.floor(Math.random() * loanOfficers.length)];
+                const contactName = firstNames[Math.floor(Math.random() * firstNames.length)] + ' ' + 
+                                  lastNames[Math.floor(Math.random() * lastNames.length)];
+                
+                let status = '', details = '';
+                
+                switch(type) {
+                    case 'call':
+                        const callOutcome = Math.random() > 0.3;
+                        if (callOutcome) {
+                            status = '<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Connected</span>';
+                            const duration = Math.floor(Math.random() * 15) + 1;
+                            details = `Duration: ${duration}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} • ${callNotes[Math.floor(Math.random() * callNotes.length)]}`;
+                        } else {
+                            status = '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">No Answer</span>';
+                            const attempts = Math.floor(Math.random() * 3) + 1;
+                            details = `Attempt #${attempts} • Left voicemail`;
+                        }
+                        break;
+                    
+                    case 'text':
+                        const textStatus = Math.random() > 0.5 ? 'delivered' : 'read';
+                        const badgeClass = textStatus === 'read' ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800';
+                        status = `<span class="${badgeClass} px-2 py-1 rounded-full text-xs">${textStatus.charAt(0).toUpperCase() + textStatus.slice(1)}</span>`;
+                        details = textMessages[Math.floor(Math.random() * textMessages.length)];
+                        break;
+                    
+                    case 'email':
+                        const emailStatus = Math.random() > 0.4 ? 'opened' : 'sent';
+                        status = `<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">${emailStatus.charAt(0).toUpperCase() + emailStatus.slice(1)}</span>`;
+                        const emailSubjects = ['Rate Update', 'Document Request', 'Pre-approval Status', 'Application Next Steps', 'Closing Information'];
+                        details = emailSubjects[Math.floor(Math.random() * emailSubjects.length)] + ' • Automated follow-up';
+                        break;
+                    
+                    case 'note':
+                        status = '—';
+                        details = notes[Math.floor(Math.random() * notes.length)];
+                        break;
+                }
+                
+                activities.push({
+                    time: activityTime,
+                    type: type,
+                    officer: officer,
+                    contact: contactName,
+                    status: status,
+                    details: details
+                });
+            }
+            
+            // Sort by time (most recent first)
+            activities.sort((a, b) => b.time - a.time);
+            return activities;
+        }
+
+        // Format time
+        function formatTime(date) {
+            return date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
+            });
+        }
+
+        // Format date
+        function formatDate(date) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (date.toDateString() === today.toDateString()) {
+                return formatTime(date);
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday ' + formatTime(date);
+            } else {
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                }) + ' ' + formatTime(date);
+            }
+        }
+
+        // Render activities in table
+        function renderActivities(activities) {
+            const tbody = document.getElementById('activityTableBody');
+            tbody.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                const typeIcons = {
+                    'call': { icon: '📞', class: 'bg-gray-100 text-gray-700' },
+                    'text': { icon: '💬', class: 'bg-gray-100 text-gray-700' },
+                    'email': { icon: '✉️', class: 'bg-pink-100 text-pink-700' },
+                    'note': { icon: '📝', class: 'bg-orange-100 text-orange-700' }
+                };
+                
+                const typeInfo = typeIcons[activity.type];
+                
+                row.innerHTML = `
+                    <td class="px-5 py-3 text-sm">${formatDate(activity.time)}</td>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-lg ${typeInfo.class}">${typeInfo.icon}</div>
+                            <span class="text-sm capitalize">${activity.type}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">${activity.officer.initials}</div>
+                            <span class="text-sm">${activity.officer.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3 text-sm">${activity.contact}</td>
+                    <td class="px-5 py-3">${activity.status}</td>
+                    <td class="px-5 py-3">
+                        <div class="text-sm text-gray-600 max-w-md overflow-hidden text-ellipsis whitespace-nowrap">${activity.details}</div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize with 200 activities
+        let allActivities = generateActivities(200);
+        let filteredActivities = [...allActivities];
+
+        // Initialize date inputs and render activities
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startDate').value = weekAgo.toISOString().split('T')[0];
+            
+            // Set up filter event listeners
+            document.getElementById('officerFilter').addEventListener('change', filterActivities);
+            document.getElementById('activityFilter').addEventListener('change', filterActivities);
+            document.getElementById('startDate').addEventListener('change', filterActivities);
+            document.getElementById('endDate').addEventListener('change', filterActivities);
+            
+            renderActivities(filteredActivities);
+        });
+
+        // Export functionality
+        function exportData() {
+            let csv = 'Time,Type,Loan Officer,Contact,Status,Details\n';
+            
+            filteredActivities.forEach(activity => {
+                const time = formatDate(activity.time);
+                const type = activity.type;
+                const officer = activity.officer.name;
+                const contact = activity.contact;
+                const status = activity.status.replace(/<[^>]*>/g, ''); // Remove HTML
+                const details = activity.details.replace(/"/g, '""'); // Escape quotes
+                
+                csv += `"${time}","${type}","${officer}","${contact}","${status}","${details}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'contact-activity-export.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Filter functionality
+        function filterActivities() {
+            const officerFilter = document.getElementById('officerFilter').value;
+            const activityFilter = document.getElementById('activityFilter').value;
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            endDate.setHours(23, 59, 59); // Include full end date
+            
+            filteredActivities = allActivities.filter(activity => {
+                // Officer filter
+                if (officerFilter !== 'all') {
+                    const officerName = document.querySelector(`#officerFilter option[value="${officerFilter}"]`).textContent;
+                    if (activity.officer.name !== officerName) return false;
+                }
+                
+                // Activity type filter
+                if (activityFilter !== 'all') {
+                    const typeMap = {
+                        'calls': 'call',
+                        'texts': 'text',
+                        'emails': 'email',
+                        'notes': 'note'
+                    };
+                    if (activity.type !== typeMap[activityFilter]) return false;
+                }
+                
+                // Date filter
+                if (activity.time < startDate || activity.time > endDate) return false;
+                
+                return true;
+            });
+            
+            renderActivities(filteredActivities);
+        }
+    </script>
+</body>
+</html>

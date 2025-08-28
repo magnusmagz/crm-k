@@ -511,10 +511,10 @@ class EmailService {
         processedMessage = this.replaceVariables(message, contactData);
       }
 
-      // Create email record first
+      // Create email record first (contactId is optional for system emails)
       emailRecord = await EmailSend.create({
         userId,
-        contactId,
+        contactId: contactId || null, // Make contactId optional
         subject: processedSubject,
         message: processedMessage,
         status: 'sent',

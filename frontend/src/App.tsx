@@ -20,6 +20,7 @@ const AutomationBuilder = lazy(() => import('./pages/AutomationBuilder'));
 const WorkflowBuilder = lazy(() => import('./pages/WorkflowBuilder'));
 const Metrics = lazy(() => import('./pages/EmailAnalytics'));
 const DuplicateContacts = lazy(() => import('./pages/DuplicateContacts'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
 
 // Round-Robin pages
 const AssignmentDashboard = lazy(() => import('./pages/RoundRobin/AssignmentDashboard'));
@@ -58,6 +59,7 @@ function App() {
               <Route path="profile" element={<Profile />} />
               <Route path="custom-fields" element={<CustomFields />} />
               <Route path="duplicates" element={<DuplicateContacts />} />
+              <Route path="users" element={<UserManagement />} />
               <Route path="round-robin" element={<AssignmentDashboard />} />
               <Route path="round-robin/rules" element={<AssignmentRules />} />
               <Route path="round-robin/rules/new" element={<RuleBuilder />} />

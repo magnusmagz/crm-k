@@ -26,7 +26,7 @@ function classNames(...classes: string[]) {
 const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const { crmName, primaryColor } = useTheme();
   const { mode, toggleMode } = useAppMode();
 
@@ -121,6 +121,21 @@ const Layout: React.FC = () => {
                                 </Link>
                               )}
                             </Menu.Item>
+                            {user?.isAdmin && (
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <Link
+                                    to="/users"
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700'
+                                    )}
+                                  >
+                                    Manage Users
+                                  </Link>
+                                )}
+                              </Menu.Item>
+                            )}
                             <Menu.Item>
                               {({ active }) => (
                                 <button

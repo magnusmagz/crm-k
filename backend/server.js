@@ -9,6 +9,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const userManagementRoutes = require('./routes/userManagement');
 const contactRoutes = require('./routes/contacts');
 const contactImportRoutes = require('./routes/contacts-import');
 const dealImportRoutes = require('./routes/deals-import');
@@ -55,6 +56,7 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/user-management', userManagementRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/contacts/import', contactImportRoutes);
 app.use('/api/custom-fields', customFieldRoutes);

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Assignment - CRM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#1f2937',
+                            dark: '#111827',
+                            light: '#4b5563'
+                        }
+                    },
+                    fontSize: {
+                        'xs': ['16px', '20px'],
+                        'sm': ['16px', '20px'],
+                        'base': ['16px', '24px'],
+                        'lg': ['18px', '28px'],
+                        'xl': ['20px', '28px'],
+                        '2xl': ['24px', '32px'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for specific components -->
+    <style>
+        /* Custom font for headings */
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 text-base">
+    <!-- Top Navigation -->
+    <nav class="bg-primary text-white py-3 px-5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="bg-white text-primary px-2 py-1 rounded font-heading font-semibold text-base">
+                    CRM
+                </div>
+                <div class="hidden md:flex gap-6">
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Dashboard</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Contacts</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Loan Pipeline</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Marketing</a>
+                    <a href="#" class="text-white font-medium opacity-100">Admin</a>
+                </div>
+            </div>
+            <div class="hidden md:block flex-1 max-w-lg mx-10">
+                <input type="text" class="w-full px-4 py-2 rounded-full bg-white bg-opacity-90 text-gray-900 placeholder-gray-500 text-sm" placeholder="Search contacts...">
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-medium">
+                SM
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-5 py-5">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-heading font-semibold text-gray-900">Assign Contacts to Loan Officers</h1>
+                <div class="flex gap-2">
+                    <button class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded transition-colors" onclick="window.location.reload()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-5 py-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 h-[calc(100vh-200px)]">
+            <!-- Unassigned Contacts Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+                <div class="px-5 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-heading font-semibold text-gray-900">Unassigned Contacts</h2>
+                    <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" id="unassignedCount">12 contacts</span>
+                </div>
+                
+                <div class="px-5 py-4 border-b border-gray-200 flex gap-4 items-center">
+                    <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer" id="ageFilter">
+                        <option value="all">All Ages</option>
+                        <option value="new">Under 1 minute</option>
+                        <option value="minutes">Under 1 hour</option>
+                        <option value="hours">Under 24 hours</option>
+                        <option value="days">Older than 24 hours</option>
+                    </select>
+                    
+                    <div class="flex-1 relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                        <input type="text" id="contactSearch" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Search contacts...">
+                    </div>
+                </div>
+                
+                <div class="px-5 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+                    <input type="checkbox" id="selectAll" class="w-4 h-4 cursor-pointer">
+                    <label for="selectAll" class="text-sm font-medium cursor-pointer">Select All</label>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto" id="contactList">
+                    <!-- Contact items will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Loan Officers Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+                <div class="px-5 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-heading font-semibold text-gray-900">Loan Officers</h2>
+                    <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm">8 active</span>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-5" id="officerGrid">
+                    <!-- Officer cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Actions Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 px-5 py-5 hidden items-center justify-center gap-5 shadow-lg" id="assignmentActions">
+        <div class="text-base text-gray-900" id="assignmentSummary">
+            <strong>0</strong> contacts selected • No loan officer selected
+        </div>
+        <button class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded text-base transition-colors" onclick="cancelAssignment()">Cancel</button>
+        <button class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed" id="assignButton" onclick="assignContacts()" disabled>Assign Contacts</button>
+    </div>
+
+    <script>
+        // Sample data with created timestamps
+        const now = new Date();
+        const contacts = [
+            { id: 1, name: 'John Smith', email: 'john.smith@email.com', phone: '(555) 123-4567', state: 'TX', initials: 'JS', createdAt: new Date(now - 30 * 1000) }, // 30 seconds ago
+            { id: 2, name: 'Sarah Johnson', email: 'sarah.j@email.com', phone: '(555) 234-5678', state: 'CA', initials: 'SJ', createdAt: new Date(now - 45 * 60 * 1000) }, // 45 minutes ago
+            { id: 3, name: 'Michael Brown', email: 'mbrown@email.com', phone: '(555) 345-6789', state: 'TX', initials: 'MB', createdAt: new Date(now - 2 * 60 * 60 * 1000) }, // 2 hours ago
+            { id: 4, name: 'Emily Davis', email: 'emily.d@email.com', phone: '(555) 456-7890', state: 'FL', initials: 'ED', createdAt: new Date(now - 5 * 24 * 60 * 60 * 1000) }, // 5 days ago
+            { id: 5, name: 'David Wilson', email: 'dwilson@email.com', phone: '(555) 567-8901', state: 'TX', initials: 'DW', createdAt: new Date(now - 15 * 60 * 1000) }, // 15 minutes ago
+            { id: 6, name: 'Lisa Anderson', email: 'lisa.a@email.com', phone: '(555) 678-9012', state: 'CA', initials: 'LA', createdAt: new Date(now - 3 * 60 * 60 * 1000) }, // 3 hours ago
+            { id: 7, name: 'Robert Taylor', email: 'rtaylor@email.com', phone: '(555) 789-0123', state: 'AZ', initials: 'RT', createdAt: new Date(now - 90 * 60 * 1000) }, // 90 minutes ago
+            { id: 8, name: 'Jennifer Martinez', email: 'jmartinez@email.com', phone: '(555) 890-1234', state: 'TX', initials: 'JM', createdAt: new Date(now - 45 * 1000) }, // 45 seconds ago
+            { id: 9, name: 'William Garcia', email: 'wgarcia@email.com', phone: '(555) 901-2345', state: 'NV', initials: 'WG', createdAt: new Date(now - 7 * 24 * 60 * 60 * 1000) }, // 7 days ago
+            { id: 10, name: 'Maria Rodriguez', email: 'mrodriguez@email.com', phone: '(555) 012-3456', state: 'CA', initials: 'MR', createdAt: new Date(now - 5 * 60 * 60 * 1000) }, // 5 hours ago
+            { id: 11, name: 'James Lee', email: 'jlee@email.com', phone: '(555) 123-4567', state: 'TX', initials: 'JL', createdAt: new Date(now - 20 * 1000) }, // 20 seconds ago
+            { id: 12, name: 'Patricia White', email: 'pwhite@email.com', phone: '(555) 234-5678', state: 'FL', initials: 'PW', createdAt: new Date(now - 12 * 60 * 60 * 1000) } // 12 hours ago
+        ];
+
+        const loanOfficers = [
+            { id: 1, name: 'Alex Thompson', role: 'Senior Loan Officer', contacts: 45, loans: 12, initials: 'AT', licensedStates: ['TX', 'OK', 'NM'] },
+            { id: 2, name: 'Jessica Chen', role: 'Loan Officer', contacts: 38, loans: 8, initials: 'JC', licensedStates: ['CA', 'OR', 'WA'] },
+            { id: 3, name: 'Marcus Johnson', role: 'Senior Loan Officer', contacts: 52, loans: 15, initials: 'MJ', licensedStates: ['FL', 'GA', 'AL'] },
+            { id: 4, name: 'Rachel Green', role: 'Loan Officer', contacts: 31, loans: 7, initials: 'RG', licensedStates: ['TX', 'LA', 'AR'] },
+            { id: 5, name: 'Daniel Kim', role: 'Loan Officer', contacts: 29, loans: 6, initials: 'DK', licensedStates: ['CA', 'NV', 'AZ'] },
+            { id: 6, name: 'Sophia Martinez', role: 'Senior Loan Officer', contacts: 48, loans: 14, initials: 'SM', licensedStates: ['TX', 'NM', 'CO'] },
+            { id: 7, name: 'Brian O\'Connor', role: 'Loan Officer', contacts: 35, loans: 9, initials: 'BO', licensedStates: ['NY', 'NJ', 'CT'] },
+            { id: 8, name: 'Emma Williams', role: 'Loan Officer', contacts: 27, loans: 5, initials: 'EW', licensedStates: ['CA', 'AZ', 'UT'] }
+        ];
+
+        // State management
+        let selectedContacts = new Set();
+        let selectedOfficer = null;
+
+        // Initialize the page
+        function init() {
+            renderContacts();
+            renderOfficers();
+            setupEventListeners();
+        }
+
+        // Calculate age label for contact
+        function getContactAge(createdAt) {
+            const now = new Date();
+            const diffMs = now - createdAt;
+            const diffSeconds = Math.floor(diffMs / 1000);
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffSeconds < 60) {
+                return { label: 'NEW', class: 'bg-gray-100 text-gray-800 font-semibold' };
+            } else if (diffMinutes < 60) {
+                return { label: `${diffMinutes}m`, class: 'bg-orange-100 text-orange-700' };
+            } else if (diffHours < 24) {
+                return { label: `${diffHours}h`, class: 'bg-gray-100 text-gray-700' };
+            } else {
+                return { label: `${diffDays}d`, class: 'bg-purple-100 text-purple-700' };
+            }
+        }
+
+        // Render contact list
+        function renderContacts(filteredContacts = contacts) {
+            const contactList = document.getElementById('contactList');
+            contactList.innerHTML = '';
+
+            if (filteredContacts.length === 0) {
+                contactList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-48 text-gray-600">
+                        <div class="text-5xl mb-4 opacity-50">📭</div>
+                        <p>No contacts found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filteredContacts.forEach(contact => {
+                const contactItem = document.createElement('div');
+                contactItem.className = 'px-5 py-4 border-b border-gray-100 cursor-pointer transition-colors hover:bg-gray-50 flex items-center gap-3';
+                const age = getContactAge(contact.createdAt);
+                contactItem.innerHTML = `
+                    <input type="checkbox" class="w-4 h-4 cursor-pointer" data-contact-id="${contact.id}">
+                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold">${contact.initials}</div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">${contact.name}</div>
+                        <div class="text-sm text-gray-600">${contact.email} • ${contact.phone} • ${contact.state}</div>
+                    </div>
+                    <span class="px-2 py-1 rounded text-xs uppercase ${age.class} whitespace-nowrap">${age.label}</span>
+                `;
+                
+                contactItem.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = contactItem.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                        handleContactSelection(contact.id, checkbox.checked);
+                    }
+                });
+
+                const checkbox = contactItem.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', (e) => {
+                    handleContactSelection(contact.id, e.target.checked);
+                });
+
+                contactList.appendChild(contactItem);
+            });
+        }
+
+        // Render loan officers
+        function renderOfficers() {
+            const officerGrid = document.getElementById('officerGrid');
+            officerGrid.innerHTML = '';
+
+            // Create grid container
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid grid-cols-1 xl:grid-cols-2 gap-4';
+
+            loanOfficers.forEach(officer => {
+                const officerCard = document.createElement('div');
+                officerCard.className = 'border-2 border-gray-200 rounded-lg p-5 cursor-pointer transition-all hover:border-primary hover:shadow-md';
+                officerCard.innerHTML = `
+                    <div class="w-15 h-15 bg-gray-500 text-white rounded-full flex items-center justify-center text-xl font-semibold mx-auto mb-3">${officer.initials}</div>
+                    <div class="text-center">
+                        <div class="font-medium text-base text-gray-900 mb-1">${officer.name}</div>
+                        <div class="text-sm text-gray-600 mb-4">${officer.role}</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-md p-3 mb-4">
+                        <div class="text-xs text-gray-600 mb-1 font-medium">Licensed States:</div>
+                        <div class="text-sm text-gray-900 font-medium">${officer.licensedStates.join(', ')}</div>
+                    </div>
+                    <div class="flex justify-around pt-4 border-t border-gray-200">
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-gray-900">${officer.contacts}</div>
+                            <div class="text-xs text-gray-600">Contacts</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-gray-900">${officer.loans}</div>
+                            <div class="text-xs text-gray-600">Active Loans</div>
+                        </div>
+                    </div>
+                `;
+                
+                officerCard.addEventListener('click', () => {
+                    handleOfficerSelection(officer.id);
+                });
+
+                gridContainer.appendChild(officerCard);
+            });
+
+            officerGrid.appendChild(gridContainer);
+        }
+
+        // Handle contact selection
+        function handleContactSelection(contactId, isSelected) {
+            if (isSelected) {
+                selectedContacts.add(contactId);
+            } else {
+                selectedContacts.delete(contactId);
+            }
+            
+            updateUI();
+        }
+
+        // Handle officer selection
+        function handleOfficerSelection(officerId) {
+            const officer = loanOfficers.find(o => o.id === officerId);
+            
+            // Check if officer can handle selected contacts
+            if (selectedContacts.size > 0) {
+                const selectedContactStates = Array.from(selectedContacts).map(id => 
+                    contacts.find(c => c.id === id).state
+                );
+                
+                const canHandleAll = selectedContactStates.every(state => 
+                    officer.licensedStates.includes(state)
+                );
+                
+                if (!canHandleAll) {
+                    const incompatibleStates = [...new Set(selectedContactStates.filter(state => 
+                        !officer.licensedStates.includes(state)
+                    ))];
+                    
+                    alert(`${officer.name} is not licensed in: ${incompatibleStates.join(', ')}\n\nPlease select a different loan officer or adjust your contact selection.`);
+                    return;
+                }
+            }
+            
+            selectedOfficer = officerId;
+            
+            // Update officer card selection
+            document.querySelectorAll('#officerGrid .border-2').forEach(card => {
+                card.classList.remove('border-primary', 'bg-gray-100');
+                card.classList.add('border-gray-200');
+            });
+            
+            const selectedCard = document.querySelectorAll('#officerGrid .border-2')[officerId - 1];
+            if (selectedCard) {
+                selectedCard.classList.remove('border-gray-200');
+                selectedCard.classList.add('border-primary', 'bg-gray-100');
+            }
+            
+            updateUI();
+        }
+
+        // Update UI based on selections
+        function updateUI() {
+            // Update contact selection UI
+            document.querySelectorAll('#contactList > div').forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    const contactId = parseInt(checkbox.dataset.contactId);
+                    
+                    if (selectedContacts.has(contactId)) {
+                        item.classList.add('bg-gray-100');
+                    } else {
+                        item.classList.remove('bg-gray-100');
+                    }
+                }
+            });
+
+            // Update officer card compatibility
+            if (selectedContacts.size > 0) {
+                const selectedContactStates = Array.from(selectedContacts).map(id => 
+                    contacts.find(c => c.id === id).state
+                );
+                
+                document.querySelectorAll('#officerGrid .border-2').forEach((card, index) => {
+                    const officer = loanOfficers[index];
+                    const canHandleAll = selectedContactStates.every(state => 
+                        officer.licensedStates.includes(state)
+                    );
+                    
+                    if (!canHandleAll) {
+                        card.classList.add('opacity-50', 'cursor-not-allowed');
+                        card.classList.remove('hover:border-primary', 'hover:shadow-md');
+                    } else {
+                        card.classList.remove('opacity-50', 'cursor-not-allowed');
+                        card.classList.add('hover:border-primary', 'hover:shadow-md');
+                    }
+                });
+            } else {
+                document.querySelectorAll('#officerGrid .border-2').forEach(card => {
+                    card.classList.remove('opacity-50', 'cursor-not-allowed');
+                    card.classList.add('hover:border-primary', 'hover:shadow-md');
+                });
+            }
+
+            // Update assignment actions
+            const assignmentActions = document.getElementById('assignmentActions');
+            const assignmentSummary = document.getElementById('assignmentSummary');
+            const assignButton = document.getElementById('assignButton');
+            
+            if (selectedContacts.size > 0 || selectedOfficer) {
+                assignmentActions.classList.remove('hidden');
+                assignmentActions.classList.add('flex');
+                
+                const contactText = selectedContacts.size === 1 ? 'contact' : 'contacts';
+                const officerText = selectedOfficer 
+                    ? loanOfficers.find(o => o.id === selectedOfficer).name 
+                    : 'No loan officer selected';
+                
+                assignmentSummary.innerHTML = `
+                    <strong>${selectedContacts.size}</strong> ${contactText} selected • 
+                    ${selectedOfficer ? 'Assign to: ' + officerText : officerText}
+                `;
+                
+                assignButton.disabled = !(selectedContacts.size > 0 && selectedOfficer);
+            } else {
+                assignmentActions.classList.add('hidden');
+                assignmentActions.classList.remove('flex');
+            }
+
+            // Update select all checkbox
+            const selectAll = document.getElementById('selectAll');
+            const totalContacts = document.querySelectorAll('input[data-contact-id]').length;
+            selectAll.checked = selectedContacts.size === totalContacts && totalContacts > 0;
+            selectAll.indeterminate = selectedContacts.size > 0 && selectedContacts.size < totalContacts;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Select all checkbox
+            document.getElementById('selectAll').addEventListener('change', (e) => {
+                const checkboxes = document.querySelectorAll('input[data-contact-id]');
+                checkboxes.forEach(checkbox => {
+                    const contactId = parseInt(checkbox.dataset.contactId);
+                    checkbox.checked = e.target.checked;
+                    if (e.target.checked) {
+                        selectedContacts.add(contactId);
+                    } else {
+                        selectedContacts.delete(contactId);
+                    }
+                });
+                updateUI();
+            });
+
+            // Age filter
+            document.getElementById('ageFilter').addEventListener('change', (e) => {
+                const ageRange = e.target.value;
+                let filtered = contacts;
+                
+                if (ageRange !== 'all') {
+                    const now = new Date();
+                    filtered = contacts.filter(contact => {
+                        const diffMs = now - contact.createdAt;
+                        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                        
+                        switch(ageRange) {
+                            case 'new':
+                                return diffMinutes < 1;
+                            case 'minutes':
+                                return diffMinutes < 60;
+                            case 'hours':
+                                return diffHours < 24;
+                            case 'days':
+                                return diffHours >= 24;
+                            default:
+                                return true;
+                        }
+                    });
+                }
+                
+                renderContacts(filtered);
+                updateUI();
+            });
+
+            // Contact search
+            document.getElementById('contactSearch').addEventListener('input', (e) => {
+                const search = e.target.value.toLowerCase();
+                const filtered = contacts.filter(c => 
+                    c.name.toLowerCase().includes(search) ||
+                    c.email.toLowerCase().includes(search) ||
+                    c.phone.includes(search)
+                );
+                renderContacts(filtered);
+                updateUI();
+            });
+        }
+
+        // Cancel assignment
+        function cancelAssignment() {
+            selectedContacts.clear();
+            selectedOfficer = null;
+            
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#officerGrid .border-2').forEach(card => {
+                card.classList.remove('border-primary', 'bg-gray-100');
+                card.classList.add('border-gray-200');
+            });
+            
+            updateUI();
+        }
+
+        // Assign contacts
+        function assignContacts() {
+            if (selectedContacts.size === 0 || !selectedOfficer) return;
+            
+            const officer = loanOfficers.find(o => o.id === selectedOfficer);
+            const contactText = selectedContacts.size === 1 ? 'contact' : 'contacts';
+            
+            // Simulate API call
+            alert(`Successfully assigned ${selectedContacts.size} ${contactText} to ${officer.name}`);
+            
+            // Reset selections
+            cancelAssignment();
+            
+            // In a real app, you would refresh the contact list here
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

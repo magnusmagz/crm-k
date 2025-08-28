@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment History - CRM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#1f2937',
+                            dark: '#111827',
+                            light: '#4b5563'
+                        }
+                    },
+                    fontSize: {
+                        'xs': ['16px', '20px'],
+                        'sm': ['16px', '20px'],
+                        'base': ['16px', '24px'],
+                        'lg': ['18px', '28px'],
+                        'xl': ['20px', '28px'],
+                        '2xl': ['24px', '32px'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for specific components -->
+    <style>
+        /* Custom font for headings */
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 text-base">
+    <!-- Top Navigation -->
+    <nav class="bg-primary text-white py-3 px-5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="bg-white text-primary px-2 py-1 rounded font-heading font-semibold text-base">
+                    CRM
+                </div>
+                <div class="hidden md:flex gap-6">
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Dashboard</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Contacts</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Loan Pipeline</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Marketing</a>
+                    <a href="#" class="text-white font-medium opacity-100">Admin</a>
+                </div>
+            </div>
+            <div class="hidden md:block flex-1 max-w-lg mx-10">
+                <input type="text" class="w-full px-4 py-2 rounded-full bg-white bg-opacity-90 text-gray-900 placeholder-gray-500 text-sm" placeholder="Search...">
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-medium">
+                SM
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-5 py-5">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-heading font-semibold text-gray-900">Assignment History</h1>
+                <div class="flex gap-2">
+                    <a href="contact-assignment.html" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm transition-colors flex items-center gap-1">+ New Assignment</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-5 py-5">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-6">
+                <div class="text-3xl font-heading font-semibold text-gray-900 mb-2 leading-none">247</div>
+                <div class="text-sm font-medium text-gray-700 mb-2">Total Leads Assigned</div>
+                <div class="text-sm text-gray-500">Last 30 days</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-6">
+                <div class="text-3xl font-heading font-semibold text-gray-900 mb-2 leading-none">8</div>
+                <div class="text-sm font-medium text-gray-700 mb-2">Active Loan Officers</div>
+                <div class="text-sm text-gray-500">Receiving assignments</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-6">
+                <div class="text-3xl font-heading font-semibold text-gray-900 mb-2 leading-none">31</div>
+                <div class="text-sm font-medium text-gray-700 mb-2">Avg. Leads per Officer</div>
+                <div class="text-sm text-gray-500">Per month</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-6">
+                <div class="text-3xl font-heading font-semibold text-gray-900 mb-2 leading-none">2.3m</div>
+                <div class="text-sm font-medium text-gray-700 mb-2">Avg. Response Time</div>
+                <div class="text-sm text-gray-500">After assignment</div>
+            </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-5 flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer w-full md:w-auto" id="periodFilter">
+                <option value="today">Today</option>
+                <option value="week" selected>Last 7 Days</option>
+                <option value="month">Last 30 Days</option>
+                <option value="custom">Custom Range</option>
+            </select>
+            
+            <div id="customDateRange" class="hidden flex-1 flex gap-3 items-center w-full md:w-auto">
+                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" id="startDate">
+                <span class="text-gray-500">to</span>
+                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" id="endDate">
+            </div>
+            
+            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer w-full md:w-auto" id="officerFilter">
+                <option value="all">All Loan Officers</option>
+                <option value="1">Alex Thompson</option>
+                <option value="2">Jessica Chen</option>
+                <option value="3">Marcus Johnson</option>
+                <option value="4">Rachel Green</option>
+                <option value="5">Daniel Kim</option>
+                <option value="6">Sophia Martinez</option>
+                <option value="7">Brian O'Connor</option>
+                <option value="8">Emma Williams</option>
+            </select>
+        </div>
+
+        <!-- History Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-5 py-5 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-heading font-semibold text-gray-900">Assignment History</h2>
+                <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm transition-colors" onclick="exportHistory()">Export CSV</button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full" id="historyTable">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date & Time</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Loan Officer</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Leads Assigned</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody" class="divide-y divide-gray-100">
+                        <!-- History rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="px-5 py-4 border-t border-gray-200 flex justify-center items-center gap-3" id="pagination">
+                <!-- Pagination will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample assignment history data
+        const assignmentHistory = [
+            {
+                id: 1,
+                timestamp: new Date('2024-01-15T14:30:00'),
+                officer: { id: 1, name: 'Alex Thompson', initials: 'AT' },
+                contacts: [
+                    { name: 'John Smith', state: 'TX' },
+                    { name: 'Michael Brown', state: 'TX' },
+                    { name: 'David Wilson', state: 'TX' }
+                ]
+            },
+            {
+                id: 2,
+                timestamp: new Date('2024-01-15T11:45:00'),
+                officer: { id: 2, name: 'Jessica Chen', initials: 'JC' },
+                contacts: [
+                    { name: 'Sarah Johnson', state: 'CA' },
+                    { name: 'Lisa Anderson', state: 'CA' }
+                ]
+            },
+            {
+                id: 3,
+                timestamp: new Date('2024-01-14T16:20:00'),
+                officer: { id: 3, name: 'Marcus Johnson', initials: 'MJ' },
+                contacts: [
+                    { name: 'Emily Davis', state: 'FL' },
+                    { name: 'Patricia White', state: 'FL' },
+                    { name: 'Robert Martinez', state: 'FL' },
+                    { name: 'Jennifer Wilson', state: 'FL' }
+                ]
+            },
+            {
+                id: 4,
+                timestamp: new Date('2024-01-14T09:15:00'),
+                officer: { id: 5, name: 'Daniel Kim', initials: 'DK' },
+                contacts: [
+                    { name: 'William Garcia', state: 'NV' },
+                    { name: 'Maria Rodriguez', state: 'CA' },
+                    { name: 'Robert Taylor', state: 'AZ' }
+                ]
+            },
+            {
+                id: 5,
+                timestamp: new Date('2024-01-13T15:30:00'),
+                officer: { id: 4, name: 'Rachel Green', initials: 'RG' },
+                contacts: [
+                    { name: 'James Lee', state: 'TX' },
+                    { name: 'Nancy Brown', state: 'TX' },
+                    { name: 'Christopher Davis', state: 'LA' },
+                    { name: 'Barbara Johnson', state: 'AR' },
+                    { name: 'Steven Wilson', state: 'TX' }
+                ]
+            }
+        ];
+
+        // State management
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let expandedRows = new Set();
+
+        // Initialize
+        function init() {
+            renderHistory();
+            setupEventListeners();
+            updateStats();
+        }
+
+        // Format date and time
+        function formatDateTime(date) {
+            const options = { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            };
+            return date.toLocaleString('en-US', options);
+        }
+
+        // Render assignment history
+        function renderHistory() {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
+
+            if (assignmentHistory.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-5 py-12 text-center text-gray-600">
+                            <div class="text-5xl mb-4 opacity-50">📋</div>
+                            <p>No assignment history found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Paginate results
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageItems = assignmentHistory.slice(startIndex, endIndex);
+
+            pageItems.forEach(assignment => {
+                const isExpanded = expandedRows.has(assignment.id);
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                row.innerHTML = `
+                    <td class="px-5 py-4">
+                        <div class="flex flex-col">
+                            <span class="font-medium text-gray-900">${formatDateTime(assignment.timestamp)}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">${assignment.officer.initials}</div>
+                            <span class="font-medium text-gray-900">${assignment.officer.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">${assignment.contacts.length} contacts</span>
+                        ${assignment.contacts.length > 0 ? `
+                            <button class="ml-2 text-primary text-xs hover:underline" onclick="toggleExpand(${assignment.id})">
+                                ${isExpanded ? 'Hide' : 'Show'} details
+                            </button>
+                        ` : ''}
+                    </td>
+                    <td class="px-5 py-4">
+                        <button class="text-primary text-sm hover:underline" onclick="viewDetails(${assignment.id})">
+                            View Details →
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+
+                // Add expanded contact list if expanded
+                if (isExpanded && assignment.contacts.length > 0) {
+                    const expandedRow = document.createElement('tr');
+                    expandedRow.innerHTML = `
+                        <td colspan="4" class="px-5 py-0 pb-4 bg-gray-50">
+                            <div class="ml-11">
+                                ${assignment.contacts.map(contact => `
+                                    <div class="flex items-center gap-2 py-1 text-sm text-gray-600">
+                                        <span class="text-gray-900">${contact.name}</span>
+                                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">${contact.state}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(expandedRow);
+                }
+            });
+
+            renderPagination();
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(assignmentHistory.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    Previous
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `
+                        <button class="px-3 py-1 border rounded text-sm transition-colors ${i === currentPage ? 'bg-primary text-white border-primary' : 'border-gray-300 hover:bg-gray-50'}" onclick="goToPage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += '<span class="px-2 text-gray-500">...</span>';
+                }
+            }
+
+            html += `
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm transition-colors hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Next
+                </button>
+            `;
+
+            pagination.innerHTML = html;
+        }
+
+        // Toggle expanded view
+        function toggleExpand(assignmentId) {
+            if (expandedRows.has(assignmentId)) {
+                expandedRows.delete(assignmentId);
+            } else {
+                expandedRows.add(assignmentId);
+            }
+            renderHistory();
+        }
+
+        // View assignment details
+        function viewDetails(assignmentId) {
+            // In a real app, this would navigate to a detailed view
+            alert(`View details for assignment #${assignmentId}`);
+        }
+
+        // Go to page
+        function goToPage(page) {
+            const totalPages = Math.ceil(assignmentHistory.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderHistory();
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            // Calculate stats based on filtered data
+            const totalAssigned = assignmentHistory.reduce((sum, a) => sum + a.contacts.length, 0);
+            document.querySelector('.text-3xl').textContent = totalAssigned;
+        }
+
+        // Export history to CSV
+        function exportHistory() {
+            let csv = 'Date,Time,Loan Officer,Contact Name,State\n';
+            
+            assignmentHistory.forEach(assignment => {
+                assignment.contacts.forEach(contact => {
+                    const date = assignment.timestamp.toLocaleDateString();
+                    const time = assignment.timestamp.toLocaleTimeString();
+                    csv += `${date},${time},${assignment.officer.name},${contact.name},${contact.state}\n`;
+                });
+            });
+
+            // Download CSV
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'assignment-history.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Period filter
+            document.getElementById('periodFilter').addEventListener('change', (e) => {
+                const customRange = document.getElementById('customDateRange');
+                if (e.target.value === 'custom') {
+                    customRange.classList.remove('hidden');
+                    customRange.classList.add('flex');
+                } else {
+                    customRange.classList.add('hidden');
+                    customRange.classList.remove('flex');
+                }
+                // In a real app, this would filter the data
+                renderHistory();
+            });
+
+            // Officer filter
+            document.getElementById('officerFilter').addEventListener('change', () => {
+                // In a real app, this would filter the data
+                renderHistory();
+            });
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

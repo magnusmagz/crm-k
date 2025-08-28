@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Activity Monitor - CRM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#1f2937',
+                            dark: '#111827',
+                            light: '#4b5563'
+                        }
+                    },
+                    fontSize: {
+                        'xs': ['16px', '20px'],
+                        'sm': ['16px', '20px'],
+                        'base': ['16px', '24px'],
+                        'lg': ['18px', '28px'],
+                        'xl': ['20px', '28px'],
+                        '2xl': ['24px', '32px'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for specific components -->
+    <style>
+        /* Custom font for headings */
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* Custom hover effects for timeline items */
+        .timeline-item:hover {
+            border-left: 3px solid #1f2937;
+            padding-left: calc(1.5rem - 3px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 text-base">
+    <!-- Top Navigation -->
+    <nav class="bg-primary text-white py-3 px-5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="bg-white text-primary px-2 py-1 rounded font-heading font-semibold text-base">
+                    CRM
+                </div>
+                <div class="hidden md:flex gap-6">
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Dashboard</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Contacts</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Loan Pipeline</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity">Marketing</a>
+                    <a href="#" class="text-white font-medium opacity-100">Admin</a>
+                </div>
+            </div>
+            <div class="hidden md:block flex-1 max-w-lg mx-10">
+                <input type="text" class="w-full px-4 py-2 rounded-full bg-white bg-opacity-90 text-gray-900 placeholder-gray-500 text-sm" placeholder="Search contacts...">
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-medium">
+                SM
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-5 py-5">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-heading font-semibold text-gray-900">Contact Activity Monitor</h1>
+                <div class="flex gap-2">
+                    <a href="admin-dashboard.html" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm transition-colors flex items-center gap-1">← Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-5 py-5 pb-10">
+        <!-- Compact Stats Row -->
+        <div class="flex gap-3 mb-5 overflow-x-auto pb-2">
+            <div class="bg-white rounded-md shadow-sm border-t-2 border-primary p-3 flex items-center gap-3 flex-shrink-0">
+                <div class="text-primary text-base">📞</div>
+                <div>
+                    <div class="text-lg font-heading font-semibold text-gray-900 leading-none">287<span class="text-xs text-gray-600 ml-2">↑12%</span></div>
+                    <div class="text-xs text-gray-600">Calls Today</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-md shadow-sm border-t-2 border-primary p-3 flex items-center gap-3 flex-shrink-0">
+                <div class="text-primary text-base">💬</div>
+                <div>
+                    <div class="text-lg font-heading font-semibold text-gray-900 leading-none">423<span class="text-xs text-gray-600 ml-2">↑18%</span></div>
+                    <div class="text-xs text-gray-600">Texts Sent</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-md shadow-sm border-t-2 border-primary p-3 flex items-center gap-3 flex-shrink-0">
+                <div class="text-primary text-base">✅</div>
+                <div>
+                    <div class="text-lg font-heading font-semibold text-gray-900 leading-none">68%<span class="text-xs text-gray-600 ml-2">↑5%</span></div>
+                    <div class="text-xs text-gray-600">Contact Rate</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-md shadow-sm border-t-2 border-primary p-3 flex items-center gap-3 flex-shrink-0">
+                <div class="text-primary text-base">⏱️</div>
+                <div>
+                    <div class="text-lg font-heading font-semibold text-gray-900 leading-none">1.2m<span class="text-xs text-red-600 ml-2">↓23%</span></div>
+                    <div class="text-xs text-gray-600">Response Time</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-md shadow-sm border-t-2 border-primary p-3 flex items-center gap-3 flex-shrink-0">
+                <div class="text-primary text-base">📝</div>
+                <div>
+                    <div class="text-lg font-heading font-semibold text-gray-900 leading-none">156</div>
+                    <div class="text-xs text-gray-600">Notes Added</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-5 flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer w-full lg:w-auto" id="officerFilter">
+                <option value="all">All Loan Officers</option>
+                <option value="1">Emma Williams</option>
+                <option value="2">Alex Thompson</option>
+                <option value="3">Jessica Chen</option>
+                <option value="4">Marcus Johnson</option>
+                <option value="5">Daniel Kim</option>
+            </select>
+            
+            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer w-full lg:w-auto" id="activityFilter">
+                <option value="all">All Activities</option>
+                <option value="calls">Calls Only</option>
+                <option value="texts">Texts Only</option>
+                <option value="emails">Emails Only</option>
+                <option value="notes">Notes Only</option>
+            </select>
+            
+            <div class="flex flex-col sm:flex-row gap-3 items-center w-full lg:w-auto">
+                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" id="startDate">
+                <span class="hidden sm:block text-gray-500">to</span>
+                <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary" id="endDate">
+            </div>
+            
+            <div class="flex gap-2 ml-auto">
+                <button class="px-3 py-2 border rounded text-sm transition-colors bg-primary text-white border-primary" onclick="switchView('timeline')">Timeline</button>
+                <button class="px-3 py-2 border border-gray-300 rounded text-sm transition-colors hover:bg-gray-50" onclick="switchView('summary')">Summary</button>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-h-96 mb-5" id="timelineView">
+            <div class="max-h-[calc(100vh-350px)] overflow-y-auto">
+                <!-- Today -->
+                <div class="px-5 py-4 bg-gray-50 font-semibold text-gray-600 text-sm uppercase tracking-wider sticky top-0 z-10">Today - January 15, 2024</div>
+                
+                <div class="timeline-item px-6 py-5 border-b border-gray-100 flex gap-4 transition-all hover:bg-gray-50">
+                    <div class="w-10 h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-lg flex-shrink-0">📞</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-gray-900">Call to Bob Jones</span>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Connected</span>
+                            </div>
+                            <span class="text-sm text-gray-500">10:32 AM</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Emma Williams • Duration: 5:23 • Redfin Lead
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-900 border-l-4 border-primary">
+                            Discussed loan options for property at 123 Oak St. Client interested in 30-year fixed. 
+                            Pre-approval documents requested. Follow-up scheduled for Thursday.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item px-6 py-5 border-b border-gray-100 flex gap-4 transition-all hover:bg-gray-50">
+                    <div class="w-10 h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-lg flex-shrink-0">💬</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-gray-900">Text to Sarah Thompson</span>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Delivered</span>
+                            </div>
+                            <span class="text-sm text-gray-500">10:15 AM</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Alex Thompson • Automated follow-up • Redfin Lead
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-900 border-l-4 border-primary">
+                            "Hi Sarah, this is Alex from CRM Mortgage. I saw you were interested in 456 Elm Ave. 
+                            I'd love to help with your pre-approval. When would be a good time to chat?"
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item px-6 py-5 border-b border-gray-100 flex gap-4 transition-all hover:bg-gray-50">
+                    <div class="w-10 h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-lg flex-shrink-0">📞</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-gray-900">Call to Michael Chen</span>
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">No Answer</span>
+                            </div>
+                            <span class="text-sm text-gray-500">9:45 AM</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Jessica Chen • Attempt #2 • Website Lead
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-900 border-l-4 border-primary">
+                            Left voicemail. Will try again after 2 PM per client's previous request.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item px-6 py-5 border-b border-gray-100 flex gap-4 transition-all hover:bg-gray-50">
+                    <div class="w-10 h-10 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center text-lg flex-shrink-0">📝</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-gray-900">Note added for Emily Rodriguez</span>
+                            </div>
+                            <span class="text-sm text-gray-500">9:12 AM</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Marcus Johnson • Manual note
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-900 border-l-4 border-primary">
+                            Client prefers email communication. Sent detailed rate sheet and loan options. 
+                            Expecting response by EOD Wednesday. Credit score: 750+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yesterday -->
+                <div class="px-5 py-4 bg-gray-50 font-semibold text-gray-600 text-sm uppercase tracking-wider sticky top-0 z-10">Yesterday - January 14, 2024</div>
+
+                <div class="timeline-item px-6 py-5 border-b border-gray-100 flex gap-4 transition-all hover:bg-gray-50">
+                    <div class="w-10 h-10 bg-pink-100 text-pink-700 rounded-full flex items-center justify-center text-lg flex-shrink-0">✉️</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-gray-900">Email to David Park</span>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Opened</span>
+                            </div>
+                            <span class="text-sm text-gray-500">4:30 PM</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Daniel Kim • Follow-up email • Redfin Lead
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-900 border-l-4 border-primary">
+                            Sent pre-approval checklist and rate comparison. Client opened email within 10 minutes.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item px-6 py-5 flex gap-4 transition-all hover:bg-gray-50">
+                    <div class="w-10 h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center text-lg flex-shrink-0">💬</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-gray-900">Text conversation with Maria Rodriguez</span>
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Responded</span>
+                            </div>
+                            <span class="text-sm text-gray-500">3:15 PM</span>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            Rachel Green • 4 messages exchanged • Manual outreach
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-900 border-l-4 border-primary">
+                            Client responded positively to initial outreach. Scheduled call for tomorrow 2 PM. 
+                            Interested in FHA loan options.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Officer Summary View (Hidden by default) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 hidden" id="summaryView">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">EW</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Emma Williams</div>
+                        <div class="text-xs text-gray-600">42 contacts assigned • 1.2m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">68</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">95</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">82%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">34</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">AT</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Alex Thompson</div>
+                        <div class="text-xs text-gray-600">38 contacts assigned • 2.1m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">52</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">78</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">71%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">28</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">JC</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Jessica Chen</div>
+                        <div class="text-xs text-gray-600">35 contacts assigned • 1.8m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">48</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">72</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">75%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">31</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">MJ</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Marcus Johnson</div>
+                        <div class="text-xs text-gray-600">41 contacts assigned • 1.5m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">61</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">89</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">79%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">38</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">RG</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Rachel Green</div>
+                        <div class="text-xs text-gray-600">29 contacts assigned • 2.3m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">38</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">56</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">65%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">22</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">DK</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Daniel Kim</div>
+                        <div class="text-xs text-gray-600">33 contacts assigned • 1.7m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">44</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">67</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">73%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">29</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">SM</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Sophia Martinez</div>
+                        <div class="text-xs text-gray-600">37 contacts assigned • 1.4m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">55</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">81</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">85%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">42</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-primary p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gray-500 text-white rounded-full flex items-center justify-center font-semibold">BO</div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Brian O'Connor</div>
+                        <div class="text-xs text-gray-600">31 contacts assigned • 1.9m avg response</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">42</div>
+                        <div class="text-xs text-gray-600 uppercase">Calls</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">63</div>
+                        <div class="text-xs text-gray-600 uppercase">Texts</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">70%</div>
+                        <div class="text-xs text-gray-600 uppercase">Contact Rate</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded-md">
+                        <div class="text-lg font-semibold text-gray-900">26</div>
+                        <div class="text-xs text-gray-600 uppercase">Notes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Switch between timeline and summary views
+        function switchView(view) {
+            const timelineView = document.getElementById('timelineView');
+            const summaryView = document.getElementById('summaryView');
+            const toggleBtns = document.querySelectorAll('.filter-bar .flex.gap-2 button');
+            
+            if (view === 'timeline') {
+                timelineView.classList.remove('hidden');
+                summaryView.classList.add('hidden');
+                toggleBtns[0].className = 'px-3 py-2 border rounded text-sm transition-colors bg-primary text-white border-primary';
+                toggleBtns[1].className = 'px-3 py-2 border border-gray-300 rounded text-sm transition-colors hover:bg-gray-50';
+            } else {
+                timelineView.classList.add('hidden');
+                summaryView.classList.remove('hidden');
+                summaryView.classList.add('grid');
+                toggleBtns[0].className = 'px-3 py-2 border border-gray-300 rounded text-sm transition-colors hover:bg-gray-50';
+                toggleBtns[1].className = 'px-3 py-2 border rounded text-sm transition-colors bg-primary text-white border-primary';
+            }
+        }
+
+        // Initialize date inputs with today and 7 days ago
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startDate').value = weekAgo.toISOString().split('T')[0];
+        });
+
+        // Filter functionality
+        document.getElementById('officerFilter').addEventListener('change', function() {
+            // In a real app, this would filter the timeline
+            console.log('Filtering by officer:', this.value);
+        });
+
+        document.getElementById('activityFilter').addEventListener('change', function() {
+            // In a real app, this would filter the timeline
+            console.log('Filtering by activity type:', this.value);
+        });
+    </script>
+</body>
+</html>

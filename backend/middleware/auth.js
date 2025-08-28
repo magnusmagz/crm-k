@@ -22,6 +22,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     req.user = user;
+    req.userId = user.id;  // Add userId for backward compatibility
     req.token = token;
     next();
   } catch (error) {

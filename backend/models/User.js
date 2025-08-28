@@ -62,6 +62,18 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: [],
       field: 'licensedStates'
+    },
+    requirePasswordChange: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+      field: 'requirePasswordChange'
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: true,
+      field: 'isActive'
     }
   }, {
     tableName: 'users',

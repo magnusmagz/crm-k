@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round Robin Assignment Rules - CRM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#1f2937',
+                            dark: '#111827',
+                            light: '#4b5563'
+                        }
+                    },
+                    fontSize: {
+                        'xs': ['16px', '20px'],
+                        'sm': ['16px', '20px'],
+                        'base': ['16px', '24px'],
+                        'lg': ['18px', '28px'],
+                        'xl': ['20px', '28px'],
+                        '2xl': ['24px', '32px'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for specific components -->
+    <style>
+        /* Custom font for headings */
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* Toggle switch styles */
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #1f2937;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 text-base">
+    <!-- Top Navigation -->
+    <nav class="bg-primary text-white py-3 px-5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="bg-white text-primary px-2 py-1 rounded font-heading font-semibold text-base">
+                    CRM
+                </div>
+                <div class="hidden md:flex gap-6">
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity flex items-center gap-1">Dashboard</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity flex items-center gap-1">Contacts</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity flex items-center gap-1">Loan Pipeline</a>
+                    <a href="#" class="text-white opacity-90 hover:opacity-100 transition-opacity flex items-center gap-1">Marketing</a>
+                    <a href="#" class="text-white font-medium opacity-100 flex items-center gap-1">Admin</a>
+                </div>
+            </div>
+            <div class="hidden md:block flex-1 max-w-lg mx-10">
+                <input type="text" class="w-full px-4 py-2 rounded-full bg-white bg-opacity-90 text-gray-900 placeholder-gray-500 text-sm" placeholder="Search...">
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-medium">
+                SM
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-5 py-5">
+            <h1 class="text-2xl font-heading font-semibold text-gray-900">Round Robin Assignment Rules</h1>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-5 py-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Rule Builder Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-heading font-semibold text-gray-900">Create New Rule</h2>
+                </div>
+                
+                <div class="p-5">
+                    <!-- Rule Conditions -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">When a contact is created with these conditions:</label>
+                        <div class="text-sm text-gray-600 mb-3">Define the criteria that must be met for this rule to trigger</div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-md mb-4" id="conditionBuilder">
+                            <div class="flex flex-col md:flex-row gap-2 items-start md:items-center mb-2">
+                                <select class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                                    <option value="contact_type">Contact Type</option>
+                                    <option value="contact_source">Contact Source</option>
+                                    <option value="state">State</option>
+                                    <option value="lead_value">Lead Value</option>
+                                </select>
+                                <select class="md:w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                                    <option value="equals">Equals</option>
+                                    <option value="not_equals">Not Equals</option>
+                                    <option value="contains">Contains</option>
+                                    <option value="greater_than">Greater Than</option>
+                                    <option value="less_than">Less Than</option>
+                                </select>
+                                <input type="text" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Enter value">
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition-colors" onclick="removeCondition(this)">Remove</button>
+                            </div>
+                        </div>
+                        <button class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded text-sm transition-colors" onclick="addCondition()">+ Add Condition</button>
+                    </div>
+
+                    <!-- Assignment Settings -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">Assignment Method:</label>
+                        <div class="text-sm text-gray-600 mb-3">Choose how leads should be distributed</div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <div class="mb-4">
+                                <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                    <input type="radio" name="assignment_method" value="round_robin" checked class="cursor-pointer">
+                                    Round Robin (Equal Distribution)
+                                </label>
+                                <div class="text-sm text-gray-600 ml-6">Distribute leads equally among selected loan officers</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                    <input type="radio" name="assignment_method" value="weighted" class="cursor-pointer">
+                                    Weighted Distribution
+                                </label>
+                                <div class="text-sm text-gray-600 ml-6">Distribute based on capacity or performance metrics</div>
+                            </div>
+                            
+                            <div>
+                                <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                    <input type="radio" name="assignment_method" value="availability" class="cursor-pointer">
+                                    Based on Availability
+                                </label>
+                                <div class="text-sm text-gray-600 ml-6">Assign to the officer with the fewest active leads</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- State Matching -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">State Matching:</label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="matchState" checked class="w-4 h-4 cursor-pointer">
+                            <span>Only assign to loan officers licensed in the lead's state</span>
+                        </label>
+                    </div>
+
+                    <!-- Time Restrictions -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">Active Hours:</label>
+                        <div class="text-sm text-gray-600 mb-3">When should this rule be active?</div>
+                        
+                        <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                            <select class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                                <option>9:00 AM</option>
+                                <option>8:00 AM</option>
+                                <option>7:00 AM</option>
+                            </select>
+                            <span class="hidden sm:block">to</span>
+                            <select class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                                <option>5:00 PM</option>
+                                <option>6:00 PM</option>
+                                <option>7:00 PM</option>
+                            </select>
+                            <select class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                                <option>PST</option>
+                                <option>MST</option>
+                                <option>CST</option>
+                                <option>EST</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 border-t border-gray-200 bg-gray-50">
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Enter rule name (e.g., Redfin Lead Distribution)">
+                    <div class="flex gap-2 justify-end">
+                        <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition-colors" onclick="clearForm()">Cancel</button>
+                        <button class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded transition-colors" onclick="saveRule()">Save Rule</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="flex flex-col gap-5">
+                <!-- Officer Pool Section -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+                        <h2 class="text-lg font-heading font-semibold text-gray-900">Select Loan Officers</h2>
+                        <span class="text-sm text-gray-600">
+                            <span id="selectedCount">0</span> selected
+                        </span>
+                    </div>
+                    
+                    <div class="p-5 max-h-96 overflow-y-auto">
+                        <div class="pb-3 border-b border-gray-200 mb-3">
+                            <label class="flex items-center gap-2 cursor-pointer font-semibold">
+                                <input type="checkbox" id="selectAllOfficers" class="w-4 h-4 cursor-pointer">
+                                <span>Select All Officers</span>
+                            </label>
+                        </div>
+                        <div class="flex flex-col gap-3" id="officerList">
+                            <!-- Officers will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Rules Section -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-5 border-b border-gray-200">
+                        <h2 class="text-lg font-heading font-semibold text-gray-900">Active Rules</h2>
+                    </div>
+                    
+                    <div class="p-5" id="rulesList">
+                        <!-- Sample existing rule -->
+                        <div class="border border-gray-300 bg-gray-50 rounded-md p-4 relative">
+                            <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Active</span>
+                            <div class="font-semibold text-gray-900 mb-2">Redfin Lead Distribution</div>
+                            <div class="text-sm text-gray-600 mb-3">
+                                When Contact Type = "Lead" AND Contact Source = "Redfin"<br>
+                                → Round Robin to 5 officers (state matching enabled)
+                            </div>
+                            <div class="flex gap-5 text-sm text-gray-600 pt-3 border-t border-gray-200">
+                                <span>Created: Jan 10, 2024</span>
+                                <span>Assigned: 127 leads</span>
+                                <span>Last triggered: 2 hours ago</span>
+                            </div>
+                            <div class="flex gap-2 mt-3">
+                                <label class="relative inline-block w-11 h-6">
+                                    <input type="checkbox" checked class="opacity-0 w-0 h-0">
+                                    <span class="toggle-slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 transition-all duration-400 rounded-full"></span>
+                                </label>
+                                <button class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm transition-colors">Edit</button>
+                                <button class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm transition-colors">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Loan officers data
+        const loanOfficers = [
+            { id: 1, name: 'Alex Thompson', initials: 'AT', licensedStates: ['TX', 'OK', 'NM'], activeLeads: 23 },
+            { id: 2, name: 'Jessica Chen', initials: 'JC', licensedStates: ['CA', 'OR', 'WA'], activeLeads: 19 },
+            { id: 3, name: 'Marcus Johnson', initials: 'MJ', licensedStates: ['FL', 'GA', 'AL'], activeLeads: 31 },
+            { id: 4, name: 'Rachel Green', initials: 'RG', licensedStates: ['TX', 'LA', 'AR'], activeLeads: 15 },
+            { id: 5, name: 'Daniel Kim', initials: 'DK', licensedStates: ['CA', 'NV', 'AZ'], activeLeads: 22 },
+            { id: 6, name: 'Sophia Martinez', initials: 'SM', licensedStates: ['TX', 'NM', 'CO'], activeLeads: 28 },
+            { id: 7, name: 'Brian O\'Connor', initials: 'BO', licensedStates: ['NY', 'NJ', 'CT'], activeLeads: 18 },
+            { id: 8, name: 'Emma Williams', initials: 'EW', licensedStates: ['CA', 'AZ', 'UT'], activeLeads: 14 }
+        ];
+
+        // Selected officers
+        let selectedOfficers = new Set();
+
+        // Initialize
+        function init() {
+            renderOfficers();
+            setupInitialConditions();
+            setupSelectAll();
+        }
+
+        // Setup select all functionality
+        function setupSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllOfficers');
+            selectAllCheckbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                
+                document.querySelectorAll('.officer-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    const officerId = parseInt(checkbox.dataset.officerId);
+                    const officerItem = checkbox.closest('.officer-item');
+                    
+                    if (isChecked) {
+                        selectedOfficers.add(officerId);
+                        officerItem.classList.add('bg-gray-50', 'border-primary');
+                    } else {
+                        selectedOfficers.delete(officerId);
+                        officerItem.classList.remove('bg-gray-50', 'border-primary');
+                    }
+                });
+                
+                updateSelectedCount();
+            });
+        }
+
+        // Setup initial conditions for Redfin leads
+        function setupInitialConditions() {
+            const conditionBuilder = document.getElementById('conditionBuilder');
+            conditionBuilder.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-2 items-start md:items-center mb-2">
+                    <select class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="contact_type" selected>Contact Type</option>
+                        <option value="contact_source">Contact Source</option>
+                        <option value="state">State</option>
+                        <option value="lead_value">Lead Value</option>
+                    </select>
+                    <select class="md:w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="equals" selected>Equals</option>
+                        <option value="not_equals">Not Equals</option>
+                        <option value="contains">Contains</option>
+                        <option value="greater_than">Greater Than</option>
+                        <option value="less_than">Less Than</option>
+                    </select>
+                    <input type="text" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Enter value" value="Lead">
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition-colors" onclick="removeCondition(this)">Remove</button>
+                </div>
+                <div class="flex flex-col md:flex-row gap-2 items-start md:items-center mb-2">
+                    <select class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="contact_type">Contact Type</option>
+                        <option value="contact_source" selected>Contact Source</option>
+                        <option value="state">State</option>
+                        <option value="lead_value">Lead Value</option>
+                    </select>
+                    <select class="md:w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="equals" selected>Equals</option>
+                        <option value="not_equals">Not Equals</option>
+                        <option value="contains">Contains</option>
+                        <option value="greater_than">Greater Than</option>
+                        <option value="less_than">Less Than</option>
+                    </select>
+                    <input type="text" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Enter value" value="Redfin">
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition-colors" onclick="removeCondition(this)">Remove</button>
+                </div>
+            `;
+        }
+
+        // Render officers
+        function renderOfficers() {
+            const officerList = document.getElementById('officerList');
+            officerList.innerHTML = '';
+
+            loanOfficers.forEach(officer => {
+                const officerItem = document.createElement('div');
+                officerItem.className = 'officer-item flex items-center gap-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer';
+                officerItem.innerHTML = `
+                    <input type="checkbox" class="officer-checkbox w-4 h-4 cursor-pointer" data-officer-id="${officer.id}">
+                    <div class="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center font-semibold text-sm">${officer.initials}</div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">${officer.name}</div>
+                        <div class="text-sm text-gray-600">
+                            <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">${officer.licensedStates.join(', ')}</span>
+                            <span class="ml-2">Active leads: ${officer.activeLeads}</span>
+                        </div>
+                    </div>
+                `;
+
+                const checkbox = officerItem.querySelector('.officer-checkbox');
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedOfficers.add(officer.id);
+                        officerItem.classList.add('bg-gray-50', 'border-primary');
+                    } else {
+                        selectedOfficers.delete(officer.id);
+                        officerItem.classList.remove('bg-gray-50', 'border-primary');
+                    }
+                    updateSelectedCount();
+                });
+
+                officerItem.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        checkbox.checked = !checkbox.checked;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                officerList.appendChild(officerItem);
+            });
+        }
+
+        // Update selected count
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = selectedOfficers.size;
+            
+            // Update select all checkbox state
+            const selectAllCheckbox = document.getElementById('selectAllOfficers');
+            const totalOfficers = document.querySelectorAll('.officer-checkbox').length;
+            
+            if (selectedOfficers.size === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (selectedOfficers.size === totalOfficers) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+
+        // Add condition
+        function addCondition() {
+            const conditionBuilder = document.getElementById('conditionBuilder');
+            const newCondition = document.createElement('div');
+            newCondition.className = 'flex flex-col md:flex-row gap-2 items-start md:items-center mb-2';
+            newCondition.innerHTML = `
+                <select class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                    <option value="contact_type">Contact Type</option>
+                    <option value="contact_source">Contact Source</option>
+                    <option value="state">State</option>
+                    <option value="lead_value">Lead Value</option>
+                </select>
+                <select class="md:w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary">
+                    <option value="equals">Equals</option>
+                    <option value="not_equals">Not Equals</option>
+                    <option value="contains">Contains</option>
+                    <option value="greater_than">Greater Than</option>
+                    <option value="less_than">Less Than</option>
+                </select>
+                <input type="text" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Enter value">
+                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition-colors" onclick="removeCondition(this)">Remove</button>
+            `;
+            conditionBuilder.appendChild(newCondition);
+        }
+
+        // Remove condition
+        function removeCondition(button) {
+            button.parentElement.remove();
+        }
+
+        // Clear form
+        function clearForm() {
+            document.querySelector('input[placeholder*="rule name"]').value = '';
+            setupInitialConditions();
+            selectedOfficers.clear();
+            document.querySelectorAll('.officer-checkbox').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.officer-item').forEach(item => {
+                item.classList.remove('bg-gray-50', 'border-primary');
+            });
+            document.getElementById('selectAllOfficers').checked = false;
+            document.getElementById('selectAllOfficers').indeterminate = false;
+            updateSelectedCount();
+        }
+
+        // Save rule
+        function saveRule() {
+            const ruleName = document.querySelector('input[placeholder*="rule name"]').value;
+            
+            if (!ruleName) {
+                alert('Please enter a rule name');
+                return;
+            }
+
+            if (selectedOfficers.size === 0) {
+                alert('Please select at least one loan officer');
+                return;
+            }
+
+            // Collect conditions
+            const conditions = [];
+            document.querySelectorAll('#conditionBuilder > div').forEach(row => {
+                const selects = row.querySelectorAll('select');
+                const input = row.querySelector('input[type="text"]');
+                if (input && input.value) {
+                    conditions.push({
+                        field: selects[0].value,
+                        operator: selects[1].value,
+                        value: input.value
+                    });
+                }
+            });
+
+            if (conditions.length === 0) {
+                alert('Please define at least one condition');
+                return;
+            }
+
+            // In a real app, this would save to the backend
+            alert(`Rule "${ruleName}" saved successfully!\n\nConditions: ${conditions.length}\nSelected Officers: ${selectedOfficers.size}`);
+            
+            // Clear form after saving
+            clearForm();
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     contactId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,  // Allow null for system emails (user invites, password resets, etc.)
       references: {
         model: 'contacts',
         key: 'id'
