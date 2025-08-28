@@ -40,8 +40,8 @@ router.get('/', authMiddleware, async (req, res) => {
         [Op.or]: [
           { name: { [Op.iLike]: `%${searchTerm}%` } },
           { notes: { [Op.iLike]: `%${searchTerm}%` } },
-          { '$Contact.firstName$': { [Op.iLike]: `%${searchTerm}%` } },
-          { '$Contact.lastName$': { [Op.iLike]: `%${searchTerm}%` } },
+          { '$Contact.first_name$': { [Op.iLike]: `%${searchTerm}%` } },
+          { '$Contact.last_name$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.email$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.company$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.notes$': { [Op.iLike]: `%${searchTerm}%` } }
