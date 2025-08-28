@@ -324,9 +324,17 @@ class AssignmentEngine {
    */
   async getUnassignedContacts(organizationId) {
     try {
+      // Get all users in the organization to fetch their contacts
+      const users = await User.findAll({
+        where: { organizationId },
+        attributes: ['id']
+      });
+      
+      const userIds = users.map(u => u.id);
+      
       const contacts = await Contact.findAll({
         where: {
-          organizationId,
+          userId: { [sequelize.Op.in]: userIds },
           assignedTo: null
         },
         order: [['createdAt', 'DESC']],

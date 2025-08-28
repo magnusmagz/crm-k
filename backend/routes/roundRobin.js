@@ -40,6 +40,9 @@ router.get('/unassigned', authMiddleware, async (req, res) => {
     }
 
     const contacts = await assignmentEngine.getUnassignedContacts(user.organizationId);
+    
+    console.log(`Found ${contacts.length} unassigned contacts for organization ${user.organizationId}`);
+    
     res.json(contacts);
   } catch (error) {
     console.error('Error fetching unassigned contacts:', error);
@@ -349,6 +352,8 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
 
     // Get unassigned contacts
     const contacts = await assignmentEngine.getUnassignedContacts(user.organizationId);
+    
+    console.log(`Manual assignment page: Found ${contacts.length} unassigned contacts`);
     
     // Get available officers
     const officers = await sequelize.query(`
