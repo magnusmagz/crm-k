@@ -16,13 +16,13 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const searchTerm = q.trim();
 
-    // Search contacts - using snake_case for database columns
+    // Search contacts - using proper Sequelize field names
     const contactsPromise = Contact.findAll({
       where: {
-        user_id: req.user.id,
+        userId: req.user.id,
         [Op.or]: [
-          { first_name: { [Op.iLike]: `%${searchTerm}%` } },
-          { last_name: { [Op.iLike]: `%${searchTerm}%` } },
+          { firstName: { [Op.iLike]: `%${searchTerm}%` } },
+          { lastName: { [Op.iLike]: `%${searchTerm}%` } },
           { email: { [Op.iLike]: `%${searchTerm}%` } },
           { phone: { [Op.iLike]: `%${searchTerm}%` } },
           { company: { [Op.iLike]: `%${searchTerm}%` } },
@@ -30,18 +30,18 @@ router.get('/', authMiddleware, async (req, res) => {
         ]
       },
       limit: parseInt(limit),
-      order: [['updated_at', 'DESC']]
+      order: [['updatedAt', 'DESC']]
     });
 
-    // Search deals (including contact info) - using snake_case for database columns
+    // Search deals (including contact info) - using proper Sequelize field names
     const dealsPromise = Deal.findAll({
       where: {
-        user_id: req.user.id,
+        userId: req.user.id,
         [Op.or]: [
           { name: { [Op.iLike]: `%${searchTerm}%` } },
           { notes: { [Op.iLike]: `%${searchTerm}%` } },
-          { '$Contact.first_name$': { [Op.iLike]: `%${searchTerm}%` } },
-          { '$Contact.last_name$': { [Op.iLike]: `%${searchTerm}%` } },
+          { '$Contact.firstName$': { [Op.iLike]: `%${searchTerm}%` } },
+          { '$Contact.lastName$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.email$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.company$': { [Op.iLike]: `%${searchTerm}%` } },
           { '$Contact.notes$': { [Op.iLike]: `%${searchTerm}%` } }
@@ -57,7 +57,7 @@ router.get('/', authMiddleware, async (req, res) => {
         }
       ],
       limit: parseInt(limit),
-      order: [['updated_at', 'DESC']]
+      order: [['updatedAt', 'DESC']]
     });
 
     // Execute both searches in parallel
