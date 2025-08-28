@@ -315,7 +315,12 @@ const Contacts: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
-                    {contacts.map((contact) => (
+                    {contacts.map((contact) => {
+                      // Debug logging - remove after testing
+                      if (contact.notes) {
+                        console.log('Contact with notes:', { id: contact.id, name: `${contact.firstName} ${contact.lastName}`, notes: contact.notes });
+                      }
+                      return (
                       <tr key={contact.id} className={selectedContacts.has(contact.id) ? 'bg-gray-50' : ''}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-primary-dark sm:pl-6">
                           <input
@@ -365,7 +370,7 @@ const Contacts: React.FC = () => {
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
                           <div className="max-w-xs truncate" title={contact.notes || ''}>
-                            {contact.notes || '-'}
+                            {contact.notes && contact.notes.trim() ? contact.notes : '-'}
                           </div>
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
@@ -400,7 +405,8 @@ const Contacts: React.FC = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    );
+                    })})
                   </tbody>
                 </table>
                 </div>
