@@ -63,6 +63,20 @@ router.get('/', authMiddleware, async (req, res) => {
     // Execute both searches in parallel
     const [contacts, deals] = await Promise.all([contactsPromise, dealsPromise]);
 
+    // Debug logging - temporary
+    console.log('=== SEARCH DEBUG ===');
+    console.log('Search term:', searchTerm);
+    console.log('Contacts found:', contacts.length);
+    if (contacts.length > 0) {
+      console.log('First contact:', {
+        id: contacts[0].id,
+        name: `${contacts[0].firstName} ${contacts[0].lastName}`,
+        notes: contacts[0].notes,
+        notesLength: contacts[0].notes?.length
+      });
+    }
+    console.log('===================');
+
     res.json({
       contacts,
       deals,
