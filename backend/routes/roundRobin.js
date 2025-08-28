@@ -371,7 +371,7 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
       LEFT JOIN user_profiles p ON u.id = p.user_id
       LEFT JOIN contacts c ON u.id = c."assignedTo"
       LEFT JOIN assignments a ON u.id = a."assignedTo"
-      WHERE u."organizationId" = :orgId
+      WHERE (u."organizationId" = :orgId OR (u."organizationId" IS NULL AND :orgId IS NULL))
       AND u."isLoanOfficer" = true
       GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
@@ -410,7 +410,7 @@ router.get('/officers', authMiddleware, async (req, res) => {
       LEFT JOIN user_profiles p ON u.id = p.user_id
       LEFT JOIN contacts c ON u.id = c."assignedTo"
       LEFT JOIN assignments a ON u.id = a."assignedTo"
-      WHERE u."organizationId" = :orgId
+      WHERE (u."organizationId" = :orgId OR (u."organizationId" IS NULL AND :orgId IS NULL))
       AND u."isLoanOfficer" = true
       GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
