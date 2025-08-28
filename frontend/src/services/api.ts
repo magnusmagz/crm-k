@@ -35,6 +35,9 @@ api.interceptors.response.use(
   }
 );
 
+// Export the api instance for direct use
+export { api };
+
 // Auth API
 export const authAPI = {
   register: (data: { email: string; password: string; firstName: string; lastName: string; companyName?: string }) =>
@@ -120,9 +123,11 @@ export const customFieldsAPI = {
 
 // Stages API
 export const stagesAPI = {
-  getAll: () => api.get('/stages'),
+  getAll: (params?: { pipelineType?: 'sales' | 'recruiting' }) => 
+    api.get('/stages', { params }),
   
-  create: (data: { name: string; color?: string; order?: number }) => api.post('/stages', data),
+  create: (data: { name: string; color?: string; order?: number; pipelineType?: 'sales' | 'recruiting' }) => 
+    api.post('/stages', data),
   
   update: (id: string, data: any) => api.put(`/stages/${id}`, data),
   
@@ -130,7 +135,8 @@ export const stagesAPI = {
   
   reorder: (stages: { id: string; order: number }[]) => api.put('/stages/reorder', { stages }),
   
-  initialize: () => api.post('/stages/initialize'),
+  initialize: (pipelineType: 'sales' | 'recruiting' = 'sales') => 
+    api.post('/stages/initialize', { pipelineType }),
 };
 
 // Deals API
@@ -274,4 +280,61 @@ export const notesAPI = {
     api.delete(`/notes/${id}`),
 };
 
+// Positions API (Recruiting)
+export const positionsAPI = {
+  getAll: (params?: { 
+    status?: string; 
+    search?: string; 
+    limit?: number; 
+    offset?: number 
+  }) => api.get('/positions', { params }),
+  
+  getById: (id: string) => api.get(`/positions/${id}`),
+  
+  create: (data: any) => api.post('/positions', data),
+  
+  update: (id: string, data: any) => api.put(`/positions/${id}`, data),
+  
+  delete: (id: string) => api.delete(`/positions/${id}`),
+  
+  bulkUpdate: (positionIds: string[], updates: any) => 
+    api.put('/positions/bulk/update', { positionIds, updates }),
+};
+
+// Recruiting Pipeline API
+export const recruitingAPI = {
+  getAll: (params?: { 
+    positionId?: string;
+    status?: string;
+    stageId?: string;
+    search?: string;
+    limit?: number; 
+    offset?: number 
+  }) => api.get('/recruiting-pipeline', { params }),
+  
+  getById: (id: string) => api.get(`/recruiting-pipeline/${id}`),
+  
+  addCandidate: (data: {
+    candidateId: string;
+    positionId: string;
+    stageId?: string;
+    status?: string;
+    rating?: number;
+    notes?: string;
+    interviewDate?: Date;
+    customFields?: any;
+  }) => api.post('/recruiting-pipeline', data),
+  
+  update: (id: string, data: any) => api.put(`/recruiting-pipeline/${id}`, data),
+  
+  moveCandidate: (id: string, stageId: string) => 
+    api.put(`/recruiting-pipeline/${id}/move`, { stageId }),
+  
+  remove: (id: string) => api.delete(`/recruiting-pipeline/${id}`),
+  
+  bulkMove: (candidateIds: string[], stageId: string) => 
+    api.put('/recruiting-pipeline/bulk/move', { candidateIds, stageId }),
+};
+
+export { api };
 export default api;
