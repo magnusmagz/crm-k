@@ -230,7 +230,7 @@ const UserManagement: React.FC = () => {
         
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <UserGroupIcon className="h-10 w-10 text-blue-500 mr-3" />
+            <UserGroupIcon className="h-10 w-10 text-primary mr-3" />
             <div>
               <p className="text-2xl font-semibold">
                 {users.filter(u => u.isLoanOfficer).length}
@@ -284,7 +284,7 @@ const UserManagement: React.FC = () => {
                       </span>
                     )}
                     {user.isLoanOfficer && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-primary-dark">
                         Loan Officer
                       </span>
                     )}
