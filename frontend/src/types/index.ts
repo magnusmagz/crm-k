@@ -3,6 +3,7 @@ export interface User {
   email: string;
   isVerified: boolean;
   isAdmin?: boolean;
+  isSuperAdmin?: boolean;
   isLoanOfficer?: boolean;
   organizationId?: string;
   lastLogin: Date | null;

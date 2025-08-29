@@ -361,6 +361,21 @@ const Layout: React.FC = () => {
                                 )}
                               </Menu.Item>
                             )}
+                            {user?.isSuperAdmin && (
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <Link
+                                    to="/super-admin"
+                                    className={classNames(
+                                      active ? 'bg-gray-100' : '',
+                                      'block px-4 py-2 text-sm text-gray-700 font-medium text-purple-600'
+                                    )}
+                                  >
+                                    🔐 Super Admin
+                                  </Link>
+                                )}
+                              </Menu.Item>
+                            )}
                             <Menu.Item>
                               {({ active }) => (
                                 <button
