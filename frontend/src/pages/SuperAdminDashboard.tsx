@@ -109,7 +109,7 @@ const SuperAdminDashboard: React.FC = () => {
       value: dashboardData.stats.organizations.total,
       subtext: `${dashboardData.stats.organizations.active} active`,
       icon: BuildingOfficeIcon,
-      color: 'bg-blue-500',
+      color: 'bg-gray-50',
       href: '/super-admin/organizations'
     },
     {
@@ -153,7 +153,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="mt-4 flex md:mt-0 md:ml-4">
           <Link
             to="/super-admin/organizations/new"
-            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
             New Organization
@@ -178,7 +178,7 @@ const SuperAdminDashboard: React.FC = () => {
               <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
               <div className="absolute bottom-0 inset-x-0 bg-gray-50 px-4 py-4 sm:px-6">
                 <div className="text-sm">
-                  <Link to={stat.href} className="font-medium text-indigo-600 hover:text-indigo-500">
+                  <Link to={stat.href} className="font-medium text-primary hover:text-primary">
                     {stat.subtext}
                     <span className="sr-only"> {stat.name} stats</span>
                   </Link>
@@ -198,7 +198,7 @@ const SuperAdminDashboard: React.FC = () => {
             </h3>
             <Link
               to="/super-admin/organizations"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              className="text-sm font-medium text-primary hover:text-primary"
             >
               View all
             </Link>
@@ -212,7 +212,7 @@ const SuperAdminDashboard: React.FC = () => {
               <div className="mt-6">
                 <Link
                   to="/super-admin/organizations/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-indigo-700"
                 >
                   <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
                   New Organization
@@ -250,7 +250,7 @@ const SuperAdminDashboard: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <Link
                           to={`/super-admin/organizations/${org.id}`}
-                          className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
+                          className="text-primary hover:text-indigo-900 text-sm font-medium flex items-center"
                         >
                           <EyeIcon className="h-4 w-4 mr-1" />
                           View
@@ -277,7 +277,7 @@ const SuperAdminDashboard: React.FC = () => {
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-300 hover:border-gray-400"
             >
               <div>
-                <span className="rounded-lg inline-flex p-3 bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100">
+                <span className="rounded-lg inline-flex p-3 bg-indigo-50 text-primary group-hover:bg-indigo-100">
                   <PlusIcon className="h-6 w-6" />
                 </span>
               </div>

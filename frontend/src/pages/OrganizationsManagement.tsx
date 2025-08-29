@@ -172,7 +172,7 @@ const OrganizationsManagement: React.FC = () => {
         <div className="mt-4 flex md:mt-0 md:ml-4">
           <Link
             to="/super-admin/organizations/new"
-            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
             New Organization
@@ -194,7 +194,7 @@ const OrganizationsManagement: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Search organizations..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-primary"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -209,7 +209,7 @@ const OrganizationsManagement: React.FC = () => {
                   <FunnelIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <select
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-primary"
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value as 'all' | 'active' | 'inactive');
@@ -267,7 +267,7 @@ const OrganizationsManagement: React.FC = () => {
               <div className="mt-6">
                 <Link
                   to="/super-admin/organizations/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-indigo-700"
                 >
                   <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
                   New Organization
@@ -350,7 +350,7 @@ const OrganizationsManagement: React.FC = () => {
                           <div className="truncate max-w-32">{org.contactEmail}</div>
                         )}
                         {org.website && (
-                          <div className="truncate max-w-32 text-indigo-600">
+                          <div className="truncate max-w-32 text-primary">
                             <a href={org.website} target="_blank" rel="noopener noreferrer" className="hover:underline">
                               {org.website.replace(/^https?:\/\//, '')}
                             </a>
@@ -361,7 +361,7 @@ const OrganizationsManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Link
                         to={`/super-admin/organizations/${org.id}`}
-                        className="text-indigo-600 hover:text-indigo-900 inline-flex items-center"
+                        className="text-primary hover:text-indigo-900 inline-flex items-center"
                         title="View Details"
                       >
                         <EyeIcon className="w-4 h-4" />

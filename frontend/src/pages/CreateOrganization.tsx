@@ -186,22 +186,22 @@ const CreateOrganization: React.FC = () => {
               <li key={step.id} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-20' : ''} flex-1`}>
                 <div className="absolute inset-0 flex items-center" aria-hidden="true">
                   {stepIdx !== steps.length - 1 && (
-                    <div className={`h-0.5 w-full ${currentStep > step.id ? 'bg-indigo-600' : 'bg-gray-200'}`} />
+                    <div className={`h-0.5 w-full ${currentStep > step.id ? 'bg-primary' : 'bg-gray-200'}`} />
                   )}
                 </div>
                 <div
                   className={`relative w-8 h-8 flex items-center justify-center rounded-full ${
                     currentStep === step.id
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-primary text-white'
                       : currentStep > step.id
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-white border-2 border-gray-300 text-gray-500'
                   }`}
                 >
                   <step.icon className="w-5 h-5" />
                 </div>
                 <span className={`absolute top-10 left-1/2 transform -translate-x-1/2 text-xs font-medium ${
-                  currentStep >= step.id ? 'text-indigo-600' : 'text-gray-500'
+                  currentStep >= step.id ? 'text-primary' : 'text-gray-500'
                 }`}>
                   {step.name}
                 </span>
@@ -244,7 +244,7 @@ const CreateOrganization: React.FC = () => {
                     className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                       errors.name
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                        : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                        : 'border-gray-300 focus:ring-indigo-500 focus:border-primary'
                     }`}
                     placeholder="e.g., Acme Real Estate"
                     value={formData.name}
@@ -265,7 +265,7 @@ const CreateOrganization: React.FC = () => {
                     className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                       errors.crmName
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                        : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                        : 'border-gray-300 focus:ring-indigo-500 focus:border-primary'
                     }`}
                     placeholder="e.g., Acme CRM"
                     value={formData.crmName}
@@ -293,7 +293,7 @@ const CreateOrganization: React.FC = () => {
                       className={`block w-full rounded-md shadow-sm sm:text-sm ${
                         errors.primaryColor
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                          : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                          : 'border-gray-300 focus:ring-indigo-500 focus:border-primary'
                       }`}
                       value={formData.primaryColor}
                       onChange={(e) => setFormData(prev => ({ ...prev, primaryColor: e.target.value }))}
@@ -331,7 +331,7 @@ const CreateOrganization: React.FC = () => {
                     className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                       errors.adminEmail
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                        : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                        : 'border-gray-300 focus:ring-indigo-500 focus:border-primary'
                     }`}
                     placeholder="admin@example.com"
                     value={formData.adminEmail}
@@ -352,7 +352,7 @@ const CreateOrganization: React.FC = () => {
                     className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
                       errors.adminName
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                        : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                        : 'border-gray-300 focus:ring-indigo-500 focus:border-primary'
                     }`}
                     placeholder="John Smith"
                     value={formData.adminName}
@@ -386,7 +386,7 @@ const CreateOrganization: React.FC = () => {
                     type="email"
                     name="contactEmail"
                     id="contactEmail"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="info@example.com"
                     value={formData.contactEmail}
                     onChange={handleInputChange}
@@ -401,7 +401,7 @@ const CreateOrganization: React.FC = () => {
                     type="url"
                     name="website"
                     id="website"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="https://example.com"
                     value={formData.website}
                     onChange={handleInputChange}
@@ -416,7 +416,7 @@ const CreateOrganization: React.FC = () => {
                     type="tel"
                     name="phone"
                     id="phone"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="(555) 123-4567"
                     value={formData.phone}
                     onChange={handleInputChange}
@@ -431,7 +431,7 @@ const CreateOrganization: React.FC = () => {
                     type="text"
                     name="address"
                     id="address"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="123 Main Street"
                     value={formData.address}
                     onChange={handleInputChange}
@@ -446,7 +446,7 @@ const CreateOrganization: React.FC = () => {
                     type="text"
                     name="city"
                     id="city"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="New York"
                     value={formData.city}
                     onChange={handleInputChange}
@@ -462,7 +462,7 @@ const CreateOrganization: React.FC = () => {
                     name="state"
                     id="state"
                     maxLength={2}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="NY"
                     value={formData.state}
                     onChange={handleInputChange}
@@ -477,7 +477,7 @@ const CreateOrganization: React.FC = () => {
                     type="text"
                     name="zipCode"
                     id="zipCode"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-primary sm:text-sm"
                     placeholder="10001"
                     value={formData.zipCode}
                     onChange={handleInputChange}
@@ -566,7 +566,7 @@ const CreateOrganization: React.FC = () => {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Next
               </button>
@@ -574,7 +574,7 @@ const CreateOrganization: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

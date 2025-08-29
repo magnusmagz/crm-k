@@ -66,18 +66,18 @@ const ForgotPassword: React.FC = () => {
                   <ExclamationCircleIcon className="h-5 w-5 text-blue-400" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">
+                  <h3 className="text-sm font-medium text-primary-dark">
                     Development Mode
                   </h3>
-                  <div className="mt-2 text-sm text-blue-700">
+                  <div className="mt-2 text-sm text-primary-dark">
                     <p className="mb-2">Reset token (for testing):</p>
-                    <code className="bg-blue-100 px-2 py-1 rounded text-xs break-all">
+                    <code className="bg-gray-100 px-2 py-1 rounded text-xs break-all">
                       {resetToken}
                     </code>
                     <p className="mt-2">
                       <Link 
                         to={`/reset-password?token=${resetToken}`}
-                        className="font-medium text-blue-600 hover:text-blue-500"
+                        className="font-medium text-primary hover:text-primary"
                       >
                         Click here to reset password →
                       </Link>

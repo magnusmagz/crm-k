@@ -249,7 +249,7 @@ const GlobalUsersView: React.FC = () => {
     
     if (user.isAdmin) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-primary-dark">
           <ShieldCheckIcon className="w-3 h-3 mr-1" />
           Admin
         </span>
@@ -383,7 +383,7 @@ const GlobalUsersView: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Search users..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-primary"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -398,7 +398,7 @@ const GlobalUsersView: React.FC = () => {
                   <FunnelIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <select
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-primary"
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value as 'all' | 'active' | 'inactive');
@@ -419,7 +419,7 @@ const GlobalUsersView: React.FC = () => {
                   <ShieldCheckIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <select
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-primary"
                   value={roleFilter}
                   onChange={(e) => {
                     setRoleFilter(e.target.value as 'all' | 'admin' | 'user' | 'super-admin');
@@ -441,7 +441,7 @@ const GlobalUsersView: React.FC = () => {
                   <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <select
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-primary"
                   value={organizationFilter}
                   onChange={(e) => {
                     setOrganizationFilter(e.target.value);
@@ -599,7 +599,7 @@ const GlobalUsersView: React.FC = () => {
                             className={`${
                               user.isAdmin 
                                 ? 'text-orange-600 hover:text-orange-900' 
-                                : 'text-blue-600 hover:text-blue-900'
+                                : 'text-primary hover:text-blue-900'
                             } inline-flex items-center disabled:opacity-50`}
                             title={user.isAdmin ? 'Remove Admin' : 'Make Admin'}
                           >
