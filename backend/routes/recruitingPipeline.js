@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
-const { sequelize } = require('../models');
+const { sequelize, RecruitingPipeline, Contact, Position, Stage, AutomationLog } = require('../models');
 const { v4: uuidv4 } = require('uuid');
+const automationEngine = require('../services/automationEngine');
 
 // Get all candidates in pipeline
 router.get('/', authMiddleware, async (req, res) => {
@@ -161,7 +162,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
       include: [
         {
           model: Contact,
-          as: 'candidate'
+          as: 'Candidate'
         },
         {
           model: Position
@@ -331,7 +332,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     const result = await RecruitingPipeline.findOne({
       where: { id: pipeline.id },
       include: [
-        { model: Contact, as: 'candidate' },
+        { model: Contact, as: 'Candidate' },
         { model: Position },
         { model: Stage }
       ]
@@ -343,7 +344,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       userId: req.user.id,
       data: {
         pipeline: result,
-        candidate: result.candidate,
+        candidate: result.Candidate,
         position: result.Position,
         stage: result.Stage,
         changes: req.body
@@ -358,7 +359,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
         userId: req.user.id,
         data: {
           pipeline: result,
-          candidate: result.candidate,
+          candidate: result.Candidate,
           position: result.Position,
           oldStageId,
           newStageId: req.body.stageId,
@@ -381,7 +382,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
           userId: req.user.id,
           data: {
             pipeline: result,
-            candidate: result.candidate,
+            candidate: result.Candidate,
             position: result.Position,
             stage: result.Stage
           }
@@ -393,7 +394,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
           userId: req.user.id,
           data: {
             pipeline: result,
-            candidate: result.candidate,
+            candidate: result.Candidate,
             position: result.Position,
             stage: result.Stage
           }
@@ -431,7 +432,7 @@ router.put('/:id/move', authMiddleware, async (req, res) => {
     const result = await RecruitingPipeline.findOne({
       where: { id: pipeline.id },
       include: [
-        { model: Contact, as: 'candidate' },
+        { model: Contact, as: 'Candidate' },
         { model: Position },
         { model: Stage }
       ]
@@ -443,7 +444,7 @@ router.put('/:id/move', authMiddleware, async (req, res) => {
       userId: req.user.id,
       data: {
         pipeline: result,
-        candidate: result.candidate,
+        candidate: result.Candidate,
         position: result.Position,
         oldStageId,
         newStageId: stageId,

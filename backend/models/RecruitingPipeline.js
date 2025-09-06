@@ -82,19 +82,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {
-    tableName: 'recruiting_pipeline',
+    tableName: 'RecruitingPipeline',
     indexes: [
       {
-        fields: ['user_id']
+        fields: ['userId']
       },
       {
-        fields: ['candidate_id']
+        fields: ['candidateId']
       },
       {
-        fields: ['position_id']
+        fields: ['positionId']
       },
       {
-        fields: ['stage_id']
+        fields: ['stageId']
       },
       {
         fields: ['status']

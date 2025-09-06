@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'positions',
     indexes: [
       {
-        fields: ['user_id']
+        fields: ['userId']
       },
       {
         fields: ['status']
@@ -78,7 +78,10 @@ module.exports = (sequelize, DataTypes) => {
 
   Position.associate = function(models) {
     Position.belongsTo(models.User, { foreignKey: 'userId' });
-    Position.hasMany(models.RecruitingPipeline, { foreignKey: 'positionId' });
+    Position.hasMany(models.RecruitingPipeline, { 
+      foreignKey: 'positionId',
+      as: 'candidates'
+    });
   };
 
   return Position;

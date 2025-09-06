@@ -30,8 +30,22 @@ const superAdminRoutes = require('./routes/superAdmin');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security middleware
-app.use(helmet());
+// Security middleware with CSP configuration for Unlayer editor
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://editor.unlayer.com", "https://*.unlayer.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://editor.unlayer.com", "https://*.unlayer.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https:", "http:"],
+      fontSrc: ["'self'", "data:", "https://editor.unlayer.com", "https://*.unlayer.com"],
+      connectSrc: ["'self'", "https://api.unlayer.com", "https://*.unlayer.com"],
+      frameSrc: ["'self'", "https://editor.unlayer.com", "https://*.unlayer.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  }
+}));
 app.use(compression());
 
 // Rate limiting
@@ -110,9 +124,9 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
     
-    // Sync database models
-    await sequelize.sync({ alter: false });
-    console.log('Database synced successfully.');
+    // Sync database models - disabled for now due to schema mismatch
+    // await sequelize.sync({ alter: false });
+    // console.log('Database synced successfully.');
     
     // Initialize automation system
     // initializeAutomations();

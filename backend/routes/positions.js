@@ -31,7 +31,7 @@ router.get('/', authMiddleware, async (req, res) => {
           include: [
             {
               model: Contact,
-              as: 'candidate',
+              as: 'Candidate',
               attributes: ['id', 'firstName', 'lastName', 'email']
             },
             {
