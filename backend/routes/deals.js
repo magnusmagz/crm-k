@@ -12,7 +12,7 @@ const router = express.Router();
 // Validation middleware
 const validateDeal = [
   body('name').notEmpty().trim(),
-  body('value').optional().isDecimal({ decimal_digits: '0,2' }),
+  body('value').optional({ nullable: true, checkFalsy: true }).isDecimal({ decimal_digits: '0,2' }),
   body('stageId').isUUID(),
   body('contactId').optional().isUUID().withMessage('Invalid contact ID'),
   body('notes').optional().trim(),
