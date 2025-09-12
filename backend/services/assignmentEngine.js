@@ -13,8 +13,8 @@ class AssignmentEngine {
       // Get active rule for this organization
       const [rule] = await sequelize.query(`
         SELECT * FROM assignment_rules 
-        WHERE "organizationId" = :orgId 
-        AND "isActive" = true
+        WHERE "organization_id" = :orgId 
+        AND "is_active" = true
         ORDER BY priority DESC
         LIMIT 1
       `, {
@@ -96,7 +96,7 @@ class AssignmentEngine {
       if (requireStateMatch && contactState) {
         // Check both old licensedStates and new state_licenses
         stateCondition = `AND (
-          :state = ANY(u."licensedStates") 
+          :state = ANY(u."licensed_states") 
           OR EXISTS (
             SELECT 1 FROM user_profiles p 
             WHERE p.user_id = u.id 
@@ -110,16 +110,16 @@ class AssignmentEngine {
       // Get officers in queue ordered by assignment count and last assignment time
       const officers = await sequelize.query(`
         SELECT 
-          u.id, u.email, u."isLoanOfficer", 
-          COALESCE(u."licensedStates", ARRAY[]::VARCHAR[]) as "licensedStates",
+          u.id, u.email, u."is_loan_officer", 
+          COALESCE(u."licensed_states", ARRAY[]::VARCHAR[]) as "licensed_states",
           p.state_licenses as "stateLicenses",
           q."assignmentCount", q."lastAssignedAt"
         FROM round_robin_queues q
         JOIN users u ON q."userId" = u.id
         LEFT JOIN user_profiles p ON u.id = p.user_id
         WHERE q."ruleId" = :ruleId
-        AND q."isActive" = true
-        AND u."isLoanOfficer" = true
+        AND q."is_active" = true
+        AND u."is_loan_officer" = true
         ${stateCondition}
         ORDER BY 
           q."assignmentCount" ASC,
@@ -274,7 +274,7 @@ class AssignmentEngine {
         FROM assignments a
         JOIN users u ON a."assignedTo" = u.id
         JOIN contacts c ON a."contactId" = c.id
-        WHERE c."organizationId" = :orgId
+        WHERE c."organization_id" = :orgId
         AND a."assignedAt" >= CURRENT_DATE - INTERVAL '30 days'
       `, {
         type: sequelize.QueryTypes.SELECT,
@@ -294,8 +294,8 @@ class AssignmentEngine {
         FROM users u
         LEFT JOIN user_profiles p ON u.id = p.user_id
         LEFT JOIN assignments a ON u.id = a."assignedTo"
-        WHERE u."organizationId" = :orgId
-        AND u."isLoanOfficer" = true
+        WHERE u."organization_id" = :orgId
+        AND u."is_loan_officer" = true
         GROUP BY u.id, u.email, p.first_name, p.last_name
         ORDER BY "total_assigned" DESC
       `, {

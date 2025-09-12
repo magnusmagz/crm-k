@@ -13,7 +13,7 @@ async function updatePasswords() {
     const result = await sequelize.query(`
       UPDATE users 
       SET password = :password, updated_at = NOW()
-      WHERE "organizationId" IS NOT NULL
+      WHERE "organization_id" IS NOT NULL
       AND email IN ('andy@salesco.com', 'amy@salesco.com', 'arnold@salesco.com')
     `, {
       replacements: {

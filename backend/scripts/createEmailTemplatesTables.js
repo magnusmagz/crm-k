@@ -8,7 +8,7 @@ async function createEmailTemplatesTables() {
     await sequelize.query(`
       CREATE TABLE IF NOT EXISTS email_templates (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "organizationId" UUID NOT NULL REFERENCES organizations(id),
+        "organization_id" UUID NOT NULL REFERENCES organizations(id),
         name VARCHAR(255) NOT NULL,
         subject VARCHAR(255),
         design_json JSONB,
@@ -27,7 +27,7 @@ async function createEmailTemplatesTables() {
     await sequelize.query(`
       CREATE TABLE IF NOT EXISTS email_campaigns (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "organizationId" UUID NOT NULL REFERENCES organizations(id),
+        "organization_id" UUID NOT NULL REFERENCES organizations(id),
         name VARCHAR(255) NOT NULL,
         template_id UUID REFERENCES email_templates(id),
         subject VARCHAR(255),
@@ -70,10 +70,10 @@ async function createEmailTemplatesTables() {
     // Create indexes for better performance
     await sequelize.query(`
       CREATE INDEX IF NOT EXISTS idx_email_templates_org 
-      ON email_templates("organizationId");
+      ON email_templates("organization_id");
       
       CREATE INDEX IF NOT EXISTS idx_email_campaigns_org 
-      ON email_campaigns("organizationId");
+      ON email_campaigns("organization_id");
       
       CREATE INDEX IF NOT EXISTS idx_campaign_recipients_campaign 
       ON campaign_recipients(campaign_id);

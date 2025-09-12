@@ -6,7 +6,7 @@ async function fixAdminStatus() {
     
     // First, let's see all users
     const users = await sequelize.query(`
-      SELECT id, email, "isAdmin", "isLoanOfficer", "organizationId"
+      SELECT id, email, "is_admin", "is_loan_officer", "organization_id"
       FROM users
       ORDER BY email
     `, { type: sequelize.QueryTypes.SELECT });
@@ -19,9 +19,9 @@ async function fixAdminStatus() {
     // Update maggie@gmail.com to be admin
     const result = await sequelize.query(`
       UPDATE users 
-      SET "isAdmin" = true 
+      SET "is_admin" = true 
       WHERE email = 'maggie@gmail.com'
-      RETURNING email, "isAdmin"
+      RETURNING email, "is_admin"
     `, { type: sequelize.QueryTypes.UPDATE });
     
     if (result[0].length > 0) {
@@ -32,9 +32,9 @@ async function fixAdminStatus() {
       // Try to find and update the main user (first user created)
       const mainUserResult = await sequelize.query(`
         UPDATE users 
-        SET "isAdmin" = true 
+        SET "is_admin" = true 
         WHERE id = (SELECT id FROM users ORDER BY "createdAt" ASC LIMIT 1)
-        RETURNING email, "isAdmin"
+        RETURNING email, "is_admin"
       `, { type: sequelize.QueryTypes.UPDATE });
       
       if (mainUserResult[0].length > 0) {
@@ -44,9 +44,9 @@ async function fixAdminStatus() {
     
     // Verify the changes
     const updatedUsers = await sequelize.query(`
-      SELECT id, email, "isAdmin", "isLoanOfficer"
+      SELECT id, email, "is_admin", "is_loan_officer"
       FROM users
-      WHERE "isAdmin" = true
+      WHERE "is_admin" = true
     `, { type: sequelize.QueryTypes.SELECT });
     
     console.log('\nAdmin users after update:');

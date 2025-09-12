@@ -1,0 +1,108 @@
+{
+  "executionSummary": {
+    "startTime": "2025-09-06T20:29:36.744Z",
+    "endTime": "2025-09-06T20:30:05.726Z",
+    "duration": "29 seconds",
+    "overallSuccess": false,
+    "totalPhases": 4,
+    "successfulPhases": 1
+  },
+  "phaseDetails": [
+    {
+      "phase": 1,
+      "name": "Models & Database",
+      "results": {
+        "serverTest": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/health",
+          "output": ""
+        },
+        "success": false
+      },
+      "success": false
+    },
+    {
+      "phase": 2,
+      "name": "Backend API",
+      "results": {
+        "api_api_contacts": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/contacts",
+          "output": ""
+        },
+        "api_api_deals": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/deals",
+          "output": ""
+        },
+        "api_api_users_me": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/users/me",
+          "output": ""
+        },
+        "api_api_automations": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/automations",
+          "output": ""
+        },
+        "api_api_email_templates": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/email-templates",
+          "output": ""
+        },
+        "api_api_round_robin_dashboard": {
+          "success": false,
+          "error": "Command failed: curl -s http://localhost:3001/api/round-robin/dashboard",
+          "output": ""
+        },
+        "success": false
+      },
+      "success": false
+    },
+    {
+      "phase": 3,
+      "name": "Frontend Integration",
+      "results": {
+        "buildTest": {
+          "success": true,
+          "output": "\n> frontend@0.1.0 build\n> npm run check-ux-standards && react-scripts build\n\n\n> frontend@0.1.0 check-ux-standards\n> node ../scripts/check-ux-standards.js\n\n🎨 Running UX Standards Check...\n\n✅ No UX standards violations found!\nCreating an optimized production build...\nCompiled with warnings.\n\n[eslint] \nsrc/components/ActivityTimeline.tsx\n  Line 45:6:  React Hook useEffect has a missing dependency: 'fetchActivities'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/BulkOperations.tsx\n  Line 135:6:  React Hook useCallback has a missing dependency: 'entityType'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/CandidateForm.tsx\n  Line 5:23:   'positionsAPI' is defined but never used                  @typescript-eslint/no-unused-vars\n  Line 5:37:   'stagesAPI' is defined but never used                     @typescript-eslint/no-unused-vars\n  Line 5:48:   'recruitingAPI' is defined but never used                 @typescript-eslint/no-unused-vars\n  Line 78:10:  'searchingCandidates' is assigned a value but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/ContactCard.tsx\n  Line 19:9:  'handleDelete' is assigned a value but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/ContactExport.tsx\n  Line 33:10:  'customFields' is assigned a value but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/ContactForm.tsx\n  Line 5:21:   'FormSelect' is defined but never used     @typescript-eslint/no-unused-vars\n  Line 43:26:  'type' is assigned a value but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/MobileNav.tsx\n  Line 4:3:    'HomeIcon' is defined but never used       @typescript-eslint/no-unused-vars\n  Line 11:15:  'HomeIconSolid' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/MobilePipeline.tsx\n  Line 1:35:  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/Profile/EmailSignatureBuilderV2.js\n  Line 4:9:     'Palette' is defined but never used                  no-unused-vars\n  Line 5:3:     'MessageSquare' is defined but never used            no-unused-vars\n  Line 6:41:    'Copy' is defined but never used                     no-unused-vars\n  Line 6:47:    'Clipboard' is defined but never used                no-unused-vars\n  Line 7:3:     'AlignLeft' is defined but never used                no-unused-vars\n  Line 7:14:    'AlignCenter' is defined but never used              no-unused-vars\n  Line 7:27:    'AlignRight' is defined but never used               no-unused-vars\n  Line 7:49:    'ChevronRight' is defined but never used             no-unused-vars\n  Line 8:18:    'Sliders' is defined but never used                  no-unused-vars\n  Line 8:27:    'X' is defined but never used                        no-unused-vars\n  Line 8:43:    'GripVertical' is defined but never used             no-unused-vars\n  Line 8:57:    'Settings' is defined but never used                 no-unused-vars\n  Line 40:10:   'showToolbar' is assigned a value but never used     no-unused-vars\n  Line 40:23:   'setShowToolbar' is assigned a value but never used  no-unused-vars\n  Line 87:9:    'templates' is assigned a value but never used       no-unused-vars\n  Line 150:13:  'targetElement' is assigned a value but never used   no-unused-vars\n\nsrc/components/SuperAdminLayout.tsx\n  Line 1:27:  'useState' is defined but never used       @typescript-eslint/no-unused-vars\n  Line 12:3:  'Cog6ToothIcon' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/components/automation/ActionBuilder.tsx\n  Line 35:6:  React Hook useEffect has a missing dependency: 'fetchFields'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/automation/ConditionBuilder.tsx\n  Line 34:6:  React Hook useEffect has a missing dependency: 'fetchFields'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/automation/DebugView.tsx\n  Line 2:10:  'automationsAPI' is defined but never used                                                                         @typescript-eslint/no-unused-vars\n  Line 28:6:  React Hook useEffect has a missing dependency: 'fetchDebugInfo'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/automation/EnrollmentView.tsx\n  Line 2:29:  'Contact' is defined but never used                                                                                  @typescript-eslint/no-unused-vars\n  Line 2:38:  'Deal' is defined but never used                                                                                     @typescript-eslint/no-unused-vars\n  Line 21:6:  React Hook useEffect has a missing dependency: 'fetchEnrollments'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/automation/EntityDebugView.tsx\n  Line 49:6:  React Hook useEffect has a missing dependency: 'fetchDebugInfo'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/automation/ExitStatsView.tsx\n  Line 37:6:  React Hook useEffect has a missing dependency: 'fetchExitStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/email/ContactEmailEngagement.tsx\n  Line 54:6:  React Hook useEffect has a missing dependency: 'fetchEngagement'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/email/EmailHistory.tsx\n  Line 33:6:  React Hook useEffect has a missing dependency: 'fetchEmails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/notes/NoteWidget.tsx\n  Line 48:6:  React Hook useEffect has a missing dependency: 'fetchNotes'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/components/workflow/ActionConfig.tsx\n  Line 23:6:  React Hook useEffect has a missing dependency: 'fetchFields'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/contexts/AuthContext.tsx\n  Line 2:10:  'User' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/AutomationBuilder.tsx\n  Line 3:10:  'Automation' is defined but never used                                                                                                @typescript-eslint/no-unused-vars\n  Line 6:35:  'TrashIcon' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars\n  Line 38:6:  React Hook useEffect has missing dependencies: 'fetchAutomation' and 'isEditing'. Either include them or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/Automations.tsx\n  Line 19:3:  'XCircleIcon' is defined but never used    @typescript-eslint/no-unused-vars\n  Line 20:3:  'ArrowPathIcon' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/ContactDetail.tsx\n  Line 36:6:  React Hook useEffect has missing dependencies: 'fetchContact' and 'fetchContactDeals'. Either include them or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/Contacts.tsx\n  Line 8:8:    'ContactCard' is defined but never used                                                                           @typescript-eslint/no-unused-vars\n  Line 20:24:  'setSearchParams' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars\n  Line 36:6:   React Hook useEffect has a missing dependency: 'fetchContacts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/CreateOrganization.tsx\n  Line 6:3:   'PaintBrushIcon' is defined but never used  @typescript-eslint/no-unused-vars\n  Line 8:3:   'GlobeAltIcon' is defined but never used    @typescript-eslint/no-unused-vars\n  Line 9:3:   'PhoneIcon' is defined but never used       @typescript-eslint/no-unused-vars\n  Line 10:3:  'MapPinIcon' is defined but never used      @typescript-eslint/no-unused-vars\n\nsrc/pages/EmailAnalytics.tsx\n  Line 3:3:    'ChartBarIcon' is defined but never used                                                                           @typescript-eslint/no-unused-vars\n  Line 88:21:  'setDateRange' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars\n  Line 95:6:   React Hook useEffect has a missing dependency: 'fetchAnalytics'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/EmailTemplateEditor.tsx\n  Line 44:9:   'applyBrandColors' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars\n  Line 103:6:  React Hook useEffect has a missing dependency: 'fetchTemplate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/GlobalUsersView.tsx\n  Line 2:10:   'Link' is defined but never used                                                                               @typescript-eslint/no-unused-vars\n  Line 12:3:   'EyeIcon' is defined but never used                                                                            @typescript-eslint/no-unused-vars\n  Line 13:3:   'PencilIcon' is defined but never used                                                                         @typescript-eslint/no-unused-vars\n  Line 41:11:  'UsersResponse' is defined but never used                                                                      @typescript-eslint/no-unused-vars\n  Line 86:6:   React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/OrganizationsManagement.tsx\n  Line 32:11:  'OrganizationsResponse' is defined but never used                                                                      @typescript-eslint/no-unused-vars\n  Line 59:6:   React Hook useEffect has a missing dependency: 'fetchOrganizations'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/Pipeline.tsx\n  Line 20:29:  'BugAntIcon' is defined but never used                                                                               @typescript-eslint/no-unused-vars\n  Line 52:10:  'analytics' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars\n  Line 70:6:   React Hook useEffect has a missing dependency: 'loadPipelineData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n  Line 452:9:  'toggleSelectAll' is assigned a value but never used                                                                 @typescript-eslint/no-unused-vars\n\nsrc/pages/Profile.tsx\n  Line 6:10:    'FormField' is defined but never used                                                         @typescript-eslint/no-unused-vars\n  Line 590:49:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators\n  Line 597:25:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators\n\nsrc/pages/RoundRobin/AssignmentDashboard.tsx\n  Line 8:3:   'CheckCircleIcon' is defined but never used      @typescript-eslint/no-unused-vars\n  Line 9:3:   'ArrowTrendingUpIcon' is defined but never used  @typescript-eslint/no-unused-vars\n  Line 10:3:  'UserIcon' is defined but never used             @typescript-eslint/no-unused-vars\n  Line 13:3:  'ChatBubbleLeftIcon' is defined but never used   @typescript-eslint/no-unused-vars\n\nsrc/pages/RoundRobin/AssignmentHistory.tsx\n  Line 6:3:   'UserIcon' is defined but never used                                                                             @typescript-eslint/no-unused-vars\n  Line 7:3:   'CalendarIcon' is defined but never used                                                                         @typescript-eslint/no-unused-vars\n  Line 8:3:   'FunnelIcon' is defined but never used                                                                           @typescript-eslint/no-unused-vars\n  Line 10:3:  'XCircleIcon' is defined but never used                                                                          @typescript-eslint/no-unused-vars\n  Line 49:6:  React Hook useEffect has a missing dependency: 'fetchHistory'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nsrc/pages/RoundRobin/AssignmentRules.tsx\n  Line 8:3:  'TrashIcon' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/RoundRobin/ManualAssignment.tsx\n  Line 6:3:  'CheckIcon' is defined but never used  @typescript-eslint/no-unused-vars\n  Line 7:3:  'UserIcon' is defined but never used   @typescript-eslint/no-unused-vars\n  Line 9:3:  'ClockIcon' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/RoundRobin/RuleBuilder.tsx\n  Line 45:11:  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/SuperAdminDashboard.tsx\n  Line 12:3:  'ClockIcon' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/UserManagement.tsx\n  Line 13:3:  'EnvelopeIcon' is defined but never used  @typescript-eslint/no-unused-vars\n\nsrc/pages/WorkflowBuilder.tsx\n  Line 3:56:  'AutomationCondition' is defined but never used                                                                                       @typescript-eslint/no-unused-vars\n  Line 10:3:  'PlusIcon' is defined but never used                                                                                                  @typescript-eslint/no-unused-vars\n  Line 53:9:  'handleExitCriteriaChange' is assigned a value but never used                                                                         @typescript-eslint/no-unused-vars\n  Line 57:9:  'handleMaxDurationChange' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars\n  Line 61:9:  'handleSafetyExitChange' is assigned a value but never used                                                                           @typescript-eslint/no-unused-vars\n  Line 69:6:  React Hook useEffect has missing dependencies: 'fetchAutomation' and 'isEditing'. Either include them or remove the dependency array  react-hooks/exhaustive-deps\n\nSearch for the keywords to learn more about each warning.\nTo ignore, add // eslint-disable-next-line to the line before.\n\nFile sizes after gzip:\n\n  138.49 kB (+464 B)  build/static/js/main.87a81420.js\n  107.83 kB           build/static/js/5.7d4a8488.chunk.js\n  23.12 kB            build/static/js/865.296f123a.chunk.js\n  15.45 kB (-155 B)   build/static/js/129.616b995f.chunk.js\n  11.02 kB            build/static/js/729.e5c9c38a.chunk.js\n  10.79 kB (-56 B)    build/static/css/main.c1a7184c.css\n  10.71 kB            build/static/js/790.cc44e978.chunk.js\n  9.35 kB             build/static/js/181.aa227b2f.chunk.js\n  7.46 kB             build/static/js/669.a9193c80.chunk.js\n  6.87 kB             build/static/js/735.eef30594.chunk.js\n  6.13 kB             build/static/js/14.f1d0b225.chunk.js\n  5.82 kB             build/static/js/795.14f06936.chunk.js\n  5.42 kB (+1.63 kB)  build/static/js/486.d9da81e0.chunk.js\n  5.39 kB             build/static/js/3.05b73f76.chunk.js\n  5.22 kB (+3 B)      build/static/js/467.c59d1cc9.chunk.js\n  5.2 kB              build/static/js/463.044f806c.chunk.js\n  5.05 kB (-1 B)      build/static/js/434.f46d5a57.chunk.js\n  4.42 kB             build/static/js/923.f0aad840.chunk.js\n  4.25 kB             build/static/js/738.bc8c71ed.chunk.js\n  3.93 kB             build/static/js/711.a8f126f2.chunk.js\n  3.86 kB             build/static/js/198.3cb529f8.chunk.js\n  3.59 kB             build/static/js/529.969c94d5.chunk.js\n  3.57 kB             build/static/js/881.fb1fc655.chunk.js\n  3.13 kB (-4 B)      build/static/js/977.ea65e16a.chunk.js\n  3.07 kB             build/static/js/246.677e337a.chunk.js\n  2.99 kB             build/static/css/729.568e8789.chunk.css\n  2.77 kB             build/static/js/103.12cc98dc.chunk.js\n  2.76 kB (+1 B)      build/static/js/301.eb8230bf.chunk.js\n  2.75 kB             build/static/js/91.7b61dd83.chunk.js\n  2.74 kB             build/static/js/379.4431d31a.chunk.js\n  2.67 kB             build/static/js/850.1876ca8c.chunk.js\n  2.54 kB             build/static/js/844.17af5d49.chunk.js\n  1.88 kB             build/static/js/141.0e192bc3.chunk.js\n  1.76 kB             build/static/js/453.54292a4b.chunk.js\n  1.69 kB             build/static/js/975.f2ddadf2.chunk.js\n  1.65 kB             build/static/js/345.1a2d45ac.chunk.js\n  1.62 kB             build/static/js/448.d5b3fba0.chunk.js\n  1.39 kB (+48 B)     build/static/js/220.9844b216.chunk.js\n\nThe project was built assuming it is hosted at /.\nYou can control this with the homepage field in your package.json.\n\nThe build folder is ready to be deployed.\nYou may serve it with a static server:\n\n  npm install -g serve\n  serve -s build\n\nFind out more about deployment here:\n\n  https://cra.link/deployment\n\n"
+        },
+        "success": true
+      },
+      "success": true
+    },
+    {
+      "phase": 4,
+      "name": "Comprehensive Testing",
+      "results": {
+        "emailTest": {
+          "success": false,
+          "error": "Command failed: node test-email-simple.js\n✗ Email templates test failed: \n",
+          "output": "Testing email endpoints...\n"
+        },
+        "actionsTest": {
+          "success": false,
+          "error": "Command failed: node test-actions-simple.js\n✗ Automations test failed: \n",
+          "output": "Testing automation actions endpoints...\n"
+        },
+        "roundRobinTest": {
+          "success": false,
+          "error": "Command failed: node test-roundrobin-simple.js\n✗ Round robin test failed: \n",
+          "output": "Testing round robin endpoints...\n"
+        },
+        "recruitingTest": {
+          "success": true,
+          "output": "✓ Position model loads\n"
+        },
+        "success": false
+      },
+      "success": false
+    }
+  ],
+  "recommendations": [
+    "3 phase(s) failed",
+    "Review failed phase logs for specific error details",
+    "Manual intervention may be required",
+    "Consider incremental fixes for failed components"
+  ]
+}

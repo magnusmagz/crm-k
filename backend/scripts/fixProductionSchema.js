@@ -53,7 +53,7 @@ async function fixProductionSchema() {
     console.log('📝 Adding organizationId column to users table...');
     await sequelize.query(`
       ALTER TABLE users 
-      ADD COLUMN IF NOT EXISTS "organizationId" UUID;
+      ADD COLUMN IF NOT EXISTS "organization_id" UUID;
     `);
     console.log('✅ organizationId column added');
     
@@ -61,7 +61,7 @@ async function fixProductionSchema() {
     console.log('📝 Adding organizationId column to contacts table...');
     await sequelize.query(`
       ALTER TABLE contacts 
-      ADD COLUMN IF NOT EXISTS "organizationId" UUID;
+      ADD COLUMN IF NOT EXISTS "organization_id" UUID;
     `);
     console.log('✅ organizationId column added to contacts');
     
@@ -103,8 +103,8 @@ async function fixProductionSchema() {
       console.log('📝 Assigning existing users to default organization...');
       await sequelize.query(`
         UPDATE users 
-        SET "organizationId" = $1 
-        WHERE "organizationId" IS NULL;
+        SET "organization_id" = $1 
+        WHERE "organization_id" IS NULL;
       `, {
         bind: [defaultOrgId]
       });
@@ -114,8 +114,8 @@ async function fixProductionSchema() {
       console.log('📝 Assigning existing contacts to default organization...');
       await sequelize.query(`
         UPDATE contacts 
-        SET "organizationId" = $1 
-        WHERE "organizationId" IS NULL;
+        SET "organization_id" = $1 
+        WHERE "organization_id" IS NULL;
       `, {
         bind: [defaultOrgId]
       });
@@ -127,13 +127,13 @@ async function fixProductionSchema() {
     await sequelize.query(`
       ALTER TABLE users 
       ADD CONSTRAINT IF NOT EXISTS users_organization_fk 
-      FOREIGN KEY ("organizationId") REFERENCES organizations(id);
+      FOREIGN KEY ("organization_id") REFERENCES organizations(id);
     `);
     
     await sequelize.query(`
       ALTER TABLE contacts 
       ADD CONSTRAINT IF NOT EXISTS contacts_organization_fk 
-      FOREIGN KEY ("organizationId") REFERENCES organizations(id);
+      FOREIGN KEY ("organization_id") REFERENCES organizations(id);
     `);
     console.log('✅ Foreign key constraints added');
     

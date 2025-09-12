@@ -7,7 +7,7 @@ async function addUserManagementColumns() {
     // Add requirePasswordChange column
     await sequelize.query(`
       ALTER TABLE users 
-      ADD COLUMN IF NOT EXISTS "requirePasswordChange" BOOLEAN DEFAULT false
+      ADD COLUMN IF NOT EXISTS "require_password_change" BOOLEAN DEFAULT false
     `).catch(err => {
       if (err.message.includes('already exists')) {
         console.log('Column requirePasswordChange already exists');
@@ -17,7 +17,7 @@ async function addUserManagementColumns() {
     // Add isActive column
     await sequelize.query(`
       ALTER TABLE users 
-      ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN DEFAULT true
+      ADD COLUMN IF NOT EXISTS "is_active" BOOLEAN DEFAULT true
     `).catch(err => {
       if (err.message.includes('already exists')) {
         console.log('Column isActive already exists');

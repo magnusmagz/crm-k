@@ -11,10 +11,10 @@ async function setupRoundRobin() {
     
     // Get loan officers
     const officers = await sequelize.query(`
-      SELECT id, email, "isLoanOfficer" 
+      SELECT id, email, "is_loan_officer" 
       FROM users 
-      WHERE "organizationId" = :orgId 
-      AND "isLoanOfficer" = true
+      WHERE "organization_id" = :orgId 
+      AND "is_loan_officer" = true
     `, {
       type: sequelize.QueryTypes.SELECT,
       replacements: { orgId }
@@ -26,7 +26,7 @@ async function setupRoundRobin() {
     const ruleId = uuidv4();
     await sequelize.query(`
       INSERT INTO assignment_rules (
-        id, "organizationId", name, conditions, "isActive",
+        id, "organization_id", name, conditions, "is_active",
         priority, "assignmentMethod", "requireStateMatch", 
         "createdAt", "updatedAt"
       )
@@ -67,7 +67,7 @@ async function setupRoundRobin() {
         await sequelize.query(`
           INSERT INTO round_robin_queues (
             id, "ruleId", "userId", "assignmentCount", 
-            "isActive", "createdAt", "updatedAt"
+            "is_active", "createdAt", "updatedAt"
           )
           VALUES (
             :id, :ruleId, :userId, 0, true, NOW(), NOW()
@@ -98,7 +98,7 @@ async function setupRoundRobin() {
       
       await sequelize.query(`
         UPDATE users 
-        SET "licensedStates" = ARRAY[:states]::text[]
+        SET "licensed_states" = ARRAY[:states]::text[]
         WHERE id = :userId
       `, {
         replacements: {
@@ -113,7 +113,7 @@ async function setupRoundRobin() {
     const contacts = await sequelize.query(`
       SELECT id, first_name, last_name, email, phone
       FROM contacts
-      WHERE "organizationId" = :orgId
+      WHERE "organization_id" = :orgId
       LIMIT 5
     `, {
       type: sequelize.QueryTypes.SELECT,

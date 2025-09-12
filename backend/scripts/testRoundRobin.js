@@ -38,7 +38,7 @@ async function testRoundRobin() {
 
     // Create a round-robin rule if it doesn't exist
     const [existingRule] = await sequelize.query(
-      `SELECT id FROM assignment_rules WHERE "organizationId" = :orgId LIMIT 1`,
+      `SELECT id FROM assignment_rules WHERE "organization_id" = :orgId LIMIT 1`,
       { 
         type: sequelize.QueryTypes.SELECT,
         replacements: { orgId: organizationId }
@@ -52,7 +52,7 @@ async function testRoundRobin() {
       
       await sequelize.query(`
         INSERT INTO assignment_rules (
-          id, "organizationId", name, conditions, "isActive",
+          id, "organization_id", name, conditions, "is_active",
           priority, "assignmentMethod", "requireStateMatch", 
           "createdAt", "updatedAt"
         )
@@ -72,7 +72,7 @@ async function testRoundRobin() {
         await sequelize.query(`
           INSERT INTO round_robin_queues (
             id, "ruleId", "userId", "assignmentCount", 
-            "isActive", "createdAt", "updatedAt"
+            "is_active", "createdAt", "updatedAt"
           )
           VALUES (
             :id, :ruleId, :userId, 0, true, NOW(), NOW()

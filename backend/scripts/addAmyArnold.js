@@ -32,8 +32,8 @@ async function addAmyArnold() {
     if (amyExists.length === 0) {
       await sequelize.query(`
         INSERT INTO users (
-          id, email, password, "organizationId", "isAdmin", 
-          "isLoanOfficer", "licensedStates", created_at, updated_at
+          id, email, password, "organization_id", "is_admin", 
+          "is_loan_officer", "licensed_states", created_at, updated_at
         )
         VALUES (
           :id, :email, :password, :organizationId, :isAdmin,
@@ -88,8 +88,8 @@ async function addAmyArnold() {
     if (arnoldExists.length === 0) {
       await sequelize.query(`
         INSERT INTO users (
-          id, email, password, "organizationId", "isAdmin", 
-          "isLoanOfficer", "licensedStates", created_at, updated_at
+          id, email, password, "organization_id", "is_admin", 
+          "is_loan_officer", "licensed_states", created_at, updated_at
         )
         VALUES (
           :id, :email, :password, :organizationId, :isAdmin,
@@ -136,7 +136,7 @@ async function addAmyArnold() {
     
     // Add them to round-robin queue if rule exists
     const [rule] = await sequelize.query(
-      `SELECT id FROM assignment_rules WHERE name = 'Default Round Robin' AND "organizationId" = :orgId LIMIT 1`,
+      `SELECT id FROM assignment_rules WHERE name = 'Default Round Robin' AND "organization_id" = :orgId LIMIT 1`,
       { 
         type: sequelize.QueryTypes.SELECT,
         replacements: { orgId: salesCoId }
@@ -148,7 +148,7 @@ async function addAmyArnold() {
       if (amyExists.length === 0) {
         await sequelize.query(`
           INSERT INTO round_robin_queues (
-            id, "ruleId", "userId", "assignmentCount", "isActive", "createdAt", "updatedAt"
+            id, "ruleId", "userId", "assignmentCount", "is_active", "createdAt", "updatedAt"
           )
           VALUES (
             :id, :ruleId, :userId, 0, true, NOW(), NOW()
@@ -167,7 +167,7 @@ async function addAmyArnold() {
       if (arnoldExists.length === 0) {
         await sequelize.query(`
           INSERT INTO round_robin_queues (
-            id, "ruleId", "userId", "assignmentCount", "isActive", "createdAt", "updatedAt"
+            id, "ruleId", "userId", "assignmentCount", "is_active", "createdAt", "updatedAt"
           )
           VALUES (
             :id, :ruleId, :userId, 0, true, NOW(), NOW()
@@ -194,7 +194,7 @@ async function addAmyArnold() {
     
     // Show all users in Sales Co
     const allUsers = await sequelize.query(
-      `SELECT email, "isAdmin", "licensedStates" FROM users WHERE "organizationId" = :orgId`,
+      `SELECT email, "is_admin", "licensed_states" FROM users WHERE "organization_id" = :orgId`,
       { 
         type: sequelize.QueryTypes.SELECT,
         replacements: { orgId: salesCoId }

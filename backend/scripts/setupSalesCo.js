@@ -70,8 +70,8 @@ async function setupSalesCo() {
         // Insert user with snake_case columns for existing table
         await sequelize.query(`
           INSERT INTO users (
-            id, email, password, "organizationId", "isAdmin", 
-            "isLoanOfficer", "licensedStates", created_at, updated_at
+            id, email, password, "organization_id", "is_admin", 
+            "is_loan_officer", "licensed_states", created_at, updated_at
           )
           VALUES (
             :id, :email, :password, :organizationId, :isAdmin,
@@ -119,7 +119,7 @@ async function setupSalesCo() {
     
     await sequelize.query(`
       INSERT INTO assignment_rules (
-        id, "organizationId", name, conditions, "isActive",
+        id, "organization_id", name, conditions, "is_active",
         priority, "assignmentMethod", "requireStateMatch", "createdAt", "updatedAt"
       )
       VALUES (
@@ -146,7 +146,7 @@ async function setupSalesCo() {
     for (const user of users) {
       await sequelize.query(`
         INSERT INTO round_robin_queues (
-          id, "ruleId", "userId", "assignmentCount", "isActive", "createdAt", "updatedAt"
+          id, "ruleId", "userId", "assignmentCount", "is_active", "createdAt", "updatedAt"
         )
         VALUES (
           :id, :ruleId, :userId, 0, true, NOW(), NOW()

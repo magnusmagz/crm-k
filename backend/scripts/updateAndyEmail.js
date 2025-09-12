@@ -49,7 +49,7 @@ async function updateAndyEmail() {
     
     // Verify the update
     const verifyResult = await sequelize.query(`
-      SELECT id, email, "isAdmin", "isLoanOfficer"
+      SELECT id, email, "is_admin", "is_loan_officer"
       FROM users
       WHERE email = 'andy@crmkiller.com'
     `, { type: sequelize.QueryTypes.SELECT });

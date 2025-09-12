@@ -3,10 +3,10 @@ const { sequelize } = require('../models');
 async function listUsers() {
   try {
     const users = await sequelize.query(
-      `SELECT email, "isAdmin", "isLoanOfficer", "licensedStates" 
+      `SELECT email, "is_admin", "is_loan_officer", "licensed_states" 
        FROM users 
-       WHERE "organizationId" IS NOT NULL
-       ORDER BY "isAdmin" DESC NULLS LAST, email`,
+       WHERE "organization_id" IS NOT NULL
+       ORDER BY "is_admin" DESC NULLS LAST, email`,
       { type: sequelize.QueryTypes.SELECT }
     );
     

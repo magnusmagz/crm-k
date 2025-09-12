@@ -8,10 +8,10 @@ async function createRoundRobinTables() {
     await sequelize.query(`
       CREATE TABLE IF NOT EXISTS assignment_rules (
         id UUID PRIMARY KEY,
-        "organizationId" UUID NOT NULL,
+        "organization_id" UUID NOT NULL,
         name VARCHAR(255) NOT NULL,
         conditions JSONB DEFAULT '{}',
-        "isActive" BOOLEAN DEFAULT true,
+        "is_active" BOOLEAN DEFAULT true,
         priority INTEGER DEFAULT 100,
         "assignmentMethod" VARCHAR(255) DEFAULT 'round_robin',
         "requireStateMatch" BOOLEAN DEFAULT false,
@@ -29,7 +29,7 @@ async function createRoundRobinTables() {
         "userId" UUID NOT NULL,
         "assignmentCount" INTEGER DEFAULT 0,
         "lastAssignedAt" TIMESTAMP WITH TIME ZONE,
-        "isActive" BOOLEAN DEFAULT true,
+        "is_active" BOOLEAN DEFAULT true,
         "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL,
         "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL
       )
@@ -53,7 +53,7 @@ async function createRoundRobinTables() {
     console.log('✅ Created assignments table');
 
     // Create indexes
-    await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_assignment_rules_org ON assignment_rules("organizationId")`);
+    await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_assignment_rules_org ON assignment_rules("organization_id")`);
     await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_round_robin_queues_rule ON round_robin_queues("ruleId")`);
     await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_assignments_contact ON assignments("contactId")`);
     await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_assignments_assigned ON assignments("assignedTo")`);

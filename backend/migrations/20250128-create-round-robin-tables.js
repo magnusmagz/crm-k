@@ -9,10 +9,10 @@ module.exports = {
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      organizationId: {
+      organization_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        field: 'organizationId'
+        field: 'organization_id'
       },
       name: {
         type: Sequelize.STRING(255),
@@ -22,10 +22,10 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
-        field: 'isActive'
+        field: 'is_active'
       },
       priority: {
         type: Sequelize.INTEGER,
@@ -187,10 +187,10 @@ module.exports = {
         defaultValue: 0,
         field: 'assignmentCount'
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
-        field: 'isActive'
+        field: 'is_active'
       },
       weight: {
         type: Sequelize.INTEGER,
@@ -319,8 +319,8 @@ module.exports = {
     // 6. Update users table - add licensedStates if it doesn't exist
     const userColumns = await queryInterface.describeTable('users');
     
-    if (!userColumns.licensedStates) {
-      await queryInterface.addColumn('users', 'licensedStates', {
+    if (!userColumns.licensed_states) {
+      await queryInterface.addColumn('users', 'licensed_states', {
         type: Sequelize.ARRAY(Sequelize.STRING),
         allowNull: true,
         defaultValue: []
@@ -333,7 +333,7 @@ module.exports = {
     await queryInterface.addIndex('assignments', ['assignedAt']);
     await queryInterface.addIndex('assignment_activities', ['assignmentId']);
     await queryInterface.addIndex('round_robin_queues', ['ruleId', 'userId'], { unique: true });
-    await queryInterface.addIndex('assignment_rules', ['organizationId', 'isActive']);
+    await queryInterface.addIndex('assignment_rules', ['organization_id', 'is_active']);
     await queryInterface.addIndex('contacts', ['assignedTo']);
     await queryInterface.addIndex('contacts', ['assignmentId']);
   },
@@ -342,7 +342,7 @@ module.exports = {
     // Remove indexes
     await queryInterface.removeIndex('contacts', ['assignmentId']);
     await queryInterface.removeIndex('contacts', ['assignedTo']);
-    await queryInterface.removeIndex('assignment_rules', ['organizationId', 'isActive']);
+    await queryInterface.removeIndex('assignment_rules', ['organization_id', 'is_active']);
     await queryInterface.removeIndex('round_robin_queues', ['ruleId', 'userId']);
     await queryInterface.removeIndex('assignment_activities', ['assignmentId']);
     await queryInterface.removeIndex('assignments', ['assignedAt']);
@@ -371,8 +371,8 @@ module.exports = {
     }
 
     const userColumns = await queryInterface.describeTable('users');
-    if (userColumns.licensedStates) {
-      await queryInterface.removeColumn('users', 'licensedStates');
+    if (userColumns.licensed_states) {
+      await queryInterface.removeColumn('users', 'licensed_states');
     }
 
     // Drop tables

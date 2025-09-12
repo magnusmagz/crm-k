@@ -42,7 +42,7 @@ async function createTestUser() {
       await sequelize.query(
         `INSERT INTO users (
           id, email, password, "is_verified", 
-          "organizationId", "isAdmin", "isLoanOfficer",
+          "organization_id", "is_admin", "is_loan_officer",
           "created_at", "updated_at"
         ) VALUES (
           :id, :email, :password, true,

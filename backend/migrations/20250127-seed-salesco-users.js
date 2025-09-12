@@ -24,10 +24,10 @@ module.exports = {
         id: uuidv4(),
         email: 'andy@salesco.com',
         password: hashedPassword,
-        organizationId: salesCoId,
-        isAdmin: true,
-        isLoanOfficer: true,
-        licensedStates: ['TX', 'CA', 'FL', 'NY'],
+        organization_id: salesCoId,
+        is_admin: true,
+        is_loan_officer: true,
+        licensed_states: ['TX', 'CA', 'FL', 'NY'],
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -35,10 +35,10 @@ module.exports = {
         id: uuidv4(),
         email: 'amy@salesco.com',
         password: hashedPassword,
-        organizationId: salesCoId,
-        isAdmin: false,
-        isLoanOfficer: true,
-        licensedStates: ['TX', 'OK', 'NM', 'LA'],
+        organization_id: salesCoId,
+        is_admin: false,
+        is_loan_officer: true,
+        licensed_states: ['TX', 'OK', 'NM', 'LA'],
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -46,10 +46,10 @@ module.exports = {
         id: uuidv4(),
         email: 'arnold@salesco.com',
         password: hashedPassword,
-        organizationId: salesCoId,
-        isAdmin: false,
-        isLoanOfficer: true,
-        licensedStates: ['CA', 'OR', 'WA', 'NV'],
+        organization_id: salesCoId,
+        is_admin: false,
+        is_loan_officer: true,
+        licensed_states: ['CA', 'OR', 'WA', 'NV'],
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -78,13 +78,13 @@ module.exports = {
     
     await queryInterface.bulkInsert('assignment_rules', [{
       id: defaultRuleId,
-      organizationId: salesCoId,
+      organization_id: salesCoId,
       name: 'Default Round Robin',
       conditions: JSON.stringify({
         contactType: 'lead',
         source: 'all'
       }),
-      isActive: true,
+      is_active: true,
       priority: 100,
       assignmentMethod: 'round_robin',
       requireStateMatch: false,
@@ -99,7 +99,7 @@ module.exports = {
       userId: user.id,
       lastAssignedAt: null,
       assignmentCount: 0,
-      isActive: true,
+      is_active: true,
       createdAt: new Date(),
       updatedAt: new Date()
     }));
@@ -132,19 +132,19 @@ module.exports = {
       });
 
       await queryInterface.bulkDelete('assignment_rules', {
-        organizationId: org
+        organization_id: org
       });
 
       await queryInterface.bulkDelete('user_profiles', {
         user_id: {
           [Sequelize.Op.in]: queryInterface.rawSelect('users', {
-            where: { organizationId: org }
+            where: { organization_id: org }
           }, ['id'])
         }
       });
 
       await queryInterface.bulkDelete('users', {
-        organizationId: org
+        organization_id: org
       });
 
       await queryInterface.bulkDelete('organizations', {

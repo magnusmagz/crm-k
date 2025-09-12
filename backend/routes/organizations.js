@@ -332,8 +332,8 @@ router.get('/:id/stats', authMiddleware, async (req, res) => {
       where: { organizationId },
       attributes: [
         [require('sequelize').fn('COUNT', require('sequelize').col('id')), 'total'],
-        [require('sequelize').fn('SUM', require('sequelize').literal('CASE WHEN "isAdmin" = true THEN 1 ELSE 0 END')), 'admins'],
-        [require('sequelize').fn('SUM', require('sequelize').literal('CASE WHEN "isLoanOfficer" = true THEN 1 ELSE 0 END')), 'loanOfficers']
+        [require('sequelize').fn('SUM', require('sequelize').literal('CASE WHEN "is_admin" = true THEN 1 ELSE 0 END')), 'admins'],
+        [require('sequelize').fn('SUM', require('sequelize').literal('CASE WHEN "is_loan_officer" = true THEN 1 ELSE 0 END')), 'loanOfficers']
       ],
       raw: true
     });

@@ -22,9 +22,9 @@ async function fixAndy() {
     await sequelize.query(
       `UPDATE users SET 
         password = :password, 
-        "isAdmin" = true, 
-        "organizationId" = :orgId,
-        "isLoanOfficer" = false
+        "is_admin" = true, 
+        "organization_id" = :orgId,
+        "is_loan_officer" = false
       WHERE email = :email`,
       {
         replacements: {

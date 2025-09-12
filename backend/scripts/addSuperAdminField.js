@@ -74,7 +74,7 @@ async function addSuperAdminField() {
     
     // Verify super admins
     const [superAdmins] = await sequelize.query(`
-      SELECT email, "isAdmin", "isSuperAdmin" 
+      SELECT email, "is_admin", "isSuperAdmin" 
       FROM users 
       WHERE "isSuperAdmin" = true
     `, {

@@ -123,7 +123,7 @@ router.get('/history', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    let whereClause = 'WHERE c."organizationId" = :orgId';
+    let whereClause = 'WHERE c."organization_id" = :orgId';
     const replacements = { 
       orgId: user.organizationId,
       limit: parseInt(limit),
@@ -216,7 +216,7 @@ router.get('/rules', authMiddleware, async (req, res) => {
         COUNT(DISTINCT q."userId") as officer_count
       FROM assignment_rules r
       LEFT JOIN round_robin_queues q ON r.id = q."ruleId"
-      WHERE r."organizationId" = :orgId
+      WHERE r."organization_id" = :orgId
       GROUP BY r.id
       ORDER BY r.priority DESC, r."createdAt" DESC
     `, {
@@ -258,7 +258,7 @@ router.post('/rules', authMiddleware, async (req, res) => {
     // Create rule
     await sequelize.query(`
       INSERT INTO assignment_rules (
-        id, "organizationId", name, conditions, "isActive",
+        id, "organization_id", name, conditions, "is_active",
         priority, "assignmentMethod", "requireStateMatch", 
         "createdAt", "updatedAt"
       )
@@ -285,7 +285,7 @@ router.post('/rules', authMiddleware, async (req, res) => {
         await sequelize.query(`
           INSERT INTO round_robin_queues (
             id, "ruleId", "userId", "assignmentCount", 
-            "isActive", "createdAt", "updatedAt"
+            "is_active", "createdAt", "updatedAt"
           )
           VALUES (
             :id, :ruleId, :userId, 0, true, NOW(), NOW()
@@ -322,10 +322,10 @@ router.put('/rules/:id/toggle', authMiddleware, async (req, res) => {
     await sequelize.query(`
       UPDATE assignment_rules
       SET 
-        "isActive" = NOT "isActive",
+        "is_active" = NOT "is_active",
         "updatedAt" = NOW()
       WHERE id = :ruleId
-      AND "organizationId" = :orgId
+      AND "organization_id" = :orgId
     `, {
       replacements: {
         ruleId: req.params.id,
@@ -360,7 +360,7 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
       SELECT 
         u.id,
         u.email,
-        COALESCE(u."licensedStates", ARRAY[]::VARCHAR[]) as "licensedStates",
+        COALESCE(u."licensed_states", ARRAY[]::VARCHAR[]) as "licensed_states",
         COALESCE(p.first_name, SPLIT_PART(u.email, '@', 1)) as "firstName",
         COALESCE(p.last_name, '') as "lastName",
         p.nmls_id as "nmlsId",
@@ -371,9 +371,9 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
       LEFT JOIN user_profiles p ON u.id = p.user_id
       LEFT JOIN contacts c ON u.id = c."assignedTo"
       LEFT JOIN assignments a ON u.id = a."assignedTo"
-      WHERE (u."organizationId" = :orgId OR (u."organizationId" IS NULL AND :orgId IS NULL))
-      AND u."isLoanOfficer" = true
-      GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name, p.nmls_id, p.state_licenses
+      WHERE (u."organization_id" = :orgId OR (u."organization_id" IS NULL AND :orgId IS NULL))
+      AND u."is_loan_officer" = true
+      GROUP BY u.id, u.email, u."licensed_states", p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
     `, {
       type: sequelize.QueryTypes.SELECT,
@@ -399,7 +399,7 @@ router.get('/officers', authMiddleware, async (req, res) => {
       SELECT 
         u.id,
         u.email,
-        COALESCE(u."licensedStates", ARRAY[]::VARCHAR[]) as "licensedStates",
+        COALESCE(u."licensed_states", ARRAY[]::VARCHAR[]) as "licensed_states",
         COALESCE(p.first_name, SPLIT_PART(u.email, '@', 1)) as "firstName",
         COALESCE(p.last_name, '') as "lastName",
         p.nmls_id as "nmlsId",
@@ -410,9 +410,9 @@ router.get('/officers', authMiddleware, async (req, res) => {
       LEFT JOIN user_profiles p ON u.id = p.user_id
       LEFT JOIN contacts c ON u.id = c."assignedTo"
       LEFT JOIN assignments a ON u.id = a."assignedTo"
-      WHERE (u."organizationId" = :orgId OR (u."organizationId" IS NULL AND :orgId IS NULL))
-      AND u."isLoanOfficer" = true
-      GROUP BY u.id, u.email, u."licensedStates", p.first_name, p.last_name, p.nmls_id, p.state_licenses
+      WHERE (u."organization_id" = :orgId OR (u."organization_id" IS NULL AND :orgId IS NULL))
+      AND u."is_loan_officer" = true
+      GROUP BY u.id, u.email, u."licensed_states", p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
     `, {
       type: sequelize.QueryTypes.SELECT,

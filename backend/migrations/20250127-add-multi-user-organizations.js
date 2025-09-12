@@ -27,7 +27,7 @@ module.exports = {
     });
 
     // Add organization_id and isAdmin to users table
-    await queryInterface.addColumn('users', 'organizationId', {
+    await queryInterface.addColumn('users', 'organization_id', {
       type: Sequelize.UUID,
       references: {
         model: 'organizations',
@@ -37,17 +37,17 @@ module.exports = {
       onDelete: 'SET NULL'
     });
 
-    await queryInterface.addColumn('users', 'isAdmin', {
+    await queryInterface.addColumn('users', 'is_admin', {
       type: Sequelize.BOOLEAN,
       defaultValue: false
     });
 
-    await queryInterface.addColumn('users', 'isLoanOfficer', {
+    await queryInterface.addColumn('users', 'is_loan_officer', {
       type: Sequelize.BOOLEAN,
       defaultValue: true
     });
 
-    await queryInterface.addColumn('users', 'licensedStates', {
+    await queryInterface.addColumn('users', 'licensed_states', {
       type: Sequelize.ARRAY(Sequelize.STRING),
       defaultValue: []
     });
@@ -68,7 +68,7 @@ module.exports = {
       allowNull: true
     });
 
-    await queryInterface.addColumn('contacts', 'organizationId', {
+    await queryInterface.addColumn('contacts', 'organization_id', {
       type: Sequelize.UUID,
       references: {
         model: 'organizations',
@@ -163,7 +163,7 @@ module.exports = {
         primaryKey: true,
         allowNull: false
       },
-      organizationId: {
+      organization_id: {
         type: Sequelize.UUID,
         references: {
           model: 'organizations',
@@ -181,7 +181,7 @@ module.exports = {
         type: Sequelize.JSONB,
         defaultValue: {}
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true
       },
@@ -245,7 +245,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true
       },
@@ -262,12 +262,12 @@ module.exports = {
     });
 
     // Add indexes for performance
-    await queryInterface.addIndex('users', ['organizationId']);
-    await queryInterface.addIndex('contacts', ['organizationId']);
+    await queryInterface.addIndex('users', ['organization_id']);
+    await queryInterface.addIndex('contacts', ['organization_id']);
     await queryInterface.addIndex('contacts', ['assignedTo']);
     await queryInterface.addIndex('assignments', ['contactId']);
     await queryInterface.addIndex('assignments', ['assignedTo']);
-    await queryInterface.addIndex('assignment_rules', ['organizationId']);
+    await queryInterface.addIndex('assignment_rules', ['organization_id']);
     await queryInterface.addIndex('round_robin_queues', ['ruleId', 'userId']);
 
     console.log('✅ Multi-user organization structure created successfully');
@@ -276,12 +276,12 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     // Remove indexes
     await queryInterface.removeIndex('round_robin_queues', ['ruleId', 'userId']);
-    await queryInterface.removeIndex('assignment_rules', ['organizationId']);
+    await queryInterface.removeIndex('assignment_rules', ['organization_id']);
     await queryInterface.removeIndex('assignments', ['assignedTo']);
     await queryInterface.removeIndex('assignments', ['contactId']);
     await queryInterface.removeIndex('contacts', ['assignedTo']);
-    await queryInterface.removeIndex('contacts', ['organizationId']);
-    await queryInterface.removeIndex('users', ['organizationId']);
+    await queryInterface.removeIndex('contacts', ['organization_id']);
+    await queryInterface.removeIndex('users', ['organization_id']);
 
     // Drop tables
     await queryInterface.dropTable('round_robin_queues');
@@ -292,13 +292,13 @@ module.exports = {
     await queryInterface.removeColumn('contacts', 'contactType');
     await queryInterface.removeColumn('contacts', 'state');
     await queryInterface.removeColumn('contacts', 'source');
-    await queryInterface.removeColumn('contacts', 'organizationId');
+    await queryInterface.removeColumn('contacts', 'organization_id');
     await queryInterface.removeColumn('contacts', 'assignedAt');
     await queryInterface.removeColumn('contacts', 'assignedTo');
-    await queryInterface.removeColumn('users', 'licensedStates');
-    await queryInterface.removeColumn('users', 'isLoanOfficer');
-    await queryInterface.removeColumn('users', 'isAdmin');
-    await queryInterface.removeColumn('users', 'organizationId');
+    await queryInterface.removeColumn('users', 'licensed_states');
+    await queryInterface.removeColumn('users', 'is_loan_officer');
+    await queryInterface.removeColumn('users', 'is_admin');
+    await queryInterface.removeColumn('users', 'organization_id');
 
     // Drop organizations table
     await queryInterface.dropTable('organizations');

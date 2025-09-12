@@ -49,35 +49,35 @@ module.exports = (sequelize, DataTypes) => {
     organizationId: {
       type: DataTypes.UUID,
       allowNull: true,
-      field: 'organizationId' // Override underscored: true - keep camelCase in DB
+      field: 'organization_id' // Now using snake_case in DB
     },
     isAdmin: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
-      field: 'isAdmin' // Override underscored: true - keep camelCase in DB
+      field: 'is_admin' // Now using snake_case in DB
     },
     isLoanOfficer: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
-      field: 'isLoanOfficer' // Override underscored: true - keep camelCase in DB
+      field: 'is_loan_officer' // Now using snake_case in DB
     },
     licensedStates: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
       defaultValue: [],
-      field: 'licensedStates' // Override underscored: true - keep camelCase in DB
+      field: 'licensed_states' // Now using snake_case in DB
     },
     requirePasswordChange: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: false,
-      field: 'requirePasswordChange' // Override underscored: true - keep camelCase in DB
+      field: 'require_password_change' // Now using snake_case in DB
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: true,
-      field: 'isActive' // Override underscored: true - keep camelCase in DB
+      field: 'is_active' // Now using snake_case in DB
     },
     // Super Admin field for platform-wide access
     isSuperAdmin: {
