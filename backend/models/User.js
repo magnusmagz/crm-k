@@ -48,36 +48,36 @@ module.exports = (sequelize, DataTypes) => {
     // Multi-tenant fields
     organizationId: {
       type: DataTypes.UUID,
-      allowNull: true
-      // No field mapping needed - column name matches property name
+      allowNull: true,
+      field: 'organizationId' // Override underscored: true - keep camelCase in DB
     },
     isAdmin: {
       type: DataTypes.BOOLEAN,
-      allowNull: true
-      // No field mapping needed - column name matches property name
+      allowNull: true,
+      field: 'isAdmin' // Override underscored: true - keep camelCase in DB
     },
     isLoanOfficer: {
       type: DataTypes.BOOLEAN,
-      allowNull: true
-      // No field mapping needed - column name matches property name
+      allowNull: true,
+      field: 'isLoanOfficer' // Override underscored: true - keep camelCase in DB
     },
     licensedStates: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
-      defaultValue: []
-      // No field mapping needed - column name matches property name
+      defaultValue: [],
+      field: 'licensedStates' // Override underscored: true - keep camelCase in DB
     },
     requirePasswordChange: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
-      defaultValue: false
-      // No field mapping needed - column name matches property name
+      defaultValue: false,
+      field: 'requirePasswordChange' // Override underscored: true - keep camelCase in DB
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
-      defaultValue: true
-      // No field mapping needed - column name matches property name
+      defaultValue: true,
+      field: 'isActive' // Override underscored: true - keep camelCase in DB
     },
     // Super Admin field for platform-wide access
     isSuperAdmin: {
