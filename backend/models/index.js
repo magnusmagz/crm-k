@@ -124,7 +124,7 @@ User.hasMany(RecruitingPipeline, { foreignKey: 'user_id', as: 'recruitingPipelin
 RecruitingPipeline.belongsTo(User, { foreignKey: 'user_id' });
 
 Contact.hasMany(RecruitingPipeline, { foreignKey: 'candidate_id', as: 'applications' });
-RecruitingPipeline.belongsTo(Contact, { foreignKey: 'candidate_id', as: 'candidate' });
+RecruitingPipeline.belongsTo(Contact, { foreignKey: 'candidate_id', as: 'Candidate' });
 
 Position.hasMany(RecruitingPipeline, { foreignKey: 'position_id', as: 'candidates' });
 RecruitingPipeline.belongsTo(Position, { foreignKey: 'position_id' });

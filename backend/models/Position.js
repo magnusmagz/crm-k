@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Position.associate = function(models) {
-    Position.belongsTo(models.User, { foreignKey: 'userId' });
+    Position.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
     Position.hasMany(models.RecruitingPipeline, { 
       foreignKey: 'positionId',
       as: 'candidates'
