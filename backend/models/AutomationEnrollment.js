@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     automationId: {
       type: DataTypes.UUID,
+      field: 'automation_id',
       allowNull: false,
       references: {
         model: 'automations',
@@ -15,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.UUID,
+      field: 'user_id',
       allowNull: false,
       references: {
         model: 'users',
@@ -23,14 +25,17 @@ module.exports = (sequelize, DataTypes) => {
     },
     entityType: {
       type: DataTypes.ENUM('contact', 'deal'),
+      field: 'entity_type',
       allowNull: false
     },
     entityId: {
       type: DataTypes.UUID,
+      field: 'entity_id',
       allowNull: false
     },
     currentStepIndex: {
       type: DataTypes.INTEGER,
+      field: 'current_step_index',
       defaultValue: 0,
       allowNull: false
     },
@@ -41,15 +46,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     enrolledAt: {
       type: DataTypes.DATE,
+      field: 'enrolled_at',
       defaultValue: DataTypes.NOW,
       allowNull: false
     },
     completedAt: {
       type: DataTypes.DATE,
+      field: 'completed_at',
       allowNull: true
     },
     nextStepAt: {
       type: DataTypes.DATE,
+      field: 'next_step_at',
       allowNull: true
     },
     metadata: {
@@ -59,10 +67,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     exitReason: {
       type: DataTypes.STRING(255),
+      field: 'exit_reason',
       allowNull: true
     },
     exitedAt: {
       type: DataTypes.DATE,
+      field: 'exited_at',
       allowNull: true
     }
   }, {

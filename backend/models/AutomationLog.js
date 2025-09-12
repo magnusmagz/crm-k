@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     automationId: {
       type: DataTypes.UUID,
+      field: 'automation_id',
       allowNull: false,
       references: {
         model: 'automations',
@@ -15,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.UUID,
+      field: 'user_id',
       allowNull: false,
       references: {
         model: 'users',
@@ -23,22 +25,27 @@ module.exports = (sequelize, DataTypes) => {
     },
     triggerType: {
       type: DataTypes.STRING,
+      field: 'trigger_type',
       allowNull: false
     },
     triggerData: {
       type: DataTypes.JSONB,
+      field: 'trigger_data',
       allowNull: false
     },
     conditionsMet: {
       type: DataTypes.BOOLEAN,
+      field: 'conditions_met',
       allowNull: false
     },
     conditionsEvaluated: {
       type: DataTypes.JSONB,
+      field: 'conditions_evaluated',
       allowNull: true
     },
     actionsExecuted: {
       type: DataTypes.JSONB,
+      field: 'actions_executed',
       allowNull: true
     },
     status: {
@@ -51,6 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     executedAt: {
       type: DataTypes.DATE,
+      field: 'executed_at',
       defaultValue: DataTypes.NOW,
       allowNull: false
     }

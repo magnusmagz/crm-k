@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.UUID,
+      field: 'user_id',
       allowNull: false,
       references: {
         model: 'users',
@@ -60,49 +61,59 @@ module.exports = (sequelize, DataTypes) => {
     },
     isMultiStep: {
       type: DataTypes.BOOLEAN,
+      field: 'is_multi_step',
       defaultValue: false,
       allowNull: false
     },
     enrolledCount: {
       type: DataTypes.INTEGER,
+      field: 'enrolled_count',
       defaultValue: 0,
       allowNull: false
     },
     activeEnrollments: {
       type: DataTypes.INTEGER,
+      field: 'active_enrollments',
       defaultValue: 0,
       allowNull: false
     },
     completedEnrollments: {
       type: DataTypes.INTEGER,
+      field: 'completed_enrollments',
       defaultValue: 0,
       allowNull: false
     },
     isActive: {
       type: DataTypes.BOOLEAN,
+      field: 'is_active',
       defaultValue: true,
       allowNull: false
     },
     executionCount: {
       type: DataTypes.INTEGER,
+      field: 'execution_count',
       defaultValue: 0,
       allowNull: false
     },
     lastExecutedAt: {
       type: DataTypes.DATE,
+      field: 'last_executed_at',
       allowNull: true
     },
     exitCriteria: {
       type: DataTypes.JSONB,
+      field: 'exit_criteria',
       defaultValue: {},
       allowNull: false
     },
     maxDurationDays: {
       type: DataTypes.INTEGER,
+      field: 'max_duration_days',
       allowNull: true
     },
     safetyExitEnabled: {
       type: DataTypes.BOOLEAN,
+      field: 'safety_exit_enabled',
       defaultValue: true,
       allowNull: false
     }

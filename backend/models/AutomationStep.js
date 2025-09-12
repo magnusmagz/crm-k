@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     automationId: {
       type: DataTypes.UUID,
+      field: 'automation_id',
       allowNull: false,
       references: {
         model: 'automations',
@@ -15,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     stepIndex: {
       type: DataTypes.INTEGER,
+      field: 'step_index',
       allowNull: false
     },
     name: {
@@ -42,18 +44,22 @@ module.exports = (sequelize, DataTypes) => {
     },
     delayConfig: {
       type: DataTypes.JSONB,
+      field: 'delay_config',
       allowNull: true
     },
     branchConfig: {
       type: DataTypes.JSONB,
+      field: 'branch_config',
       allowNull: true
     },
     nextStepIndex: {
       type: DataTypes.INTEGER,
+      field: 'next_step_index',
       allowNull: true
     },
     branchStepIndices: {
       type: DataTypes.JSONB,
+      field: 'branch_step_indices',
       defaultValue: {},
       allowNull: false
     }

@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'user_id',
       references: {
         model: 'users',
         key: 'id'
@@ -36,12 +37,14 @@ module.exports = (sequelize, DataTypes) => {
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
-      allowNull: false
+      allowNull: false,
+      field: 'is_active'
     },
     pipelineType: {
       type: DataTypes.ENUM('sales', 'recruiting'),
       defaultValue: 'sales',
-      allowNull: false
+      allowNull: false,
+      field: 'pipeline_type'
     }
   }, {
     tableName: 'stages',

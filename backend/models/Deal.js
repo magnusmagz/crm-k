@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'user_id',
       references: {
         model: 'users',
         key: 'id'
@@ -16,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     contactId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'contact_id',
       references: {
         model: 'contacts',
         key: 'id'
@@ -24,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     stageId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'stage_id',
       references: {
         model: 'stages',
         key: 'id'
@@ -55,16 +58,19 @@ module.exports = (sequelize, DataTypes) => {
     },
     closedAt: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      field: 'closed_at'
     },
     expectedCloseDate: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      field: 'expected_close_date'
     },
     customFields: {
       type: DataTypes.JSONB,
       defaultValue: {},
-      allowNull: false
+      allowNull: false,
+      field: 'custom_fields'
     }
   }, {
     tableName: 'deals',

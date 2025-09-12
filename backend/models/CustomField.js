@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.UUID,
+      field: 'user_id',
       allowNull: false,
       references: {
         model: 'users',
@@ -15,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     entityType: {
       type: DataTypes.ENUM('contact', 'deal'),
+      field: 'entity_type',
       allowNull: false,
       defaultValue: 'contact'
     },

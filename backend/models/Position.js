@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.UUID,
+      field: 'user_id',
       allowNull: false,
       references: {
         model: 'users',
@@ -40,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     salaryRange: {
       type: DataTypes.JSONB,
+      field: 'salary_range',
       allowNull: true,
       defaultValue: {}
     },
@@ -58,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     customFields: {
       type: DataTypes.JSONB,
+      field: 'custom_fields',
       defaultValue: {},
       allowNull: false
     }
