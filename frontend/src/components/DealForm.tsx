@@ -18,7 +18,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [formData, setFormData] = useState({
     name: deal?.name || '',
-    value: deal?.value || 0,
+    value: deal?.value ?? '',
     stageId: deal?.stageId || stages[0]?.id || '',
     contactId: deal?.contactId || defaultContactId || '',
     notes: deal?.notes || '',
@@ -59,7 +59,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'value' ? parseFloat(value) || 0 : value
+      [name]: name === 'value' ? (value === '' ? '' : parseFloat(value) || 0) : value
     }));
     setErrors(prev => ({ ...prev, [name]: '' }));
   };
@@ -86,7 +86,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
     if (!formData.contactId) {
       newErrors.contactId = 'Contact is required';
     }
-    if (formData.value < 0) {
+    if (formData.value !== '' && formData.value < 0) {
       newErrors.value = 'Value cannot be negative';
     }
 
@@ -114,6 +114,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
     try {
       const data = {
         ...formData,
+        value: formData.value === '' ? null : formData.value,
         contactId: formData.contactId || null,
         expectedCloseDate: formData.expectedCloseDate || null
       };
