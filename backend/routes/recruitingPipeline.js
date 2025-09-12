@@ -10,7 +10,7 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     const { positionId, status, stageId, search, limit = 50, offset = 0 } = req.query;
     
-    let whereConditions = [`rp."userId" = :userId`];
+    let whereConditions = [`rp.user_id = :userId`];
     const replacements = { 
       userId: req.user.id,
       limit: parseInt(limit),
@@ -18,7 +18,7 @@ router.get('/', authMiddleware, async (req, res) => {
     };
     
     if (positionId) {
-      whereConditions.push(`rp."positionId" = :positionId`);
+      whereConditions.push(`rp.position_id = :positionId`);
       replacements.positionId = positionId;
     }
     
@@ -28,7 +28,7 @@ router.get('/', authMiddleware, async (req, res) => {
     }
     
     if (stageId) {
-      whereConditions.push(`rp."stageId" = :stageId`);
+      whereConditions.push(`rp.stage_id = :stageId`);
       replacements.stageId = stageId;
     }
     
@@ -37,8 +37,8 @@ router.get('/', authMiddleware, async (req, res) => {
         c.first_name ILIKE :search OR 
         c.last_name ILIKE :search OR 
         c.email ILIKE :search OR
-        c."currentRole" ILIKE :search OR
-        c."currentEmployer" ILIKE :search
+        c.current_role ILIKE :search OR
+        c.current_employer ILIKE :search
       )`);
       replacements.search = `%${search}%`;
     }
@@ -54,13 +54,13 @@ router.get('/', authMiddleware, async (req, res) => {
         c.last_name as candidatelastname,
         c.email as candidateemail,
         c.phone as candidatephone,
-        c."currentRole" as currentrole,
-        c."currentEmployer" as currentemployer,
-        c."experienceYears" as experienceyears,
+        c.current_role as currentrole,
+        c.current_employer as currentemployer,
+        c.experience_years as experienceyears,
         c.skills as skills,
-        c."salaryExpectation" as salaryexpectation,
-        c."linkedinUrl" as linkedinurl,
-        c."githubUrl" as githuburl,
+        c.salary_expectation as salaryexpectation,
+        c.linkedin_url as linkedinurl,
+        c.github_url as githuburl,
         p.id as positionidfull,
         p.title as positiontitle,
         p.department as positiondepartment,
@@ -68,11 +68,11 @@ router.get('/', authMiddleware, async (req, res) => {
         s.name as stagename,
         s.color as stagecolor
       FROM "RecruitingPipeline" rp
-      LEFT JOIN contacts c ON rp."candidateId" = c.id
-      LEFT JOIN positions p ON rp."positionId" = p.id
-      LEFT JOIN stages s ON rp."stageId" = s.id
+      LEFT JOIN contacts c ON rp.candidate_id = c.id
+      LEFT JOIN positions p ON rp.position_id = p.id
+      LEFT JOIN stages s ON rp.stage_id = s.id
       WHERE ${whereClause}
-      ORDER BY rp."appliedAt" DESC
+      ORDER BY rp.applied_at DESC
       LIMIT :limit OFFSET :offset`,
       {
         replacements,
@@ -131,7 +131,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const [countResult] = await sequelize.query(
       `SELECT COUNT(*) as count 
       FROM "RecruitingPipeline" rp
-      LEFT JOIN contacts c ON rp."candidateId" = c.id
+      LEFT JOIN contacts c ON rp.candidate_id = c.id
       WHERE ${whereClause}`,
       {
         replacements,
@@ -216,9 +216,9 @@ router.post('/', authMiddleware, async (req, res) => {
     // Check if candidate is already in pipeline for this position
     const [existing] = await sequelize.query(
       `SELECT id FROM "RecruitingPipeline" 
-      WHERE "candidateId" = :candidateId 
-      AND "positionId" = :positionId 
-      AND "userId" = :userId`,
+      WHERE candidate_id = :candidateId 
+      AND position_id = :positionId 
+      AND user_id = :userId`,
       {
         replacements: { candidateId, positionId, userId: req.user.id },
         type: sequelize.QueryTypes.SELECT
@@ -254,7 +254,7 @@ router.post('/', authMiddleware, async (req, res) => {
     // Create pipeline entry
     await sequelize.query(
       `INSERT INTO "RecruitingPipeline" 
-      (id, "userId", "candidateId", "positionId", "stageId", status, rating, notes, "interviewDate", "customFields", "appliedAt", "createdAt", "updatedAt")
+      (id, user_id, candidate_id, position_id, stage_id, status, rating, notes, interview_date, custom_fields, applied_at, created_at, updated_at)
       VALUES (:id, :userId, :candidateId, :positionId, :stageId, :status, :rating, :notes, :interviewDate, :customFields, NOW(), NOW(), NOW())`,
       {
         replacements: {
@@ -282,9 +282,9 @@ router.post('/', authMiddleware, async (req, res) => {
         p.title as "positionTitle",
         s.name as "stageName"
       FROM "RecruitingPipeline" rp
-      LEFT JOIN contacts c ON rp."candidateId" = c.id
-      LEFT JOIN positions p ON rp."positionId" = p.id
-      LEFT JOIN stages s ON rp."stageId" = s.id
+      LEFT JOIN contacts c ON rp.candidate_id = c.id
+      LEFT JOIN positions p ON rp.position_id = p.id
+      LEFT JOIN stages s ON rp.stage_id = s.id
       WHERE rp.id = :id`,
       {
         replacements: { id: pipelineId },
