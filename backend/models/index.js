@@ -32,6 +32,15 @@ const Note = require('./Note')(sequelize, Sequelize.DataTypes);
 const Position = require('./Position')(sequelize, Sequelize.DataTypes);
 const RecruitingPipeline = require('./RecruitingPipeline')(sequelize, Sequelize.DataTypes);
 
+// Import new models with field mappings
+const AssignmentRule = require('./AssignmentRule')(sequelize, Sequelize.DataTypes);
+const Assignment = require('./Assignment')(sequelize, Sequelize.DataTypes);
+const EmailTemplate = require('./EmailTemplate')(sequelize, Sequelize.DataTypes);
+const EmailCampaign = require('./EmailCampaign')(sequelize, Sequelize.DataTypes);
+const RoundRobinQueue = require('./RoundRobinQueue')(sequelize, Sequelize.DataTypes);
+const InterviewSchedule = require('./InterviewSchedule')(sequelize, Sequelize.DataTypes);
+const CandidateEvaluation = require('./CandidateEvaluation')(sequelize, Sequelize.DataTypes);
+
 // Define associations
 // Organization associations
 Organization.hasMany(User, { foreignKey: 'organizationId', as: 'users' });
@@ -123,6 +132,58 @@ RecruitingPipeline.belongsTo(Position, { foreignKey: 'position_id' });
 Stage.hasMany(RecruitingPipeline, { foreignKey: 'stage_id', as: 'recruitingPipelines' });
 RecruitingPipeline.belongsTo(Stage, { foreignKey: 'stage_id' });
 
+// Assignment Rule associations
+Organization.hasMany(AssignmentRule, { foreignKey: 'organizationId', as: 'assignmentRules' });
+AssignmentRule.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
+
+AssignmentRule.hasMany(RoundRobinQueue, { foreignKey: 'ruleId', as: 'queues' });
+RoundRobinQueue.belongsTo(AssignmentRule, { foreignKey: 'ruleId', as: 'rule' });
+
+// Assignment associations
+Contact.hasMany(Assignment, { foreignKey: 'contactId', as: 'assignments' });
+Assignment.belongsTo(Contact, { foreignKey: 'contactId', as: 'contact' });
+
+User.hasMany(Assignment, { foreignKey: 'assignedTo', as: 'assignmentsReceived' });
+Assignment.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignedUser' });
+
+User.hasMany(Assignment, { foreignKey: 'assignedBy', as: 'assignmentsMade' });
+Assignment.belongsTo(User, { foreignKey: 'assignedBy', as: 'assigner' });
+
+// Round Robin Queue associations
+User.hasMany(RoundRobinQueue, { foreignKey: 'userId', as: 'roundRobinQueues' });
+RoundRobinQueue.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// Email Template associations
+Organization.hasMany(EmailTemplate, { foreignKey: 'organizationId', as: 'emailTemplates' });
+EmailTemplate.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
+
+User.hasMany(EmailTemplate, { foreignKey: 'createdBy', as: 'createdEmailTemplates' });
+EmailTemplate.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+
+User.hasMany(EmailTemplate, { foreignKey: 'updatedBy', as: 'updatedEmailTemplates' });
+EmailTemplate.belongsTo(User, { foreignKey: 'updatedBy', as: 'updater' });
+
+// Email Campaign associations
+Organization.hasMany(EmailCampaign, { foreignKey: 'organizationId', as: 'emailCampaigns' });
+EmailCampaign.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
+
+EmailTemplate.hasMany(EmailCampaign, { foreignKey: 'templateId', as: 'campaigns' });
+EmailCampaign.belongsTo(EmailTemplate, { foreignKey: 'templateId', as: 'template' });
+
+User.hasMany(EmailCampaign, { foreignKey: 'createdBy', as: 'createdEmailCampaigns' });
+EmailCampaign.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+
+// Interview Schedule associations
+RecruitingPipeline.hasMany(InterviewSchedule, { foreignKey: 'pipelineId', as: 'interviews' });
+InterviewSchedule.belongsTo(RecruitingPipeline, { foreignKey: 'pipelineId', as: 'pipeline' });
+
+// Candidate Evaluation associations
+RecruitingPipeline.hasMany(CandidateEvaluation, { foreignKey: 'pipelineId', as: 'evaluations' });
+CandidateEvaluation.belongsTo(RecruitingPipeline, { foreignKey: 'pipelineId', as: 'pipeline' });
+
+User.hasMany(CandidateEvaluation, { foreignKey: 'evaluatorId', as: 'evaluations' });
+CandidateEvaluation.belongsTo(User, { foreignKey: 'evaluatorId', as: 'evaluator' });
+
 module.exports = {
   sequelize,
   Organization,
@@ -142,5 +203,13 @@ module.exports = {
   EmailSuppression,
   Note,
   Position,
-  RecruitingPipeline
+  RecruitingPipeline,
+  // New models with field mappings
+  AssignmentRule,
+  Assignment,
+  EmailTemplate,
+  EmailCampaign,
+  RoundRobinQueue,
+  InterviewSchedule,
+  CandidateEvaluation
 };

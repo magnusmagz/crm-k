@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'user_id', // Now using snake_case in DB
       references: {
         model: 'users',
         key: 'id'
@@ -16,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     candidateId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'candidate_id', // Now using snake_case in DB
       references: {
         model: 'contacts',
         key: 'id'
@@ -24,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     positionId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'position_id', // Now using snake_case in DB
       references: {
         model: 'positions',
         key: 'id'
@@ -32,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     stageId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'stage_id', // Now using snake_case in DB
       references: {
         model: 'stages',
         key: 'id'
@@ -56,33 +60,39 @@ module.exports = (sequelize, DataTypes) => {
     },
     interviewDate: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      field: 'interview_date' // Now using snake_case in DB
     },
     offerDetails: {
       type: DataTypes.JSONB,
       allowNull: true,
-      defaultValue: {}
+      defaultValue: {},
+      field: 'offer_details' // Now using snake_case in DB
     },
     rejectionReason: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
+      field: 'rejection_reason' // Now using snake_case in DB
     },
     appliedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false
+      allowNull: false,
+      field: 'applied_at' // Now using snake_case in DB
     },
     hiredAt: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      field: 'hired_at' // Now using snake_case in DB
     },
     customFields: {
       type: DataTypes.JSONB,
       defaultValue: {},
-      allowNull: false
+      allowNull: false,
+      field: 'custom_fields' // Now using snake_case in DB
     }
   }, {
-    tableName: 'RecruitingPipeline',
+    tableName: 'recruiting_pipeline', // Table renamed to snake_case
     indexes: [
       {
         fields: ['userId']
