@@ -67,7 +67,7 @@ router.get('/', authMiddleware, async (req, res) => {
         p.location as positionlocation,
         s.name as stagename,
         s.color as stagecolor
-      FROM "RecruitingPipeline" rp
+      FROM recruiting_pipeline rp
       LEFT JOIN contacts c ON rp.candidate_id = c.id
       LEFT JOIN positions p ON rp.position_id = p.id
       LEFT JOIN stages s ON rp.stage_id = s.id
@@ -83,23 +83,23 @@ router.get('/', authMiddleware, async (req, res) => {
     // Transform flat data into nested structure expected by frontend
     const pipelines = rawPipelines.map(p => ({
       id: p.id,
-      userId: p.userId,
-      candidateId: p.candidateId,
-      positionId: p.positionId,
-      stageId: p.stageId,
+      userId: p.user_id,
+      candidateId: p.candidate_id,
+      positionId: p.position_id,
+      stageId: p.stage_id,
       status: p.status,
       rating: p.rating,
       notes: p.notes,
-      interviewDate: p.interviewDate,
-      appliedAt: p.appliedAt,
-      hiredAt: p.hiredAt,
-      rejectedAt: p.rejectedAt,
-      withdrawnAt: p.withdrawnAt,
-      offerDetails: p.offerDetails,
-      rejectionReason: p.rejectionReason,
-      customFields: p.customFields,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
+      interviewDate: p.interview_date,
+      appliedAt: p.applied_at,
+      hiredAt: p.hired_at,
+      rejectedAt: p.rejected_at,
+      withdrawnAt: p.withdrawn_at,
+      offerDetails: p.offer_details,
+      rejectionReason: p.rejection_reason,
+      customFields: p.custom_fields,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
       candidate: p.candidatefirstname ? {
         id: p.candidateid,
         firstName: p.candidatefirstname,
@@ -130,7 +130,7 @@ router.get('/', authMiddleware, async (req, res) => {
     // Get total count
     const [countResult] = await sequelize.query(
       `SELECT COUNT(*) as count 
-      FROM "RecruitingPipeline" rp
+      FROM recruiting_pipeline rp
       LEFT JOIN contacts c ON rp.candidate_id = c.id
       WHERE ${whereClause}`,
       {
@@ -215,7 +215,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     // Check if candidate is already in pipeline for this position
     const [existing] = await sequelize.query(
-      `SELECT id FROM "RecruitingPipeline" 
+      `SELECT id FROM recruiting_pipeline 
       WHERE candidate_id = :candidateId 
       AND position_id = :positionId 
       AND user_id = :userId`,
@@ -253,7 +253,7 @@ router.post('/', authMiddleware, async (req, res) => {
     
     // Create pipeline entry
     await sequelize.query(
-      `INSERT INTO "RecruitingPipeline" 
+      `INSERT INTO recruiting_pipeline 
       (id, user_id, candidate_id, position_id, stage_id, status, rating, notes, interview_date, custom_fields, applied_at, created_at, updated_at)
       VALUES (:id, :userId, :candidateId, :positionId, :stageId, :status, :rating, :notes, :interviewDate, :customFields, NOW(), NOW(), NOW())`,
       {
@@ -281,7 +281,7 @@ router.post('/', authMiddleware, async (req, res) => {
         c.email as "candidateEmail",
         p.title as "positionTitle",
         s.name as "stageName"
-      FROM "RecruitingPipeline" rp
+      FROM recruiting_pipeline rp
       LEFT JOIN contacts c ON rp.candidate_id = c.id
       LEFT JOIN positions p ON rp.position_id = p.id
       LEFT JOIN stages s ON rp.stage_id = s.id
