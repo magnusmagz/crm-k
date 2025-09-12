@@ -14,9 +14,9 @@ const validateDeal = [
   body('name').notEmpty().trim(),
   body('value').optional({ nullable: true, checkFalsy: true }).isDecimal({ decimal_digits: '0,2' }),
   body('stageId').isUUID(),
-  body('contactId').optional().isUUID().withMessage('Invalid contact ID'),
+  body('contactId').optional({ nullable: true, checkFalsy: true }).isUUID().withMessage('Invalid contact ID'),
   body('notes').optional().trim(),
-  body('expectedCloseDate').optional().isISO8601()
+  body('expectedCloseDate').optional({ nullable: true, checkFalsy: true }).isISO8601()
 ];
 
 // Get all deals for the user with filtering
