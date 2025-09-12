@@ -68,7 +68,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'positions',
     indexes: [
       {
-        fields: ['userId']
+        fields: ['user_id']
       },
       {
         fields: ['status']
