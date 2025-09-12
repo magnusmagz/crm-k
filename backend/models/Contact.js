@@ -81,17 +81,17 @@ module.exports = (sequelize, DataTypes) => {
     organizationId: {
       type: DataTypes.UUID,
       allowNull: true,
-      field: 'organizationId'
+      field: 'organization_id' // Now using snake_case in DB
     },
     assignedTo: {
       type: DataTypes.UUID,
       allowNull: true,
-      field: 'assignedTo'
+      field: 'assigned_to' // Now using snake_case in DB
     },
     assignedAt: {
       type: DataTypes.DATE,
       allowNull: true,
-      field: 'assignedAt'
+      field: 'assigned_at' // Now using snake_case in DB
     },
     source: {
       type: DataTypes.STRING,
@@ -105,23 +105,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       defaultValue: 'contact',
-      field: 'contactType'
+      field: 'contact_type' // Now using snake_case in DB
     },
     // Recruiting-specific fields
     resumeUrl: {
       type: DataTypes.STRING,
       allowNull: true,
-      field: 'resumeUrl'
+      field: 'resume_url' // Now using snake_case in DB
     },
     linkedinUrl: {
       type: DataTypes.STRING,
       allowNull: true,
-      field: 'linkedinUrl'
+      field: 'linkedin_url' // Now using snake_case in DB
     },
     githubUrl: {
       type: DataTypes.STRING,
       allowNull: true,
-      field: 'githubUrl'
+      field: 'github_url' // Now using snake_case in DB
     },
     skills: {
       type: DataTypes.ARRAY(DataTypes.STRING),
@@ -131,13 +131,13 @@ module.exports = (sequelize, DataTypes) => {
     experienceYears: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      field: 'experienceYears'
+      field: 'experience_years' // Now using snake_case in DB
     },
     salaryExpectation: {
       type: DataTypes.JSONB,
       allowNull: true,
       defaultValue: {},
-      field: 'salaryExpectation'
+      field: 'salary_expectation' // Now using snake_case in DB
     },
     availability: {
       type: DataTypes.STRING,
@@ -146,12 +146,12 @@ module.exports = (sequelize, DataTypes) => {
     currentEmployer: {
       type: DataTypes.STRING,
       allowNull: true,
-      field: 'currentEmployer'
+      field: 'current_employer' // Now using snake_case in DB
     },
     currentRole: {
       type: DataTypes.STRING,
       allowNull: true,
-      field: 'currentRole'
+      field: 'current_role' // Now using snake_case in DB
     }
   }, {
     tableName: 'contacts',
