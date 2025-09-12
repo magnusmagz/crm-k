@@ -14,7 +14,7 @@ const validateDeal = [
   body('name').notEmpty().trim(),
   body('value').optional().isDecimal({ decimal_digits: '0,2' }),
   body('stageId').isUUID(),
-  body('contactId').notEmpty().isUUID().withMessage('Contact is required'),
+  body('contactId').optional().isUUID().withMessage('Invalid contact ID'),
   body('notes').optional().trim(),
   body('expectedCloseDate').optional().isISO8601()
 ];
@@ -182,16 +182,18 @@ router.post('/', authMiddleware, validateDeal, async (req, res) => {
       return res.status(400).json({ error: 'Invalid stage' });
     }
 
-    // Verify contact belongs to user (required)
-    const contact = await Contact.findOne({
-      where: {
-        id: req.body.contactId,
-        userId: req.user.id
-      }
-    });
+    // Verify contact belongs to user (if provided)
+    if (req.body.contactId) {
+      const contact = await Contact.findOne({
+        where: {
+          id: req.body.contactId,
+          userId: req.user.id
+        }
+      });
 
-    if (!contact) {
-      return res.status(400).json({ error: 'Invalid contact or contact not found' });
+      if (!contact) {
+        return res.status(400).json({ error: 'Invalid contact or contact not found' });
+      }
     }
 
     // Validate custom fields if provided

@@ -83,9 +83,6 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
     if (!formData.stageId) {
       newErrors.stageId = 'Stage is required';
     }
-    if (!formData.contactId) {
-      newErrors.contactId = 'Contact is required';
-    }
     if (formData.value !== '' && formData.value < 0) {
       newErrors.value = 'Value cannot be negative';
     }
@@ -196,7 +193,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
         </div>
 
         <FormSelect
-          label="Associated Contact"
+          label="Associated Contact (Optional)"
           id="contactId"
           name="contactId"
           value={formData.contactId}
