@@ -10,7 +10,7 @@ class AutomationEngine {
       'update_deal_field': this.updateDealField.bind(this),
       'move_deal_to_stage': this.moveDealToStage.bind(this),
       'update_custom_field': this.updateCustomField.bind(this),
-      'send_email': this.sendEmailAction.bind(this),
+      'send_email': this.sendEmailAction ? this.sendEmailAction.bind(this) : null,
       // Recruiting actions
       'update_candidate_status': this.updateCandidateStatus.bind(this),
       'move_candidate_to_stage': this.moveCandidateToStage.bind(this),
