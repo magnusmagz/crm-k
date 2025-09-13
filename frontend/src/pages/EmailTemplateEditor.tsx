@@ -42,10 +42,23 @@ const EmailTemplateEditor: React.FC = () => {
   const [currentId, setCurrentId] = useState(id);
 
   useEffect(() => {
+    console.log('=== COMPONENT MOUNTED/ID CHANGED ===');
+    console.log('URL ID param:', id);
+    console.log('Current ID state:', currentId);
     if (id && id !== 'new') {
       fetchTemplate();
     }
   }, [id]);
+
+  useEffect(() => {
+    console.log('=== COMPONENT MOUNT ===');
+    console.log('Component mounted at:', new Date().toISOString());
+
+    return () => {
+      console.log('=== COMPONENT UNMOUNT ===');
+      console.log('Component unmounting at:', new Date().toISOString());
+    };
+  }, []);
 
   const fetchTemplate = async () => {
     setLoading(true);
@@ -67,16 +80,28 @@ const EmailTemplateEditor: React.FC = () => {
   };
 
   const onReady = () => {
+    console.log('=== UNLAYER EDITOR READY ===');
+    console.log('Editor ready at:', new Date().toISOString());
+
     // Editor is ready
     const unlayer = emailEditorRef.current?.editor;
+    console.log('Editor reference exists:', !!unlayer);
 
     // Load existing design if editing
     if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
+      console.log('Loading existing design into editor');
       unlayer.loadDesign(template.design_json);
+    } else {
+      console.log('No existing design to load');
     }
   };
 
   const handleSave = async () => {
+    console.log('=== SAVE CLICKED ===');
+    console.log('Current template state:', template);
+    console.log('Current ID from URL:', id);
+    console.log('Current ID state:', currentId);
+
     if (!template.name || template.name.trim() === '') {
       toast.error('Template name is required');
       return;
@@ -88,13 +113,18 @@ const EmailTemplateEditor: React.FC = () => {
       return;
     }
 
+    console.log('Editor reference exists:', !!unlayer);
     setSaving(true);
 
     // Simple approach - just use exportHtml without any options
     unlayer.exportHtml((data: any) => {
       try {
         const { design, html } = data || {};
-        console.log('Export data:', data);
+        console.log('=== EXPORT DATA ===');
+        console.log('Full export data:', data);
+        console.log('Design object exists:', !!design);
+        console.log('HTML exists:', !!html);
+        console.log('HTML length:', html?.length || 0);
 
         // Save even if design is empty/null
         saveTemplate(design || {}, html || '');
@@ -107,6 +137,11 @@ const EmailTemplateEditor: React.FC = () => {
   };
 
   const saveTemplate = async (design: any, html: string) => {
+    console.log('=== SAVE TEMPLATE CALLED ===');
+    console.log('Design to save:', design);
+    console.log('HTML to save length:', html?.length || 0);
+    console.log('Is new template?', !currentId || currentId === 'new');
+
     try {
       const templateData = {
         ...template,
@@ -115,6 +150,7 @@ const EmailTemplateEditor: React.FC = () => {
       };
 
       if (currentId && currentId !== 'new') {
+        console.log('Updating existing template:', currentId);
         await api.put(`/email-templates/${currentId}`, templateData);
         toast.success('Template updated');
         // Update local state with the saved design
@@ -123,9 +159,13 @@ const EmailTemplateEditor: React.FC = () => {
           design_json: design,
           html_output: html
         }));
+        console.log('Template updated successfully');
       } else {
+        console.log('Creating new template...');
         const response = await api.post('/email-templates', templateData);
+        console.log('Create response:', response.data);
         toast.success('Template created');
+
         // Update local state with the saved template
         setTemplate(prev => ({
           ...prev,
@@ -133,15 +173,28 @@ const EmailTemplateEditor: React.FC = () => {
           design_json: design,
           html_output: html
         }));
+
         // Update currentId so next save will use PUT instead of POST
-        setCurrentId(response.data.id);
+        const newId = response.data.id;
+        console.log('Setting currentId to:', newId);
+        setCurrentId(newId);
+
         // Don't navigate - just update the URL in the browser without React Router
-        window.history.replaceState({}, '', `/email-templates/${response.data.id}`);
+        const newUrl = `/email-templates/${newId}`;
+        console.log('Updating browser URL to:', newUrl);
+        window.history.replaceState({}, '', newUrl);
+
+        console.log('=== AFTER SAVE ===');
+        console.log('Template state will be updated with design');
+        console.log('Current URL:', window.location.pathname);
+        console.log('Editor should remain intact');
       }
     } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save template');
     } finally {
       setSaving(false);
+      console.log('Save process complete');
     }
   };
 
