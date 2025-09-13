@@ -375,15 +375,15 @@ router.get('/users', async (req, res) => {
     const formattedUsers = users.rows.map(user => ({
       id: user.id,
       email: user.email,
-      firstName: user.profile?.first_name || '',
-      lastName: user.profile?.last_name || '',
-      isAdmin: user.is_admin,
-      isLoanOfficer: user.is_loan_officer,
-      isSuperAdmin: user.is_super_admin,
-      isActive: user.is_active,
-      lastLogin: user.last_login,
-      organizationId: user.organization_id,
-      createdAt: user.created_at,
+      firstName: user.profile?.firstName || user.profile?.first_name || '',
+      lastName: user.profile?.lastName || user.profile?.last_name || '',
+      isAdmin: user.isAdmin !== undefined ? user.isAdmin : user.is_admin,
+      isLoanOfficer: user.isLoanOfficer !== undefined ? user.isLoanOfficer : user.is_loan_officer,
+      isSuperAdmin: user.isSuperAdmin !== undefined ? user.isSuperAdmin : user.is_super_admin,
+      isActive: user.isActive !== undefined ? user.isActive : user.is_active,
+      lastLogin: user.lastLogin || user.last_login,
+      organizationId: user.organizationId || user.organization_id,
+      createdAt: user.createdAt || user.created_at,
       organization: user.organization
     }));
 
