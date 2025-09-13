@@ -132,10 +132,10 @@ router.get('/history', authMiddleware, async (req, res) => {
 
     // Non-admins can only see their own assignments
     if (user.isAdmin !== true) {
-      whereClause += ' AND a."assignedTo" = :userId';
+      whereClause += ' AND a.assigned_to = :userId';
       replacements.userId = req.user.id;
     } else if (officerId) {
-      whereClause += ' AND a."assignedTo" = :officerId';
+      whereClause += ' AND a.assigned_to = :officerId';
       replacements.officerId = officerId;
     }
 
@@ -152,14 +152,14 @@ router.get('/history', authMiddleware, async (req, res) => {
     const history = await sequelize.query(`
       SELECT 
         a.id,
-        a."contactId",
-        a."assignedTo",
-        a."assignedBy",
-        a."assignedAt",
+        a.contact_id as "contactId",
+        a.assigned_to as "assignedTo",
+        a.assigned_by as "assignedBy",
+        a.assigned_at as "assignedAt",
         a.status,
         a.notes,
-        c."first_name" as "firstName",
-        c."last_name" as "lastName",
+        c.first_name as "firstName",
+        c.last_name as "lastName",
         c.email as contact_email,
         c.phone,
         c.source,
@@ -167,11 +167,11 @@ router.get('/history', authMiddleware, async (req, res) => {
         u.email as officer_email,
         assigner.email as assigner_email
       FROM assignments a
-      JOIN contacts c ON a."contactId" = c.id
-      JOIN users u ON a."assignedTo" = u.id
-      LEFT JOIN users assigner ON a."assignedBy" = assigner.id
+      JOIN contacts c ON a.contact_id = c.id
+      JOIN users u ON a.assigned_to = u.id
+      LEFT JOIN users assigner ON a.assigned_by = assigner.id
       ${whereClause}
-      ORDER BY a."assignedAt" DESC
+      ORDER BY a.assigned_at DESC
       LIMIT :limit OFFSET :offset
     `, {
       type: sequelize.QueryTypes.SELECT,
@@ -182,7 +182,7 @@ router.get('/history', authMiddleware, async (req, res) => {
     const [countResult] = await sequelize.query(`
       SELECT COUNT(*) as total
       FROM assignments a
-      JOIN contacts c ON a."contactId" = c.id
+      JOIN contacts c ON a.contact_id = c.id
       ${whereClause}
     `, {
       type: sequelize.QueryTypes.SELECT,
@@ -213,12 +213,12 @@ router.get('/rules', authMiddleware, async (req, res) => {
     const rules = await sequelize.query(`
       SELECT 
         r.*,
-        COUNT(DISTINCT q."userId") as officer_count
+        COUNT(DISTINCT q.user_id) as officer_count
       FROM assignment_rules r
-      LEFT JOIN round_robin_queues q ON r.id = q."ruleId"
-      WHERE r."organization_id" = :orgId
+      LEFT JOIN round_robin_queues q ON r.id = q.rule_id
+      WHERE r.organization_id = :orgId
       GROUP BY r.id
-      ORDER BY r.priority DESC, r."createdAt" DESC
+      ORDER BY r.priority DESC, r.created_at DESC
     `, {
       type: sequelize.QueryTypes.SELECT,
       replacements: { orgId: user.organizationId }
@@ -258,9 +258,9 @@ router.post('/rules', authMiddleware, async (req, res) => {
     // Create rule
     await sequelize.query(`
       INSERT INTO assignment_rules (
-        id, "organization_id", name, conditions, "is_active",
-        priority, "assignmentMethod", "requireStateMatch", 
-        "createdAt", "updatedAt"
+        id, organization_id, name, conditions, is_active,
+        priority, assignment_method, require_state_match, 
+        created_at, updated_at
       )
       VALUES (
         :id, :orgId, :name, :conditions, true,
@@ -284,8 +284,8 @@ router.post('/rules', authMiddleware, async (req, res) => {
       for (const officerId of officerIds) {
         await sequelize.query(`
           INSERT INTO round_robin_queues (
-            id, "ruleId", "userId", "assignmentCount", 
-            "is_active", "createdAt", "updatedAt"
+            id, rule_id, user_id, assignment_count, 
+            is_active, created_at, updated_at
           )
           VALUES (
             :id, :ruleId, :userId, 0, true, NOW(), NOW()
@@ -322,10 +322,10 @@ router.put('/rules/:id/toggle', authMiddleware, async (req, res) => {
     await sequelize.query(`
       UPDATE assignment_rules
       SET 
-        "is_active" = NOT "is_active",
-        "updatedAt" = NOW()
+        is_active = NOT is_active,
+        updated_at = NOW()
       WHERE id = :ruleId
-      AND "organization_id" = :orgId
+      AND organization_id = :orgId
     `, {
       replacements: {
         ruleId: req.params.id,
@@ -360,7 +360,7 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
       SELECT 
         u.id,
         u.email,
-        COALESCE(u."licensed_states", ARRAY[]::VARCHAR[]) as "licensed_states",
+        COALESCE(u.licensed_states, ARRAY[]::VARCHAR[]) as "licensed_states",
         COALESCE(p.first_name, SPLIT_PART(u.email, '@', 1)) as "firstName",
         COALESCE(p.last_name, '') as "lastName",
         p.nmls_id as "nmlsId",
@@ -369,11 +369,11 @@ router.get('/manual-assignment', authMiddleware, async (req, res) => {
         COUNT(DISTINCT a.id) as total_assignments
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
-      LEFT JOIN contacts c ON u.id = c."assignedTo"
-      LEFT JOIN assignments a ON u.id = a."assignedTo"
-      WHERE (u."organization_id" = :orgId OR (u."organization_id" IS NULL AND :orgId IS NULL))
-      AND u."is_loan_officer" = true
-      GROUP BY u.id, u.email, u."licensed_states", p.first_name, p.last_name, p.nmls_id, p.state_licenses
+      LEFT JOIN contacts c ON u.id = c.assigned_to
+      LEFT JOIN assignments a ON u.id = a.assigned_to
+      WHERE (u.organization_id = :orgId OR (u.organization_id IS NULL AND :orgId IS NULL))
+      AND u.is_loan_officer = true
+      GROUP BY u.id, u.email, u.licensed_states, p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
     `, {
       type: sequelize.QueryTypes.SELECT,
@@ -399,7 +399,7 @@ router.get('/officers', authMiddleware, async (req, res) => {
       SELECT 
         u.id,
         u.email,
-        COALESCE(u."licensed_states", ARRAY[]::VARCHAR[]) as "licensed_states",
+        COALESCE(u.licensed_states, ARRAY[]::VARCHAR[]) as "licensed_states",
         COALESCE(p.first_name, SPLIT_PART(u.email, '@', 1)) as "firstName",
         COALESCE(p.last_name, '') as "lastName",
         p.nmls_id as "nmlsId",
@@ -408,11 +408,11 @@ router.get('/officers', authMiddleware, async (req, res) => {
         COUNT(DISTINCT a.id) as total_assignments
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
-      LEFT JOIN contacts c ON u.id = c."assignedTo"
-      LEFT JOIN assignments a ON u.id = a."assignedTo"
-      WHERE (u."organization_id" = :orgId OR (u."organization_id" IS NULL AND :orgId IS NULL))
-      AND u."is_loan_officer" = true
-      GROUP BY u.id, u.email, u."licensed_states", p.first_name, p.last_name, p.nmls_id, p.state_licenses
+      LEFT JOIN contacts c ON u.id = c.assigned_to
+      LEFT JOIN assignments a ON u.id = a.assigned_to
+      WHERE (u.organization_id = :orgId OR (u.organization_id IS NULL AND :orgId IS NULL))
+      AND u.is_loan_officer = true
+      GROUP BY u.id, u.email, u.licensed_states, p.first_name, p.last_name, p.nmls_id, p.state_licenses
       ORDER BY u.email
     `, {
       type: sequelize.QueryTypes.SELECT,
