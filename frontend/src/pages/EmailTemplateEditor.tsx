@@ -88,12 +88,36 @@ const EmailTemplateEditor: React.FC = () => {
     }
 
     setSaving(true);
-    
-    // Export the design and HTML
-    unlayer.exportHtml((data: any) => {
-      const { design, html } = data;
-      saveTemplate(design, html);
-    });
+
+    try {
+      // Export the design and HTML
+      unlayer.exportHtml((data: any) => {
+        try {
+          const { design, html } = data;
+
+          // Validate the design object
+          if (!design || typeof design !== 'object') {
+            console.error('Invalid design object:', design);
+            toast.error('Failed to export template design');
+            setSaving(false);
+            return;
+          }
+
+          // Clean up any undefined values in the design
+          const cleanDesign = JSON.parse(JSON.stringify(design));
+
+          saveTemplate(cleanDesign, html || '');
+        } catch (error) {
+          console.error('Error processing design:', error);
+          toast.error('Failed to save template');
+          setSaving(false);
+        }
+      });
+    } catch (error) {
+      console.error('Error exporting template:', error);
+      toast.error('Failed to export template');
+      setSaving(false);
+    }
   };
 
   const saveTemplate = async (design: any, html: string) => {
@@ -241,10 +265,13 @@ const EmailTemplateEditor: React.FC = () => {
           minHeight="100%"
           options={{
             displayMode: 'email',
-            projectId: undefined, // Use undefined for free version
+            projectId: null, // Changed from undefined to null
             features: {
               colorPicker: {
                 presets: ['#6366f1', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6']
+              },
+              undoRedo: {
+                enabled: true
               }
             },
             tools: {
@@ -259,7 +286,9 @@ const EmailTemplateEditor: React.FC = () => {
                   dock: 'left'
                 }
               }
-            }
+            },
+            mergeTags: {},
+            customCSS: []
           }}
         />
       </div>
