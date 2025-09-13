@@ -264,7 +264,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                💡 Use {{variable || 'fallback'}} for optional values
+                💡 Use {`{{variable || 'fallback'}}`} for optional values
               </p>
             </div>
 
@@ -275,7 +275,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 <div className="text-xs space-y-1">
                   <div><strong>Trigger:</strong> {triggerType}</div>
                   <div><strong>Subject:</strong> "{action.config.subject || '[Empty]'}"</div>
-                  <div><strong>Body:</strong> "{action.config.body?.substring(0, 100) || '[Empty]'}..."</div>
+                  <div><strong>Body:</strong> "{(action.config.body?.substring(0, 100) || '[Empty]') + '...'}"</div>
                   <div><strong>Variables:</strong> {availableVariables.join(', ')}</div>
                 </div>
               </div>
