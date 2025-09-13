@@ -123,6 +123,7 @@ module.exports = (sequelize, DataTypes) => {
     emailSignature: {
       type: DataTypes.JSONB,
       allowNull: true,
+      field: 'email_signature',
       defaultValue: {
         enabled: false,
         layout: 'modern',
