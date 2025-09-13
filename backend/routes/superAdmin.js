@@ -432,7 +432,7 @@ router.put('/users/:id', async (req, res) => {
     }
 
     // Don't allow modifying super admins
-    if (user.is_super_admin && req.user.id !== user.id) {
+    if ((user.isSuperAdmin || user.is_super_admin) && req.user.id !== user.id) {
       return res.status(403).json({ error: 'Cannot modify super admin users' });
     }
 
@@ -453,15 +453,18 @@ router.put('/users/:id', async (req, res) => {
       changes: Object.keys(updateData)
     });
 
+    // Reload user to get updated values
+    await user.reload();
+
     res.json({
       message: 'User updated successfully',
       user: {
         id: user.id,
         email: user.email,
-        isActive: user.is_active,
-        isAdmin: user.is_admin,
-        isLoanOfficer: user.is_loan_officer,
-        isSuperAdmin: user.is_super_admin
+        isActive: user.isActive !== undefined ? user.isActive : user.is_active,
+        isAdmin: user.isAdmin !== undefined ? user.isAdmin : user.is_admin,
+        isLoanOfficer: user.isLoanOfficer !== undefined ? user.isLoanOfficer : user.is_loan_officer,
+        isSuperAdmin: user.isSuperAdmin !== undefined ? user.isSuperAdmin : user.is_super_admin
       }
     });
 
