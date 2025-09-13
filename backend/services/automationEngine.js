@@ -501,6 +501,225 @@ class AutomationEngine {
 
     await pipeline.update({ positionId });
   }
+
+  // Email automation action
+  async sendEmailAction(data, action, userId) {
+    const debugMode = process.env.AUTOMATION_DEBUG === 'true';
+    
+    if (debugMode) {
+      console.log('🔧 [DEBUG] Email action triggered:', {
+        actionType: action.type,
+        triggerData: data,
+        actionConfig: action.config
+      });
+    }
+
+    try {
+      // Get recipient email based on trigger type
+      const recipientEmail = this.extractRecipientEmail(data);
+      
+      if (!recipientEmail) {
+        throw new Error('No recipient email found in trigger data');
+      }
+
+      if (debugMode) {
+        console.log('🔧 [DEBUG] Recipient email extracted:', recipientEmail);
+      }
+
+      // Process email template with variables
+      const processedSubject = this.replaceVariables(action.config.subject || 'Notification', data, debugMode);
+      const processedBody = this.replaceVariables(action.config.body || 'This is an automated message.', data, debugMode);
+
+      if (debugMode) {
+        console.log('🔧 [DEBUG] Email template processed:', {
+          originalSubject: action.config.subject,
+          processedSubject,
+          originalBody: action.config.body,
+          processedBody
+        });
+      }
+
+      // Send email using email service
+      const emailResult = await emailService.sendEmail({
+        userId: userId,
+        contactEmail: recipientEmail,
+        subject: processedSubject,
+        message: processedBody,
+        userName: 'Automation System',
+        userEmail: 'automation@crmkiller.com',
+        userFirstName: 'CRM',
+        enableTracking: true,
+        appendSignature: true
+      });
+
+      if (debugMode) {
+        console.log('🔧 [DEBUG] Email sent successfully:', {
+          recipient: recipientEmail,
+          subject: processedSubject,
+          emailResult: emailResult ? 'Success' : 'No result returned'
+        });
+      }
+
+      return { success: true, recipientEmail, subject: processedSubject };
+
+    } catch (error) {
+      console.error('❌ [ERROR] Email automation failed:', {
+        error: error.message,
+        stack: error.stack,
+        actionConfig: action.config,
+        triggerData: data
+      });
+      
+      throw error;
+    }
+  }
+
+  // Extract recipient email from trigger data
+  extractRecipientEmail(data) {
+    // Try different data structures based on trigger type
+    if (data.contact && data.contact.email) {
+      return data.contact.email;
+    }
+    
+    if (data.candidate && data.candidate.email) {
+      return data.candidate.email;
+    }
+    
+    if (data.pipeline && data.pipeline.Candidate && data.pipeline.Candidate.email) {
+      return data.pipeline.Candidate.email;
+    }
+    
+    if (data.pipeline && data.pipeline.candidate && data.pipeline.candidate.email) {
+      return data.pipeline.candidate.email;
+    }
+    
+    // For deal triggers, get contact email from deal
+    if (data.deal && data.deal.Contact && data.deal.Contact.email) {
+      return data.deal.Contact.email;
+    }
+    
+    return null;
+  }
+
+  // Replace template variables with actual data
+  replaceVariables(template, data, debugMode = false) {
+    if (!template || typeof template !== 'string') {
+      return template;
+    }
+
+    const variables = this.extractVariables(data, debugMode);
+    let processed = template;
+
+    if (debugMode) {
+      console.log('🔧 [DEBUG] Available variables:', variables);
+    }
+
+    // Replace {{variableName}} with actual values
+    processed = processed.replace(/\{\{([^}]+)\}\}/g, (match, variableName) => {
+      const trimmedVar = variableName.trim();
+      
+      // Handle fallback syntax: {{firstName || 'there'}}
+      if (trimmedVar.includes('||')) {
+        const [varName, fallback] = trimmedVar.split('||').map(s => s.trim());
+        const value = this.getNestedValue(variables, varName);
+        const fallbackValue = fallback.replace(/['"]/g, ''); // Remove quotes
+        const result = value || fallbackValue;
+        
+        if (debugMode) {
+          console.log(`🔧 [DEBUG] Variable replacement: ${match} -> "${result}" (fallback: ${fallbackValue})`);
+        }
+        
+        return result;
+      }
+      
+      const value = this.getNestedValue(variables, trimmedVar);
+      
+      if (debugMode) {
+        console.log(`🔧 [DEBUG] Variable replacement: ${match} -> "${value || '[EMPTY]'}"`);
+      }
+      
+      return value || match; // Keep original if no value found
+    });
+
+    return processed;
+  }
+
+  // Extract all available variables from trigger data
+  extractVariables(data, debugMode = false) {
+    const variables = {};
+
+    // Contact data
+    if (data.contact) {
+      Object.keys(data.contact).forEach(key => {
+        variables[key] = data.contact[key];
+        variables[`contact.${key}`] = data.contact[key];
+      });
+    }
+
+    // Deal data
+    if (data.deal) {
+      Object.keys(data.deal).forEach(key => {
+        if (key !== 'Contact') { // Avoid nested contact duplication
+          variables[key] = data.deal[key];
+          variables[`deal.${key}`] = data.deal[key];
+        }
+      });
+    }
+
+    // Candidate/Pipeline data
+    if (data.candidate) {
+      Object.keys(data.candidate).forEach(key => {
+        variables[key] = data.candidate[key];
+        variables[`candidate.${key}`] = data.candidate[key];
+      });
+    }
+
+    if (data.pipeline) {
+      // Handle different pipeline structures
+      if (data.pipeline.Candidate) {
+        Object.keys(data.pipeline.Candidate).forEach(key => {
+          variables[`candidateName`] = `${data.pipeline.Candidate.firstName || ''} ${data.pipeline.Candidate.lastName || ''}`.trim();
+          variables[key] = data.pipeline.Candidate[key];
+          variables[`candidate.${key}`] = data.pipeline.Candidate[key];
+        });
+      }
+      
+      if (data.pipeline.Position) {
+        Object.keys(data.pipeline.Position).forEach(key => {
+          variables[`positionTitle`] = data.pipeline.Position.title;
+          variables[key] = data.pipeline.Position[key];
+          variables[`position.${key}`] = data.pipeline.Position[key];
+        });
+      }
+    }
+
+    // Position data
+    if (data.position) {
+      Object.keys(data.position).forEach(key => {
+        variables[`positionTitle`] = data.position.title;
+        variables[key] = data.position[key];
+        variables[`position.${key}`] = data.position[key];
+      });
+    }
+
+    // Add common computed variables
+    if (data.contact) {
+      variables.fullName = `${data.contact.firstName || ''} ${data.contact.lastName || ''}`.trim();
+    }
+
+    if (debugMode) {
+      console.log('🔧 [DEBUG] Extracted variables from trigger data:', Object.keys(variables));
+    }
+
+    return variables;
+  }
+
+  // Get nested value from object using dot notation
+  getNestedValue(obj, path) {
+    return path.split('.').reduce((current, key) => {
+      return current && current[key] !== undefined ? current[key] : null;
+    }, obj);
+  }
 }
 
 // Create singleton instance

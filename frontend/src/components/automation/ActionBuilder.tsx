@@ -62,6 +62,10 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
   };
 
   const getActionOptions = () => {
+    const emailActions = [
+      { value: 'send_email', label: 'Send Email' },
+    ];
+
     const contactActions = [
       { value: 'update_contact_field', label: 'Update Contact Field' },
       { value: 'add_contact_tag', label: 'Add Tag to Contact' },
@@ -86,13 +90,13 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
     ];
 
     if (triggerType.includes('candidate') || triggerType.includes('position') || triggerType.includes('interview')) {
-      return [...recruitingActions, ...customFieldAction];
+      return [...emailActions, ...recruitingActions, ...customFieldAction];
     } else if (triggerType.includes('contact')) {
-      return [...contactActions, ...customFieldAction];
+      return [...emailActions, ...contactActions, ...customFieldAction];
     } else if (triggerType.includes('deal')) {
-      return [...dealActions, ...contactActions, ...customFieldAction];
+      return [...emailActions, ...dealActions, ...contactActions, ...customFieldAction];
     }
-    return [];
+    return [...emailActions];
   };
 
   const getFieldValue = () => {
@@ -167,8 +171,118 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
     );
   };
 
+  const getVariablesByTrigger = () => {
+    const baseVariables = ['firstName', 'lastName', 'email', 'phone', 'fullName'];
+    
+    if (triggerType.includes('candidate') || triggerType.includes('position') || triggerType.includes('interview')) {
+      return [...baseVariables, 'candidateName', 'positionTitle', 'appliedAt', 'rating', 'status'];
+    } else if (triggerType.includes('deal')) {
+      return [...baseVariables, 'title', 'value', 'expectedCloseDate', 'deal.title', 'deal.value'];
+    } else if (triggerType.includes('contact')) {
+      return [...baseVariables, 'source', 'currentRole', 'currentEmployer'];
+    }
+    
+    return baseVariables;
+  };
+
+  const insertVariable = (variable: string, field: 'subject' | 'body') => {
+    const currentValue = action.config[field] || '';
+    const newValue = currentValue + `{{${variable}}}`;
+    
+    onChange({
+      ...action,
+      config: { ...action.config, [field]: newValue }
+    });
+  };
+
   const renderActionConfig = () => {
     switch (action.type) {
+      case 'send_email':
+        const availableVariables = getVariablesByTrigger();
+        
+        return (
+          <div className="space-y-4">
+            {/* Subject Line */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Subject
+              </label>
+              <input
+                type="text"
+                value={action.config.subject || ''}
+                onChange={(e) => onChange({
+                  ...action,
+                  config: { ...action.config, subject: e.target.value }
+                })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                placeholder="e.g., Welcome {{firstName}}!"
+              />
+            </div>
+
+            {/* Email Body */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Body
+              </label>
+              <textarea
+                value={action.config.body || ''}
+                onChange={(e) => onChange({
+                  ...action,
+                  config: { ...action.config, body: e.target.value }
+                })}
+                rows={6}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                placeholder="Hi {{firstName || 'there'}},&#10;&#10;This is an automated message...&#10;&#10;Best regards,&#10;{{deal.title}} Team"
+              />
+            </div>
+
+            {/* Variable Helper */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Insert Variables
+              </label>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {availableVariables.map(variable => (
+                  <div key={variable} className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => insertVariable(variable, 'subject')}
+                      className="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex-1"
+                      title={`Add {{${variable}}} to subject`}
+                    >
+                      📧 {variable}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => insertVariable(variable, 'body')}
+                      className="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 flex-1"
+                      title={`Add {{${variable}}} to body`}
+                    >
+                      📝 {variable}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Use {{variable || 'fallback'}} for optional values
+              </p>
+            </div>
+
+            {/* Debug Preview */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="bg-gray-50 p-3 rounded-md border">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Debug Preview</h4>
+                <div className="text-xs space-y-1">
+                  <div><strong>Trigger:</strong> {triggerType}</div>
+                  <div><strong>Subject:</strong> "{action.config.subject || '[Empty]'}"</div>
+                  <div><strong>Body:</strong> "{action.config.body?.substring(0, 100) || '[Empty]'}..."</div>
+                  <div><strong>Variables:</strong> {availableVariables.join(', ')}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
       case 'update_contact_field':
         return (
           <div className="grid grid-cols-2 gap-3">
