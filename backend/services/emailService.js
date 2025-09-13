@@ -489,7 +489,7 @@ class EmailService {
     return replacedText;
   }
 
-  async sendEmail({ userId, contactId, subject, message, userName, userEmail, userFirstName, contactEmail, contactData, enableTracking = true }) {
+  async sendEmail({ userId, contactId, subject, message, userName, userEmail, userFirstName, contactEmail, contactData, enableTracking = true, appendSignature = true }) {
     let emailRecord;
     
     try {
@@ -535,10 +535,12 @@ class EmailService {
         textBody = $.text();
       }
 
-      // Append email signature
-      const signatureResult = await this.appendEmailSignature(htmlBody, textBody, userId);
-      htmlBody = signatureResult.html;
-      textBody = signatureResult.text;
+      // Append email signature only if requested
+      if (appendSignature) {
+        const signatureResult = await this.appendEmailSignature(htmlBody, textBody, userId);
+        htmlBody = signatureResult.html;
+        textBody = signatureResult.text;
+      }
 
       // Add simple unsubscribe footer (Postmark will replace the URL)
       const unsubscribeFooterHtml = `

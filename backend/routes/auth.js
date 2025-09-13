@@ -201,7 +201,8 @@ router.post('/forgot-password',
           userName: 'CRM System',
           userEmail: 'noreply@crmkiller.com',
           userFirstName: 'CRM',
-          enableTracking: false
+          enableTracking: false,
+          appendSignature: false
         });
 
         res.json({ 
