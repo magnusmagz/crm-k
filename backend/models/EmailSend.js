@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'user_id',
       references: {
         model: 'users',
         key: 'id'
@@ -16,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     contactId: {
       type: DataTypes.UUID,
       allowNull: true,  // Allow null for system emails (user invites, password resets, etc.)
+      field: 'contact_id',
       references: {
         model: 'contacts',
         key: 'id'
