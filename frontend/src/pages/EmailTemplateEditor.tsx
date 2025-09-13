@@ -149,7 +149,7 @@ const EmailTemplateEditor: React.FC = () => {
         // Save even if design is empty/null
         saveTemplate(design || {}, html || '');
       } catch (error) {
-        debugLog('Error in exportHtml callback', { error: error.message });
+        debugLog('Error in exportHtml callback', { error: error instanceof Error ? error.message : String(error) });
         // Save with empty design if there's an error
         saveTemplate({}, '');
       }
@@ -221,7 +221,7 @@ const EmailTemplateEditor: React.FC = () => {
         }, 1000);
       }
     } catch (error) {
-      debugLog('Save error', { error: error.message });
+      debugLog('Save error', { error: error instanceof Error ? error.message : String(error) });
       toast.error('Failed to save template');
     } finally {
       setSaving(false);
