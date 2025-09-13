@@ -39,6 +39,7 @@ const EmailTemplateEditor: React.FC = () => {
   const [showTestEmail, setShowTestEmail] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [previewHtml, setPreviewHtml] = useState('');
+  const [currentId, setCurrentId] = useState(id);
 
   useEffect(() => {
     if (id && id !== 'new') {
@@ -113,8 +114,8 @@ const EmailTemplateEditor: React.FC = () => {
         html_output: html
       };
 
-      if (id && id !== 'new') {
-        await api.put(`/email-templates/${id}`, templateData);
+      if (currentId && currentId !== 'new') {
+        await api.put(`/email-templates/${currentId}`, templateData);
         toast.success('Template updated');
         // Update local state with the saved design
         setTemplate(prev => ({
@@ -132,8 +133,10 @@ const EmailTemplateEditor: React.FC = () => {
           design_json: design,
           html_output: html
         }));
-        // Use navigate with replace to update URL without causing a hard reload
-        navigate(`/email-templates/${response.data.id}`, { replace: true });
+        // Update currentId so next save will use PUT instead of POST
+        setCurrentId(response.data.id);
+        // Don't navigate - just update the URL in the browser without React Router
+        window.history.replaceState({}, '', `/email-templates/${response.data.id}`);
       }
     } catch (error) {
       toast.error('Failed to save template');
