@@ -68,10 +68,19 @@ const EmailTemplateEditor: React.FC = () => {
   const onReady = () => {
     // Editor is ready
     const unlayer = emailEditorRef.current?.editor;
-    
+
+    // Set default merge tags to prevent undefined errors
+    if (unlayer) {
+      unlayer.setMergeTags({});
+    }
+
     // Load existing design if editing
     if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
-      unlayer.loadDesign(template.design_json);
+      try {
+        unlayer.loadDesign(template.design_json);
+      } catch (error) {
+        console.error('Error loading design:', error);
+      }
     }
   };
 
@@ -90,33 +99,48 @@ const EmailTemplateEditor: React.FC = () => {
     setSaving(true);
 
     try {
-      // Export the design and HTML
-      unlayer.exportHtml((data: any) => {
+      // Try to save the design using saveDesign first (more stable)
+      unlayer.saveDesign((design: any) => {
+        console.log('Design saved:', design);
+
+        // Now export HTML separately
         try {
-          const { design, html } = data;
+          unlayer.exportHtml((data: any) => {
+            const html = data?.html || '';
 
-          // Validate the design object
-          if (!design || typeof design !== 'object') {
-            console.error('Invalid design object:', design);
-            toast.error('Failed to export template design');
-            setSaving(false);
-            return;
-          }
+            // Clean the design object to remove any undefined/null values
+            const cleanDesign = design ? JSON.parse(JSON.stringify(design)) : {};
 
-          // Clean up any undefined values in the design
-          const cleanDesign = JSON.parse(JSON.stringify(design));
-
-          saveTemplate(cleanDesign, html || '');
-        } catch (error) {
-          console.error('Error processing design:', error);
-          toast.error('Failed to save template');
-          setSaving(false);
+            saveTemplate(cleanDesign, html);
+          }, {
+            cleanup: true,
+            mergeTags: {}
+          });
+        } catch (htmlError) {
+          console.error('Error exporting HTML, saving design only:', htmlError);
+          // Save with design only if HTML export fails
+          const cleanDesign = design ? JSON.parse(JSON.stringify(design)) : {};
+          saveTemplate(cleanDesign, '');
         }
       });
     } catch (error) {
-      console.error('Error exporting template:', error);
-      toast.error('Failed to export template');
-      setSaving(false);
+      console.error('Error saving template:', error);
+
+      // Fallback: Try to get just the HTML without the design
+      try {
+        unlayer.exportHtml((data: any) => {
+          const html = data?.html || '';
+          console.log('Fallback: Saving HTML only');
+          saveTemplate({}, html);
+        }, {
+          cleanup: true,
+          mergeTags: {}
+        });
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        toast.error('Failed to save template');
+        setSaving(false);
+      }
     }
   };
 
@@ -147,10 +171,18 @@ const EmailTemplateEditor: React.FC = () => {
     const unlayer = emailEditorRef.current?.editor;
     if (!unlayer) return;
 
-    unlayer.exportHtml((data: any) => {
-      setPreviewHtml(data.html);
-      setShowPreview(true);
-    });
+    try {
+      unlayer.exportHtml((data: any) => {
+        setPreviewHtml(data?.html || '');
+        setShowPreview(true);
+      }, {
+        cleanup: true,
+        mergeTags: {}
+      });
+    } catch (error) {
+      console.error('Error generating preview:', error);
+      toast.error('Failed to generate preview');
+    }
   };
 
   const handleSendTest = async () => {
@@ -162,21 +194,29 @@ const EmailTemplateEditor: React.FC = () => {
     const unlayer = emailEditorRef.current?.editor;
     if (!unlayer) return;
 
-    unlayer.exportHtml(async (data: any) => {
-      try {
-        await api.post('/emails/send-test', {
-          to: testEmail,
-          subject: template.subject || 'Test Email',
-          html: data.html
-        });
+    try {
+      unlayer.exportHtml(async (data: any) => {
+        try {
+          await api.post('/emails/send-test', {
+            to: testEmail,
+            subject: template.subject || 'Test Email',
+            html: data?.html || ''
+          });
 
-        toast.success(`Test email sent to ${testEmail}`);
-        setShowTestEmail(false);
-        setTestEmail('');
-      } catch (error) {
-        toast.error('Failed to send test email');
-      }
-    });
+          toast.success(`Test email sent to ${testEmail}`);
+          setShowTestEmail(false);
+          setTestEmail('');
+        } catch (error) {
+          toast.error('Failed to send test email');
+        }
+      }, {
+        cleanup: true,
+        mergeTags: {}
+      });
+    } catch (error) {
+      console.error('Error exporting for test email:', error);
+      toast.error('Failed to prepare test email');
+    }
   };
 
   if (loading) {
