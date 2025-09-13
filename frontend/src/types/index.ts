@@ -144,7 +144,7 @@ export interface AutomationCondition {
 }
 
 export interface AutomationAction {
-  type: 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage' | 'update_custom_field' |
+  type: 'send_email' | 'update_contact_field' | 'add_contact_tag' | 'update_deal_field' | 'move_deal_to_stage' | 'update_custom_field' |
         'update_candidate_status' | 'schedule_interview' | 'send_offer' | 'update_candidate_rating' |
         'add_candidate_note' | 'move_candidate_to_stage' | 'assign_to_position' | 'send_rejection_email';
   config: any;
