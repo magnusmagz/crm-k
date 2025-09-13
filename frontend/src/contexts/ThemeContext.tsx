@@ -14,10 +14,11 @@ const ThemeContext = createContext<ThemeContextType>({
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
 
-  const primaryColor = profile?.primaryColor || '#1f2937';
-  const crmName = profile?.crmName || 'CRM Killer';
+  // Get organization branding from user.organization, fallback to profile or defaults
+  const primaryColor = user?.organization?.primaryColor || user?.organization?.primary_color || profile?.primaryColor || '#1f2937';
+  const crmName = user?.organization?.crmName || user?.organization?.crm_name || profile?.crmName || 'CRM Killer';
 
   useEffect(() => {
     // Update CSS variables for theme
@@ -82,7 +83,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Update page title
     document.title = crmName;
-  }, [primaryColor, crmName]);
+  }, [primaryColor, crmName, user]);
 
   return (
     <ThemeContext.Provider value={{ primaryColor, crmName }}>
