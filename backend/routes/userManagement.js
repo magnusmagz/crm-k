@@ -254,7 +254,9 @@ router.put('/:id',
         userId: id,
         profile,
         userUpdates,
-        fullBody: req.body
+        fullBody: req.body,
+        isAdmin: userUpdates.isAdmin,
+        isLoanOfficer: userUpdates.isLoanOfficer
       });
 
       // Get admin's organization
@@ -293,7 +295,17 @@ router.put('/:id',
         }
       }
       
+      console.log('Before update - user roles:', {
+        isAdmin: user.isAdmin,
+        isLoanOfficer: user.isLoanOfficer
+      });
+      
       await user.update(userUpdates);
+      
+      console.log('After update - user roles:', {
+        isAdmin: user.isAdmin,
+        isLoanOfficer: user.isLoanOfficer
+      });
 
       // Update profile if any profile fields are provided
       if (profile && (

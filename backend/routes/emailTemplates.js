@@ -17,8 +17,8 @@ router.get('/', authMiddleware, async (req, res) => {
         created_by,
         created_at,
         updated_at
-      FROM email_templates 
-      WHERE "organization_id" = :orgId
+      FROM email_templates
+      WHERE organization_id = :orgId
       ORDER BY created_at DESC`,
       {
         replacements: { orgId: req.user.organizationId },
@@ -37,8 +37,8 @@ router.get('/', authMiddleware, async (req, res) => {
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const [template] = await sequelize.query(
-      `SELECT * FROM email_templates 
-      WHERE id = :id AND "organization_id" = :orgId`,
+      `SELECT * FROM email_templates
+      WHERE id = :id AND organization_id = :orgId`,
       {
         replacements: { 
           id: req.params.id,
@@ -71,8 +71,8 @@ router.post('/', authMiddleware, async (req, res) => {
     const templateId = uuidv4();
     
     await sequelize.query(
-      `INSERT INTO email_templates 
-      (id, "organization_id", name, subject, design_json, html_output, category, created_by, updated_by)
+      `INSERT INTO email_templates
+      (id, organization_id, name, subject, design_json, html_output, category, created_by, updated_by)
       VALUES (:id, :orgId, :name, :subject, :design_json, :html_output, :category, :userId, :userId)`,
       {
         replacements: {
@@ -110,8 +110,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
     
     // Verify template belongs to organization
     const [existing] = await sequelize.query(
-      `SELECT id FROM email_templates 
-      WHERE id = :id AND "organization_id" = :orgId`,
+      `SELECT id FROM email_templates
+      WHERE id = :id AND organization_id = :orgId`,
       {
         replacements: { 
           id: req.params.id,
@@ -204,8 +204,8 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
     
     const result = await sequelize.query(
-      `DELETE FROM email_templates 
-      WHERE id = :id AND "organization_id" = :orgId`,
+      `DELETE FROM email_templates
+      WHERE id = :id AND organization_id = :orgId`,
       {
         replacements: { 
           id: req.params.id,
@@ -225,8 +225,8 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 router.post('/:id/duplicate', authMiddleware, async (req, res) => {
   try {
     const [original] = await sequelize.query(
-      `SELECT * FROM email_templates 
-      WHERE id = :id AND "organization_id" = :orgId`,
+      `SELECT * FROM email_templates
+      WHERE id = :id AND organization_id = :orgId`,
       {
         replacements: { 
           id: req.params.id,
@@ -244,8 +244,8 @@ router.post('/:id/duplicate', authMiddleware, async (req, res) => {
     const newName = `${original.name} (Copy)`;
     
     await sequelize.query(
-      `INSERT INTO email_templates 
-      (id, "organization_id", name, subject, design_json, html_output, category, created_by, updated_by)
+      `INSERT INTO email_templates
+      (id, organization_id, name, subject, design_json, html_output, category, created_by, updated_by)
       VALUES (:id, :orgId, :name, :subject, :design_json, :html_output, :category, :userId, :userId)`,
       {
         replacements: {
