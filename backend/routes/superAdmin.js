@@ -603,11 +603,13 @@ router.get('/dashboard', async (req, res) => {
     // Format organizations with user count for frontend
     const recentOrganizations = await Promise.all(recentOrgs.map(async (org) => {
       const userCount = await User.count({ where: { organization_id: org.id } });
+      // Get the raw data values
+      const orgData = org.dataValues || org;
       return {
-        id: org.id,
-        name: org.name,
-        crmName: org.crm_name || org.crmName || org.name,
-        isActive: org.is_active !== undefined ? org.is_active : org.isActive,
+        id: orgData.id,
+        name: orgData.name,
+        crmName: orgData.crm_name || orgData.crmName || orgData.name,
+        isActive: orgData.is_active === true || orgData.is_active === 't' || orgData.isActive === true,
         userCount: userCount
       };
     }));
