@@ -17,10 +17,19 @@ class EmailService {
   }
 
   async checkSuppression(email) {
-    const suppression = await EmailSuppression.findOne({
-      where: { email: email.toLowerCase() }
-    });
-    return suppression !== null;
+    try {
+      const suppression = await EmailSuppression.findOne({
+        where: { email: email.toLowerCase() }
+      });
+      return suppression !== null;
+    } catch (error) {
+      // In development, if email_suppressions table doesn't exist, assume not suppressed
+      if (error.message.includes('relation') && error.message.includes('does not exist')) {
+        console.log('⚠️  Email suppressions table not found - assuming email not suppressed for development');
+        return false;
+      }
+      throw error;
+    }
   }
 
   async wrapLinksForTracking(html, emailSendId, trackingId) {
