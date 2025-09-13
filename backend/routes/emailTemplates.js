@@ -7,15 +7,20 @@ const { v4: uuidv4 } = require('uuid');
 // Get all templates for organization
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    console.log('User object:', req.user);
+    console.log('User dataValues:', req.user?.dataValues);
     console.log('User organizationId:', req.user?.organizationId);
     console.log('User organization_id:', req.user?.organization_id);
+    console.log('User dataValues.organizationId:', req.user?.dataValues?.organizationId);
+    console.log('User dataValues.organization_id:', req.user?.dataValues?.organization_id);
 
-    // Try to get organizationId from different possible field names
-    const orgId = req.user?.organizationId || req.user?.organization_id;
+    // Try to get organizationId from different possible field names and locations
+    const orgId = req.user?.organizationId ||
+                  req.user?.organization_id ||
+                  req.user?.dataValues?.organizationId ||
+                  req.user?.dataValues?.organization_id;
 
     if (!orgId) {
-      console.error('No organization ID found on user object');
+      console.error('No organization ID found on user object. Full user:', JSON.stringify(req.user?.dataValues || req.user));
       return res.status(400).json({ error: 'Organization ID not found' });
     }
 
@@ -78,13 +83,14 @@ router.get('/:id', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { name, subject, design_json, html_output, category } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Template name is required' });
     }
-    
+
     const templateId = uuidv4();
-    
+    const orgId = req.user?.organizationId || req.user?.organization_id;
+
     await sequelize.query(
       `INSERT INTO email_templates
       (id, organization_id, name, subject, design_json, html_output, category, created_by, updated_by)
@@ -92,7 +98,7 @@ router.post('/', authMiddleware, async (req, res) => {
       {
         replacements: {
           id: templateId,
-          orgId: req.user.organizationId,
+          orgId,
           name,
           subject: subject || '',
           design_json: JSON.stringify(design_json || {}),
@@ -122,15 +128,16 @@ router.post('/', authMiddleware, async (req, res) => {
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { name, subject, design_json, html_output, category, is_active } = req.body;
-    
+    const orgId = req.user?.organizationId || req.user?.organization_id;
+
     // Verify template belongs to organization
     const [existing] = await sequelize.query(
       `SELECT id FROM email_templates
       WHERE id = :id AND organization_id = :orgId`,
       {
-        replacements: { 
+        replacements: {
           id: req.params.id,
-          orgId: req.user.organizationId 
+          orgId 
         },
         type: sequelize.QueryTypes.SELECT
       }
@@ -222,9 +229,9 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       `DELETE FROM email_templates
       WHERE id = :id AND organization_id = :orgId`,
       {
-        replacements: { 
+        replacements: {
           id: req.params.id,
-          orgId: req.user.organizationId 
+          orgId: req.user?.organizationId || req.user?.organization_id 
         }
       }
     );
@@ -239,13 +246,15 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 // Duplicate template
 router.post('/:id/duplicate', authMiddleware, async (req, res) => {
   try {
+    const orgId = req.user?.organizationId || req.user?.organization_id;
+
     const [original] = await sequelize.query(
       `SELECT * FROM email_templates
       WHERE id = :id AND organization_id = :orgId`,
       {
-        replacements: { 
+        replacements: {
           id: req.params.id,
-          orgId: req.user.organizationId 
+          orgId 
         },
         type: sequelize.QueryTypes.SELECT
       }
@@ -265,7 +274,7 @@ router.post('/:id/duplicate', authMiddleware, async (req, res) => {
       {
         replacements: {
           id: newId,
-          orgId: req.user.organizationId,
+          orgId,
           name: newName,
           subject: original.subject,
           design_json: original.design_json,

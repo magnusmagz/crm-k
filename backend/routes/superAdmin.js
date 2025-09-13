@@ -38,9 +38,9 @@ router.get('/organizations', async (req, res) => {
       where.name = { [require('sequelize').Op.iLike]: `%${search}%` };
     }
     if (status === 'active') {
-      where.isActive = true;
+      where.is_active = true;
     } else if (status === 'inactive') {
-      where.isActive = false;
+      where.is_active = false;
     }
 
     // Get organizations with user and contact counts
@@ -61,8 +61,8 @@ router.get('/organizations', async (req, res) => {
         }
       ],
       attributes: [
-        'id', 'name', 'crmName', 'primaryColor', 'isActive',
-        'createdBy', 'contactEmail', 'website', 
+        'id', 'name', 'crm_name', 'primary_color', 'is_active',
+        'created_by', 'contact_email', 'website', 
         [require('sequelize').fn('COUNT', require('sequelize').literal('DISTINCT users.id')), 'userCount'],
         [require('sequelize').fn('COUNT', require('sequelize').literal('DISTINCT contacts.id')), 'contactCount']
       ],
@@ -101,14 +101,14 @@ router.get('/organizations/:id', async (req, res) => {
         {
           model: User,
           as: 'users',
-          attributes: ['id', 'email', 'isAdmin', 'isLoanOfficer', 'isActive', 'lastLogin'],
+          attributes: ['id', 'email', 'is_admin', 'is_loan_officer', 'is_active', 'last_login'],
           limit: 50,
           order: [['email', 'ASC']]
         },
         {
           model: Contact,
           as: 'contacts',
-          attributes: ['id', 'firstName', 'lastName', 'email', 'company', 'createdAt'],
+          attributes: ['id', 'first_name', 'last_name', 'email', 'company', 'created_at'],
           limit: 20,
           order: [['createdAt', 'DESC']]
         }
@@ -326,16 +326,16 @@ router.get('/users', async (req, res) => {
       where.organizationId = organizationId;
     }
     if (role === 'admin') {
-      where.isAdmin = true;
+      where.is_admin = true;
     } else if (role === 'super_admin') {
-      where.isSuperAdmin = true;
+      where.is_super_admin = true;
     } else if (role === 'loan_officer') {
-      where.isLoanOfficer = true;
+      where.is_loan_officer = true;
     }
     if (status === 'active') {
-      where.isActive = true;
+      where.is_active = true;
     } else if (status === 'inactive') {
-      where.isActive = false;
+      where.is_active = false;
     }
 
     const users = await User.findAndCountAll({
@@ -344,32 +344,130 @@ router.get('/users', async (req, res) => {
         {
           model: Organization,
           as: 'organization',
-          attributes: ['id', 'name', 'crmName']
+          attributes: ['id', 'name', 'crmName', 'primaryColor', 'isActive']
+        },
+        {
+          model: require('../models').UserProfile,
+          as: 'profile',
+          attributes: ['firstName', 'lastName']
         }
       ],
-      attributes: ['id', 'email', 'isAdmin', 'isLoanOfficer', 'isSuperAdmin', 'isActive', 'lastLogin', 'organizationId'],
+      attributes: ['id', 'email', 'is_admin', 'is_loan_officer', 'is_super_admin', 'is_active', 'last_login', 'organization_id', 'created_at'],
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [[sortBy, sortOrder.toUpperCase()]]
     });
+
+    // Calculate stats for all users (not just current page)
+    const statsWhere = {};
+    if (organizationId) {
+      statsWhere.organization_id = organizationId;
+    }
+
+    const [totalUsers, activeUsers, adminUsers, superAdminUsers] = await Promise.all([
+      User.count({ where: statsWhere }),
+      User.count({ where: { ...statsWhere, is_active: true } }),
+      User.count({ where: { ...statsWhere, is_admin: true } }),
+      User.count({ where: { ...statsWhere, is_super_admin: true } })
+    ]);
+
+    // Format users to include firstName and lastName from profile
+    const formattedUsers = users.rows.map(user => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.profile?.first_name || '',
+      lastName: user.profile?.last_name || '',
+      isAdmin: user.is_admin,
+      isLoanOfficer: user.is_loan_officer,
+      isSuperAdmin: user.is_super_admin,
+      isActive: user.is_active,
+      lastLogin: user.last_login,
+      organizationId: user.organization_id,
+      createdAt: user.created_at,
+      organization: user.organization
+    }));
 
     req.superAdmin?.logAction('LIST_USERS', {
       search, organizationId, role, status, page, limit, total: users.count
     });
 
     res.json({
-      users: users.rows,
+      users: formattedUsers,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total: users.count,
         pages: Math.ceil(users.count / limit)
+      },
+      stats: {
+        total: totalUsers,
+        active: activeUsers,
+        inactive: totalUsers - activeUsers,
+        admins: adminUsers,
+        superAdmins: superAdminUsers
       }
     });
 
   } catch (error) {
     console.error('List users error:', error);
     res.status(500).json({ error: 'Failed to retrieve users' });
+  }
+});
+
+// PUT /api/super-admin/users/:id - Update user
+router.put('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id, {
+      include: [
+        {
+          model: Organization,
+          as: 'organization',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Don't allow modifying super admins
+    if (user.is_super_admin && req.user.id !== user.id) {
+      return res.status(403).json({ error: 'Cannot modify super admin users' });
+    }
+
+    const { isActive, isAdmin, isLoanOfficer, requirePasswordChange } = req.body;
+
+    const updateData = {};
+    if (isActive !== undefined) updateData.is_active = isActive;
+    if (isAdmin !== undefined) updateData.is_admin = isAdmin;
+    if (isLoanOfficer !== undefined) updateData.is_loan_officer = isLoanOfficer;
+    if (requirePasswordChange !== undefined) updateData.require_password_change = requirePasswordChange;
+
+    await user.update(updateData);
+
+    req.superAdmin?.logAction('UPDATE_USER', {
+      userId: req.params.id,
+      userEmail: user.email,
+      organizationName: user.organization?.name,
+      changes: Object.keys(updateData)
+    });
+
+    res.json({
+      message: 'User updated successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        isActive: user.is_active,
+        isAdmin: user.is_admin,
+        isLoanOfficer: user.is_loan_officer,
+        isSuperAdmin: user.is_super_admin
+      }
+    });
+
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Failed to update user' });
   }
 });
 
@@ -393,7 +491,7 @@ router.get('/users/search', async (req, res) => {
           attributes: ['name']
         }
       ],
-      attributes: ['id', 'email', 'isAdmin', 'isSuperAdmin'],
+      attributes: ['id', 'email', 'is_admin', 'is_super_admin'],
       limit: parseInt(limit),
       order: [['email', 'ASC']]
     });

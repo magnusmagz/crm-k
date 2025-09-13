@@ -122,8 +122,28 @@ const UserManagement: React.FC = () => {
 
   const handleUpdateUser = async (userId: string, updates: Partial<User>) => {
     try {
-      console.log('Updating user with data:', updates);
-      await api.put(`/user-management/${userId}`, updates);
+      // Extract only the fields that can be updated
+      const updateData: any = {
+        email: updates.email,
+        isAdmin: updates.isAdmin,
+        isLoanOfficer: updates.isLoanOfficer,
+        licensedStates: updates.licensedStates,
+        isActive: updates.isActive
+      };
+      
+      // Add profile fields if they exist
+      if (updates.profile) {
+        updateData.profile = {
+          firstName: updates.profile.firstName || '',
+          lastName: updates.profile.lastName || '',
+          phone: updates.profile.phone || '',
+          nmlsId: updates.profile.nmlsId || '',
+          stateLicenses: updates.profile.stateLicenses || []
+        };
+      }
+      
+      console.log('Updating user with data:', updateData);
+      await api.put(`/user-management/${userId}`, updateData);
       toast.success('User updated successfully');
       fetchUsers();
       setShowEditModal(false);
