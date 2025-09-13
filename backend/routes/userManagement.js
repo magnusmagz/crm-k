@@ -467,7 +467,8 @@ router.post('/:id/reset-password',
 
       // Send password reset email
       try {
-        await emailService.sendEmail({
+        console.log('Attempting to send password reset email to:', user.email);
+        const emailResult = await emailService.sendEmail({
           userId: req.userId,
           contactEmail: user.email,
           subject: 'Your Password Has Been Reset',
@@ -491,8 +492,10 @@ router.post('/:id/reset-password',
           userFirstName: 'CRM',
           enableTracking: false
         });
+        console.log('Email send result:', emailResult);
       } catch (emailError) {
         console.error('Failed to send password reset email:', emailError);
+        console.error('Full error details:', JSON.stringify(emailError, null, 2));
         // Return error to user so they know email didn't send
         return res.status(500).json({ 
           error: 'Password reset but email could not be sent. Please contact support.',

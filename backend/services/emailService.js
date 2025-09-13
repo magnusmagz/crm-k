@@ -605,11 +605,14 @@ Unsubscribe: {{{ pm:unsubscribe_url }}}
         To: emailData.To,
         Subject: emailData.Subject,
         ReplyTo: emailData.ReplyTo,
-        emailDomain: this.emailDomain
+        emailDomain: this.emailDomain,
+        apiKey: process.env.POSTMARK_API_KEY ? 'Set (hidden)' : 'NOT SET - USING TEST KEY'
       });
 
       // Send email via Postmark
+      console.log('Calling Postmark API...');
       const response = await this.client.sendEmail(emailData);
+      console.log('Postmark response:', response);
 
       // Update email record with Postmark message ID
       await emailRecord.update({
