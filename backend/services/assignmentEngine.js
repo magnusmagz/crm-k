@@ -13,8 +13,8 @@ class AssignmentEngine {
       // Get active rule for this organization
       const [rule] = await sequelize.query(`
         SELECT * FROM assignment_rules 
-        WHERE "organization_id" = :orgId 
-        AND "is_active" = true
+        WHERE organization_id = :orgId 
+        AND is_active = true
         ORDER BY priority DESC
         LIMIT 1
       `, {
@@ -110,20 +110,20 @@ class AssignmentEngine {
       // Get officers in queue ordered by assignment count and last assignment time
       const officers = await sequelize.query(`
         SELECT 
-          u.id, u.email, u."is_loan_officer", 
-          COALESCE(u."licensed_states", ARRAY[]::VARCHAR[]) as "licensed_states",
+          u.id, u.email, u.is_loan_officer, 
+          COALESCE(u.licensed_states, ARRAY[]::VARCHAR[]) as "licensed_states",
           p.state_licenses as "stateLicenses",
-          q."assignmentCount", q."lastAssignedAt"
+          q.assignment_count as "assignmentCount", q.last_assigned_at as "lastAssignedAt"
         FROM round_robin_queues q
-        JOIN users u ON q."userId" = u.id
+        JOIN users u ON q.user_id = u.id
         LEFT JOIN user_profiles p ON u.id = p.user_id
-        WHERE q."ruleId" = :ruleId
-        AND q."is_active" = true
-        AND u."is_loan_officer" = true
+        WHERE q.rule_id = :ruleId
+        AND q.is_active = true
+        AND u.is_loan_officer = true
         ${stateCondition}
         ORDER BY 
-          q."assignmentCount" ASC,
-          q."lastAssignedAt" ASC NULLS FIRST
+          q.assignment_count ASC,
+          q.last_assigned_at ASC NULLS FIRST
         LIMIT 1
       `, {
         type: sequelize.QueryTypes.SELECT,
@@ -140,10 +140,10 @@ class AssignmentEngine {
       await sequelize.query(`
         UPDATE round_robin_queues
         SET 
-          "assignmentCount" = "assignmentCount" + 1,
-          "lastAssignedAt" = NOW(),
-          "updatedAt" = NOW()
-        WHERE "ruleId" = :ruleId AND "userId" = :userId
+          assignment_count = assignment_count + 1,
+          last_assigned_at = NOW(),
+          updated_at = NOW()
+        WHERE rule_id = :ruleId AND user_id = :userId
       `, {
         replacements: {
           ruleId,
@@ -173,8 +173,8 @@ class AssignmentEngine {
       const assignmentId = uuidv4();
       await sequelize.query(`
         INSERT INTO assignments (
-          id, "contactId", "assignedTo", "assignedBy",
-          "assignedAt", status, notes, "createdAt", "updatedAt"
+          id, contact_id, assigned_to, assigned_by,
+          assigned_at, status, notes, created_at, updated_at
         )
         VALUES (
           :id, :contactId, :assignedTo, :assignedBy,
@@ -227,8 +227,8 @@ class AssignmentEngine {
       const assignmentId = uuidv4();
       await sequelize.query(`
         INSERT INTO assignments (
-          id, "contactId", "assignedTo", "assignedBy",
-          "assignedAt", status, notes, "createdAt", "updatedAt"
+          id, contact_id, assigned_to, assigned_by,
+          assigned_at, status, notes, created_at, updated_at
         )
         VALUES (
           :id, :contactId, :assignedTo, :assignedBy,
@@ -263,19 +263,19 @@ class AssignmentEngine {
       const stats = await sequelize.query(`
         SELECT 
           COUNT(DISTINCT a.id) as total_assignments,
-          COUNT(DISTINCT CASE WHEN DATE(a."assignedAt") = CURRENT_DATE THEN a.id END) as today_assignments,
+          COUNT(DISTINCT CASE WHEN DATE(a.assigned_at) = CURRENT_DATE THEN a.id END) as today_assignments,
           COUNT(DISTINCT CASE WHEN a.status = 'pending' THEN a.id END) as pending_assignments,
           COUNT(DISTINCT CASE WHEN a.status = 'contacted' THEN a.id END) as contacted_assignments,
           COUNT(DISTINCT u.id) as active_officers,
           AVG(CASE 
             WHEN a.status = 'contacted' 
-            THEN EXTRACT(EPOCH FROM (a."updatedAt" - a."assignedAt"))/60 
+            THEN EXTRACT(EPOCH FROM (a.updated_at - a.assigned_at))/60 
           END) as avg_response_time_minutes
         FROM assignments a
-        JOIN users u ON a."assignedTo" = u.id
-        JOIN contacts c ON a."contactId" = c.id
-        WHERE c."organization_id" = :orgId
-        AND a."assignedAt" >= CURRENT_DATE - INTERVAL '30 days'
+        JOIN users u ON a.assigned_to = u.id
+        JOIN contacts c ON a.contact_id = c.id
+        WHERE c.organization_id = :orgId
+        AND a.assigned_at >= CURRENT_DATE - INTERVAL '30 days'
       `, {
         type: sequelize.QueryTypes.SELECT,
         replacements: { orgId: organizationId }
@@ -290,12 +290,12 @@ class AssignmentEngine {
           COALESCE(p.last_name, '') as "lastName",
           COUNT(a.id) as "total_assigned",
           COUNT(CASE WHEN a.status = 'contacted' THEN 1 END) as "contacted",
-          COUNT(CASE WHEN DATE(a."assignedAt") = CURRENT_DATE THEN 1 END) as "assigned_today"
+          COUNT(CASE WHEN DATE(a.assigned_at) = CURRENT_DATE THEN 1 END) as "assigned_today"
         FROM users u
         LEFT JOIN user_profiles p ON u.id = p.user_id
-        LEFT JOIN assignments a ON u.id = a."assignedTo"
-        WHERE u."organization_id" = :orgId
-        AND u."is_loan_officer" = true
+        LEFT JOIN assignments a ON u.id = a.assigned_to
+        WHERE u.organization_id = :orgId
+        AND u.is_loan_officer = true
         GROUP BY u.id, u.email, p.first_name, p.last_name
         ORDER BY "total_assigned" DESC
       `, {
@@ -357,10 +357,10 @@ class AssignmentEngine {
       await sequelize.query(`
         UPDATE round_robin_queues
         SET 
-          "assignmentCount" = 0,
-          "lastAssignedAt" = NULL,
-          "updatedAt" = NOW()
-        WHERE "ruleId" = :ruleId
+          assignment_count = 0,
+          last_assigned_at = NULL,
+          updated_at = NOW()
+        WHERE rule_id = :ruleId
       `, {
         replacements: { ruleId }
       });
