@@ -193,11 +193,12 @@ const EmailTemplateEditor: React.FC = () => {
         toast.success('Template updated');
         // Update local state with the saved design
         debugLog('Updating local template state after save');
-        setTemplate(prev => ({
-          ...prev,
-          design_json: design,
-          html_output: html
-        }));
+        // TEMPORARILY COMMENT OUT STATE UPDATE TO TEST IF THIS CAUSES EDITOR CLEARING
+        // setTemplate(prev => ({
+        //   ...prev,
+        //   design_json: design,
+        //   html_output: html
+        // }));
         debugLog('Template updated successfully');
 
         // Check editor state after save
