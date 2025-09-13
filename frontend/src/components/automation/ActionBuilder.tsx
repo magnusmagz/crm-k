@@ -255,7 +255,7 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                     <button
                       type="button"
                       onClick={() => insertVariable(variable, 'body')}
-                      className="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 flex-1"
+                      className="px-2 py-1 bg-gray-100 text-primary-dark rounded hover:bg-gray-200 flex-1"
                       title={`Add {{${variable}}} to body`}
                     >
                       📝 {variable}
