@@ -69,18 +69,9 @@ const EmailTemplateEditor: React.FC = () => {
     // Editor is ready
     const unlayer = emailEditorRef.current?.editor;
 
-    // Set default merge tags to prevent undefined errors
-    if (unlayer) {
-      unlayer.setMergeTags({});
-    }
-
     // Load existing design if editing
     if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
-      try {
-        unlayer.loadDesign(template.design_json);
-      } catch (error) {
-        console.error('Error loading design:', error);
-      }
+      unlayer.loadDesign(template.design_json);
     }
   };
 
@@ -98,50 +89,20 @@ const EmailTemplateEditor: React.FC = () => {
 
     setSaving(true);
 
-    try {
-      // Try to save the design using saveDesign first (more stable)
-      unlayer.saveDesign((design: any) => {
-        console.log('Design saved:', design);
-
-        // Now export HTML separately
-        try {
-          unlayer.exportHtml((data: any) => {
-            const html = data?.html || '';
-
-            // Clean the design object to remove any undefined/null values
-            const cleanDesign = design ? JSON.parse(JSON.stringify(design)) : {};
-
-            saveTemplate(cleanDesign, html);
-          }, {
-            cleanup: true,
-            mergeTags: {}
-          });
-        } catch (htmlError) {
-          console.error('Error exporting HTML, saving design only:', htmlError);
-          // Save with design only if HTML export fails
-          const cleanDesign = design ? JSON.parse(JSON.stringify(design)) : {};
-          saveTemplate(cleanDesign, '');
-        }
-      });
-    } catch (error) {
-      console.error('Error saving template:', error);
-
-      // Fallback: Try to get just the HTML without the design
+    // Simple approach - just use exportHtml without any options
+    unlayer.exportHtml((data: any) => {
       try {
-        unlayer.exportHtml((data: any) => {
-          const html = data?.html || '';
-          console.log('Fallback: Saving HTML only');
-          saveTemplate({}, html);
-        }, {
-          cleanup: true,
-          mergeTags: {}
-        });
-      } catch (fallbackError) {
-        console.error('Fallback also failed:', fallbackError);
-        toast.error('Failed to save template');
-        setSaving(false);
+        const { design, html } = data || {};
+        console.log('Export data:', data);
+
+        // Save even if design is empty/null
+        saveTemplate(design || {}, html || '');
+      } catch (error) {
+        console.error('Error in exportHtml callback:', error);
+        // Save with empty design if there's an error
+        saveTemplate({}, '');
       }
-    }
+    });
   };
 
   const saveTemplate = async (design: any, html: string) => {
@@ -171,18 +132,10 @@ const EmailTemplateEditor: React.FC = () => {
     const unlayer = emailEditorRef.current?.editor;
     if (!unlayer) return;
 
-    try {
-      unlayer.exportHtml((data: any) => {
-        setPreviewHtml(data?.html || '');
-        setShowPreview(true);
-      }, {
-        cleanup: true,
-        mergeTags: {}
-      });
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      toast.error('Failed to generate preview');
-    }
+    unlayer.exportHtml((data: any) => {
+      setPreviewHtml(data?.html || '');
+      setShowPreview(true);
+    });
   };
 
   const handleSendTest = async () => {
@@ -194,29 +147,21 @@ const EmailTemplateEditor: React.FC = () => {
     const unlayer = emailEditorRef.current?.editor;
     if (!unlayer) return;
 
-    try {
-      unlayer.exportHtml(async (data: any) => {
-        try {
-          await api.post('/emails/send-test', {
-            to: testEmail,
-            subject: template.subject || 'Test Email',
-            html: data?.html || ''
-          });
+    unlayer.exportHtml(async (data: any) => {
+      try {
+        await api.post('/emails/send-test', {
+          to: testEmail,
+          subject: template.subject || 'Test Email',
+          html: data?.html || ''
+        });
 
-          toast.success(`Test email sent to ${testEmail}`);
-          setShowTestEmail(false);
-          setTestEmail('');
-        } catch (error) {
-          toast.error('Failed to send test email');
-        }
-      }, {
-        cleanup: true,
-        mergeTags: {}
-      });
-    } catch (error) {
-      console.error('Error exporting for test email:', error);
-      toast.error('Failed to prepare test email');
-    }
+        toast.success(`Test email sent to ${testEmail}`);
+        setShowTestEmail(false);
+        setTestEmail('');
+      } catch (error) {
+        toast.error('Failed to send test email');
+      }
+    });
   };
 
   if (loading) {
@@ -303,33 +248,6 @@ const EmailTemplateEditor: React.FC = () => {
           ref={emailEditorRef}
           onReady={onReady}
           minHeight="100%"
-          options={{
-            displayMode: 'email',
-            projectId: null, // Changed from undefined to null
-            features: {
-              colorPicker: {
-                presets: ['#6366f1', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6']
-              },
-              undoRedo: {
-                enabled: true
-              }
-            },
-            tools: {
-              form: {
-                enabled: false
-              }
-            },
-            appearance: {
-              theme: 'modern_light',
-              panels: {
-                tools: {
-                  dock: 'left'
-                }
-              }
-            },
-            mergeTags: {},
-            customCSS: []
-          }}
         />
       </div>
 
