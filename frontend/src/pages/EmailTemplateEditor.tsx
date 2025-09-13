@@ -87,6 +87,13 @@ const EmailTemplateEditor: React.FC = () => {
       designKeys: template.design_json ? Object.keys(template.design_json) : [],
       htmlLength: template.html_output?.length || 0
     });
+
+    // If the template has a design and the editor is ready, load it
+    const unlayer = emailEditorRef.current?.editor;
+    if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
+      debugLog('Template updated with design - loading into editor');
+      unlayer.loadDesign(template.design_json);
+    }
   }, [template]);
 
   const fetchTemplate = async () => {
@@ -100,12 +107,9 @@ const EmailTemplateEditor: React.FC = () => {
       });
       setTemplate(response.data);
 
-      // Load the design into the editor when ready
-      const unlayer = emailEditorRef.current?.editor;
-      if (unlayer && response.data.design_json) {
-        debugLog('Loading design from API into editor');
-        unlayer.loadDesign(response.data.design_json);
-      }
+      // Load the design into the editor when ready - but the editor might not be ready yet
+      // The actual loading happens in onReady() callback
+      debugLog('Template data set, editor will load design when ready');
     } catch (error) {
       debugLog('Error fetching template', { error: error instanceof Error ? error.message : String(error) });
       toast.error('Failed to load template');
@@ -121,13 +125,24 @@ const EmailTemplateEditor: React.FC = () => {
     // Editor is ready
     const unlayer = emailEditorRef.current?.editor;
     debugLog('Editor reference check', { exists: !!unlayer });
+    debugLog('Template state at editor ready', {
+      hasDesign: !!template.design_json,
+      designKeys: template.design_json ? Object.keys(template.design_json) : [],
+      templateName: template.name
+    });
 
     // Load existing design if editing
     if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
-      debugLog('Loading existing design into editor');
+      debugLog('Loading existing design into editor', {
+        designKeys: Object.keys(template.design_json)
+      });
       unlayer.loadDesign(template.design_json);
     } else {
-      debugLog('No existing design to load');
+      debugLog('No existing design to load', {
+        hasUnlayer: !!unlayer,
+        hasDesignJson: !!template.design_json,
+        designJsonKeys: template.design_json ? Object.keys(template.design_json).length : 0
+      });
     }
   };
 
@@ -193,12 +208,13 @@ const EmailTemplateEditor: React.FC = () => {
         toast.success('Template updated');
         // Update local state with the saved design
         debugLog('Updating local template state after save');
-        // TEMPORARILY COMMENT OUT STATE UPDATE TO TEST IF THIS CAUSES EDITOR CLEARING
-        // setTemplate(prev => ({
-        //   ...prev,
-        //   design_json: design,
-        //   html_output: html
-        // }));
+        // Update the React state with the saved design so it's available when re-editing
+        // This doesn't affect the current Unlayer editor session since it's already loaded
+        setTemplate(prev => ({
+          ...prev,
+          design_json: design,
+          html_output: html
+        }));
         debugLog('Template updated successfully');
 
         // Check editor state after save
