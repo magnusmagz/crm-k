@@ -587,24 +587,30 @@ router.get('/dashboard', async (req, res) => {
       totalContacts
     ] = await Promise.all([
       Organization.count(),
-      Organization.count({ where: { isActive: true } }),
+      Organization.count({ where: { is_active: true } }),
       User.count(),
-      User.count({ where: { isActive: true } }),
+      User.count({ where: { is_active: true } }),
       Contact.count()
     ]);
 
-    // Get recent organizations (top 5) - simplified without user count for now
-    const recentOrganizations = await Organization.findAll({
+    // Get recent organizations (top 5) with user count
+    const recentOrgs = await Organization.findAll({
       attributes: ['id', 'name', 'crm_name', 'is_active'],
       order: [['name', 'ASC']],
       limit: 5
     });
-    
-    // Add user count manually for each organization
-    for (const org of recentOrganizations) {
-      const userCount = await User.count({ where: { organizationId: org.id } });
-      org.dataValues.user_count = userCount;
-    }
+
+    // Format organizations with user count for frontend
+    const recentOrganizations = await Promise.all(recentOrgs.map(async (org) => {
+      const userCount = await User.count({ where: { organization_id: org.id } });
+      return {
+        id: org.id,
+        name: org.name,
+        crmName: org.crm_name || org.crmName || org.name,
+        isActive: org.is_active !== undefined ? org.is_active : org.isActive,
+        userCount: userCount
+      };
+    }));
 
     req.superAdmin?.logAction('VIEW_DASHBOARD');
 
