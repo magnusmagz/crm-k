@@ -1,4 +1,5 @@
 const { Automation, AutomationLog, Contact, Deal, Stage, RecruitingPipeline, Position } = require('../models');
+const emailService = require('./emailService');
 const { Op } = require('sequelize');
 
 class AutomationEngine {
@@ -9,6 +10,7 @@ class AutomationEngine {
       'update_deal_field': this.updateDealField.bind(this),
       'move_deal_to_stage': this.moveDealToStage.bind(this),
       'update_custom_field': this.updateCustomField.bind(this),
+      'send_email': this.sendEmailAction.bind(this),
       // Recruiting actions
       'update_candidate_status': this.updateCandidateStatus.bind(this),
       'move_candidate_to_stage': this.moveCandidateToStage.bind(this),

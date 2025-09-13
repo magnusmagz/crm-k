@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { body, validationResult } = require('express-validator');
-const { User, UserProfile } = require('../models');
+const { User, UserProfile, Organization } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const emailService = require('../services/emailService');
 
@@ -85,9 +85,12 @@ router.post('/login', validateLogin, async (req, res) => {
     const { email, password } = req.body;
     console.log('Login attempt for email:', email);
 
-    const user = await User.findOne({ 
+    const user = await User.findOne({
       where: { email },
-      include: [{ model: UserProfile, as: 'profile' }]
+      include: [
+        { model: UserProfile, as: 'profile' },
+        { model: Organization, as: 'organization' }
+      ]
     });
 
     console.log('User found:', user ? 'Yes' : 'No');
@@ -132,7 +135,10 @@ router.post('/login', validateLogin, async (req, res) => {
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      include: [{ model: UserProfile, as: 'profile' }]
+      include: [
+        { model: UserProfile, as: 'profile' },
+        { model: Organization, as: 'organization' }
+      ]
     });
 
     res.json({ user });
