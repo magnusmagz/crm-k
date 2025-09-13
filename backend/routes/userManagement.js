@@ -493,6 +493,11 @@ router.post('/:id/reset-password',
         });
       } catch (emailError) {
         console.error('Failed to send password reset email:', emailError);
+        // Return error to user so they know email didn't send
+        return res.status(500).json({ 
+          error: 'Password reset but email could not be sent. Please contact support.',
+          tempPassword: process.env.NODE_ENV === 'development' ? tempPassword : undefined
+        });
       }
 
       res.json({ 
