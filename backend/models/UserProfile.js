@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'user_id',
       references: {
         model: 'users',
         key: 'id'
@@ -16,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     firstName: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: 'first_name',
       validate: {
         notEmpty: true
       }
@@ -23,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: 'last_name',
       validate: {
         notEmpty: true
       }
@@ -33,7 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     companyName: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
+      field: 'company_name'
     },
     phone: {
       type: DataTypes.STRING,
@@ -83,16 +87,19 @@ module.exports = (sequelize, DataTypes) => {
     profilePhoto: {
       type: DataTypes.TEXT,
       allowNull: true,
+      field: 'profile_photo',
       comment: 'Base64 encoded profile photo'
     },
     companyLogo: {
       type: DataTypes.TEXT,
       allowNull: true,
+      field: 'company_logo',
       comment: 'Base64 encoded company logo'
     },
     primaryColor: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: 'primary_color',
       defaultValue: '#1f2937',
       validate: {
         isValidHexColor(value) {
@@ -107,6 +114,7 @@ module.exports = (sequelize, DataTypes) => {
     crmName: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: 'crm_name',
       defaultValue: 'CRM Killer',
       validate: {
         len: [1, 50]
