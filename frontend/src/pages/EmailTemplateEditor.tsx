@@ -79,18 +79,35 @@ const EmailTemplateEditor: React.FC = () => {
     };
   }, []);
 
+  // Monitor template state changes
+  useEffect(() => {
+    debugLog('=== TEMPLATE STATE CHANGED ===', {
+      templateName: template.name,
+      hasDesign: !!template.design_json && Object.keys(template.design_json).length > 0,
+      designKeys: template.design_json ? Object.keys(template.design_json) : [],
+      htmlLength: template.html_output?.length || 0
+    });
+  }, [template]);
+
   const fetchTemplate = async () => {
+    debugLog('=== FETCHING TEMPLATE ===', { id });
     setLoading(true);
     try {
       const response = await api.get(`/email-templates/${id}`);
+      debugLog('Template fetched from API', {
+        hasDesign: !!response.data.design_json,
+        designKeys: response.data.design_json ? Object.keys(response.data.design_json) : []
+      });
       setTemplate(response.data);
-      
+
       // Load the design into the editor when ready
       const unlayer = emailEditorRef.current?.editor;
       if (unlayer && response.data.design_json) {
+        debugLog('Loading design from API into editor');
         unlayer.loadDesign(response.data.design_json);
       }
     } catch (error) {
+      debugLog('Error fetching template', { error: error instanceof Error ? error.message : String(error) });
       toast.error('Failed to load template');
       navigate('/email-templates');
     } finally {
@@ -175,12 +192,28 @@ const EmailTemplateEditor: React.FC = () => {
         await api.put(`/email-templates/${currentId}`, templateData);
         toast.success('Template updated');
         // Update local state with the saved design
+        debugLog('Updating local template state after save');
         setTemplate(prev => ({
           ...prev,
           design_json: design,
           html_output: html
         }));
         debugLog('Template updated successfully');
+
+        // Check editor state after save
+        setTimeout(() => {
+          const unlayer = emailEditorRef.current?.editor;
+          if (unlayer) {
+            unlayer.exportHtml((data: any) => {
+              debugLog('=== POST-SAVE EDITOR CHECK ===', {
+                hasDesign: !!data?.design,
+                hasHtml: !!data?.html,
+                htmlLength: data?.html?.length || 0,
+                designKeys: data?.design ? Object.keys(data.design) : []
+              });
+            });
+          }
+        }, 100);
       } else {
         debugLog('Creating new template...');
         const response = await api.post('/email-templates', templateData);
