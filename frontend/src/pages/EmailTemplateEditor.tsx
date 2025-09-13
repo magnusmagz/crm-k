@@ -116,10 +116,24 @@ const EmailTemplateEditor: React.FC = () => {
       if (id && id !== 'new') {
         await api.put(`/email-templates/${id}`, templateData);
         toast.success('Template updated');
+        // Update local state with the saved design
+        setTemplate(prev => ({
+          ...prev,
+          design_json: design,
+          html_output: html
+        }));
       } else {
         const response = await api.post('/email-templates', templateData);
         toast.success('Template created');
-        navigate(`/email-templates/${response.data.id}`);
+        // Update local state with the saved template
+        setTemplate(prev => ({
+          ...prev,
+          id: response.data.id,
+          design_json: design,
+          html_output: html
+        }));
+        // Use navigate with replace to update URL without causing a hard reload
+        navigate(`/email-templates/${response.data.id}`, { replace: true });
       }
     } catch (error) {
       toast.error('Failed to save template');
