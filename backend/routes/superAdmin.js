@@ -372,20 +372,27 @@ router.get('/users', async (req, res) => {
     ]);
 
     // Format users to include firstName and lastName from profile
-    const formattedUsers = users.rows.map(user => ({
-      id: user.id,
-      email: user.email,
-      firstName: user.profile?.firstName || user.profile?.first_name || '',
-      lastName: user.profile?.lastName || user.profile?.last_name || '',
-      isAdmin: user.isAdmin !== undefined ? user.isAdmin : user.is_admin,
-      isLoanOfficer: user.isLoanOfficer !== undefined ? user.isLoanOfficer : user.is_loan_officer,
-      isSuperAdmin: user.isSuperAdmin !== undefined ? user.isSuperAdmin : user.is_super_admin,
-      isActive: user.isActive !== undefined ? user.isActive : user.is_active,
-      lastLogin: user.lastLogin || user.last_login,
-      organizationId: user.organizationId || user.organization_id,
-      createdAt: user.createdAt || user.created_at,
-      organization: user.organization
-    }));
+    const formattedUsers = users.rows.map(user => {
+      // Get the raw data values for proper field access
+      const userData = user.dataValues || user;
+      const profileData = user.profile?.dataValues || user.profile || {};
+      const orgData = user.organization?.dataValues || user.organization || {};
+
+      return {
+        id: userData.id,
+        email: userData.email,
+        firstName: profileData.firstName || profileData.first_name || '',
+        lastName: profileData.lastName || profileData.last_name || '',
+        isAdmin: userData.is_admin === true || userData.is_admin === 't' || userData.isAdmin === true,
+        isLoanOfficer: userData.is_loan_officer === true || userData.is_loan_officer === 't' || userData.isLoanOfficer === true,
+        isSuperAdmin: userData.is_super_admin === true || userData.is_super_admin === 't' || userData.isSuperAdmin === true,
+        isActive: userData.is_active === true || userData.is_active === 't' || userData.isActive === true,
+        lastLogin: userData.last_login || userData.lastLogin,
+        organizationId: userData.organization_id || userData.organizationId,
+        createdAt: userData.created_at || userData.createdAt,
+        organization: orgData
+      };
+    });
 
     req.superAdmin?.logAction('LIST_USERS', {
       search, organizationId, role, status, page, limit, total: users.count
