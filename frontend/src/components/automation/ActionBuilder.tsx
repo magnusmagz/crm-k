@@ -202,6 +202,25 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
         
         return (
           <div className="space-y-4">
+            {/* Template Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Template (Optional)
+              </label>
+              <select
+                value={action.config.templateId || ''}
+                onChange={(e) => handleTemplateSelection(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+              >
+                <option value="">Create custom email</option>
+                {availableTemplates.map(template => (
+                  <option key={template.id} value={template.id}>
+                    {template.name} - {template.subject}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Subject Line */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

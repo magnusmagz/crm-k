@@ -1,3 +1,14 @@
+export interface Organization {
+  id: string;
+  name: string;
+  crmName?: string;
+  crm_name?: string;
+  primaryColor?: string;
+  primary_color?: string;
+  isActive?: boolean;
+  is_active?: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -6,6 +17,7 @@ export interface User {
   isSuperAdmin?: boolean;
   isLoanOfficer?: boolean;
   organizationId?: string;
+  organization?: Organization;
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
