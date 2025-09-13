@@ -41,22 +41,41 @@ const EmailTemplateEditor: React.FC = () => {
   const [previewHtml, setPreviewHtml] = useState('');
   const [currentId, setCurrentId] = useState(id);
 
+  // Debug logging helper that saves to localStorage
+  const debugLog = (message: string, data?: any) => {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] ${message}`;
+    console.log(logEntry, data);
+
+    // Save to localStorage
+    const existingLogs = localStorage.getItem('emailTemplateDebugLogs') || '';
+    const newLog = data
+      ? `${logEntry}\n${JSON.stringify(data, null, 2)}\n`
+      : `${logEntry}\n`;
+    localStorage.setItem('emailTemplateDebugLogs', existingLogs + newLog);
+  };
+
+  // Clear debug logs on mount
   useEffect(() => {
-    console.log('=== COMPONENT MOUNTED/ID CHANGED ===');
-    console.log('URL ID param:', id);
-    console.log('Current ID state:', currentId);
+    localStorage.setItem('emailTemplateDebugLogs', '');
+    debugLog('=== DEBUG SESSION STARTED ===');
+  }, []);
+
+  useEffect(() => {
+    debugLog('=== COMPONENT MOUNTED/ID CHANGED ===', {
+      urlIdParam: id,
+      currentIdState: currentId
+    });
     if (id && id !== 'new') {
       fetchTemplate();
     }
   }, [id]);
 
   useEffect(() => {
-    console.log('=== COMPONENT MOUNT ===');
-    console.log('Component mounted at:', new Date().toISOString());
+    debugLog('=== COMPONENT MOUNT ===');
 
     return () => {
-      console.log('=== COMPONENT UNMOUNT ===');
-      console.log('Component unmounting at:', new Date().toISOString());
+      debugLog('=== COMPONENT UNMOUNT ===');
     };
   }, []);
 
@@ -80,27 +99,27 @@ const EmailTemplateEditor: React.FC = () => {
   };
 
   const onReady = () => {
-    console.log('=== UNLAYER EDITOR READY ===');
-    console.log('Editor ready at:', new Date().toISOString());
+    debugLog('=== UNLAYER EDITOR READY ===');
 
     // Editor is ready
     const unlayer = emailEditorRef.current?.editor;
-    console.log('Editor reference exists:', !!unlayer);
+    debugLog('Editor reference check', { exists: !!unlayer });
 
     // Load existing design if editing
     if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
-      console.log('Loading existing design into editor');
+      debugLog('Loading existing design into editor');
       unlayer.loadDesign(template.design_json);
     } else {
-      console.log('No existing design to load');
+      debugLog('No existing design to load');
     }
   };
 
   const handleSave = async () => {
-    console.log('=== SAVE CLICKED ===');
-    console.log('Current template state:', template);
-    console.log('Current ID from URL:', id);
-    console.log('Current ID state:', currentId);
+    debugLog('=== SAVE CLICKED ===', {
+      templateName: template.name,
+      urlId: id,
+      currentIdState: currentId
+    });
 
     if (!template.name || template.name.trim() === '') {
       toast.error('Template name is required');
@@ -113,23 +132,24 @@ const EmailTemplateEditor: React.FC = () => {
       return;
     }
 
-    console.log('Editor reference exists:', !!unlayer);
+    debugLog('Editor reference check before save', { exists: !!unlayer });
     setSaving(true);
 
     // Simple approach - just use exportHtml without any options
     unlayer.exportHtml((data: any) => {
       try {
         const { design, html } = data || {};
-        console.log('=== EXPORT DATA ===');
-        console.log('Full export data:', data);
-        console.log('Design object exists:', !!design);
-        console.log('HTML exists:', !!html);
-        console.log('HTML length:', html?.length || 0);
+        debugLog('=== EXPORT DATA ===', {
+          hasDesign: !!design,
+          hasHtml: !!html,
+          htmlLength: html?.length || 0,
+          designKeys: design ? Object.keys(design) : []
+        });
 
         // Save even if design is empty/null
         saveTemplate(design || {}, html || '');
       } catch (error) {
-        console.error('Error in exportHtml callback:', error);
+        debugLog('Error in exportHtml callback', { error: error.message });
         // Save with empty design if there's an error
         saveTemplate({}, '');
       }
@@ -137,10 +157,11 @@ const EmailTemplateEditor: React.FC = () => {
   };
 
   const saveTemplate = async (design: any, html: string) => {
-    console.log('=== SAVE TEMPLATE CALLED ===');
-    console.log('Design to save:', design);
-    console.log('HTML to save length:', html?.length || 0);
-    console.log('Is new template?', !currentId || currentId === 'new');
+    debugLog('=== SAVE TEMPLATE CALLED ===', {
+      htmlLength: html?.length || 0,
+      isNewTemplate: !currentId || currentId === 'new',
+      currentId: currentId
+    });
 
     try {
       const templateData = {
@@ -150,7 +171,7 @@ const EmailTemplateEditor: React.FC = () => {
       };
 
       if (currentId && currentId !== 'new') {
-        console.log('Updating existing template:', currentId);
+        debugLog('Updating existing template', { id: currentId });
         await api.put(`/email-templates/${currentId}`, templateData);
         toast.success('Template updated');
         // Update local state with the saved design
@@ -159,11 +180,11 @@ const EmailTemplateEditor: React.FC = () => {
           design_json: design,
           html_output: html
         }));
-        console.log('Template updated successfully');
+        debugLog('Template updated successfully');
       } else {
-        console.log('Creating new template...');
+        debugLog('Creating new template...');
         const response = await api.post('/email-templates', templateData);
-        console.log('Create response:', response.data);
+        debugLog('Create response', { id: response.data.id });
         toast.success('Template created');
 
         // Update local state with the saved template
@@ -176,25 +197,35 @@ const EmailTemplateEditor: React.FC = () => {
 
         // Update currentId so next save will use PUT instead of POST
         const newId = response.data.id;
-        console.log('Setting currentId to:', newId);
+        debugLog('Setting currentId', { newId });
         setCurrentId(newId);
 
         // Don't navigate - just update the URL in the browser without React Router
         const newUrl = `/email-templates/${newId}`;
-        console.log('Updating browser URL to:', newUrl);
+        debugLog('Updating browser URL', { newUrl, currentPath: window.location.pathname });
         window.history.replaceState({}, '', newUrl);
 
-        console.log('=== AFTER SAVE ===');
-        console.log('Template state will be updated with design');
-        console.log('Current URL:', window.location.pathname);
-        console.log('Editor should remain intact');
+        debugLog('=== AFTER SAVE ===', {
+          templateUpdated: true,
+          currentUrl: window.location.pathname,
+          editorShouldRemainIntact: true
+        });
+
+        // Check if component remounts after this
+        setTimeout(() => {
+          debugLog('=== POST-SAVE CHECK (1 second later) ===', {
+            stillMounted: true,
+            currentUrl: window.location.pathname,
+            editorRef: !!emailEditorRef.current?.editor
+          });
+        }, 1000);
       }
     } catch (error) {
-      console.error('Save error:', error);
+      debugLog('Save error', { error: error.message });
       toast.error('Failed to save template');
     } finally {
       setSaving(false);
-      console.log('Save process complete');
+      debugLog('Save process complete');
     }
   };
 
@@ -232,6 +263,20 @@ const EmailTemplateEditor: React.FC = () => {
         toast.error('Failed to send test email');
       }
     });
+  };
+
+  const downloadDebugLogs = () => {
+    const logs = localStorage.getItem('emailTemplateDebugLogs') || 'No logs found';
+    const blob = new Blob([logs], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `email-editor-debug-${new Date().toISOString().slice(0, 19)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Debug logs downloaded');
   };
 
   if (loading) {
@@ -307,6 +352,14 @@ const EmailTemplateEditor: React.FC = () => {
             >
               <CloudArrowUpIcon className="h-5 w-5 mr-2" />
               {saving ? 'Saving...' : 'Save'}
+            </button>
+
+            <button
+              onClick={downloadDebugLogs}
+              className="inline-flex items-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+              title="Download debug logs for troubleshooting"
+            >
+              🐛 Debug
             </button>
           </div>
         </div>
