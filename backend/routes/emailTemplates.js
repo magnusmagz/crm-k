@@ -7,12 +7,24 @@ const { v4: uuidv4 } = require('uuid');
 // Get all templates for organization
 router.get('/', authMiddleware, async (req, res) => {
   try {
+    console.log('User object:', req.user);
+    console.log('User organizationId:', req.user?.organizationId);
+    console.log('User organization_id:', req.user?.organization_id);
+
+    // Try to get organizationId from different possible field names
+    const orgId = req.user?.organizationId || req.user?.organization_id;
+
+    if (!orgId) {
+      console.error('No organization ID found on user object');
+      return res.status(400).json({ error: 'Organization ID not found' });
+    }
+
     const templates = await sequelize.query(
-      `SELECT 
-        id, 
-        name, 
-        subject, 
-        category, 
+      `SELECT
+        id,
+        name,
+        subject,
+        category,
         is_active,
         created_by,
         created_at,
@@ -21,14 +33,15 @@ router.get('/', authMiddleware, async (req, res) => {
       WHERE organization_id = :orgId
       ORDER BY created_at DESC`,
       {
-        replacements: { orgId: req.user.organizationId },
+        replacements: { orgId },
         type: sequelize.QueryTypes.SELECT
       }
     );
-    
+
     res.json(templates);
   } catch (error) {
     console.error('Error fetching templates:', error);
+    console.error('Error details:', error.message);
     res.status(500).json({ error: 'Failed to fetch templates' });
   }
 });
@@ -36,13 +49,15 @@ router.get('/', authMiddleware, async (req, res) => {
 // Get single template
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
+    const orgId = req.user?.organizationId || req.user?.organization_id;
+
     const [template] = await sequelize.query(
       `SELECT * FROM email_templates
       WHERE id = :id AND organization_id = :orgId`,
       {
-        replacements: { 
+        replacements: {
           id: req.params.id,
-          orgId: req.user.organizationId 
+          orgId
         },
         type: sequelize.QueryTypes.SELECT
       }

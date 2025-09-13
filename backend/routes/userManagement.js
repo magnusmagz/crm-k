@@ -235,15 +235,16 @@ router.put('/:id',
     body('profile.lastName').optional({ nullable: true, checkFalsy: true }),
     body('profile.phone').optional({ nullable: true, checkFalsy: true }),
     body('profile.nmlsId').optional({ nullable: true, checkFalsy: true }).matches(/^\d*$/).withMessage('NMLS ID must contain only numbers'),
-    body('profile.stateLicenses').optional().isArray(),
-    body('profile.stateLicenses.*.state').optional().isIn(['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']),
-    body('profile.stateLicenses.*.licenseNumber').optional().notEmpty()
+    body('profile.stateLicenses').optional({ nullable: true, checkFalsy: true }).isArray(),
+    body('profile.stateLicenses.*.state').optional({ nullable: true, checkFalsy: true }).isIn(['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']),
+    body('profile.stateLicenses.*.licenseNumber').optional({ nullable: true, checkFalsy: true })
   ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.log('Validation errors:', errors.array());
+        console.log('Validation errors:', JSON.stringify(errors.array(), null, 2));
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
         return res.status(400).json({ errors: errors.array() });
       }
 
