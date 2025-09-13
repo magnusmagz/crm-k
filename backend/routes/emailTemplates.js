@@ -7,21 +7,13 @@ const { v4: uuidv4 } = require('uuid');
 // Get all templates for organization
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    console.log('User dataValues:', req.user?.dataValues);
-    console.log('User organizationId:', req.user?.organizationId);
-    console.log('User organization_id:', req.user?.organization_id);
-    console.log('User dataValues.organizationId:', req.user?.dataValues?.organizationId);
-    console.log('User dataValues.organization_id:', req.user?.dataValues?.organization_id);
+    // Try to get organizationId from different possible field names
+    const orgId = req.user?.organizationId || req.user?.organization_id;
 
-    // Try to get organizationId from different possible field names and locations
-    const orgId = req.user?.organizationId ||
-                  req.user?.organization_id ||
-                  req.user?.dataValues?.organizationId ||
-                  req.user?.dataValues?.organization_id;
-
+    // If user has no organization, return empty array (they can't see any templates)
     if (!orgId) {
-      console.error('No organization ID found on user object. Full user:', JSON.stringify(req.user?.dataValues || req.user));
-      return res.status(400).json({ error: 'Organization ID not found' });
+      console.log('User has no organization assigned, returning empty templates list');
+      return res.json([]);
     }
 
     const templates = await sequelize.query(
@@ -46,7 +38,6 @@ router.get('/', authMiddleware, async (req, res) => {
     res.json(templates);
   } catch (error) {
     console.error('Error fetching templates:', error);
-    console.error('Error details:', error.message);
     res.status(500).json({ error: 'Failed to fetch templates' });
   }
 });
@@ -90,6 +81,10 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const templateId = uuidv4();
     const orgId = req.user?.organizationId || req.user?.organization_id;
+
+    if (!orgId) {
+      return res.status(400).json({ error: 'User must belong to an organization to create templates' });
+    }
 
     await sequelize.query(
       `INSERT INTO email_templates

@@ -125,10 +125,10 @@ const UserManagement: React.FC = () => {
       // Extract only the fields that can be updated
       const updateData: any = {
         email: updates.email,
-        isAdmin: updates.isAdmin,
-        isLoanOfficer: updates.isLoanOfficer,
-        licensedStates: updates.licensedStates,
-        isActive: updates.isActive
+        isAdmin: updates.isAdmin === true,  // Ensure boolean
+        isLoanOfficer: updates.isLoanOfficer === true,  // Ensure boolean
+        licensedStates: updates.licensedStates || [],
+        isActive: updates.isActive !== false  // Default to true if not explicitly false
       };
       
       // Add profile fields if they exist

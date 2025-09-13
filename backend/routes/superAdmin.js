@@ -161,17 +161,17 @@ router.post('/organizations', validateOrganizationCreation, async (req, res) => 
       // Create organization
       const organization = await Organization.create({
         name,
-        crmName: crmName || name,
-        primaryColor: primaryColor || '#6366f1',
-        contactEmail,
+        crm_name: crmName || name,
+        primary_color: primaryColor || '#6366f1',
+        contact_email: contactEmail,
         website,
-        contactPhone: phone,
+        contact_phone: phone,
         address,
         city,
         state,
-        zipCode,
-        createdBy: req.user.id,
-        isActive: true,
+        zip_code: zipCode,
+        created_by: req.user.id,
+        is_active: true,
         settings: {
           allowUserRegistration: false,
           requireEmailVerification: true,
@@ -190,21 +190,21 @@ router.post('/organizations', validateOrganizationCreation, async (req, res) => 
       const adminUser = await User.create({
         email: adminEmail,
         password: 'TempPassword123!', // TODO: Generate secure temp password and send email
-        isVerified: false,
-        organizationId: organization.id,
-        isAdmin: true,
-        isLoanOfficer: false,
-        requirePasswordChange: true,
-        isActive: true
+        is_verified: false,
+        organization_id: organization.id,
+        is_admin: true,
+        is_loan_officer: false,
+        require_password_change: true,
+        is_active: true
       }, { transaction });
 
       // Create user profile for admin
       const { UserProfile } = require('../models');
       await UserProfile.create({
-        userId: adminUser.id,
-        firstName: adminName.split(' ')[0] || adminName,
-        lastName: adminName.split(' ').slice(1).join(' ') || '',
-        companyName: name
+        user_id: adminUser.id,
+        first_name: adminName.split(' ')[0] || adminName,
+        last_name: adminName.split(' ').slice(1).join(' ') || '',
+        company_name: name
       }, { transaction });
 
       await transaction.commit();
@@ -220,7 +220,7 @@ router.post('/organizations', validateOrganizationCreation, async (req, res) => 
         organization: {
           id: organization.id,
           name: organization.name,
-          crmName: organization.crmName,
+          crmName: organization.crm_name,
           adminEmail: adminEmail
         }
       });
@@ -252,16 +252,16 @@ router.put('/organizations/:id', async (req, res) => {
 
     const updateData = {};
     if (name !== undefined) updateData.name = name;
-    if (crmName !== undefined) updateData.crmName = crmName;
-    if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (contactEmail !== undefined) updateData.contactEmail = contactEmail;
+    if (crmName !== undefined) updateData.crm_name = crmName;
+    if (primaryColor !== undefined) updateData.primary_color = primaryColor;
+    if (isActive !== undefined) updateData.is_active = isActive;
+    if (contactEmail !== undefined) updateData.contact_email = contactEmail;
     if (website !== undefined) updateData.website = website;
-    if (contactPhone !== undefined) updateData.contactPhone = contactPhone;
+    if (contactPhone !== undefined) updateData.contact_phone = contactPhone;
     if (address !== undefined) updateData.address = address;
     if (city !== undefined) updateData.city = city;
     if (state !== undefined) updateData.state = state;
-    if (zipCode !== undefined) updateData.zipCode = zipCode;
+    if (zipCode !== undefined) updateData.zip_code = zipCode;
     if (settings !== undefined) updateData.settings = { ...organization.settings, ...settings };
 
     await organization.update(updateData);
@@ -292,7 +292,7 @@ router.delete('/organizations/:id', async (req, res) => {
     }
 
     // Instead of hard delete, deactivate the organization
-    await organization.update({ isActive: false });
+    await organization.update({ is_active: false });
 
     req.superAdmin?.logAction('DEACTIVATE_ORGANIZATION', {
       organizationId: req.params.id,
@@ -513,16 +513,16 @@ router.get('/analytics', async (req, res) => {
   try {
     // Get basic counts
     const [orgCount, userCount, contactCount] = await Promise.all([
-      Organization.count({ where: { isActive: true } }),
-      User.count({ where: { isActive: true } }),
+      Organization.count({ where: { is_active: true } }),
+      User.count({ where: { is_active: true } }),
       Contact.count()
     ]);
 
     // Get user breakdown by role
     const [adminCount, loanOfficerCount, superAdminCount] = await Promise.all([
-      User.count({ where: { isAdmin: true, isActive: true } }),
-      User.count({ where: { isLoanOfficer: true, isActive: true } }),
-      User.count({ where: { isSuperAdmin: true, isActive: true } })
+      User.count({ where: { is_admin: true, is_active: true } }),
+      User.count({ where: { is_loan_officer: true, is_active: true } }),
+      User.count({ where: { is_super_admin: true, is_active: true } })
     ]);
 
     // Get recent activity (last 30 days)
@@ -535,10 +535,10 @@ router.get('/analytics', async (req, res) => {
         // where: { createdAt: { [require('sequelize').Op.gte]: thirtyDaysAgo } }
       }),
       User.count({ 
-        where: { createdAt: { [require('sequelize').Op.gte]: thirtyDaysAgo } }
+        where: { created_at: { [require('sequelize').Op.gte]: thirtyDaysAgo } }
       }),
       Contact.count({ 
-        where: { createdAt: { [require('sequelize').Op.gte]: thirtyDaysAgo } }
+        where: { created_at: { [require('sequelize').Op.gte]: thirtyDaysAgo } }
       })
     ]);
 
@@ -595,7 +595,7 @@ router.get('/dashboard', async (req, res) => {
 
     // Get recent organizations (top 5) - simplified without user count for now
     const recentOrganizations = await Organization.findAll({
-      attributes: ['id', 'name', 'crmName', 'isActive'],
+      attributes: ['id', 'name', 'crm_name', 'is_active'],
       order: [['name', 'ASC']],
       limit: 5
     });
@@ -603,7 +603,7 @@ router.get('/dashboard', async (req, res) => {
     // Add user count manually for each organization
     for (const org of recentOrganizations) {
       const userCount = await User.count({ where: { organizationId: org.id } });
-      org.dataValues.userCount = userCount;
+      org.dataValues.user_count = userCount;
     }
 
     req.superAdmin?.logAction('VIEW_DASHBOARD');
@@ -627,7 +627,7 @@ router.get('/dashboard', async (req, res) => {
       recentOrganizations,
       user: {
         email: req.user.email,
-        isSuperAdmin: req.user.isSuperAdmin
+        isSuperAdmin: req.user.is_super_admin
       }
     });
 
