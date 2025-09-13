@@ -514,6 +514,38 @@ class AutomationEngine {
       });
     }
 
+    let emailSubject = action.config.subject || 'Notification';
+    let emailBody = action.config.body || 'This is an automated message.';
+
+    // If a template is selected, use it as base content
+    if (action.config.templateId) {
+      try {
+        const { EmailTemplate } = require('../models');
+        const template = await EmailTemplate.findByPk(action.config.templateId);
+        
+        if (template) {
+          // Use template content if custom subject/body are empty
+          if (!action.config.subject && template.subject) {
+            emailSubject = template.subject;
+          }
+          if (!action.config.body && template.htmlOutput) {
+            emailBody = template.htmlOutput;
+          }
+          
+          if (debugMode) {
+            console.log('🔧 [DEBUG] Using email template:', {
+              templateId: template.id,
+              templateName: template.name,
+              templateSubject: template.subject,
+              hasHtmlOutput: !!template.htmlOutput
+            });
+          }
+        }
+      } catch (templateError) {
+        console.error('❌ [ERROR] Failed to load email template:', templateError);
+      }
+    }
+
     try {
       // Get recipient email based on trigger type
       const recipientEmail = this.extractRecipientEmail(data);
@@ -527,8 +559,8 @@ class AutomationEngine {
       }
 
       // Process email template with variables
-      const processedSubject = this.replaceVariables(action.config.subject || 'Notification', data, debugMode);
-      const processedBody = this.replaceVariables(action.config.body || 'This is an automated message.', data, debugMode);
+      const processedSubject = this.replaceVariables(emailSubject, data, debugMode);
+      const processedBody = this.replaceVariables(emailBody, data, debugMode);
 
       if (debugMode) {
         console.log('🔧 [DEBUG] Email template processed:', {

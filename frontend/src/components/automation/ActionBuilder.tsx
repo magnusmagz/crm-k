@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AutomationAction, Stage } from '../../types';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { automationsAPI } from '../../services/api';
+import api from '../../services/api';
 
 interface ActionBuilderProps {
   action: AutomationAction;
@@ -19,6 +20,14 @@ interface Field {
   isCustom?: boolean;
 }
 
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  category: string;
+  htmlOutput?: string;
+}
+
 const ActionBuilder: React.FC<ActionBuilderProps> = ({
   action,
   onChange,
@@ -29,10 +38,15 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
   const [contactFields, setContactFields] = useState<Field[]>([]);
   const [dealFields, setDealFields] = useState<Field[]>([]);
   const [isLoadingFields, setIsLoadingFields] = useState(false);
+  const [availableTemplates, setAvailableTemplates] = useState<EmailTemplate[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   useEffect(() => {
     fetchFields();
-  }, [triggerType]);
+    if (action.type === 'send_email') {
+      fetchEmailTemplates();
+    }
+  }, [triggerType, action.type]);
 
   const fetchFields = async () => {
     // Skip fetching for recruiting triggers as they use different field structures
@@ -58,6 +72,46 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
       console.error('Failed to fetch fields:', error);
     } finally {
       setIsLoadingFields(false);
+    }
+  };
+
+  const fetchEmailTemplates = async () => {
+    setLoadingTemplates(true);
+    try {
+      const response = await api.get('/email-templates');
+      setAvailableTemplates(response.data.filter((t: EmailTemplate) => t.category !== 'system'));
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const handleTemplateSelection = async (templateId: string) => {
+    if (!templateId) {
+      onChange({
+        ...action,
+        config: { ...action.config, templateId: '', subject: '', body: '' }
+      });
+      return;
+    }
+
+    try {
+      const response = await api.get(`/email-templates/${templateId}`);
+      const template = response.data;
+      
+      onChange({
+        ...action,
+        config: {
+          ...action.config,
+          templateId,
+          subject: template.subject || '',
+          body: template.htmlOutput || '',
+          templateName: template.name
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching template details:', error);
     }
   };
 
@@ -211,11 +265,14 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 value={action.config.templateId || ''}
                 onChange={(e) => handleTemplateSelection(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                disabled={loadingTemplates}
               >
-                <option value="">Create custom email</option>
+                <option value="">
+                  {loadingTemplates ? 'Loading templates...' : 'Create custom email'}
+                </option>
                 {availableTemplates.map(template => (
                   <option key={template.id} value={template.id}>
-                    {template.name} - {template.subject}
+                    {template.name}{template.subject ? ` - ${template.subject}` : ''}
                   </option>
                 ))}
               </select>
