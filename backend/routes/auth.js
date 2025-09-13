@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 const { body, validationResult } = require('express-validator');
 const { User, UserProfile } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -169,13 +170,56 @@ router.post('/forgot-password',
 
       await user.update({ resetToken, resetTokenExpiry });
 
-      // TODO: Send email with reset link
-      // For now, just return success
-      res.json({ 
-        message: 'Password reset email sent',
-        // In development, include token for testing
-        ...(process.env.NODE_ENV === 'development' && { resetToken })
-      });
+      // Send password reset email
+      try {
+        const resetUrl = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+        
+        await emailService.sendEmail({
+          userId: user.id,
+          contactEmail: user.email,
+          subject: 'Password Reset Request',
+          message: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Password Reset Request</h2>
+              <p>You requested a password reset for your account.</p>
+              <p>Click the link below to reset your password:</p>
+              <div style="margin: 30px 0;">
+                <a href="${resetUrl}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                  Reset Password
+                </a>
+              </div>
+              <p style="color: #666; font-size: 14px;">
+                This link will expire in 1 hour. If you didn't request this reset, please ignore this email.
+              </p>
+              <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 30px 0;">
+              <p style="color: #666; font-size: 12px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                ${resetUrl}
+              </p>
+            </div>
+          `,
+          userName: 'CRM System',
+          userEmail: 'noreply@crmkiller.com',
+          userFirstName: 'CRM',
+          enableTracking: false
+        });
+
+        res.json({ 
+          message: 'Password reset email sent',
+          // In development, include token for testing
+          ...(process.env.NODE_ENV === 'development' && { resetToken })
+        });
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+        // Still return success to not reveal if email exists
+        res.json({ 
+          message: 'If the email exists, a reset link will be sent',
+          ...(process.env.NODE_ENV === 'development' && { 
+            resetToken,
+            emailError: emailError.message 
+          })
+        });
+      }
     } catch (error) {
       console.error('Password reset error:', error);
       res.status(500).json({ error: 'Failed to process password reset' });
