@@ -109,29 +109,6 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-lg font-medium text-primary-dark mb-4">Getting Started</h2>
-        <div className="bg-white shadow rounded-lg p-6">
-          <ul className="space-y-3">
-            <li className="flex items-start">
-              <span className="flex-shrink-0 h-5 w-5 text-green-500 mt-0.5">✓</span>
-              <span className="ml-3 text-gray-600">Create your account and set up your profile</span>
-            </li>
-            <li className="flex items-start">
-              <span className="flex-shrink-0 h-5 w-5 text-gray-400 mt-0.5">○</span>
-              <span className="ml-3 text-gray-600">Add custom fields to track specific information</span>
-            </li>
-            <li className="flex items-start">
-              <span className="flex-shrink-0 h-5 w-5 text-gray-400 mt-0.5">○</span>
-              <span className="ml-3 text-gray-600">Import or add your first contacts</span>
-            </li>
-            <li className="flex items-start">
-              <span className="flex-shrink-0 h-5 w-5 text-gray-400 mt-0.5">○</span>
-              <span className="ml-3 text-gray-600">Start tracking customer interactions</span>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 };
