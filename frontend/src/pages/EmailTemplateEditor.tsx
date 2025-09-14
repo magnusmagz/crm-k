@@ -40,6 +40,7 @@ const EmailTemplateEditor: React.FC = () => {
   const [testEmail, setTestEmail] = useState('');
   const [previewHtml, setPreviewHtml] = useState('');
   const [currentId, setCurrentId] = useState(id);
+  const [editorReady, setEditorReady] = useState(false);
 
   // Debug logging helper that saves to localStorage
   const debugLog = (message: string, data?: any) => {
@@ -79,22 +80,25 @@ const EmailTemplateEditor: React.FC = () => {
     };
   }, []);
 
-  // Monitor template state changes
+  // Load design when both editor is ready and template data is available
   useEffect(() => {
-    debugLog('=== TEMPLATE STATE CHANGED ===', {
+    debugLog('=== DESIGN LOADING EFFECT ===', {
+      editorReady,
       templateName: template.name,
       hasDesign: !!template.design_json && Object.keys(template.design_json).length > 0,
       designKeys: template.design_json ? Object.keys(template.design_json) : [],
       htmlLength: template.html_output?.length || 0
     });
 
-    // If the template has a design and the editor is ready, load it
+    // Only load design if both editor is ready AND we have template data with design
     const unlayer = emailEditorRef.current?.editor;
-    if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
-      debugLog('Template updated with design - loading into editor');
+    if (editorReady && unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
+      debugLog('Loading design into editor', {
+        designKeys: Object.keys(template.design_json)
+      });
       unlayer.loadDesign(template.design_json);
     }
-  }, [template]);
+  }, [editorReady, template.design_json, template.name]); // Only depend on design_json and name, not entire template
 
   const fetchTemplate = async () => {
     debugLog('=== FETCHING TEMPLATE ===', { id });
@@ -121,29 +125,10 @@ const EmailTemplateEditor: React.FC = () => {
 
   const onReady = () => {
     debugLog('=== UNLAYER EDITOR READY ===');
+    setEditorReady(true);
 
-    // Editor is ready
-    const unlayer = emailEditorRef.current?.editor;
-    debugLog('Editor reference check', { exists: !!unlayer });
-    debugLog('Template state at editor ready', {
-      hasDesign: !!template.design_json,
-      designKeys: template.design_json ? Object.keys(template.design_json) : [],
-      templateName: template.name
-    });
-
-    // Load existing design if editing
-    if (unlayer && template.design_json && Object.keys(template.design_json).length > 0) {
-      debugLog('Loading existing design into editor', {
-        designKeys: Object.keys(template.design_json)
-      });
-      unlayer.loadDesign(template.design_json);
-    } else {
-      debugLog('No existing design to load', {
-        hasUnlayer: !!unlayer,
-        hasDesignJson: !!template.design_json,
-        designJsonKeys: template.design_json ? Object.keys(template.design_json).length : 0
-      });
-    }
+    // Don't load design here - let the effect handle it when both editor is ready and template is loaded
+    debugLog('Editor ready, will load design when template data is available');
   };
 
   const handleSave = async () => {
