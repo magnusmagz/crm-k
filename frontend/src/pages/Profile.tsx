@@ -97,9 +97,18 @@ const Profile: React.FC = () => {
       setIsEditing(false);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.error || 'Failed to update profile' 
+      console.error('Profile update error:', error);
+      let errorMessage = 'Failed to update profile';
+
+      if (error.response?.status === 413) {
+        errorMessage = 'Image too large. Please choose a smaller image (under 5MB).';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+
+      setMessage({
+        type: 'error',
+        text: errorMessage
       });
     }
   };
