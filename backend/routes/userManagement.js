@@ -155,6 +155,13 @@ router.post('/',
         requirePasswordChange: true
       });
 
+      // Create user profile with firstName and lastName
+      await UserProfile.create({
+        userId: newUser.id,
+        firstName,
+        lastName
+      });
+
       // Send invitation email
       try {
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
