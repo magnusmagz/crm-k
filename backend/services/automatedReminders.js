@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Contact, Reminder, User, UserProfile, Note } = require('../models');
+const { Contact, Reminder, User, UserProfile, Note, sequelize } = require('../models');
 
 class AutomatedReminderService {
   /**
@@ -14,9 +14,7 @@ class AutomatedReminderService {
         include: [{
           model: UserProfile,
           as: 'profile',
-          where: {
-            enableAutoReminders: true
-          }
+          where: sequelize.literal('"profile"."enable_auto_reminders" = true')
         }]
       });
 
