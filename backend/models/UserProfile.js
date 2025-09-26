@@ -209,6 +209,22 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       }
+    },
+    reminderDaysThreshold: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 5,
+      field: 'reminder_days_threshold',
+      validate: {
+        min: 1,
+        max: 365
+      }
+    },
+    enableAutoReminders: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: 'enable_auto_reminders'
     }
   }, {
     tableName: 'user_profiles',

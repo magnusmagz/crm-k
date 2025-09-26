@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
 const upload = require('../middleware/upload');
 const { parseCSV, getCSVHeaders, validateContactRecord, mapCSVToContact, autoDetectMapping } = require('../utils/csvParser');
+const { touchContactMiddleware } = require('../middleware/contactTouch');
 
 const router = express.Router();
 
@@ -1303,7 +1304,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Update contact
-router.put('/:id', authMiddleware, validateContact, async (req, res) => {
+router.put('/:id', authMiddleware, validateContact, touchContactMiddleware('update'), async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
