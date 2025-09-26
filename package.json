@@ -11,6 +11,8 @@
     "install-all": "npm install && cd frontend && npm install",
     "build": "cd frontend && npm run build",
     "heroku-postbuild": "npm run install-all && npm run build",
+    "migrate": "cd backend && npx sequelize-cli db:migrate",
+    "migrate:undo": "cd backend && npx sequelize-cli db:migrate:undo",
     "test": "jest --forceExit --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
