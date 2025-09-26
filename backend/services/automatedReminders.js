@@ -9,18 +9,23 @@ class AutomatedReminderService {
     try {
       console.log('Starting automated reminder check for untouched contacts...');
 
-      // Get all users with auto reminders enabled
+      // Get all users first, then filter by auto reminders
       const usersWithProfiles = await User.findAll({
         include: [{
           model: UserProfile,
           as: 'profile',
-          where: sequelize.literal('"profile"."enable_auto_reminders" = true')
+          required: true
         }]
       });
 
+      // Filter users with auto reminders enabled
+      const enabledUsers = usersWithProfiles.filter(user =>
+        user.profile && user.profile.enableAutoReminders === true
+      );
+
       let totalRemindersCreated = 0;
 
-      for (const user of usersWithProfiles) {
+      for (const user of enabledUsers) {
         const threshold = user.profile.reminderDaysThreshold || 5;
         const thresholdDate = new Date();
         thresholdDate.setDate(thresholdDate.getDate() - threshold);
@@ -103,7 +108,7 @@ class AutomatedReminderService {
       return {
         success: true,
         remindersCreated: totalRemindersCreated,
-        usersProcessed: usersWithProfiles.length,
+        usersProcessed: enabledUsers.length,
         timestamp: new Date().toISOString()
       };
     } catch (error) {
