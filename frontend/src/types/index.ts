@@ -18,6 +18,7 @@ export interface User {
   isLoanOfficer?: boolean;
   organizationId?: string;
   organization?: Organization;
+  profile?: UserProfile;
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
