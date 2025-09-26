@@ -1,10 +1,86 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { Reminder } = require('../models');
+const { Reminder, Contact, Note, UserProfile } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 
 const router = express.Router();
+
+// Helper function to check and create reminders for untouched contacts
+const checkUntouchedContacts = async (userId) => {
+  try {
+    // Get user's profile for threshold
+    const profile = await UserProfile.findOne({
+      where: { user_id: userId }
+    });
+
+    if (!profile?.enableAutoReminders) {
+      return 0; // User has disabled auto reminders
+    }
+
+    const threshold = profile.reminder_days_threshold || 5;
+    const thresholdDate = new Date();
+    thresholdDate.setDate(thresholdDate.getDate() - threshold);
+
+    // Find contacts with their most recent note
+    const contacts = await Contact.findAll({
+      where: { user_id: userId },
+      include: [{
+        model: Note,
+        as: 'contactNotes',
+        attributes: ['created_at'],
+        required: false,
+        order: [['created_at', 'DESC']],
+        limit: 1
+      }],
+      limit: 20 // Limit to prevent performance issues
+    });
+
+    let remindersCreated = 0;
+
+    for (const contact of contacts) {
+      // Check last touch (note or creation date)
+      const lastNote = contact.contactNotes?.[0]?.created_at;
+      const lastTouched = lastNote || contact.created_at;
+
+      if (new Date(lastTouched) < thresholdDate) {
+        // Check if reminder already exists in last 24 hours
+        const existingReminder = await Reminder.findOne({
+          where: {
+            userId: userId,
+            entityType: 'contact',
+            entityId: contact.id,
+            title: { [Op.like]: '%hasn\'t been contacted%' },
+            createdAt: {
+              [Op.gte]: new Date(Date.now() - 24 * 60 * 60 * 1000)
+            }
+          }
+        });
+
+        if (!existingReminder) {
+          const daysSince = Math.floor((Date.now() - new Date(lastTouched).getTime()) / (1000 * 60 * 60 * 24));
+
+          await Reminder.create({
+            userId: userId,
+            title: `${contact.firstName} ${contact.lastName} hasn't been contacted in ${daysSince} days`,
+            description: `Follow up with ${contact.firstName} ${contact.lastName}. Last contact was ${daysSince} days ago.`,
+            remindAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+            entityType: 'contact',
+            entityId: contact.id,
+            entityName: `${contact.firstName} ${contact.lastName}`
+          });
+
+          remindersCreated++;
+        }
+      }
+    }
+
+    return remindersCreated;
+  } catch (error) {
+    console.error('Error checking untouched contacts:', error);
+    return 0;
+  }
+};
 
 // Validation middleware
 const validateReminder = [
@@ -21,9 +97,13 @@ const validateReminder = [
   body('entityName').optional().trim().isLength({ max: 255 }).withMessage('Entity name must be less than 255 characters')
 ];
 
-// Get user's pending reminders
+// Get user's pending reminders - NOW WITH AUTO-CHECK
 router.get('/', authMiddleware, async (req, res) => {
   try {
+    // Automatically check for untouched contacts on page load
+    // This is FREE and happens only when users actually use the system
+    const autoCreated = await checkUntouchedContacts(req.user.id);
+
     const { completed, entityType, limit = 50, offset = 0 } = req.query;
 
     const where = { userId: req.user.id };
@@ -49,7 +129,8 @@ router.get('/', authMiddleware, async (req, res) => {
       reminders: reminders.rows,
       total: reminders.count,
       limit: parseInt(limit),
-      offset: parseInt(offset)
+      offset: parseInt(offset),
+      autoCreated // Let frontend know if new reminders were created
     });
   } catch (error) {
     console.error('Get reminders error:', error);
