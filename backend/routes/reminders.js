@@ -18,7 +18,7 @@ const checkUntouchedContacts = async (userId) => {
       return 0; // User has disabled auto reminders
     }
 
-    const threshold = profile.reminder_days_threshold || 5;
+    const threshold = profile.reminderDaysThreshold || 5;
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() - threshold);
 

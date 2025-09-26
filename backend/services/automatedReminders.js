@@ -15,7 +15,7 @@ class AutomatedReminderService {
           model: UserProfile,
           as: 'profile',
           where: {
-            enable_auto_reminders: true
+            enableAutoReminders: true
           }
         }]
       });
@@ -23,7 +23,7 @@ class AutomatedReminderService {
       let totalRemindersCreated = 0;
 
       for (const user of usersWithProfiles) {
-        const threshold = user.profile.reminder_days_threshold || 5;
+        const threshold = user.profile.reminderDaysThreshold || 5;
         const thresholdDate = new Date();
         thresholdDate.setDate(thresholdDate.getDate() - threshold);
 
