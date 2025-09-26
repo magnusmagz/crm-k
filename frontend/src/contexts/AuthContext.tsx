@@ -123,7 +123,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updateProfile = (profile: UserProfile) => {
-    setState(prev => ({ ...prev, profile }));
+    setState(prev => ({
+      ...prev,
+      profile,
+      user: prev.user ? {
+        ...prev.user,
+        profile
+      } : null
+    }));
   };
 
   return (

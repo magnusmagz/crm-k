@@ -17,8 +17,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const { profile, user } = useAuth();
 
   // Get organization branding from user.organization, fallback to profile or defaults
-  const primaryColor = user?.organization?.primaryColor || user?.organization?.primary_color || profile?.primaryColor || '#1f2937';
-  const crmName = user?.organization?.crmName || user?.organization?.crm_name || profile?.crmName || 'CRM Killer';
+  // Check user.profile first (for immediate updates), then organization, then standalone profile
+  const primaryColor = user?.profile?.primaryColor || user?.organization?.primaryColor || user?.organization?.primary_color || profile?.primaryColor || '#1f2937';
+  const crmName = user?.profile?.crmName || user?.organization?.crmName || user?.organization?.crm_name || profile?.crmName || 'CRM Killer';
 
   useEffect(() => {
     // Update CSS variables for theme
