@@ -14,7 +14,7 @@ const router = express.Router();
 const validateContact = [
   body('firstName').notEmpty().trim().withMessage('First name is required'),
   body('lastName').notEmpty().trim().withMessage('Last name is required'),
-  body('email').optional({ nullable: true, checkFalsy: false }).isEmail().normalizeEmail().withMessage('Invalid email format'),
+  body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail().withMessage('Invalid email format'),
   body('phone').optional({ nullable: true, checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format'),
   body('company').optional({ nullable: true, checkFalsy: false }).trim(),
   body('position').optional({ nullable: true, checkFalsy: false }).trim(),
