@@ -80,7 +80,7 @@ class AutomatedReminderService {
             const daysSince = Math.floor((Date.now() - new Date(lastContactedDate).getTime()) / (1000 * 60 * 60 * 24));
 
             // Create automated reminder
-            await Reminder.create({
+            const reminder = await Reminder.create({
               userId: user.id,
               title: `${contact.firstName} ${contact.lastName} hasn't been contacted in ${daysSince} days`,
               description: `Follow up with ${contact.firstName} ${contact.lastName}. Last contact was ${daysSince} days ago.`,
@@ -92,12 +92,22 @@ class AutomatedReminderService {
 
             totalRemindersCreated++;
             console.log(`Created reminder for ${contact.firstName} ${contact.lastName} (User: ${user.email})`);
+
+            // TODO: Send email notification when email service is ready
+            // await emailService.sendReminderNotification(user, contact, reminder, daysSince);
           }
         }
       }
 
       console.log(`Automated reminder check complete. Created ${totalRemindersCreated} reminders.`);
-      return { success: true, remindersCreated: totalRemindersCreated };
+
+      // Return detailed results for potential email digest
+      return {
+        success: true,
+        remindersCreated: totalRemindersCreated,
+        usersProcessed: usersWithProfiles.length,
+        timestamp: new Date().toISOString()
+      };
     } catch (error) {
       console.error('Error in automated reminder service:', error);
       return { success: false, error: error.message };
