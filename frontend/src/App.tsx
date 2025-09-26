@@ -42,6 +42,9 @@ const RuleBuilder = lazy(() => import('./pages/RoundRobin/RuleBuilder'));
 const ManualAssignment = lazy(() => import('./pages/RoundRobin/ManualAssignment'));
 const AssignmentHistory = lazy(() => import('./pages/RoundRobin/AssignmentHistory'));
 
+// Reminders page
+const Reminders = lazy(() => import('./pages/Reminders'));
+
 // Loading component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -88,6 +91,7 @@ function App() {
               <Route path="custom-fields" element={<CustomFields />} />
               <Route path="duplicates" element={<DuplicateContacts />} />
               <Route path="users" element={<UserManagement />} />
+              <Route path="reminders" element={<Reminders />} />
               <Route path="round-robin" element={<AssignmentDashboard />} />
               <Route path="round-robin/rules" element={<AssignmentRules />} />
               <Route path="round-robin/rules/new" element={<RuleBuilder />} />

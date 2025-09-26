@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Contact } from '../types';
-import { 
-  EnvelopeIcon, 
-  PhoneIcon, 
+import {
+  EnvelopeIcon,
+  PhoneIcon,
   BuildingOfficeIcon,
   TagIcon,
   DocumentTextIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
+import { ReminderButton } from './ReminderButton';
 
 interface ContactCardProps {
   contact: Contact;
@@ -133,7 +134,14 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end mt-4 pt-3 border-t border-gray-100">
+      <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
+        <ReminderButton
+          entityType="contact"
+          entityId={contact.id}
+          entityName={`${contact.firstName} ${contact.lastName}`}
+          variant="link"
+          size="sm"
+        />
         <Link
           to={`/contacts/${contact.id}`}
           className="text-mobile-sm font-medium text-primary hover:text-primary-dark"

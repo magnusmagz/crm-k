@@ -40,6 +40,7 @@ const EmailCampaign = require('./EmailCampaign')(sequelize, Sequelize.DataTypes)
 const RoundRobinQueue = require('./RoundRobinQueue')(sequelize, Sequelize.DataTypes);
 const InterviewSchedule = require('./InterviewSchedule')(sequelize, Sequelize.DataTypes);
 const CandidateEvaluation = require('./CandidateEvaluation')(sequelize, Sequelize.DataTypes);
+const Reminder = require('./Reminder')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 // Organization associations
@@ -184,6 +185,10 @@ CandidateEvaluation.belongsTo(RecruitingPipeline, { foreignKey: 'pipelineId', as
 User.hasMany(CandidateEvaluation, { foreignKey: 'evaluatorId', as: 'evaluations' });
 CandidateEvaluation.belongsTo(User, { foreignKey: 'evaluatorId', as: 'evaluator' });
 
+// Reminder associations
+User.hasMany(Reminder, { foreignKey: 'userId', as: 'reminders' });
+Reminder.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   sequelize,
   Organization,
@@ -211,5 +216,6 @@ module.exports = {
   EmailCampaign,
   RoundRobinQueue,
   InterviewSchedule,
-  CandidateEvaluation
+  CandidateEvaluation,
+  Reminder
 };

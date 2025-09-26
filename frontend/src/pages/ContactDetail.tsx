@@ -10,6 +10,7 @@ import EmailHistory from '../components/email/EmailHistory';
 import ContactEmailEngagement from '../components/email/ContactEmailEngagement';
 import NoteWidget from '../components/notes/NoteWidget';
 import ActivityTimeline from '../components/ActivityTimeline';
+import { ReminderButton } from '../components/ReminderButton';
 import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -171,6 +172,13 @@ const ContactDetail: React.FC = () => {
                 {contact.isUnsubscribed ? 'Unsubscribed' : 'Email'}
               </button>
             )}
+            <ReminderButton
+              entityType="contact"
+              entityId={contact.id}
+              entityName={`${contact.firstName} ${contact.lastName}`}
+              variant="button"
+              size="md"
+            />
             <button
               onClick={() => setIsEditing(true)}
               className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"

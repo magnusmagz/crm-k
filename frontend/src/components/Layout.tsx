@@ -14,6 +14,7 @@ import api from '../services/api';
 const navigation = [
   { name: 'Contacts', href: '/contacts' },
   { name: 'Pipeline', href: '/pipeline' },
+  { name: 'Reminders', href: '/reminders' },
   { name: 'Round-Robin', href: '/round-robin' },
 ];
 

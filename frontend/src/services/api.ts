@@ -332,8 +332,41 @@ export const recruitingAPI = {
   
   remove: (id: string) => api.delete(`/recruiting-pipeline/${id}`),
   
-  bulkMove: (candidateIds: string[], stageId: string) => 
+  bulkMove: (candidateIds: string[], stageId: string) =>
     api.put('/recruiting-pipeline/bulk/move', { candidateIds, stageId }),
+};
+
+// Reminders API
+export const remindersAPI = {
+  getAll: (params?: {
+    completed?: boolean;
+    entityType?: 'contact' | 'deal';
+    limit?: number;
+    offset?: number;
+  }) => api.get('/reminders', { params }),
+
+  create: (data: {
+    title: string;
+    description?: string;
+    remindAt: string;
+    entityType?: 'contact' | 'deal';
+    entityId?: string;
+    entityName?: string;
+  }) => api.post('/reminders', data),
+
+  getById: (id: string) => api.get(`/reminders/${id}`),
+
+  update: (id: string, data?: { isCompleted?: boolean }) =>
+    api.put(`/reminders/${id}`, data),
+
+  delete: (id: string) => api.delete(`/reminders/${id}`),
+
+  checkDue: () => api.get('/reminders/check/due'),
+
+  getDashboardSummary: () => api.get('/reminders/dashboard/summary'),
+
+  bulkAction: (action: 'complete' | 'incomplete' | 'delete', reminderIds: string[]) =>
+    api.post('/reminders/bulk', { action, reminderIds })
 };
 
 export default api;
