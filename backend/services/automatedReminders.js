@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Contact, Reminder, User, UserProfile } = require('../models');
+const { Contact, Reminder, User, UserProfile, Note } = require('../models');
 
 class AutomatedReminderService {
   /**
@@ -27,16 +27,34 @@ class AutomatedReminderService {
         const thresholdDate = new Date();
         thresholdDate.setDate(thresholdDate.getDate() - threshold);
 
-        // Find untouched contacts for this user
-        const untouchedContacts = await Contact.findAll({
+        // Find all contacts for this user
+        const contacts = await Contact.findAll({
           where: {
-            user_id: user.id,
-            [Op.or]: [
-              { last_contacted_at: null },
-              { last_contacted_at: { [Op.lt]: thresholdDate } }
-            ]
+            user_id: user.id
           },
-          limit: 50 // Process max 50 contacts per user to avoid overload
+          include: [{
+            model: Note,
+            as: 'contactNotes',
+            attributes: ['created_at'],
+            required: false,
+            order: [['created_at', 'DESC']],
+            limit: 1
+          }],
+          limit: 100 // Process max 100 contacts per user to avoid overload
+        });
+
+        // Filter contacts that haven't been touched (no recent notes)
+        const untouchedContacts = contacts.filter(contact => {
+          // Get the most recent note date if it exists
+          const lastNote = contact.contactNotes && contact.contactNotes.length > 0
+            ? contact.contactNotes[0].created_at
+            : null;
+
+          // Use the most recent note date as last touched, or creation date if no notes
+          const lastTouched = lastNote || contact.created_at;
+
+          // Check if it's been too long since last touch
+          return new Date(lastTouched) < thresholdDate;
         });
 
         for (const contact of untouchedContacts) {
@@ -54,8 +72,11 @@ class AutomatedReminderService {
           });
 
           if (!existingReminder) {
-            // Calculate days since last contact
-            const lastContactedDate = contact.last_contacted_at || contact.created_at;
+            // Calculate days since last contact (using most recent note or creation date)
+            const lastNote = contact.contactNotes && contact.contactNotes.length > 0
+              ? contact.contactNotes[0].created_at
+              : null;
+            const lastContactedDate = lastNote || contact.created_at;
             const daysSince = Math.floor((Date.now() - new Date(lastContactedDate).getTime()) / (1000 * 60 * 60 * 24));
 
             // Create automated reminder

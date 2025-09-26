@@ -97,6 +97,7 @@ app.use('/api/recruiting-pipeline', require('./routes/recruitingPipeline'));
 app.use('/api/search', require('./routes/search'));
 app.use('/api/reminders', require('./routes/reminders'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/cron', require('./routes/cron'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

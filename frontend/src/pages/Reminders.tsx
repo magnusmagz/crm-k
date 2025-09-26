@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BellIcon, CheckIcon, TrashIcon, ClockIcon, CogIcon } from '@heroicons/react/24/outline';
+import { BellIcon, CheckIcon, TrashIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { remindersAPI } from '../services/api';
 import { QuickReminderModal } from '../components/QuickReminderModal';
-import api from '../services/api';
 
 interface Reminder {
   id: string;
@@ -22,7 +21,6 @@ export const Reminders: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showNewReminderModal, setShowNewReminderModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('pending');
-  const [checkingUntouched, setCheckingUntouched] = useState(false);
 
   useEffect(() => {
     fetchReminders();
@@ -105,27 +103,6 @@ export const Reminders: React.FC = () => {
     }
   };
 
-  const checkUntouchedContacts = async () => {
-    setCheckingUntouched(true);
-    try {
-      const response = await api.post('/admin/check-my-untouched-contacts');
-      const { remindersCreated, untouchedCount, threshold } = response.data;
-
-      if (remindersCreated > 0) {
-        alert(`Created ${remindersCreated} reminders for contacts not touched in ${threshold} days.`);
-        fetchReminders();
-      } else if (untouchedCount > 0) {
-        alert(`Found ${untouchedCount} untouched contacts but reminders already exist.`);
-      } else {
-        alert('All contacts have been touched recently!');
-      }
-    } catch (error) {
-      console.error('Failed to check untouched contacts:', error);
-      alert('Failed to check untouched contacts');
-    } finally {
-      setCheckingUntouched(false);
-    }
-  };
 
   const isOverdue = (remindAt: string) => {
     return new Date(remindAt) < new Date();
@@ -185,24 +162,13 @@ export const Reminders: React.FC = () => {
             Manage your follow-up reminders and never miss an important task.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex gap-2">
-          <button
-            onClick={checkUntouchedContacts}
-            disabled={checkingUntouched}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-            title="Check for contacts not touched recently"
-          >
-            <CogIcon className="-ml-1 mr-2 h-5 w-5" />
-            {checkingUntouched ? 'Checking...' : 'Check Untouched'}
-          </button>
-          <button
-            onClick={() => setShowNewReminderModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            <BellIcon className="-ml-1 mr-2 h-5 w-5" />
-            New Reminder
-          </button>
-        </div>
+        <button
+          onClick={() => setShowNewReminderModal(true)}
+          className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+        >
+          <BellIcon className="-ml-1 mr-2 h-5 w-5" />
+          New Reminder
+        </button>
       </div>
 
       {/* Filter Tabs */}

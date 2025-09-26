@@ -22,7 +22,7 @@ router.post('/run-automated-reminders', authMiddleware, async (req, res) => {
 // Manual trigger for testing - creates reminders for current user only
 router.post('/check-my-untouched-contacts', authMiddleware, async (req, res) => {
   try {
-    const { Contact, Reminder, UserProfile } = require('../models');
+    const { Contact, Reminder, UserProfile, Note } = require('../models');
     const { Op } = require('sequelize');
 
     // Get user's profile
@@ -34,16 +34,29 @@ router.post('/check-my-untouched-contacts', authMiddleware, async (req, res) => 
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() - threshold);
 
-    // Find untouched contacts
-    const untouchedContacts = await Contact.findAll({
+    // Find all contacts with their most recent note
+    const contacts = await Contact.findAll({
       where: {
-        user_id: req.user.id,
-        [Op.or]: [
-          { last_contacted_at: null },
-          { last_contacted_at: { [Op.lt]: thresholdDate } }
-        ]
+        user_id: req.user.id
       },
-      limit: 10
+      include: [{
+        model: Note,
+        as: 'contactNotes',
+        attributes: ['created_at'],
+        required: false,
+        order: [['created_at', 'DESC']],
+        limit: 1
+      }],
+      limit: 50
+    });
+
+    // Filter contacts that haven't been touched
+    const untouchedContacts = contacts.filter(contact => {
+      const lastNote = contact.contactNotes && contact.contactNotes.length > 0
+        ? contact.contactNotes[0].created_at
+        : null;
+      const lastTouched = lastNote || contact.created_at;
+      return new Date(lastTouched) < thresholdDate;
     });
 
     const remindersCreated = [];
@@ -63,7 +76,10 @@ router.post('/check-my-untouched-contacts', authMiddleware, async (req, res) => 
       });
 
       if (!existingReminder) {
-        const lastContactedDate = contact.last_contacted_at || contact.created_at;
+        const lastNote = contact.contactNotes && contact.contactNotes.length > 0
+          ? contact.contactNotes[0].created_at
+          : null;
+        const lastContactedDate = lastNote || contact.created_at;
         const daysSince = Math.floor((Date.now() - new Date(lastContactedDate).getTime()) / (1000 * 60 * 60 * 24));
 
         const reminder = await Reminder.create({
