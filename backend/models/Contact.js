@@ -97,11 +97,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    lastContactedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      field: 'last_contacted_at'
-    },
     state: {
       type: DataTypes.STRING,
       allowNull: true

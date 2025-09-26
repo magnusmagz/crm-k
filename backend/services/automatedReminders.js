@@ -116,48 +116,6 @@ class AutomatedReminderService {
       return { success: false, error: error.message };
     }
   }
-
-  /**
-   * Update last_contacted_at when a contact is touched
-   */
-  async touchContact(contactId, userId) {
-    try {
-      await Contact.update(
-        { last_contacted_at: new Date() },
-        {
-          where: {
-            id: contactId,
-            user_id: userId
-          }
-        }
-      );
-      return { success: true };
-    } catch (error) {
-      console.error('Error updating contact touch:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Batch update contact touch times for multiple contacts
-   */
-  async touchContacts(contactIds, userId) {
-    try {
-      await Contact.update(
-        { last_contacted_at: new Date() },
-        {
-          where: {
-            id: { [Op.in]: contactIds },
-            user_id: userId
-          }
-        }
-      );
-      return { success: true };
-    } catch (error) {
-      console.error('Error batch updating contact touches:', error);
-      return { success: false, error: error.message };
-    }
-  }
 }
 
 module.exports = new AutomatedReminderService();
