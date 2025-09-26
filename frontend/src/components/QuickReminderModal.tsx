@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import api from '../services/api';
+import { remindersAPI } from '../services/api';
 
 interface QuickReminderModalProps {
   isOpen: boolean;
@@ -64,7 +64,7 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
         reminderData.entityName = entityName;
       }
 
-      await api.post('/reminders', reminderData);
+      await remindersAPI.create(reminderData);
 
       // Success - close modal and show success message
       onClose();

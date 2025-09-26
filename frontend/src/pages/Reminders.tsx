@@ -290,3 +290,5 @@ export const Reminders: React.FC = () => {
     </div>
   );
 };
+
+export default Reminders;
