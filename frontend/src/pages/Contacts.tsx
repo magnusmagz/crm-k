@@ -411,19 +411,21 @@ const Contacts: React.FC = () => {
       )}
 
       {total > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={Math.ceil(total / pageSize)}
-          onPageChange={setCurrentPage}
-          pageSize={pageSize}
-          onPageSizeChange={(newSize) => {
-            setPageSize(newSize);
-            setCurrentPage(1); // Reset to first page when page size changes
-          }}
-          totalItems={total}
-          startItem={(currentPage - 1) * pageSize + 1}
-          endItem={Math.min(currentPage * pageSize, total)}
-        />
+        <div className={`${selectedContacts.size > 0 ? 'mb-24' : ''}`}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(total / pageSize)}
+            onPageChange={setCurrentPage}
+            pageSize={pageSize}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1); // Reset to first page when page size changes
+            }}
+            totalItems={total}
+            startItem={(currentPage - 1) * pageSize + 1}
+            endItem={Math.min(currentPage * pageSize, total)}
+          />
+        </div>
       )}
 
       {showImport && (
