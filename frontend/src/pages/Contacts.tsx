@@ -411,7 +411,7 @@ const Contacts: React.FC = () => {
       )}
 
       {total > 0 && (
-        <div className={`${selectedContacts.size > 0 ? 'mb-24' : ''}`}>
+        <div className={`mb-24 md:mb-0 ${selectedContacts.size > 0 ? 'mb-32 md:mb-0' : ''}`}>
           <Pagination
             currentPage={currentPage}
             totalPages={Math.ceil(total / pageSize)}
