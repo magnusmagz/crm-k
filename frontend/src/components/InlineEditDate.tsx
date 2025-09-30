@@ -13,9 +13,15 @@ const InlineEditDate: React.FC<InlineEditDateProps> = ({ value, onSave, placehol
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Update localValue when value prop changes
+  // Update localValue when value prop changes - convert to YYYY-MM-DD format for date input
   useEffect(() => {
-    setLocalValue(value || '');
+    if (value) {
+      const date = new Date(value);
+      const formatted = date.toISOString().split('T')[0];
+      setLocalValue(formatted);
+    } else {
+      setLocalValue('');
+    }
   }, [value]);
 
   useEffect(() => {
@@ -25,14 +31,37 @@ const InlineEditDate: React.FC<InlineEditDateProps> = ({ value, onSave, placehol
   }, [isEditing]);
 
   const handleSave = async () => {
-    if (localValue === value) {
+    console.log('handleSave called', { localValue, value });
+
+    // If no value selected, just close
+    if (!localValue) {
+      setIsEditing(false);
+      return;
+    }
+
+    // Normalize both dates to YYYY-MM-DD format for comparison
+    const normalizeDate = (dateStr: string | null | undefined) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toISOString().split('T')[0];
+    };
+
+    const normalizedLocal = normalizeDate(localValue);
+    const normalizedValue = normalizeDate(value);
+
+    console.log('Normalized dates:', { normalizedLocal, normalizedValue });
+
+    if (normalizedLocal === normalizedValue) {
+      console.log('No change detected, closing editor');
       setIsEditing(false);
       return;
     }
 
     setIsSaving(true);
     try {
+      console.log('Saving date:', localValue);
       await onSave(localValue);
+      console.log('Date saved successfully');
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to save:', error);
