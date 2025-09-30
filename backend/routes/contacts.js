@@ -11,10 +11,32 @@ const { touchContactMiddleware } = require('../middleware/contactTouch');
 const router = express.Router();
 
 
-// Validation middleware
+// Validation middleware for creating contacts (firstName/lastName required)
 const validateContact = [
   body('firstName').notEmpty().trim().withMessage('First name is required'),
   body('lastName').notEmpty().trim().withMessage('Last name is required'),
+  body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail().withMessage('Invalid email format'),
+  body('phone').optional({ nullable: true, checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format'),
+  body('company').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('position').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('tags').optional({ nullable: true, checkFalsy: false }).isArray().withMessage('Tags must be an array'),
+  body('notes').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('lastContacted').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+    if (!value) return true;
+    // Accept both ISO8601 datetime and YYYY-MM-DD date format
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return true;
+  }),
+  body('customFields').optional({ nullable: true, checkFalsy: false }).isObject().withMessage('Custom fields must be an object')
+];
+
+// Validation middleware for updating contacts (all fields optional for partial updates)
+const validateContactUpdate = [
+  body('firstName').optional({ nullable: true, checkFalsy: true }).trim(),
+  body('lastName').optional({ nullable: true, checkFalsy: true }).trim(),
   body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail().withMessage('Invalid email format'),
   body('phone').optional({ nullable: true, checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format'),
   body('company').optional({ nullable: true, checkFalsy: false }).trim(),
@@ -1318,7 +1340,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Update contact
-router.put('/:id', authMiddleware, validateContact, async (req, res) => {
+router.put('/:id', authMiddleware, validateContactUpdate, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
