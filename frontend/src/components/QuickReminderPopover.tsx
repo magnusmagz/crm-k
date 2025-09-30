@@ -121,7 +121,6 @@ export const QuickReminderPopover: React.FC<QuickReminderPopoverProps> = ({
 
   const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
-    e.preventDefault();
   };
 
   const renderTrigger = () => {
