@@ -181,13 +181,6 @@ const ContactDetail: React.FC = () => {
               <PencilIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
               Edit
             </button>
-            <button
-              onClick={handleDelete}
-              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              <TrashIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-              Delete
-            </button>
           </div>
         </div>
         <div className="border-t border-gray-200">
@@ -446,6 +439,16 @@ const ContactDetail: React.FC = () => {
           }}
         />
       )}
+
+      {/* Delete Contact Link */}
+      <div className="mt-8 mb-8 text-center">
+        <button
+          onClick={handleDelete}
+          className="text-sm text-red-600 hover:text-red-900 underline"
+        >
+          Delete Contact
+        </button>
+      </div>
 
       <Toaster position="top-right" />
     </div>
