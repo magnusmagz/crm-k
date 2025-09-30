@@ -21,6 +21,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
     position: contact?.position || '',
     tags: contact?.tags?.join(', ') || '',
     notes: contact?.notes || '',
+    lastContacted: contact?.lastContacted || '',
     customFields: contact?.customFields || {},
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -308,6 +309,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 id="position"
                 name="position"
                 value={formData.position}
+                onChange={handleChange}
+              />
+
+              <FormField
+                label="Last Contacted"
+                id="lastContacted"
+                name="lastContacted"
+                type="date"
+                value={formData.lastContacted}
                 onChange={handleChange}
               />
             </div>

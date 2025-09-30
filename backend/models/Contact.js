@@ -152,6 +152,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       field: 'current_role' // Now using snake_case in DB
+    },
+    lastContacted: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      field: 'last_contacted'
     }
   }, {
     tableName: 'contacts',

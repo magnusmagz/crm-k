@@ -93,6 +93,7 @@ export interface Contact {
   availability?: string;
   currentEmployer?: string;
   currentRole?: string;
+  lastContacted?: string;
 }
 
 export interface CustomField {
