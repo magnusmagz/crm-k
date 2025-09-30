@@ -8,7 +8,8 @@ import {
   TagIcon,
   DocumentTextIcon,
   CurrencyDollarIcon,
-  CalendarIcon
+  CalendarIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { ReminderButton } from './ReminderButton';
 import { contactsAPI } from '../services/api';
@@ -153,8 +154,8 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete, onUpdate }
       </div>
 
       {/* Actions */}
-      <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100" data-no-swipe>
-        <div data-no-swipe>
+      <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
+        <div className="flex items-center gap-3">
           <ReminderButton
             entityType="contact"
             entityId={contact.id}
@@ -162,6 +163,13 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete, onUpdate }
             variant="link"
             size="sm"
           />
+          <button
+            onClick={handleDelete}
+            className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors text-mobile-sm"
+          >
+            <TrashIcon className="h-4 w-4" />
+            <span>Delete</span>
+          </button>
         </div>
         <Link
           to={`/contacts/${contact.id}`}

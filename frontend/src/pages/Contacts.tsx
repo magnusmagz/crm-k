@@ -6,7 +6,6 @@ import { Contact } from '../types';
 import { PlusIcon, UserGroupIcon, ArrowUpTrayIcon, AdjustmentsHorizontalIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
-import SwipeableContactCard from '../components/SwipeableContactCard';
 import PullToRefresh from '../components/PullToRefresh';
 import LazyLoadWrapper from '../components/LazyLoadWrapper';
 import ContactCardSkeleton from '../components/ContactCardSkeleton';
@@ -301,13 +300,6 @@ const Contacts: React.FC = () => {
             </div>
 
             <PullToRefresh onRefresh={handleRefresh}>
-              {/* Swipe hint - shown only once */}
-              <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-mobile-sm text-gray-700">
-                <p className="flex items-center gap-2">
-                  <span>💡</span>
-                  <span>Tip: Swipe left to delete • Pull down to refresh</span>
-                </p>
-              </div>
               <div className="space-y-3">
               {contacts.map((contact) => (
                 <LazyLoadWrapper
@@ -315,7 +307,7 @@ const Contacts: React.FC = () => {
                   placeholder={<ContactCardSkeleton />}
                   rootMargin="200px"
                 >
-                  <SwipeableContactCard
+                  <ContactCard
                     contact={contact}
                     onDelete={handleDelete}
                     onUpdate={(updatedContact) => {
