@@ -63,8 +63,9 @@ const InlineEditDate: React.FC<InlineEditDateProps> = ({ value, onSave, placehol
       await onSave(localValue);
       console.log('Date saved successfully');
       setIsEditing(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save:', error);
+      console.error('Error response:', error.response?.data);
       setLocalValue(value || '');
     } finally {
       setIsSaving(false);
