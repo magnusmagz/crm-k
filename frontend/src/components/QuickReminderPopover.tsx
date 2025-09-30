@@ -43,10 +43,13 @@ export const QuickReminderPopover: React.FC<QuickReminderPopoverProps> = ({
     setError(null);
 
     try {
+      // Convert local datetime to ISO string for proper timezone handling
+      const remindAtISO = new Date(formData.remindAt).toISOString();
+
       const reminderData: any = {
         title: formData.title,
         description: formData.description,
-        remindAt: formData.remindAt
+        remindAt: remindAtISO
       };
 
       if (entityType && entityId && entityName) {
