@@ -6,9 +6,10 @@ import { Contact } from '../types';
 interface SwipeableContactCardProps {
   contact: Contact;
   onDelete: (id: string) => void;
+  onUpdate?: (updatedContact: Contact) => void;
 }
 
-const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, onDelete }) => {
+const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, onDelete, onUpdate }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -103,7 +104,7 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <ContactCard contact={contact} onDelete={onDelete} />
+        <ContactCard contact={contact} onDelete={onDelete} onUpdate={onUpdate} />
       </div>
 
       {/* Delete confirmation overlay */}

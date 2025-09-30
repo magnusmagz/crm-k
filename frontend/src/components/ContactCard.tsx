@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Contact } from '../types';
 import {
@@ -11,13 +11,16 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import { ReminderButton } from './ReminderButton';
+import { contactsAPI } from '../services/api';
+import InlineEditDate from './InlineEditDate';
 
 interface ContactCardProps {
   contact: Contact;
   onDelete: (id: string) => void;
+  onUpdate?: (updatedContact: Contact) => void;
 }
 
-const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
+const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete, onUpdate }) => {
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this contact?')) {
       onDelete(contact.id);
@@ -27,13 +30,19 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
       {/* Last Contacted */}
-      {contact.lastContacted && (
-        <div className="flex items-center text-mobile-sm text-gray-600 mb-3">
-          <CalendarIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-          <span className="font-medium">Last contacted:</span>
-          <span className="ml-1">{new Date(contact.lastContacted).toLocaleDateString()}</span>
-        </div>
-      )}
+      <div className="flex items-center text-mobile-sm text-gray-600 mb-3">
+        <CalendarIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+        <span className="font-medium mr-2">Last contacted:</span>
+        <InlineEditDate
+          value={contact.lastContacted}
+          onSave={async (value) => {
+            await contactsAPI.update(contact.id, { lastContacted: value });
+            if (onUpdate) {
+              onUpdate({ ...contact, lastContacted: value });
+            }
+          }}
+        />
+      </div>
 
       {/* Header */}
       <div className="flex items-start justify-between mb-3">

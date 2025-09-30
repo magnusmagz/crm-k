@@ -14,6 +14,7 @@ import ContactImport from '../components/ContactImport';
 import ContactExport from '../components/ContactExport';
 import Pagination from '../components/Pagination';
 import BulkOperations from '../components/BulkOperations';
+import InlineEditDate from '../components/InlineEditDate';
 import { Dialog, Transition } from '@headlessui/react';
 
 const Contacts: React.FC = () => {
@@ -265,6 +266,11 @@ const Contacts: React.FC = () => {
                   <SwipeableContactCard
                     contact={contact}
                     onDelete={handleDelete}
+                    onUpdate={(updatedContact) => {
+                      setContacts(prev => prev.map(c =>
+                        c.id === updatedContact.id ? updatedContact : c
+                      ));
+                    }}
                   />
                 </LazyLoadWrapper>
               ))}
@@ -329,7 +335,15 @@ const Contacts: React.FC = () => {
                           />
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {contact.lastContacted ? new Date(contact.lastContacted).toLocaleDateString() : '-'}
+                          <InlineEditDate
+                            value={contact.lastContacted}
+                            onSave={async (value) => {
+                              await contactsAPI.update(contact.id, { lastContacted: value });
+                              setContacts(prev => prev.map(c =>
+                                c.id === contact.id ? { ...c, lastContacted: value } : c
+                              ));
+                            }}
+                          />
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-primary-dark">
                           <Link to={`/contacts/${contact.id}`} className="hover:text-primary">
