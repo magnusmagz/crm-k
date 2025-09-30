@@ -119,11 +119,18 @@ export const QuickReminderPopover: React.FC<QuickReminderPopoverProps> = ({
     }
   };
 
+  const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   const renderTrigger = () => {
     switch (variant) {
       case 'link':
         return (
           <Popover.Button
+            onClick={handleButtonClick}
+            onTouchStart={handleButtonClick}
             className={`inline-flex items-center gap-1 text-primary hover:text-primary-dark transition-colors ${getSizeClasses()} ${className}`}
           >
             <BellIcon className={getIconSize()} />
@@ -134,6 +141,8 @@ export const QuickReminderPopover: React.FC<QuickReminderPopoverProps> = ({
       case 'icon':
         return (
           <Popover.Button
+            onClick={handleButtonClick}
+            onTouchStart={handleButtonClick}
             className={`inline-flex items-center justify-center text-gray-500 hover:text-primary transition-colors ${getSizeClasses()} ${className}`}
             title="Set Reminder"
           >
@@ -144,6 +153,8 @@ export const QuickReminderPopover: React.FC<QuickReminderPopoverProps> = ({
       default:
         return (
           <Popover.Button
+            onClick={handleButtonClick}
+            onTouchStart={handleButtonClick}
             className={`inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${getSizeClasses()} ${className}`}
           >
             <BellIcon className={getIconSize()} />

@@ -21,6 +21,7 @@ const validateContact = [
   body('position').optional({ nullable: true, checkFalsy: false }).trim(),
   body('tags').optional({ nullable: true, checkFalsy: false }).isArray().withMessage('Tags must be an array'),
   body('notes').optional({ nullable: true, checkFalsy: false }).trim(),
+  body('lastContacted').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Invalid date format'),
   body('customFields').optional({ nullable: true, checkFalsy: false }).isObject().withMessage('Custom fields must be an object')
 ];
 
