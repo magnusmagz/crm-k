@@ -13,6 +13,11 @@ const InlineEditDate: React.FC<InlineEditDateProps> = ({ value, onSave, placehol
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Update localValue when value prop changes
+  useEffect(() => {
+    setLocalValue(value || '');
+  }, [value]);
+
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
