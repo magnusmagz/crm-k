@@ -63,10 +63,15 @@ router.get('/', authMiddleware, async (req, res) => {
       where.tags = { [Op.overlap]: tagArray };
     }
 
+    // Validate and normalize sort parameters
+    const allowedSortFields = ['createdAt', 'updatedAt', 'firstName', 'lastName', 'email', 'company', 'lastContacted'];
+    const normalizedSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const normalizedSortOrder = (sortOrder || '').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
     // First get contacts without deals for better performance
     const contacts = await Contact.findAndCountAll({
       where,
-      order: [[sortBy, sortOrder]],
+      order: [[normalizedSortBy, normalizedSortOrder]],
       limit: parseInt(limit),
       offset: parseInt(offset)
     });

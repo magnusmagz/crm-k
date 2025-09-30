@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
 import api from '../services/api';
 import { Contact } from '../types';
-import { PlusIcon, UserGroupIcon, ArrowUpTrayIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, UserGroupIcon, ArrowUpTrayIcon, AdjustmentsHorizontalIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
 import SwipeableContactCard from '../components/SwipeableContactCard';
@@ -30,11 +30,13 @@ const Contacts: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [customFields, setCustomFields] = useState<any[]>([]);
+  const [sortBy, setSortBy] = useState<string>('lastContacted');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     fetchContacts();
     fetchCustomFields();
-  }, [search, currentPage, pageSize]);
+  }, [search, currentPage, pageSize, sortBy, sortOrder]);
 
   const fetchCustomFields = async () => {
     try {
@@ -49,10 +51,12 @@ const Contacts: React.FC = () => {
     setIsLoading(true);
     try {
       const offset = (currentPage - 1) * pageSize;
-      const response = await contactsAPI.getAll({ 
+      const response = await contactsAPI.getAll({
         search: search || undefined,
         limit: pageSize,
-        offset: offset
+        offset: offset,
+        sortBy,
+        sortOrder
       });
       setContacts(response.data.contacts);
       setTotal(response.data.total);
@@ -61,6 +65,16 @@ const Contacts: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('desc');
+    }
+    setCurrentPage(1);
   };
 
   const handleContactCreated = (contact: Contact) => {
@@ -108,6 +122,17 @@ const Contacts: React.FC = () => {
 
   const clearSelection = () => {
     setSelectedContacts(new Set());
+  };
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortBy !== field) {
+      return <ChevronUpIcon className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ChevronUpIcon className="h-4 w-4 text-primary" />
+    ) : (
+      <ChevronDownIcon className="h-4 w-4 text-primary" />
+    );
   };
 
   return (
@@ -248,6 +273,33 @@ const Contacts: React.FC = () => {
         <>
           {/* Mobile Cards View with Swipe-to-Delete and Pull-to-Refresh */}
           <div className="md:hidden mt-4">
+            {/* Mobile Sort Dropdown */}
+            <div className="mb-3 flex items-center gap-2">
+              <label htmlFor="mobile-sort" className="text-sm font-medium text-gray-700">
+                Sort by:
+              </label>
+              <select
+                id="mobile-sort"
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => {
+                  const [field, order] = e.target.value.split('-');
+                  setSortBy(field);
+                  setSortOrder(order as 'asc' | 'desc');
+                  setCurrentPage(1);
+                }}
+                className="flex-1 rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-primary focus:ring-primary"
+              >
+                <option value="lastContacted-desc">Last Contacted (Newest)</option>
+                <option value="lastContacted-asc">Last Contacted (Oldest)</option>
+                <option value="lastName-asc">Name (A-Z)</option>
+                <option value="lastName-desc">Name (Z-A)</option>
+                <option value="email-asc">Email (A-Z)</option>
+                <option value="email-desc">Email (Z-A)</option>
+                <option value="company-asc">Company (A-Z)</option>
+                <option value="company-desc">Company (Z-A)</option>
+              </select>
+            </div>
+
             <PullToRefresh onRefresh={handleRefresh}>
               {/* Swipe hint - shown only once */}
               <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-mobile-sm text-gray-700">
@@ -295,19 +347,43 @@ const Contacts: React.FC = () => {
                         />
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Last Contacted
+                        <button
+                          onClick={() => handleSort('lastContacted')}
+                          className="group inline-flex items-center gap-1 hover:text-primary"
+                        >
+                          Last Contacted
+                          <SortIcon field="lastContacted" />
+                        </button>
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Name
+                        <button
+                          onClick={() => handleSort('lastName')}
+                          className="group inline-flex items-center gap-1 hover:text-primary"
+                        >
+                          Name
+                          <SortIcon field="lastName" />
+                        </button>
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Email
+                        <button
+                          onClick={() => handleSort('email')}
+                          className="group inline-flex items-center gap-1 hover:text-primary"
+                        >
+                          Email
+                          <SortIcon field="email" />
+                        </button>
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Phone
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Company
+                        <button
+                          onClick={() => handleSort('company')}
+                          className="group inline-flex items-center gap-1 hover:text-primary"
+                        >
+                          Company
+                          <SortIcon field="company" />
+                        </button>
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Tags
