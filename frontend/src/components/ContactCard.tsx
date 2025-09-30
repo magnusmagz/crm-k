@@ -7,7 +7,8 @@ import {
   BuildingOfficeIcon,
   TagIcon,
   DocumentTextIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { ReminderButton } from './ReminderButton';
 
@@ -25,9 +26,18 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      {/* Last Contacted */}
+      {contact.lastContacted && (
+        <div className="flex items-center text-mobile-sm text-gray-600 mb-3">
+          <CalendarIcon className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+          <span className="font-medium">Last contacted:</span>
+          <span className="ml-1">{new Date(contact.lastContacted).toLocaleDateString()}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
-        <Link 
+        <Link
           to={`/contacts/${contact.id}`}
           className="flex-1 min-w-0"
         >

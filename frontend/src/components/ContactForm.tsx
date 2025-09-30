@@ -258,6 +258,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
             <h4 className="text-sm font-medium text-primary-dark mb-4">Basic Information</h4>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
               <FormField
+                label="Last Contacted"
+                id="lastContacted"
+                name="lastContacted"
+                type="date"
+                value={formData.lastContacted}
+                onChange={handleChange}
+              />
+
+              <FormField
                 label="First Name"
                 id="firstName"
                 name="firstName"
@@ -266,7 +275,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 error={errors.firstName}
                 required
               />
-              
+
               <FormField
                 label="Last Name"
                 id="lastName"
@@ -276,7 +285,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 error={errors.lastName}
                 required
               />
-              
+
               <FormField
                 label="Email"
                 id="email"
@@ -286,7 +295,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 onChange={handleChange}
                 error={errors.email}
               />
-              
+
               <FormField
                 label="Phone"
                 id="phone"
@@ -295,7 +304,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 value={formData.phone}
                 onChange={handleChange}
               />
-              
+
               <FormField
                 label="Company"
                 id="company"
@@ -303,21 +312,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 value={formData.company}
                 onChange={handleChange}
               />
-              
+
               <FormField
                 label="Position"
                 id="position"
                 name="position"
                 value={formData.position}
-                onChange={handleChange}
-              />
-
-              <FormField
-                label="Last Contacted"
-                id="lastContacted"
-                name="lastContacted"
-                type="date"
-                value={formData.lastContacted}
                 onChange={handleChange}
               />
             </div>
