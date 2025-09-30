@@ -99,20 +99,21 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       const data = {
         ...formData,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        lastContacted: formData.lastContacted || null,
       };
-      
-      
+
+
       let result;
       if (contact) {
         const response = await contactsAPI.update(contact.id, data);
@@ -121,7 +122,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
         const response = await contactsAPI.create(data);
         result = response.data.contact;
       }
-      
+
       onSubmit(result);
     } catch (error: any) {
       console.error('Failed to save contact:', error);
