@@ -289,6 +289,9 @@ const Contacts: React.FC = () => {
                         />
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
+                        Last Contacted
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
                         Name
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
@@ -324,6 +327,9 @@ const Contacts: React.FC = () => {
                             onChange={() => toggleContactSelection(contact.id)}
                             className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {contact.lastContacted ? new Date(contact.lastContacted).toLocaleDateString() : '-'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-primary-dark">
                           <Link to={`/contacts/${contact.id}`} className="hover:text-primary">
