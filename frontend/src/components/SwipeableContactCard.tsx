@@ -34,6 +34,7 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
       target.closest('input') ||
       target.closest('[role="button"]')
     ) {
+      touchStartX.current = -1; // Mark as invalid
       return;
     }
 
@@ -42,24 +43,35 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // Ignore if touch started on an interactive element
+    if (touchStartX.current === -1) {
+      return;
+    }
+
     const currentX = e.touches[0].clientX;
     const diff = touchStartX.current - currentX;
-    
+
     // Only allow left swipe (positive diff)
     if (diff > 0) {
       // Apply resistance after threshold
-      const offset = diff > SWIPE_THRESHOLD 
+      const offset = diff > SWIPE_THRESHOLD
         ? SWIPE_THRESHOLD + (diff - SWIPE_THRESHOLD) * 0.3
         : diff;
-      
+
       setSwipeOffset(Math.min(offset, DELETE_ZONE_WIDTH));
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    // Ignore if touch started on an interactive element
+    if (touchStartX.current === -1) {
+      touchStartX.current = 0; // Reset for next touch
+      return;
+    }
+
     const touchDuration = Date.now() - touchStartTime.current;
     const velocity = swipeOffset / touchDuration;
-    
+
     // If swiped far enough or fast enough, show delete confirmation
     if (swipeOffset >= SWIPE_THRESHOLD || velocity > 0.5) {
       setSwipeOffset(DELETE_ZONE_WIDTH);
