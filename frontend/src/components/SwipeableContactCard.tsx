@@ -22,6 +22,21 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
   const ANIMATION_DURATION = 300; // ms
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+
+    // Don't interfere with interactive elements like buttons
+    if (
+      target.tagName === 'A' ||
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'INPUT' ||
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('input') ||
+      target.closest('[role="button"]')
+    ) {
+      return;
+    }
+
     touchStartX.current = e.touches[0].clientX;
     touchStartTime.current = Date.now();
   };

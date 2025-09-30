@@ -1305,7 +1305,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Update contact
-router.put('/:id', authMiddleware, validateContact, touchContactMiddleware('update'), async (req, res) => {
+router.put('/:id', authMiddleware, validateContact, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
