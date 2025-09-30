@@ -24,7 +24,7 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement;
 
-    // Don't interfere with interactive elements like buttons
+    // Don't interfere with interactive elements or zones marked data-no-swipe
     if (
       target.tagName === 'A' ||
       target.tagName === 'BUTTON' ||
@@ -32,7 +32,8 @@ const SwipeableContactCard: React.FC<SwipeableContactCardProps> = ({ contact, on
       target.closest('button') ||
       target.closest('a') ||
       target.closest('input') ||
-      target.closest('[role="button"]')
+      target.closest('[role="button"]') ||
+      target.closest('[data-no-swipe]')
     ) {
       touchStartX.current = -1; // Mark as invalid
       return;

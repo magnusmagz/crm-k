@@ -153,14 +153,16 @@ const ContactCard: React.FC<ContactCardProps> = ({ contact, onDelete, onUpdate }
       </div>
 
       {/* Actions */}
-      <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
-        <ReminderButton
-          entityType="contact"
-          entityId={contact.id}
-          entityName={`${contact.firstName} ${contact.lastName}`}
-          variant="link"
-          size="sm"
-        />
+      <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100" data-no-swipe>
+        <div data-no-swipe>
+          <ReminderButton
+            entityType="contact"
+            entityId={contact.id}
+            entityName={`${contact.firstName} ${contact.lastName}`}
+            variant="link"
+            size="sm"
+          />
+        </div>
         <Link
           to={`/contacts/${contact.id}`}
           className="text-mobile-sm font-medium text-primary hover:text-primary-dark"
