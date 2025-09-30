@@ -87,7 +87,12 @@ const validateReminder = [
   body('title').notEmpty().trim().withMessage('Title is required').isLength({ max: 255 }).withMessage('Title must be less than 255 characters'),
   body('description').optional().trim(),
   body('remindAt').isISO8601().withMessage('Valid reminder date is required').custom((value) => {
-    if (new Date(value) <= new Date()) {
+    // Allow a 1 minute grace period for processing time and timezone issues
+    const reminderDate = new Date(value);
+    const now = new Date();
+    const oneMinuteAgo = new Date(now.getTime() - 60000); // 1 minute buffer
+
+    if (reminderDate < oneMinuteAgo) {
       throw new Error('Reminder date must be in the future');
     }
     return true;
