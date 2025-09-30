@@ -21,7 +21,15 @@ const validateContact = [
   body('position').optional({ nullable: true, checkFalsy: false }).trim(),
   body('tags').optional({ nullable: true, checkFalsy: false }).isArray().withMessage('Tags must be an array'),
   body('notes').optional({ nullable: true, checkFalsy: false }).trim(),
-  body('lastContacted').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Invalid date format'),
+  body('lastContacted').optional({ nullable: true, checkFalsy: true }).custom((value) => {
+    if (!value) return true;
+    // Accept both ISO8601 datetime and YYYY-MM-DD date format
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    return true;
+  }),
   body('customFields').optional({ nullable: true, checkFalsy: false }).isObject().withMessage('Custom fields must be an object')
 ];
 
