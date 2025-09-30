@@ -156,14 +156,14 @@ const ContactDetail: React.FC = () => {
               Contact information and details
             </p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {contact.email && (
               <button
                 onClick={() => setShowEmailModal(true)}
                 disabled={contact.isUnsubscribed}
-                className={`inline-flex items-center px-4 py-3 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  contact.isUnsubscribed 
-                    ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed opacity-60' 
+                className={`inline-flex items-center px-3 py-2 sm:px-4 sm:py-3 border shadow-sm text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  contact.isUnsubscribed
+                    ? 'border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed opacity-60'
                     : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-primary'
                 }`}
                 title={contact.isUnsubscribed ? 'Cannot send email - contact is unsubscribed' : 'Send email'}
@@ -181,14 +181,14 @@ const ContactDetail: React.FC = () => {
             />
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center px-4 py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               <PencilIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
               Edit
             </button>
             <button
               onClick={handleDelete}
-              className="inline-flex items-center px-4 py-3 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               <TrashIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
               Delete
