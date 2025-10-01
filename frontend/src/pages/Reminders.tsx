@@ -57,11 +57,15 @@ export const Reminders: React.FC = () => {
 
   const checkDueReminders = async () => {
     try {
+      console.log('Checking for due reminders...');
       const response = await remindersAPI.checkDue();
       const dueReminders = response.data.reminders || [];
+      console.log('Due reminders found:', dueReminders.length, dueReminders);
+      console.log('Notification permission:', Notification.permission);
 
       dueReminders.forEach((reminder: Reminder) => {
         if (Notification.permission === 'granted') {
+          console.log('Showing notification for:', reminder.title);
           new Notification(reminder.title, {
             body: reminder.entityName
               ? `Reminder for ${reminder.entityName}`
@@ -69,6 +73,8 @@ export const Reminders: React.FC = () => {
             icon: '/favicon.ico',
             tag: reminder.id // Prevents duplicate notifications
           });
+        } else {
+          console.log('Notification permission not granted:', Notification.permission);
         }
       });
 
