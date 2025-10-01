@@ -1,12 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid';
-import { PhotoIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, BuildingOfficeIcon, BellIcon, BellSlashIcon, CheckIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
 import { FormField } from '../components/ui/FormField';
 import EmailSignatureEditor from '../components/EmailSignatureEditor';
 import StateLicenseManager from '../components/StateLicenseManager';
 import { StateLicense } from '../types';
+import { pushNotificationService, PushSubscriptionStatus } from '../services/pushNotificationService';
 
 const Profile: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -41,6 +42,12 @@ const Profile: React.FC = () => {
     confirmPassword: '',
   });
 
+  // Notification settings state
+  const [notificationStatus, setNotificationStatus] = useState<PushSubscriptionStatus | null>(null);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
+  const [notificationError, setNotificationError] = useState<string | null>(null);
+  const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name.startsWith('address.')) {
@@ -59,6 +66,71 @@ const Profile: React.FC = () => {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPasswordData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // Load notification status on mount
+  useEffect(() => {
+    loadNotificationStatus();
+  }, []);
+
+  const loadNotificationStatus = async () => {
+    setIsLoadingNotifications(true);
+    try {
+      const status = await pushNotificationService.getSubscriptionStatus();
+      setNotificationStatus(status);
+    } catch (error) {
+      console.error('Error loading notification status:', error);
+      setNotificationError('Failed to load notification settings');
+    } finally {
+      setIsLoadingNotifications(false);
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    setIsTogglingNotifications(true);
+    setNotificationError(null);
+
+    try {
+      if (notificationStatus?.isSubscribed) {
+        // Unsubscribe
+        await pushNotificationService.unsubscribeFromPush();
+        setMessage({ type: 'success', text: 'Notifications disabled successfully' });
+      } else {
+        // Subscribe
+        await pushNotificationService.subscribeToPush();
+        setMessage({ type: 'success', text: 'Notifications enabled successfully' });
+      }
+
+      // Reload status
+      await loadNotificationStatus();
+    } catch (error: any) {
+      console.error('Error toggling notifications:', error);
+
+      let errorMessage = 'Failed to update notification settings';
+      if (error.message.includes('permission')) {
+        errorMessage = 'Permission denied. Please enable notifications in your device settings.';
+      } else if (error.message.includes('not supported')) {
+        errorMessage = 'Push notifications are not supported on this device.';
+      }
+
+      setNotificationError(errorMessage);
+      setMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setIsTogglingNotifications(false);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    setNotificationError(null);
+
+    try {
+      await pushNotificationService.sendTestNotification();
+      setMessage({ type: 'success', text: 'Test notification sent! Check your device.' });
+    } catch (error) {
+      console.error('Error sending test notification:', error);
+      setNotificationError('Failed to send test notification');
+      setMessage({ type: 'error', text: 'Failed to send test notification' });
+    }
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'profilePhoto' | 'companyLogo') => {
@@ -755,6 +827,197 @@ const Profile: React.FC = () => {
           <div className="shadow overflow-hidden sm:rounded-md">
             <div className="px-4 py-5 bg-white sm:p-6">
               <EmailSignatureEditor profile={profile} user={user} />
+            </div>
+          </div>
+        </div>
+
+        {/* Notification Settings Section */}
+        <div className="">
+          <div className="border-t border-gray-200 pt-8 mb-6">
+            <h3 className="text-xl font-semibold text-primary-dark">Push Notifications</h3>
+            <p className="text-sm text-gray-600 mt-1">Manage your reminder notification preferences</p>
+          </div>
+          <div className="shadow overflow-hidden sm:rounded-md">
+            <div className="px-4 py-5 bg-white sm:p-6">
+              {isLoadingNotifications ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Status Display */}
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      {notificationStatus?.isSubscribed ? (
+                        <BellIcon className="h-6 w-6 text-green-500" />
+                      ) : (
+                        <BellSlashIcon className="h-6 w-6 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Status: {notificationStatus?.isSubscribed ? (
+                          <span className="text-green-600">Enabled</span>
+                        ) : notificationStatus?.permission === 'denied' ? (
+                          <span className="text-red-600">Blocked</span>
+                        ) : (
+                          <span className="text-gray-600">Disabled</span>
+                        )}
+                      </h4>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {notificationStatus?.isSubscribed
+                          ? 'You will receive push notifications for your reminders'
+                          : notificationStatus?.permission === 'denied'
+                          ? 'Notifications are blocked. Enable them in your device settings.'
+                          : 'Enable notifications to get reminders even when the app is closed'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Device Information */}
+                  {notificationStatus && (
+                    <div className="bg-gray-50 rounded-md p-4">
+                      <h5 className="text-xs font-medium text-gray-700 uppercase tracking-wide mb-2">
+                        Device Information
+                      </h5>
+                      <dl className="grid grid-cols-1 gap-3 text-sm">
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Push Support:</dt>
+                          <dd className="font-medium text-gray-900">
+                            {notificationStatus.isSupported ? (
+                              <span className="text-green-600 flex items-center">
+                                <CheckIcon className="h-4 w-4 mr-1" />
+                                Supported
+                              </span>
+                            ) : (
+                              <span className="text-red-600">Not Supported</span>
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">PWA Mode:</dt>
+                          <dd className="font-medium text-gray-900">
+                            {notificationStatus.isPWA ? (
+                              <span className="text-green-600 flex items-center">
+                                <CheckIcon className="h-4 w-4 mr-1" />
+                                Installed
+                              </span>
+                            ) : (
+                              <span className="text-yellow-600 flex items-center">
+                                <DevicePhoneMobileIcon className="h-4 w-4 mr-1" />
+                                Not Installed
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Permission:</dt>
+                          <dd className="font-medium text-gray-900 capitalize">
+                            {notificationStatus.permission === 'granted' ? (
+                              <span className="text-green-600">{notificationStatus.permission}</span>
+                            ) : notificationStatus.permission === 'denied' ? (
+                              <span className="text-red-600">{notificationStatus.permission}</span>
+                            ) : (
+                              <span className="text-gray-600">{notificationStatus.permission}</span>
+                            )}
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  )}
+
+                  {/* Not in PWA warning */}
+                  {notificationStatus && !notificationStatus.isPWA && (
+                    <div className="bg-blue-50 border-l-4 border-gray-200 p-4 rounded-md">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <DevicePhoneMobileIcon className="h-5 w-5 text-blue-400" />
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-primary-dark">Install App for Best Experience</h3>
+                          <div className="mt-2 text-sm text-primary-dark">
+                            <p>
+                              For reliable push notifications, install this app to your home screen.
+                            </p>
+                            {pushNotificationService.isIOS() && (
+                              <div className="mt-2 text-xs">
+                                <p className="font-semibold">On iOS:</p>
+                                <ol className="list-decimal list-inside mt-1 space-y-1">
+                                  <li>Tap the Share button in Safari</li>
+                                  <li>Scroll down and tap "Add to Home Screen"</li>
+                                  <li>Tap "Add" to confirm</li>
+                                </ol>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {notificationStatus?.isSupported && notificationStatus.permission !== 'denied' && (
+                      <button
+                        type="button"
+                        onClick={handleToggleNotifications}
+                        disabled={isTogglingNotifications || !notificationStatus.isPWA}
+                        className={`inline-flex items-center justify-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          notificationStatus.isSubscribed
+                            ? 'border-red-300 text-red-700 bg-white hover:bg-red-50 focus:ring-red-500'
+                            : 'border-transparent text-white bg-primary hover:bg-primary-dark focus:ring-primary'
+                        }`}
+                      >
+                        {isTogglingNotifications ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                            {notificationStatus.isSubscribed ? 'Disabling...' : 'Enabling...'}
+                          </>
+                        ) : (
+                          <>
+                            {notificationStatus.isSubscribed ? (
+                              <>
+                                <BellSlashIcon className="h-4 w-4 mr-2" />
+                                Disable Notifications
+                              </>
+                            ) : (
+                              <>
+                                <BellIcon className="h-4 w-4 mr-2" />
+                                Enable Notifications
+                              </>
+                            )}
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    {notificationStatus?.isSubscribed && (
+                      <button
+                        type="button"
+                        onClick={handleSendTestNotification}
+                        className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                      >
+                        <BellIcon className="h-4 w-4 mr-2" />
+                        Send Test Notification
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Error Display */}
+                  {notificationError && (
+                    <div className="rounded-md bg-red-50 p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <ExclamationCircleIcon className="h-5 w-5 text-red-400" />
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-red-800">{notificationError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

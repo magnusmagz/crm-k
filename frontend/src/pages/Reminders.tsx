@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BellIcon, CheckIcon, TrashIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { remindersAPI } from '../services/api';
 import { QuickReminderModal } from '../components/QuickReminderModal';
+import { NotificationPermissionPrompt } from '../components/NotificationPermissionPrompt';
 
 interface Reminder {
   id: string;
@@ -21,6 +22,7 @@ export const Reminders: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showNewReminderModal, setShowNewReminderModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('pending');
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
   useEffect(() => {
     fetchReminders();
@@ -28,13 +30,15 @@ export const Reminders: React.FC = () => {
     // Simple polling for due reminders (every minute)
     const interval = setInterval(checkDueReminders, 60000);
 
-    // Request notification permission on component mount
-    if (Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-
     return () => clearInterval(interval);
   }, [filter]);
+
+  // Check if we should show notification prompt after reminders are loaded
+  useEffect(() => {
+    if (!loading && reminders.length > 0 && Notification.permission === 'default') {
+      setShowNotificationPrompt(true);
+    }
+  }, [loading, reminders.length]);
 
   const fetchReminders = async () => {
     setLoading(true);
@@ -205,6 +209,15 @@ export const Reminders: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {/* Notification Permission Prompt - Only show when user has reminders */}
+      {showNotificationPrompt && reminders.length > 0 && (
+        <NotificationPermissionPrompt
+          onSubscribed={() => setShowNotificationPrompt(false)}
+          onDismiss={() => setShowNotificationPrompt(false)}
+          showOnlyIfNeeded={true}
+        />
+      )}
+
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-primary-dark">Reminders</h1>

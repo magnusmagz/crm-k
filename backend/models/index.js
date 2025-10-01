@@ -41,6 +41,7 @@ const RoundRobinQueue = require('./RoundRobinQueue')(sequelize, Sequelize.DataTy
 const InterviewSchedule = require('./InterviewSchedule')(sequelize, Sequelize.DataTypes);
 const CandidateEvaluation = require('./CandidateEvaluation')(sequelize, Sequelize.DataTypes);
 const Reminder = require('./Reminder')(sequelize, Sequelize.DataTypes);
+const PushSubscription = require('./PushSubscription')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 // Organization associations
@@ -189,6 +190,10 @@ CandidateEvaluation.belongsTo(User, { foreignKey: 'evaluatorId', as: 'evaluator'
 User.hasMany(Reminder, { foreignKey: 'userId', as: 'reminders' });
 Reminder.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// Push Subscription associations
+User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
+PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   sequelize,
   Organization,
@@ -217,5 +222,6 @@ module.exports = {
   RoundRobinQueue,
   InterviewSchedule,
   CandidateEvaluation,
-  Reminder
+  Reminder,
+  PushSubscription
 };

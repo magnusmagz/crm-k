@@ -369,4 +369,31 @@ export const remindersAPI = {
     api.post('/reminders/bulk', { action, reminderIds })
 };
 
+// Push Notification API
+export const pushAPI = {
+  // Get VAPID public key for push subscription
+  getVapidPublicKey: () => api.get('/push/vapid-public-key'),
+
+  // Subscribe to push notifications
+  subscribe: (data: {
+    subscription: PushSubscriptionJSON;
+    deviceInfo?: {
+      userAgent: string;
+      platform: string;
+      isIOS: boolean;
+      isPWA: boolean;
+    };
+  }) => api.post('/push/subscribe', data),
+
+  // Unsubscribe from push notifications
+  unsubscribe: (data: { endpoint: string }) =>
+    api.post('/push/unsubscribe', data),
+
+  // Send test notification
+  test: () => api.post('/push/test'),
+
+  // Get user's push subscriptions
+  getSubscriptions: () => api.get('/push/subscriptions'),
+};
+
 export default api;
