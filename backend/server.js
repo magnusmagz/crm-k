@@ -26,6 +26,7 @@ const emailTemplatesRoutes = require('./routes/emailTemplates');
 const organizationRoutes = require('./routes/organizations');
 const superAdminRoutes = require('./routes/superAdmin');
 const pushRoutes = require('./routes/push');
+const { startScheduler } = require('./services/reminderScheduler');
 // const { initializeAutomations } = require('./services/automationInitializer');
 
 const app = express();
@@ -135,7 +136,10 @@ async function startServer() {
     
     // Initialize automation system
     // initializeAutomations();
-    
+
+    // Start reminder scheduler
+    startScheduler();
+
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

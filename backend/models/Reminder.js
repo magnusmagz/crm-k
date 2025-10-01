@@ -64,6 +64,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
       field: 'completed_at'
+    },
+    lastNotificationSentAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'last_notification_sent_at'
     }
   }, {
     tableName: 'reminders',
