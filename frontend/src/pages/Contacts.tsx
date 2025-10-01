@@ -139,9 +139,6 @@ const Contacts: React.FC = () => {
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-mobile-2xl font-bold text-primary-dark">Contacts</h1>
-          <p className="mt-2 text-mobile-sm text-gray-700">
-            A list of all your contacts including their name, email, and phone.
-          </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none grid grid-cols-2 gap-2 sm:flex sm:gap-3">
           <Link
