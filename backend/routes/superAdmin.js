@@ -73,12 +73,28 @@ router.get('/organizations', async (req, res) => {
       subQuery: false
     });
 
+    // Format organizations to use camelCase property names
+    const formattedOrganizations = organizations.rows.map(org => {
+      const orgData = org.dataValues || org;
+      return {
+        id: orgData.id,
+        name: orgData.name,
+        crmName: orgData.crm_name || orgData.crmName,
+        primaryColor: orgData.primary_color || orgData.primaryColor,
+        isActive: orgData.is_active !== undefined ? orgData.is_active : orgData.isActive,
+        contactEmail: orgData.contact_email || orgData.contactEmail,
+        website: orgData.website,
+        userCount: parseInt(orgData.userCount) || 0,
+        contactCount: parseInt(orgData.contactCount) || 0
+      };
+    });
+
     req.superAdmin?.logAction('LIST_ORGANIZATIONS', {
       search, status, page, limit, total: organizations.count.length
     });
 
     res.json({
-      organizations: organizations.rows,
+      organizations: formattedOrganizations,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -119,12 +135,35 @@ router.get('/organizations/:id', async (req, res) => {
       return res.status(404).json({ error: 'Organization not found' });
     }
 
+    // Format organization data to use camelCase and include counts
+    const orgData = organization.dataValues || organization;
+    const formattedOrg = {
+      id: orgData.id,
+      name: orgData.name,
+      crm_name: orgData.crm_name || orgData.crmName,
+      primary_color: orgData.primary_color || orgData.primaryColor,
+      is_active: orgData.is_active !== undefined ? orgData.is_active : orgData.isActive,
+      contact_email: orgData.contact_email || orgData.contactEmail,
+      contact_phone: orgData.contact_phone || orgData.contactPhone,
+      website: orgData.website,
+      address: orgData.address,
+      city: orgData.city,
+      state: orgData.state,
+      zip_code: orgData.zip_code || orgData.zipCode,
+      created_at: orgData.created_at || orgData.createdAt,
+      updated_at: orgData.updated_at || orgData.updatedAt,
+      settings: orgData.settings,
+      users: orgData.users || [],
+      contacts: orgData.contacts || [],
+      contactCount: orgData.contacts ? orgData.contacts.length : 0
+    };
+
     req.superAdmin?.logAction('VIEW_ORGANIZATION', {
       organizationId: req.params.id,
       organizationName: organization.name
     });
 
-    res.json({ organization });
+    res.json({ organization: formattedOrg });
 
   } catch (error) {
     console.error('Get organization error:', error);
