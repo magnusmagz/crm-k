@@ -361,7 +361,7 @@ const OrganizationsManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                       <Link
                         to={`/super-admin/organizations/${org.id}/users`}
-                        className="text-blue-600 hover:text-blue-900 inline-flex items-center"
+                        className="text-primary hover:text-indigo-900 inline-flex items-center"
                         title="View Users"
                       >
                         <UsersIcon className="w-4 h-4" />
