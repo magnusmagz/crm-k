@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AppModeProvider } from './contexts/AppModeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
+import InstallPWAPrompt from './components/InstallPWAPrompt';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -107,6 +108,7 @@ function App() {
             </Route>
             </Routes>
           </Suspense>
+          <InstallPWAPrompt />
           </AppModeProvider>
         </ThemeProvider>
       </AuthProvider>
