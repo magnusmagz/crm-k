@@ -408,8 +408,101 @@ const Layout: React.FC = () => {
                 </div>
               </div>
 
-              <Disclosure.Panel className="hidden">
-                {/* Mobile menu panel is hidden - using bottom navigation instead */}
+              <Disclosure.Panel className="md:hidden">
+                <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={classNames(
+                        location.pathname === item.href
+                          ? 'bg-primary-light text-white'
+                          : 'text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white',
+                        'block rounded-md px-3 py-2 text-base font-medium'
+                      )}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+
+                  {/* Marketing section */}
+                  <div className="pt-2 border-t border-gray-700">
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Marketing
+                    </div>
+                    {marketingNavigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={classNames(
+                          location.pathname === item.href
+                            ? 'bg-primary-light text-white'
+                            : 'text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white',
+                          'block rounded-md px-3 py-2 text-base font-medium'
+                        )}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Mode Toggle */}
+                  <div className="pt-2 border-t border-gray-700">
+                    <button
+                      onClick={toggleMode}
+                      className="flex items-center space-x-2 w-full px-3 py-2 rounded-md text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white transition-colors text-base font-medium"
+                    >
+                      {mode === 'sales' ? (
+                        <>
+                          <BriefcaseIcon className="h-5 w-5" />
+                          <span>Sales Mode</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserGroupIcon className="h-5 w-5" />
+                          <span>Recruiting Mode</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* User menu */}
+                  <div className="border-t border-gray-700 pt-4 pb-3">
+                    <div className="px-3 text-base font-medium text-white">
+                      {profile?.firstName} {profile?.lastName}
+                    </div>
+                    <div className="mt-3 space-y-1">
+                      <Link
+                        to="/profile"
+                        className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
+                      >
+                        Your Profile
+                      </Link>
+                      {user?.isAdmin && (
+                        <Link
+                          to="/users"
+                          className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
+                        >
+                          Manage Users
+                        </Link>
+                      )}
+                      {user?.isSuperAdmin && (
+                        <Link
+                          to="/super-admin"
+                          className="block rounded-md px-3 py-2 text-base font-medium text-purple-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
+                        >
+                          🔐 Super Admin
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </Disclosure.Panel>
             </>
           )}
