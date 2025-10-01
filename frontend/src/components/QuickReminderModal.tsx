@@ -51,10 +51,13 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
     setError(null);
 
     try {
+      // Convert local datetime to ISO string for proper timezone handling
+      const remindAtISO = new Date(formData.remindAt).toISOString();
+
       const reminderData: any = {
         title: formData.title,
         description: formData.description,
-        remindAt: formData.remindAt
+        remindAt: remindAtISO
       };
 
       // Add entity information if provided
@@ -74,7 +77,8 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
 
     } catch (error: any) {
       console.error('Failed to create reminder:', error);
-      setError(error.response?.data?.error || 'Failed to create reminder');
+      console.error('Error response:', error.response?.data);
+      setError(error.response?.data?.error || error.response?.data?.errors?.[0]?.msg || 'Failed to create reminder');
     } finally {
       setLoading(false);
     }
