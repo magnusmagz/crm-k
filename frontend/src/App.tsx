@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AppModeProvider } from './contexts/AppModeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
+import InstallPWAPrompt from './components/InstallPWAPrompt';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -29,6 +30,7 @@ const SuperAdminLayout = lazy(() => import('./components/SuperAdminLayout'));
 const SuperAdminDashboard = lazy(() => import('./pages/SuperAdminDashboard'));
 const OrganizationsManagement = lazy(() => import('./pages/OrganizationsManagement'));
 const CreateOrganization = lazy(() => import('./pages/CreateOrganization'));
+const OrganizationUsers = lazy(() => import('./pages/OrganizationUsers'));
 const GlobalUsersView = lazy(() => import('./pages/GlobalUsersView'));
 
 // Email Template pages
@@ -64,18 +66,19 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            
+
             {/* Super Admin Routes */}
             <Route path="/super-admin" element={<PrivateRoute><SuperAdminLayout /></PrivateRoute>}>
               <Route index element={<SuperAdminDashboard />} />
               <Route path="organizations" element={<OrganizationsManagement />} />
               <Route path="organizations/new" element={<CreateOrganization />} />
               <Route path="organizations/:id" element={<div>Organization Details - TODO</div>} />
+              <Route path="organizations/:id/users" element={<OrganizationUsers />} />
               <Route path="organizations/:id/edit" element={<div>Edit Organization - TODO</div>} />
               <Route path="users" element={<GlobalUsersView />} />
               <Route path="analytics" element={<div>Analytics Dashboard - TODO</div>} />
             </Route>
-            
+
             {/* Main App Routes */}
             <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
@@ -104,6 +107,7 @@ function App() {
             </Route>
             </Routes>
           </Suspense>
+          <InstallPWAPrompt />
           </AppModeProvider>
         </ThemeProvider>
       </AuthProvider>
