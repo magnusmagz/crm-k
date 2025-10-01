@@ -409,11 +409,13 @@ const Layout: React.FC = () => {
               </div>
 
               <Disclosure.Panel className="md:hidden">
+                {({ close }) => (
                 <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
+                      onClick={() => close()}
                       className={classNames(
                         location.pathname === item.href
                           ? 'bg-primary-light text-white'
@@ -434,6 +436,7 @@ const Layout: React.FC = () => {
                       <Link
                         key={item.name}
                         to={item.href}
+                        onClick={() => close()}
                         className={classNames(
                           location.pathname === item.href
                             ? 'bg-primary-light text-white'
@@ -474,6 +477,7 @@ const Layout: React.FC = () => {
                     <div className="mt-3 space-y-1">
                       <Link
                         to="/profile"
+                        onClick={() => close()}
                         className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
                       >
                         Your Profile
@@ -481,6 +485,7 @@ const Layout: React.FC = () => {
                       {user?.isAdmin && (
                         <Link
                           to="/users"
+                          onClick={() => close()}
                           className="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
                         >
                           Manage Users
@@ -489,13 +494,17 @@ const Layout: React.FC = () => {
                       {user?.isSuperAdmin && (
                         <Link
                           to="/super-admin"
+                          onClick={() => close()}
                           className="block rounded-md px-3 py-2 text-base font-medium text-purple-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
                         >
                           🔐 Super Admin
                         </Link>
                       )}
                       <button
-                        onClick={handleLogout}
+                        onClick={() => {
+                          close();
+                          handleLogout();
+                        }}
                         className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white hover:bg-opacity-10 hover:text-white"
                       >
                         Sign out
@@ -503,6 +512,7 @@ const Layout: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                )}
               </Disclosure.Panel>
             </>
           )}
