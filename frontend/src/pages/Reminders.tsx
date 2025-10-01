@@ -112,13 +112,44 @@ export const Reminders: React.FC = () => {
   const testNotification = () => {
     console.log('Testing notification...');
     console.log('Permission:', Notification.permission);
+    console.log('Notification supported?', 'Notification' in window);
+
     if (Notification.permission === 'granted') {
-      new Notification('Test Notification', {
-        body: 'If you see this, notifications are working!',
-        icon: '/favicon.ico'
-      });
+      try {
+        const notification = new Notification('Test Notification', {
+          body: 'If you see this, notifications are working!',
+          icon: '/favicon.ico',
+          requireInteraction: false,
+          silent: false
+        });
+        console.log('Notification object created:', notification);
+
+        notification.onclick = () => {
+          console.log('Notification clicked!');
+        };
+
+        notification.onerror = (error) => {
+          console.error('Notification error:', error);
+        };
+
+        notification.onshow = () => {
+          console.log('Notification shown!');
+        };
+
+        notification.onclose = () => {
+          console.log('Notification closed');
+        };
+      } catch (error) {
+        console.error('Failed to create notification:', error);
+        alert('Error creating notification: ' + error);
+      }
     } else {
       alert('Notification permission: ' + Notification.permission);
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          console.log('Permission result:', permission);
+        });
+      }
     }
   };
 
