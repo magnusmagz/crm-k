@@ -67,20 +67,37 @@ export const Reminders: React.FC = () => {
       console.log('Due reminders found:', dueReminders.length, dueReminders);
       console.log('Notification permission:', Notification.permission);
 
-      dueReminders.forEach((reminder: Reminder) => {
-        if (Notification.permission === 'granted') {
-          console.log('Showing notification for:', reminder.title);
-          new Notification(reminder.title, {
-            body: reminder.entityName
-              ? `Reminder for ${reminder.entityName}`
-              : reminder.description || 'You have a reminder due',
-            icon: '/favicon.ico',
-            tag: reminder.id // Prevents duplicate notifications
-          });
-        } else {
-          console.log('Notification permission not granted:', Notification.permission);
+      if (Notification.permission === 'granted' && dueReminders.length > 0) {
+        try {
+          // Get the service worker registration
+          const registration = await navigator.serviceWorker.ready;
+
+          // Show notification for each due reminder
+          for (const reminder of dueReminders) {
+            console.log('Showing notification for:', reminder.title);
+            await registration.showNotification(reminder.title, {
+              body: reminder.entityName
+                ? `Reminder for ${reminder.entityName}`
+                : reminder.description || 'You have a reminder due',
+              icon: '/logo192.png',
+              badge: '/logo192.png',
+              tag: reminder.id, // Prevents duplicate notifications
+              data: {
+                url: '/reminders',
+                reminderId: reminder.id,
+                entityType: reminder.entityType,
+                entityId: reminder.entityId
+              },
+              requireInteraction: false,
+              vibrate: [200, 100, 200]
+            });
+          }
+        } catch (error) {
+          console.error('Failed to show notifications via service worker:', error);
         }
-      });
+      } else if (Notification.permission !== 'granted') {
+        console.log('Notification permission not granted:', Notification.permission);
+      }
 
       // Refresh the list if we have due reminders
       if (dueReminders.length > 0 && filter === 'pending') {
@@ -113,36 +130,30 @@ export const Reminders: React.FC = () => {
     }
   };
 
-  const testNotification = () => {
+  const testNotification = async () => {
     console.log('Testing notification...');
     console.log('Permission:', Notification.permission);
-    console.log('Notification supported?', 'Notification' in window);
+    console.log('Service Worker supported?', 'serviceWorker' in navigator);
 
     if (Notification.permission === 'granted') {
       try {
-        const notification = new Notification('Test Notification', {
+        // Get the service worker registration
+        const registration = await navigator.serviceWorker.ready;
+        console.log('Service worker ready:', registration);
+
+        // Use service worker to show notification
+        await registration.showNotification('Test Notification', {
           body: 'If you see this, notifications are working!',
-          icon: '/favicon.ico',
+          icon: '/logo192.png',
+          badge: '/logo192.png',
+          tag: 'test-notification',
           requireInteraction: false,
-          silent: false
+          silent: false,
+          vibrate: [200, 100, 200]
         });
-        console.log('Notification object created:', notification);
 
-        notification.onclick = () => {
-          console.log('Notification clicked!');
-        };
-
-        notification.onerror = (error) => {
-          console.error('Notification error:', error);
-        };
-
-        notification.onshow = () => {
-          console.log('Notification shown!');
-        };
-
-        notification.onclose = () => {
-          console.log('Notification closed');
-        };
+        console.log('Notification shown via service worker!');
+        alert('Test notification sent! Check your notification tray.');
       } catch (error) {
         console.error('Failed to create notification:', error);
         alert('Error creating notification: ' + error);
@@ -152,6 +163,9 @@ export const Reminders: React.FC = () => {
       if (Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
           console.log('Permission result:', permission);
+          if (permission === 'granted') {
+            alert('Permission granted! Click Test Notification again.');
+          }
         });
       }
     }
