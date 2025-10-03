@@ -346,6 +346,80 @@ router.put('/organizations/:id', async (req, res) => {
   }
 });
 
+// POST /api/super-admin/organizations/:id/users - Create user for organization
+router.post('/organizations/:id/users', [
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 }),
+  body('isAdmin').optional().isBoolean(),
+  body('isLoanOfficer').optional().isBoolean(),
+  body('isActive').optional().isBoolean()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const organization = await Organization.findByPk(req.params.id);
+    if (!organization) {
+      return res.status(404).json({ error: 'Organization not found' });
+    }
+
+    const { email, password, isAdmin = false, isLoanOfficer = false, isActive = true } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+
+    // Create user
+    const user = await User.create({
+      email,
+      password, // Will be hashed by the User model's beforeCreate hook
+      organization_id: organization.id,
+      is_admin: isAdmin,
+      is_loan_officer: isLoanOfficer,
+      is_active: isActive
+    });
+
+    // Create user profile
+    const { UserProfile } = require('../models');
+    const nameParts = email.split('@')[0].split('.');
+    const firstName = nameParts[0] || email.split('@')[0];
+    const lastName = nameParts.slice(1).join(' ') || firstName;
+
+    await UserProfile.create({
+      userId: user.id,
+      firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1),
+      lastName: lastName.charAt(0).toUpperCase() + lastName.slice(1),
+      companyName: organization.name
+    });
+
+    req.superAdmin?.logAction('CREATE_USER', {
+      userId: user.id,
+      email: user.email,
+      organizationId: organization.id,
+      organizationName: organization.name
+    });
+
+    res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        is_admin: user.is_admin,
+        is_loan_officer: user.is_loan_officer,
+        is_active: user.is_active
+      }
+    });
+
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
 // DELETE /api/super-admin/organizations/:id - Deactivate organization
 router.delete('/organizations/:id', async (req, res) => {
   try {
