@@ -354,10 +354,11 @@ const CreateOrganization: React.FC = () => {
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : 'border-gray-300 focus:ring-indigo-500 focus:border-primary'
                     }`}
-                    placeholder="John Smith"
+                    placeholder="First Last"
                     value={formData.adminName}
                     onChange={handleInputChange}
                   />
+                  <p className="mt-1 text-sm text-gray-500">Enter first and last name</p>
                   {errors.adminName && <p className="mt-1 text-sm text-red-600">{errors.adminName}</p>}
                 </div>
               </div>
