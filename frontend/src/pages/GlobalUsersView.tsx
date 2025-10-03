@@ -541,18 +541,22 @@ const GlobalUsersView: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div 
-                          className="h-6 w-6 rounded-full flex items-center justify-center text-white text-xs font-semibold mr-2"
-                          style={{ backgroundColor: user.organization.primaryColor }}
-                        >
-                          {user.organization.name.charAt(0).toUpperCase()}
+                      {user.organization ? (
+                        <div className="flex items-center">
+                          <div
+                            className="h-6 w-6 rounded-full flex items-center justify-center text-white text-xs font-semibold mr-2"
+                            style={{ backgroundColor: user.organization.primaryColor || '#6366f1' }}
+                          >
+                            {user.organization.name?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{user.organization.name}</div>
+                            <div className="text-sm text-gray-500">{user.organization.crmName}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{user.organization.name}</div>
-                          <div className="text-sm text-gray-500">{user.organization.crmName}</div>
-                        </div>
-                      </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">No organization</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="space-y-1">

@@ -527,7 +527,13 @@ router.get('/users', async (req, res) => {
         lastLogin: userData.last_login || userData.lastLogin,
         organizationId: userData.organization_id || userData.organizationId,
         createdAt: userData.created_at || userData.createdAt,
-        organization: orgData
+        organization: orgData ? {
+          id: orgData.id,
+          name: orgData.name,
+          crmName: orgData.crmName || orgData.crm_name,
+          primaryColor: orgData.primaryColor || orgData.primary_color,
+          isActive: orgData.isActive || orgData.is_active
+        } : null
       };
     });
 
