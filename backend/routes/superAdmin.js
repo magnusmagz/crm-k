@@ -599,7 +599,20 @@ router.put('/users/:id', async (req, res) => {
 
     console.log('Update data to apply:', updateData);
 
-    await user.update(updateData);
+    // Use direct SQL update to ensure it persists
+    if (Object.keys(updateData).length > 0) {
+      const [rowsUpdated] = await sequelize.query(
+        `UPDATE users SET ${Object.keys(updateData).map((key, i) => `${key} = $${i + 2}`).join(', ')} WHERE id = $1 RETURNING *`,
+        {
+          bind: [req.params.id, ...Object.values(updateData)],
+          type: QueryTypes.UPDATE
+        }
+      );
+      console.log('Direct SQL update result:', rowsUpdated);
+    }
+
+    // Reload to get updated values
+    await user.reload();
 
     console.log('User after update - organization_id:', user.organization_id, 'organizationId:', user.organizationId);
 
