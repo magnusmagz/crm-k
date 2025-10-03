@@ -126,7 +126,7 @@ const EditOrganization: React.FC = () => {
       const payload = {
         name: formData.name.trim(),
         crmName: formData.crmName.trim(),
-        primaryColor: formData.primaryColor,
+        primaryColor: formData.primaryColor.toUpperCase(), // Ensure uppercase for consistency
         isActive: formData.isActive,
         contactEmail: formData.contactEmail.trim() || undefined,
         website: formData.website.trim() || undefined,
@@ -136,6 +136,8 @@ const EditOrganization: React.FC = () => {
         state: formData.state.trim() || undefined,
         zipCode: formData.zipCode.trim() || undefined
       };
+
+      console.log('Saving organization with payload:', payload);
 
       await api.put(`/super-admin/organizations/${id}`, payload);
 
