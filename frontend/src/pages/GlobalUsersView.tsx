@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { 
+import {
   UsersIcon,
   MagnifyingGlassIcon,
   CheckCircleIcon,
@@ -14,6 +14,7 @@ import {
   ClockIcon,
   EnvelopeIcon
 } from '@heroicons/react/24/outline';
+import { Dialog, Transition } from '@headlessui/react';
 import api from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
@@ -79,6 +80,9 @@ const GlobalUsersView: React.FC = () => {
   });
   const [organizations, setOrganizations] = useState<Array<{id: string, name: string}>>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
 
   useEffect(() => {
     fetchUsers();
@@ -175,7 +179,7 @@ const GlobalUsersView: React.FC = () => {
   const handleToggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     const action = currentStatus ? 'remove admin privileges from' : 'grant admin privileges to';
     const user = users.find(u => u.id === userId);
-    
+
     if (!window.confirm(`Are you sure you want to ${action} ${user?.firstName} ${user?.lastName}?`)) {
       return;
     }
@@ -185,16 +189,16 @@ const GlobalUsersView: React.FC = () => {
       await api.put(`/super-admin/users/${userId}`, {
         isAdmin: !currentStatus
       });
-      
+
       // Update user in the list
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.id === userId 
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === userId
             ? { ...user, isAdmin: !currentStatus }
             : user
         )
       );
-      
+
       // Update stats
       setStats(prevStats => ({
         ...prevStats,
@@ -206,6 +210,60 @@ const GlobalUsersView: React.FC = () => {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const handleAssignOrganization = async () => {
+    if (!selectedUser || !selectedOrgId) {
+      alert('Please select an organization');
+      return;
+    }
+
+    try {
+      setActionLoading(selectedUser.id);
+      await api.put(`/super-admin/users/${selectedUser.id}`, {
+        organizationId: selectedOrgId
+      });
+
+      // Find the new organization
+      const newOrg = organizations.find(o => o.id === selectedOrgId);
+
+      // Update user in the list
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === selectedUser.id
+            ? {
+                ...user,
+                organizationId: selectedOrgId,
+                organization: newOrg ? {
+                  id: newOrg.id,
+                  name: newOrg.name,
+                  crmName: newOrg.name,
+                  primaryColor: '#6366f1',
+                  isActive: true
+                } : user.organization
+              }
+            : user
+        )
+      );
+
+      setShowAssignModal(false);
+      setSelectedUser(null);
+      setSelectedOrgId('');
+
+      // Refresh to get updated data
+      await fetchUsers();
+    } catch (error: any) {
+      console.error('Failed to assign organization:', error);
+      alert(error.response?.data?.error || 'Failed to assign organization');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const openAssignModal = (user: User) => {
+    setSelectedUser(user);
+    setSelectedOrgId(user.organizationId || '');
+    setShowAssignModal(true);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -583,8 +641,8 @@ const GlobalUsersView: React.FC = () => {
                             onClick={() => handleToggleUserStatus(user.id, user.isActive)}
                             disabled={actionLoading === user.id}
                             className={`${
-                              user.isActive 
-                                ? 'text-red-600 hover:text-red-900' 
+                              user.isActive
+                                ? 'text-red-600 hover:text-red-900'
                                 : 'text-green-600 hover:text-green-900'
                             } inline-flex items-center disabled:opacity-50`}
                             title={user.isActive ? 'Deactivate User' : 'Activate User'}
@@ -601,8 +659,8 @@ const GlobalUsersView: React.FC = () => {
                             onClick={() => handleToggleAdminStatus(user.id, user.isAdmin)}
                             disabled={actionLoading === user.id}
                             className={`${
-                              user.isAdmin 
-                                ? 'text-orange-600 hover:text-orange-900' 
+                              user.isAdmin
+                                ? 'text-orange-600 hover:text-orange-900'
                                 : 'text-primary hover:text-blue-900'
                             } inline-flex items-center disabled:opacity-50`}
                             title={user.isAdmin ? 'Remove Admin' : 'Make Admin'}
@@ -612,6 +670,14 @@ const GlobalUsersView: React.FC = () => {
                             ) : (
                               <ShieldCheckIcon className="w-4 h-4" />
                             )}
+                          </button>
+                          <button
+                            onClick={() => openAssignModal(user)}
+                            disabled={actionLoading === user.id}
+                            className="text-indigo-600 hover:text-indigo-900 inline-flex items-center disabled:opacity-50"
+                            title="Assign Organization"
+                          >
+                            <BuildingOfficeIcon className="w-4 h-4" />
                           </button>
                         </>
                       )}
@@ -639,6 +705,93 @@ const GlobalUsersView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Assign Organization Modal */}
+      <Transition.Root show={showAssignModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={setShowAssignModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                  <div>
+                    <div className="mt-3 text-center sm:mt-0 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                        Assign Organization
+                      </Dialog.Title>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">
+                          Assign {selectedUser?.firstName} {selectedUser?.lastName} to an organization
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6">
+                      <label htmlFor="organization" className="block text-sm font-medium text-gray-700">
+                        Organization
+                      </label>
+                      <select
+                        id="organization"
+                        value={selectedOrgId}
+                        onChange={(e) => setSelectedOrgId(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                      >
+                        <option value="">Select an organization</option>
+                        {organizations.map((org) => (
+                          <option key={org.id} value={org.id}>
+                            {org.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={handleAssignOrganization}
+                        disabled={!selectedOrgId || actionLoading === selectedUser?.id}
+                        className="inline-flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:col-start-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {actionLoading === selectedUser?.id ? 'Assigning...' : 'Assign'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAssignModal(false);
+                          setSelectedUser(null);
+                          setSelectedOrgId('');
+                        }}
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </div>
   );
 };

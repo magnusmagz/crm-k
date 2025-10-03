@@ -586,13 +586,14 @@ router.put('/users/:id', async (req, res) => {
       return res.status(403).json({ error: 'Cannot modify super admin users' });
     }
 
-    const { isActive, isAdmin, isLoanOfficer, requirePasswordChange } = req.body;
+    const { isActive, isAdmin, isLoanOfficer, requirePasswordChange, organizationId } = req.body;
 
     const updateData = {};
     if (isActive !== undefined) updateData.is_active = isActive;
     if (isAdmin !== undefined) updateData.is_admin = isAdmin;
     if (isLoanOfficer !== undefined) updateData.is_loan_officer = isLoanOfficer;
     if (requirePasswordChange !== undefined) updateData.require_password_change = requirePasswordChange;
+    if (organizationId !== undefined) updateData.organization_id = organizationId;
 
     await user.update(updateData);
 
