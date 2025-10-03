@@ -239,10 +239,14 @@ router.post('/organizations', validateOrganizationCreation, async (req, res) => 
 
       // Create user profile for admin
       const { UserProfile } = require('../models');
+      const nameParts = adminName.trim().split(' ');
+      const firstName = nameParts[0] || adminName;
+      const lastName = nameParts.slice(1).join(' ') || firstName; // Use firstName as fallback if no last name
+
       await UserProfile.create({
         user_id: adminUser.id,
-        first_name: adminName.split(' ')[0] || adminName,
-        last_name: adminName.split(' ').slice(1).join(' ') || '',
+        first_name: firstName,
+        last_name: lastName,
         company_name: name
       }, { transaction });
 
