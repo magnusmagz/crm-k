@@ -420,6 +420,48 @@ router.post('/organizations/:id/users', [
   }
 });
 
+// PUT /api/super-admin/users/:id/reset-password - Reset user password
+router.put('/users/:id/reset-password', async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Hash the new password
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Use direct SQL to update password
+    await sequelize.query(
+      `UPDATE users SET password = $1, require_password_change = true WHERE id = $2`,
+      {
+        bind: [hashedPassword, req.params.id],
+        type: QueryTypes.UPDATE
+      }
+    );
+
+    req.superAdmin?.logAction('RESET_USER_PASSWORD', {
+      userId: req.params.id,
+      userEmail: user.email
+    });
+
+    res.json({
+      message: 'Password reset successfully'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
 // DELETE /api/super-admin/organizations/:id - Deactivate organization
 router.delete('/organizations/:id', async (req, res) => {
   try {

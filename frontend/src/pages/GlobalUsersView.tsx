@@ -12,7 +12,8 @@ import {
   EyeIcon,
   PencilIcon,
   ClockIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 import api from '../services/api';
@@ -83,6 +84,8 @@ const GlobalUsersView: React.FC = () => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -264,6 +267,36 @@ const GlobalUsersView: React.FC = () => {
     setSelectedUser(user);
     setSelectedOrgId(user.organizationId || '');
     setShowAssignModal(true);
+  };
+
+  const openResetPasswordModal = (user: User) => {
+    setSelectedUser(user);
+    setNewPassword('TempPassword123!');
+    setShowResetPasswordModal(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (!selectedUser || !newPassword) {
+      alert('Please enter a password');
+      return;
+    }
+
+    try {
+      setActionLoading(selectedUser.id);
+      await api.put(`/super-admin/users/${selectedUser.id}/reset-password`, {
+        password: newPassword
+      });
+
+      alert(`Password reset successfully for ${selectedUser.email}\nNew password: ${newPassword}`);
+      setShowResetPasswordModal(false);
+      setSelectedUser(null);
+      setNewPassword('');
+    } catch (error: any) {
+      console.error('Failed to reset password:', error);
+      alert(error.response?.data?.error || 'Failed to reset password');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -679,6 +712,14 @@ const GlobalUsersView: React.FC = () => {
                           >
                             <BuildingOfficeIcon className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => openResetPasswordModal(user)}
+                            disabled={actionLoading === user.id}
+                            className="text-yellow-600 hover:text-yellow-900 inline-flex items-center disabled:opacity-50"
+                            title="Reset Password"
+                          >
+                            <KeyIcon className="w-4 h-4" />
+                          </button>
                         </>
                       )}
                     </td>
@@ -779,6 +820,89 @@ const GlobalUsersView: React.FC = () => {
                           setShowAssignModal(false);
                           setSelectedUser(null);
                           setSelectedOrgId('');
+                        }}
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
+      {/* Reset Password Modal */}
+      <Transition.Root show={showResetPasswordModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={setShowResetPasswordModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                  <div>
+                    <div className="mt-3 text-center sm:mt-0 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                        Reset Password
+                      </Dialog.Title>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">
+                          Reset password for {selectedUser?.firstName} {selectedUser?.lastName} ({selectedUser?.email})
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6">
+                      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                        New Password
+                      </label>
+                      <input
+                        type="text"
+                        id="newPassword"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        placeholder="Enter new password"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">User will be able to change this password after login</p>
+                    </div>
+
+                    <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={handleResetPassword}
+                        disabled={!newPassword || actionLoading === selectedUser?.id}
+                        className="inline-flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:col-start-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {actionLoading === selectedUser?.id ? 'Resetting...' : 'Reset Password'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowResetPasswordModal(false);
+                          setSelectedUser(null);
+                          setNewPassword('');
                         }}
                         className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
                       >
