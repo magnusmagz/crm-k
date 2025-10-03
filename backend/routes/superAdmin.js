@@ -459,8 +459,8 @@ router.get('/users', async (req, res) => {
     if (search) {
       where.email = { [require('sequelize').Op.iLike]: `%${search}%` };
     }
-    if (organizationId) {
-      where.organizationId = organizationId;
+    if (organizationId && organizationId !== 'all') {
+      where.organization_id = organizationId;
     }
     if (role === 'admin') {
       where.is_admin = true;
