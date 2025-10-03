@@ -185,6 +185,26 @@ const Contacts: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile Search Bar */}
+      <div className="md:hidden mt-4">
+        <div className="relative">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearchParams(e.target.value ? { search: e.target.value } : {});
+              setCurrentPage(1);
+            }}
+            placeholder="Search contacts..."
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-base"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
       <Transition.Root show={showNewContact} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setShowNewContact}>
