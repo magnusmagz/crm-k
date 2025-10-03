@@ -1,6 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { Organization, User, Contact } = require('../models');
+const { Organization, User, Contact, sequelize } = require('../models');
+const { QueryTypes } = require('sequelize');
 const { authMiddleware } = require('../middleware/auth');
 const { requireSuperAdmin, loadSuperAdminContext } = require('../middleware/superAdmin');
 
@@ -308,12 +309,22 @@ router.put('/organizations/:id', async (req, res) => {
     if (settings !== undefined) updateData.settings = { ...organization.settings, ...settings };
 
     console.log('Updating organization with data:', updateData);
-    await organization.update(updateData);
+    const [rowsUpdated] = await sequelize.query(
+      `UPDATE organizations SET ${Object.keys(updateData).map((key, i) => `${key} = $${i + 2}`).join(', ')} WHERE id = $1 RETURNING *`,
+      {
+        bind: [req.params.id, ...Object.values(updateData)],
+        type: QueryTypes.UPDATE
+      }
+    );
 
-    // Reload to get fresh data from database
+    console.log('Direct SQL update result:', rowsUpdated);
+
+    // Reload to get fresh data
     await organization.reload();
-    console.log('Organization after update and reload:', {
+    console.log('Organization after reload:', {
       id: organization.id,
+      name: organization.name,
+      crm_name: organization.crm_name,
       primary_color: organization.primary_color,
       primaryColor: organization.primaryColor
     });
