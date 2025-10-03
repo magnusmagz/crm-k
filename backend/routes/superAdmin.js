@@ -308,8 +308,15 @@ router.put('/organizations/:id', async (req, res) => {
     if (settings !== undefined) updateData.settings = { ...organization.settings, ...settings };
 
     console.log('Updating organization with data:', updateData);
-    const updatedOrg = await organization.update(updateData);
-    console.log('Organization after update:', { id: updatedOrg.id, primary_color: updatedOrg.primary_color });
+    await organization.update(updateData);
+
+    // Reload to get fresh data from database
+    await organization.reload();
+    console.log('Organization after update and reload:', {
+      id: organization.id,
+      primary_color: organization.primary_color,
+      primaryColor: organization.primaryColor
+    });
 
     req.superAdmin?.logAction('UPDATE_ORGANIZATION', {
       organizationId: req.params.id,
