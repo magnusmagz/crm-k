@@ -588,6 +588,8 @@ router.put('/users/:id', async (req, res) => {
 
     const { isActive, isAdmin, isLoanOfficer, requirePasswordChange, organizationId } = req.body;
 
+    console.log('Update user request body:', req.body);
+
     const updateData = {};
     if (isActive !== undefined) updateData.is_active = isActive;
     if (isAdmin !== undefined) updateData.is_admin = isAdmin;
@@ -595,7 +597,11 @@ router.put('/users/:id', async (req, res) => {
     if (requirePasswordChange !== undefined) updateData.require_password_change = requirePasswordChange;
     if (organizationId !== undefined) updateData.organization_id = organizationId;
 
+    console.log('Update data to apply:', updateData);
+
     await user.update(updateData);
+
+    console.log('User after update - organization_id:', user.organization_id, 'organizationId:', user.organizationId);
 
     req.superAdmin?.logAction('UPDATE_USER', {
       userId: req.params.id,
