@@ -30,6 +30,7 @@ const SuperAdminLayout = lazy(() => import('./components/SuperAdminLayout'));
 const SuperAdminDashboard = lazy(() => import('./pages/SuperAdminDashboard'));
 const OrganizationsManagement = lazy(() => import('./pages/OrganizationsManagement'));
 const CreateOrganization = lazy(() => import('./pages/CreateOrganization'));
+const EditOrganization = lazy(() => import('./pages/EditOrganization'));
 const OrganizationDetail = lazy(() => import('./pages/OrganizationDetail'));
 const OrganizationUsers = lazy(() => import('./pages/OrganizationUsers'));
 const GlobalUsersView = lazy(() => import('./pages/GlobalUsersView'));
@@ -74,8 +75,8 @@ function App() {
               <Route path="organizations" element={<OrganizationsManagement />} />
               <Route path="organizations/new" element={<CreateOrganization />} />
               <Route path="organizations/:id" element={<OrganizationDetail />} />
+              <Route path="organizations/:id/edit" element={<EditOrganization />} />
               <Route path="organizations/:id/users" element={<OrganizationUsers />} />
-              <Route path="organizations/:id/edit" element={<div>Edit Organization - TODO</div>} />
               <Route path="users" element={<GlobalUsersView />} />
               <Route path="analytics" element={<div>Analytics Dashboard - TODO</div>} />
             </Route>
