@@ -244,10 +244,10 @@ router.post('/organizations', validateOrganizationCreation, async (req, res) => 
       const lastName = nameParts.slice(1).join(' ') || firstName; // Use firstName as fallback if no last name
 
       await UserProfile.create({
-        user_id: adminUser.id,
-        first_name: firstName,
-        last_name: lastName,
-        company_name: name
+        userId: adminUser.id,
+        firstName: firstName,
+        lastName: lastName,
+        companyName: name
       }, { transaction });
 
       await transaction.commit();
