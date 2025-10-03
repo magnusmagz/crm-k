@@ -674,7 +674,7 @@ const GlobalUsersView: React.FC = () => {
                           <button
                             onClick={() => openAssignModal(user)}
                             disabled={actionLoading === user.id}
-                            className="text-indigo-600 hover:text-indigo-900 inline-flex items-center disabled:opacity-50"
+                            className="text-primary hover:text-primary-dark inline-flex items-center disabled:opacity-50"
                             title="Assign Organization"
                           >
                             <BuildingOfficeIcon className="w-4 h-4" />
