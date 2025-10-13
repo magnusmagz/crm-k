@@ -11,7 +11,7 @@ import ContactEmailEngagement from '../components/email/ContactEmailEngagement';
 import NoteWidget from '../components/notes/NoteWidget';
 import ActivityTimeline from '../components/ActivityTimeline';
 import { ReminderButton } from '../components/ReminderButton';
-import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, ArrowLeftIcon, PlusIcon, CurrencyDollarIcon, CpuChipIcon, EnvelopeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
 const ContactDetail: React.FC = () => {
@@ -112,6 +112,34 @@ const ContactDetail: React.FC = () => {
     }).format(value);
   };
 
+  const handleResearchContact = () => {
+    // Build ChatGPT research prompt with contact details
+    const firstName = contact?.firstName || '';
+    const lastName = contact?.lastName || '';
+    const company = contact?.company || '';
+    const position = contact?.position || '';
+
+    // Create a detailed research prompt
+    let prompt = `Research this person: ${firstName} ${lastName}`;
+
+    if (company) {
+      prompt += ` from ${company}`;
+    }
+
+    if (position) {
+      prompt += ` (${position})`;
+    }
+
+    prompt += `. Please provide:\n- Professional background and experience\n- Current role and responsibilities\n- Company information\n- Recent news or activities\n- Social media presence (LinkedIn, Twitter, etc.)\n- Any relevant articles or publications`;
+
+    // Encode the prompt for URL
+    const encodedPrompt = encodeURIComponent(prompt);
+
+    // Open ChatGPT with the pre-filled prompt
+    const chatGPTUrl = `https://chat.openai.com/?q=${encodedPrompt}`;
+    window.open(chatGPTUrl, '_blank');
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -167,6 +195,14 @@ const ContactDetail: React.FC = () => {
                 {contact.isUnsubscribed ? 'Unsubscribed' : 'Email'}
               </button>
             )}
+            <button
+              onClick={handleResearchContact}
+              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              title="Research this contact on ChatGPT"
+            >
+              <MagnifyingGlassIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+              Research
+            </button>
             <ReminderButton
               entityType="contact"
               entityId={contact.id}
