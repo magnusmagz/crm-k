@@ -59,16 +59,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    // TODO: Re-enable after running migrations
-    // companyId: {
-    //   type: DataTypes.UUID,
-    //   allowNull: true,
-    //   references: {
-    //     model: 'companies',
-    //     key: 'id'
-    //   },
-    //   field: 'company_id'
-    // },
+    companyId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'companies',
+        key: 'id'
+      },
+      field: 'company_id'
+    },
     position: {
       type: DataTypes.STRING,
       allowNull: true
