@@ -42,6 +42,7 @@ const InterviewSchedule = require('./InterviewSchedule')(sequelize, Sequelize.Da
 const CandidateEvaluation = require('./CandidateEvaluation')(sequelize, Sequelize.DataTypes);
 const Reminder = require('./Reminder')(sequelize, Sequelize.DataTypes);
 const PushSubscription = require('./PushSubscription')(sequelize, Sequelize.DataTypes);
+const Company = require('./Company')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 // Organization associations
@@ -194,6 +195,19 @@ Reminder.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
 PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// Company associations
+User.hasMany(Company, { foreignKey: 'userId', as: 'companies' });
+Company.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Organization.hasMany(Company, { foreignKey: 'organizationId', as: 'companies' });
+Company.belongsTo(Organization, { foreignKey: 'organizationId', as: 'organization' });
+
+Company.hasMany(Contact, { foreignKey: 'companyId', as: 'contacts' });
+Contact.belongsTo(Company, { foreignKey: 'companyId', as: 'Company' });
+
+Company.hasMany(Deal, { foreignKey: 'companyId', as: 'deals' });
+Deal.belongsTo(Company, { foreignKey: 'companyId', as: 'Company' });
+
 module.exports = {
   sequelize,
   Organization,
@@ -223,5 +237,6 @@ module.exports = {
   InterviewSchedule,
   CandidateEvaluation,
   Reminder,
-  PushSubscription
+  PushSubscription,
+  Company
 };

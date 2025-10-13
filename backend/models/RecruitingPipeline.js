@@ -95,16 +95,16 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'recruiting_pipeline', // Table renamed to snake_case
     indexes: [
       {
-        fields: ['userId']
+        fields: ['user_id']
       },
       {
-        fields: ['candidateId']
+        fields: ['candidate_id']
       },
       {
-        fields: ['positionId']
+        fields: ['position_id']
       },
       {
-        fields: ['stageId']
+        fields: ['stage_id']
       },
       {
         fields: ['status']

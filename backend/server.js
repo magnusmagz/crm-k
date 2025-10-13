@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
@@ -26,6 +26,7 @@ const emailTemplatesRoutes = require('./routes/emailTemplates');
 const organizationRoutes = require('./routes/organizations');
 const superAdminRoutes = require('./routes/superAdmin');
 const pushRoutes = require('./routes/push');
+const companyRoutes = require('./routes/companies');
 const { startScheduler } = require('./services/reminderScheduler');
 // const { initializeAutomations } = require('./services/automationInitializer');
 
@@ -101,6 +102,7 @@ app.use('/api/reminders', require('./routes/reminders'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/cron', require('./routes/cron'));
 app.use('/api/push', pushRoutes);
+app.use('/api/companies', companyRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
