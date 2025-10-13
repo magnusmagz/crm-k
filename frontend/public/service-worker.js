@@ -1,7 +1,10 @@
 /* eslint-disable no-restricted-globals */
 
 // Cache name - update version to force cache refresh
-const CACHE_NAME = 'crm-app-v1';
+// Use timestamp to ensure new deployments always get fresh cache
+const CACHE_VERSION = '1.0.0';
+const CACHE_TIMESTAMP = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+const CACHE_NAME = `crm-app-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
 
 // Assets to cache on install
 const ASSETS_TO_CACHE = [
@@ -61,7 +64,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - cache-first strategy with network fallback
+// Fetch event - network-first for HTML, cache-first for assets
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
@@ -73,11 +76,60 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const url = new URL(event.request.url);
+  const isHTMLRequest = event.request.headers.get('accept')?.includes('text/html') ||
+                        url.pathname === '/' ||
+                        url.pathname.endsWith('.html');
+
+  // Network-first strategy for HTML documents (prevents stale app shell)
+  if (isHTMLRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          // Cache the fresh HTML for offline use
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+          }
+          return networkResponse;
+        })
+        .catch((error) => {
+          // If network fails, try cache (offline support)
+          console.log('[Service Worker] Network failed, trying cache:', error);
+          return caches.match(event.request)
+            .then((cachedResponse) => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              throw error;
+            });
+        })
+    );
+    return;
+  }
+
+  // Cache-first strategy for static assets (JS, CSS, images)
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
         if (cachedResponse) {
-          // Return cached version
+          // Return cached version but check for updates in background
+          fetch(event.request)
+            .then((networkResponse) => {
+              if (networkResponse && networkResponse.status === 200) {
+                caches.open(CACHE_NAME)
+                  .then((cache) => {
+                    cache.put(event.request, networkResponse);
+                  });
+              }
+            })
+            .catch(() => {
+              // Silently fail background update
+            });
+
           return cachedResponse;
         }
 
@@ -96,7 +148,6 @@ self.addEventListener('fetch', (event) => {
           })
           .catch((error) => {
             console.error('[Service Worker] Fetch failed:', error);
-            // Could return a custom offline page here
             throw error;
           });
       })

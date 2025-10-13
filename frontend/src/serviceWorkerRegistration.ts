@@ -41,6 +41,13 @@ export function register(config?: Config) {
         registerValidSW(swUrl, config);
       }
     });
+
+    // Check for updates every 5 minutes
+    setInterval(() => {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
+      }
+    }, 5 * 60 * 1000);
   }
 }
 
@@ -58,13 +65,20 @@ function registerValidSW(swUrl: string, config?: Config) {
             if (navigator.serviceWorker.controller) {
               // New content available
               console.log(
-                'New content is available and will be used when all tabs are closed.'
+                'New content is available. The page will reload to use the new version.'
               );
 
               // Execute callback
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
+
+              // Auto-reload after a short delay to apply updates
+              // This prevents white screens from stale cached assets
+              setTimeout(() => {
+                console.log('Reloading page to apply service worker update...');
+                window.location.reload();
+              }, 1000);
             } else {
               // Content is cached for offline use
               console.log('Content is cached for offline use.');
