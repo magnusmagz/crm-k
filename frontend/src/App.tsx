@@ -15,6 +15,8 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Contacts = lazy(() => import('./pages/Contacts'));
 const ContactDetail = lazy(() => import('./pages/ContactDetail'));
+const Companies = lazy(() => import('./pages/Companies'));
+const CompanyDetail = lazy(() => import('./pages/CompanyDetail'));
 const Profile = lazy(() => import('./pages/Profile'));
 const CustomFields = lazy(() => import('./pages/CustomFields'));
 const Pipeline = lazy(() => import('./pages/Pipeline'));
@@ -87,6 +89,8 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="contacts" element={<Contacts />} />
               <Route path="contacts/:id" element={<ContactDetail />} />
+              <Route path="companies" element={<Companies />} />
+              <Route path="companies/:id" element={<CompanyDetail />} />
               <Route path="pipeline" element={<Pipeline />} />
               <Route path="automations" element={<Automations />} />
               <Route path="automations/:id" element={<AutomationBuilder />} />

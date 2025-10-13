@@ -54,6 +54,37 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
+export interface Company {
+  id: string;
+  userId: string;
+  organizationId?: string;
+  name: string;
+  address?: string;
+  address2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  website?: string;
+  license?: string;
+  linkedinPage?: string;
+  companyLink1?: string;
+  companyLink2?: string;
+  companyLink3?: string;
+  companyLink4?: string;
+  companyLink5?: string;
+  notes?: string;
+  customFields?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+  // Stats (populated from API)
+  contactCount?: number;
+  dealCount?: number;
+  totalDealValue?: number;
+  // Related data
+  contacts?: Contact[];
+  deals?: Deal[];
+}
+
 export interface Contact {
   id: string;
   userId: string;
@@ -62,6 +93,7 @@ export interface Contact {
   email?: string;
   phone?: string;
   company?: string;
+  companyId?: string;
   position?: string;
   tags: string[];
   notes?: string;
@@ -69,6 +101,7 @@ export interface Contact {
   createdAt: Date;
   updatedAt: Date;
   deals?: Deal[];
+  Company?: Company;
   dealStats?: {
     dealCount: number;
     totalValue: number;
@@ -129,6 +162,7 @@ export interface Deal {
   id: string;
   userId: string;
   contactId?: string;
+  companyId?: string;
   stageId: string;
   name: string;
   value: number;
@@ -140,6 +174,7 @@ export interface Deal {
   createdAt: Date;
   updatedAt: Date;
   Contact?: Contact;
+  Company?: Company;
   Stage?: Stage;
 }
 

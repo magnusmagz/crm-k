@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Contact, CustomField } from '../types';
-import { contactsAPI, customFieldsAPI } from '../services/api';
+import { Contact, CustomField, Company } from '../types';
+import { contactsAPI, customFieldsAPI, companiesAPI } from '../services/api';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { FormField, FormSelect, FormTextarea } from './ui/FormField';
 
@@ -12,12 +12,14 @@ interface ContactFormProps {
 
 const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }) => {
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [formData, setFormData] = useState({
     firstName: contact?.firstName || '',
     lastName: contact?.lastName || '',
     email: contact?.email || '',
     phone: contact?.phone || '',
     company: contact?.company || '',
+    companyId: contact?.companyId || '',
     position: contact?.position || '',
     tags: contact?.tags?.join(', ') || '',
     notes: contact?.notes || '',
@@ -29,6 +31,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
 
   useEffect(() => {
     fetchCustomFields();
+    fetchCompanies();
   }, []);
 
   const fetchCustomFields = async () => {
@@ -37,6 +40,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
       setCustomFields(response.data.customFields);
     } catch (error) {
       console.error('Failed to fetch custom fields:', error);
+    }
+  };
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await companiesAPI.getAll();
+      setCompanies(response.data.companies);
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
     }
   };
 
@@ -313,6 +325,21 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
                 value={formData.company}
                 onChange={handleChange}
               />
+
+              <FormSelect
+                label="Company Selector"
+                id="companyId"
+                name="companyId"
+                value={formData.companyId}
+                onChange={handleChange}
+              >
+                <option value="">Select a company...</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </FormSelect>
 
               <FormField
                 label="Position"

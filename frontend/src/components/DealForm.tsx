@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Deal, Stage, Contact, CustomField } from '../types';
-import { contactsAPI, dealCustomFieldsAPI } from '../services/api';
+import { Deal, Stage, Contact, CustomField, Company } from '../types';
+import { contactsAPI, dealCustomFieldsAPI, companiesAPI } from '../services/api';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import CustomFieldInput from './CustomFieldInput';
 import { FormField, FormSelect, FormTextarea } from './ui/FormField';
@@ -15,15 +15,17 @@ interface DealFormProps {
 
 const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, defaultContactId }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [formData, setFormData] = useState({
     name: deal?.name || '',
     value: deal?.value ?? '',
     stageId: deal?.stageId || stages[0]?.id || '',
     contactId: deal?.contactId || defaultContactId || '',
+    companyId: deal?.companyId || '',
     notes: deal?.notes || '',
-    expectedCloseDate: deal?.expectedCloseDate 
-      ? new Date(deal.expectedCloseDate).toISOString().split('T')[0] 
+    expectedCloseDate: deal?.expectedCloseDate
+      ? new Date(deal.expectedCloseDate).toISOString().split('T')[0]
       : '',
     status: deal?.status || 'open',
     customFields: deal?.customFields || {}
@@ -33,6 +35,7 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
 
   useEffect(() => {
     fetchContacts();
+    fetchCompanies();
     fetchCustomFields();
   }, []);
 
@@ -43,6 +46,15 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
       setContacts(response.data.contacts);
     } catch (error) {
       console.error('Failed to fetch contacts:', error);
+    }
+  };
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await companiesAPI.getAll({ limit: 1000 });
+      setCompanies(response.data.companies);
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
     }
   };
 
@@ -113,9 +125,10 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
         ...formData,
         value: formData.value === '' ? null : formData.value,
         contactId: formData.contactId || null,
+        companyId: formData.companyId || null,
         expectedCloseDate: formData.expectedCloseDate || null
       };
-      
+
       await onSubmit(data);
     } catch (error) {
       console.error('Failed to save deal:', error);
@@ -206,6 +219,21 @@ const DealForm: React.FC<DealFormProps> = ({ deal, stages, onSubmit, onClose, de
             <option key={contact.id} value={contact.id}>
               {contact.firstName} {contact.lastName}
               {contact.company && ` - ${contact.company}`}
+            </option>
+          ))}
+        </FormSelect>
+
+        <FormSelect
+          label="Associated Company (Optional)"
+          id="companyId"
+          name="companyId"
+          value={formData.companyId}
+          onChange={handleChange}
+        >
+          <option value="">Select a company...</option>
+          {companies.map(company => (
+            <option key={company.id} value={company.id}>
+              {company.name}
             </option>
           ))}
         </FormSelect>

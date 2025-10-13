@@ -396,4 +396,25 @@ export const pushAPI = {
   getSubscriptions: () => api.get('/push/subscriptions'),
 };
 
+// Companies API
+export const companiesAPI = {
+  getAll: (params?: {
+    search?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    limit?: number;
+    offset?: number
+  }) => api.get('/companies', { params }),
+
+  getById: (id: string) => api.get(`/companies/${id}`),
+
+  create: (data: any) => api.post('/companies', data),
+
+  update: (id: string, data: any) => api.put(`/companies/${id}`, data),
+
+  delete: (id: string) => api.delete(`/companies/${id}`),
+
+  bulkDelete: (ids: string[]) => api.post('/companies/bulk-delete', { ids }),
+};
+
 export default api;
