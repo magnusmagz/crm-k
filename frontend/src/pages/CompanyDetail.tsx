@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Company, Contact, Deal } from '../types';
 import { companiesAPI, contactsAPI, dealsAPI } from '../services/api';
-import { PencilIcon, ArrowLeftIcon, BuildingOfficeIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, ArrowLeftIcon, BuildingOfficeIcon, CurrencyDollarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 
 const CompanyDetail: React.FC = () => {
@@ -154,6 +154,26 @@ const CompanyDetail: React.FC = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  const handleResearchCompany = () => {
+    const name = company?.name || '';
+    const city = company?.city || '';
+    const state = company?.state || '';
+    const website = company?.website || '';
+    const linkedinPage = company?.linkedinPage || '';
+
+    let prompt = `Research this company: ${name}`;
+    if (city && state) prompt += ` located in ${city}, ${state}`;
+    if (website) prompt += ` (website: ${website})`;
+
+    prompt += `. Please provide:\n- Company background and history\n- Products/services offered\n- Market position and competitors\n- Recent news and developments\n- Key leadership and team\n- Company culture and values`;
+
+    if (linkedinPage) prompt += `\n- LinkedIn: ${linkedinPage}`;
+
+    const encodedPrompt = encodeURIComponent(prompt);
+    const chatGPTUrl = `https://chat.openai.com/?q=${encodedPrompt}`;
+    window.open(chatGPTUrl, '_blank');
   };
 
   const renderLink = (url: string | undefined, label: string) => {
@@ -469,6 +489,14 @@ const CompanyDetail: React.FC = () => {
             >
               <PencilIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
               Edit
+            </button>
+            <button
+              onClick={handleResearchCompany}
+              className="inline-flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              title="Research this company on ChatGPT"
+            >
+              <MagnifyingGlassIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+              Research
             </button>
           </div>
         </div>
