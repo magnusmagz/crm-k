@@ -23,15 +23,16 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
-    companyId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      field: 'company_id',
-      references: {
-        model: 'companies',
-        key: 'id'
-      }
-    },
+    // TODO: Re-enable after running migrations
+    // companyId: {
+    //   type: DataTypes.UUID,
+    //   allowNull: true,
+    //   field: 'company_id',
+    //   references: {
+    //     model: 'companies',
+    //     key: 'id'
+    //   }
+    // },
     stageId: {
       type: DataTypes.UUID,
       allowNull: false,
