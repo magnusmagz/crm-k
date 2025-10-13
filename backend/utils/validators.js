@@ -1,20 +1,19 @@
+const { validatePhone: validatePhoneNumber, normalizePhoneNumber } = require('./phoneUtils');
+
 // Email validation regex
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-// Phone validation - allows common phone formats
+// Phone validation - uses enhanced validation from phoneUtils
+// Kept as 'validatePhone' for backward compatibility
 const validatePhone = (phone) => {
-  // Remove all non-numeric characters except + for international
-  const cleaned = phone.replace(/[^\d+]/g, '');
-  
-  // Check if it's a valid phone length (7-15 digits)
-  const phoneRegex = /^(\+?\d{7,15})$/;
-  return phoneRegex.test(cleaned);
+  return validatePhoneNumber(phone);
 };
 
 module.exports = {
   validateEmail,
-  validatePhone
+  validatePhone,
+  normalizePhoneNumber // Export normalization for use in other modules
 };

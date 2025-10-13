@@ -1,5 +1,5 @@
 const { parse } = require('csv-parse');
-const { validateEmail, validatePhone } = require('./validators');
+const { validateEmail, validatePhone, normalizePhoneNumber } = require('./validators');
 
 // Parse CSV buffer and return parsed data
 const parseCSV = (buffer) => {
@@ -101,7 +101,7 @@ const mapCSVToContact = (record, fieldMapping, customFieldDefs = []) => {
   const contact = {
     customFields: {}
   };
-  
+
   // Apply field mapping
   Object.entries(fieldMapping).forEach(([csvField, contactField]) => {
     const value = record[csvField];
@@ -112,16 +112,28 @@ const mapCSVToContact = (record, fieldMapping, customFieldDefs = []) => {
         contact.customFields[contactField] = value;
       } else {
         // Standard field
-        contact[contactField] = value;
+        // Special handling for phone field - normalize it
+        if (contactField === 'phone') {
+          const normalized = normalizePhoneNumber(value);
+          if (normalized) {
+            contact[contactField] = normalized;
+          } else {
+            // If normalization fails, keep original value
+            // Validation will catch it later
+            contact[contactField] = value;
+          }
+        } else {
+          contact[contactField] = value;
+        }
       }
     }
   });
-  
+
   // Handle tags (comma-separated string to array)
   if (contact.tags && typeof contact.tags === 'string') {
     contact.tags = contact.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
   }
-  
+
   return contact;
 };
 

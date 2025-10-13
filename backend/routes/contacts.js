@@ -7,6 +7,7 @@ const automationEmitter = require('../services/eventEmitter');
 const upload = require('../middleware/upload');
 const { parseCSV, getCSVHeaders, validateContactRecord, mapCSVToContact, autoDetectMapping } = require('../utils/csvParser');
 const { touchContactMiddleware } = require('../middleware/contactTouch');
+const { normalizePhoneNumber, arePhoneNumbersEquivalent } = require('../utils/phoneUtils');
 
 const router = express.Router();
 
@@ -16,7 +17,14 @@ const validateContact = [
   body('firstName').notEmpty().trim().withMessage('First name is required'),
   body('lastName').notEmpty().trim().withMessage('Last name is required'),
   body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail().withMessage('Invalid email format'),
-  body('phone').optional({ nullable: true, checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format'),
+  body('phone').optional({ nullable: true, checkFalsy: true })
+    .matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format')
+    .customSanitizer((value) => {
+      // Normalize phone number during validation
+      if (!value) return value;
+      const normalized = normalizePhoneNumber(value);
+      return normalized || value; // Keep original if normalization fails
+    }),
   body('company').optional({ nullable: true, checkFalsy: false }).trim(),
   body('position').optional({ nullable: true, checkFalsy: false }).trim(),
   body('tags').optional({ nullable: true, checkFalsy: false }).isArray().withMessage('Tags must be an array'),
@@ -38,7 +46,14 @@ const validateContactUpdate = [
   body('firstName').optional({ nullable: true, checkFalsy: true }).trim(),
   body('lastName').optional({ nullable: true, checkFalsy: true }).trim(),
   body('email').optional({ nullable: true, checkFalsy: true }).isEmail().normalizeEmail().withMessage('Invalid email format'),
-  body('phone').optional({ nullable: true, checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format'),
+  body('phone').optional({ nullable: true, checkFalsy: true })
+    .matches(/^[\d\s\-\+\(\)]+$/).withMessage('Invalid phone format')
+    .customSanitizer((value) => {
+      // Normalize phone number during validation
+      if (!value) return value;
+      const normalized = normalizePhoneNumber(value);
+      return normalized || value; // Keep original if normalization fails
+    }),
   body('company').optional({ nullable: true, checkFalsy: false }).trim(),
   body('position').optional({ nullable: true, checkFalsy: false }).trim(),
   body('tags').optional({ nullable: true, checkFalsy: false }).isArray().withMessage('Tags must be an array'),
@@ -621,14 +636,14 @@ router.get('/tags/all', authMiddleware, async (req, res) => {
 router.get('/duplicates', authMiddleware, async (req, res) => {
   try {
     const { search } = req.query;
-    
+
     if (!search || search.trim().length < 2) {
       return res.status(400).json({ error: 'Search query must be at least 2 characters' });
     }
 
     const searchTerm = search.trim().toLowerCase();
-    
-    // Search by email (exact match) or name (fuzzy match)
+
+    // Search by email (exact match), name (fuzzy match), or phone number
     const contacts = await Contact.findAll({
       where: {
         userId: req.user.id,
@@ -640,12 +655,14 @@ router.get('/duplicates', authMiddleware, async (req, res) => {
           ),
           // Email contains
           { email: { [Op.iLike]: `%${searchTerm}%` } },
+          // Phone contains (basic search for now)
+          { phone: { [Op.iLike]: `%${searchTerm}%` } },
           // Name fuzzy match
           sequelize.where(
-            sequelize.fn('LOWER', 
-              sequelize.fn('CONCAT', 
-                sequelize.col('first_name'), 
-                ' ', 
+            sequelize.fn('LOWER',
+              sequelize.fn('CONCAT',
+                sequelize.col('first_name'),
+                ' ',
                 sequelize.col('last_name')
               )
             ),
@@ -934,9 +951,11 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
             return;
           }
 
-          // Check for duplicates based on email (case-insensitive)
+          // Check for duplicates based on email (case-insensitive) or phone number
+          let existingContact = null;
+
           if (contactData.email) {
-            const existingContact = await Contact.findOne({
+            existingContact = await Contact.findOne({
               where: {
                 [Op.and]: [
                   sequelize.where(
@@ -947,25 +966,45 @@ router.post('/import', authMiddleware, upload.single('file'), async (req, res) =
                 ]
               }
             });
+          }
 
-            if (existingContact) {
-              if (duplicateStrategy === 'skip') {
-                results.skipped++;
-                return;
-              } else if (duplicateStrategy === 'update') {
-                await existingContact.update(contactData);
-                results.updated++;
-                
-                // Emit update event
-                automationEmitter.emitContactUpdated(
-                  req.user.id, 
-                  existingContact.toJSON(), 
-                  Object.keys(contactData)
-                );
-                return;
+          // If no email duplicate found, check for phone number duplicates
+          if (!existingContact && contactData.phone) {
+            // Find contacts with phone numbers
+            const contactsWithPhone = await Contact.findAll({
+              where: {
+                userId: req.user.id,
+                phone: { [Op.ne]: null }
+              },
+              attributes: ['id', 'phone', 'firstName', 'lastName', 'email']
+            });
+
+            // Check for phone number match using normalized comparison
+            for (const contact of contactsWithPhone) {
+              if (arePhoneNumbersEquivalent(contact.phone, contactData.phone)) {
+                existingContact = contact;
+                break;
               }
-              // If strategy is 'create', continue to create new contact
             }
+          }
+
+          if (existingContact) {
+            if (duplicateStrategy === 'skip') {
+              results.skipped++;
+              return;
+            } else if (duplicateStrategy === 'update') {
+              await existingContact.update(contactData);
+              results.updated++;
+
+              // Emit update event
+              automationEmitter.emitContactUpdated(
+                req.user.id,
+                existingContact.toJSON(),
+                Object.keys(contactData)
+              );
+              return;
+            }
+            // If strategy is 'create', continue to create new contact
           }
 
           // Validate custom fields
