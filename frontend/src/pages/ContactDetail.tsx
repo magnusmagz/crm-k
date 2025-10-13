@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Contact, Deal } from '../types';
-import { contactsAPI, dealsAPI } from '../services/api';
+import { Contact, Deal, Company } from '../types';
+import { contactsAPI, dealsAPI, companiesAPI } from '../services/api';
 import ContactForm from '../components/ContactForm';
 import DealForm from '../components/DealForm';
 import EntityDebugView from '../components/automation/EntityDebugView';
@@ -27,6 +27,7 @@ const ContactDetail: React.FC = () => {
   const [showDebugView, setShowDebugView] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailRefresh, setEmailRefresh] = useState(false);
+  const [associatedCompany, setAssociatedCompany] = useState<Company | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -39,7 +40,20 @@ const ContactDetail: React.FC = () => {
   const fetchContact = async () => {
     try {
       const response = await contactsAPI.getById(id!);
-      setContact(response.data.contact);
+      const contactData = response.data.contact;
+      setContact(contactData);
+
+      // Fetch associated company if companyId exists
+      if (contactData.companyId) {
+        try {
+          const companyResponse = await companiesAPI.getById(contactData.companyId);
+          setAssociatedCompany(companyResponse.data.company);
+        } catch (error) {
+          console.error('Failed to fetch associated company:', error);
+        }
+      } else {
+        setAssociatedCompany(null);
+      }
     } catch (error) {
       console.error('Failed to fetch contact:', error);
       navigate('/contacts');
@@ -258,7 +272,23 @@ const ContactDetail: React.FC = () => {
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500">Company</dt>
               <dd className="mt-1 text-sm text-primary-dark sm:mt-0 sm:col-span-2">
-                {contact.company || 'Not provided'}
+                <div className="flex items-center gap-2">
+                  {associatedCompany ? (
+                    <>
+                      <button
+                        onClick={() => navigate(`/companies/${associatedCompany.id}`)}
+                        className="text-primary hover:text-primary-dark underline font-medium"
+                      >
+                        {associatedCompany.name}
+                      </button>
+                      <span className="text-xs text-gray-500">(Associated Company)</span>
+                    </>
+                  ) : contact.company ? (
+                    <span>{contact.company}</span>
+                  ) : (
+                    <span className="text-gray-500">Not provided</span>
+                  )}
+                </div>
               </dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

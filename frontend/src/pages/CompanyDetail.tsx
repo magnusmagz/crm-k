@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Company, Contact, Deal } from '../types';
 import { companiesAPI, contactsAPI, dealsAPI } from '../services/api';
-import { PencilIcon, ArrowLeftIcon, BuildingOfficeIcon, CurrencyDollarIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, ArrowLeftIcon, BuildingOfficeIcon, CurrencyDollarIcon, MagnifyingGlassIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const CompanyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +16,9 @@ const CompanyDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [totalDealValue, setTotalDealValue] = useState(0);
+  const [showAddContactModal, setShowAddContactModal] = useState(false);
+  const [allContacts, setAllContacts] = useState<Contact[]>([]);
+  const [selectedContactId, setSelectedContactId] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -37,6 +42,7 @@ const CompanyDetail: React.FC = () => {
       fetchCompany();
       fetchCompanyContacts();
       fetchCompanyDeals();
+      fetchAllContacts();
     }
   }, [id]);
 
@@ -102,6 +108,50 @@ const CompanyDetail: React.FC = () => {
       setTotalDealValue(total);
     } catch (error) {
       console.error('Failed to fetch deals:', error);
+    }
+  };
+
+  const fetchAllContacts = async () => {
+    try {
+      const response = await contactsAPI.getAll({});
+      setAllContacts(response.data.contacts);
+    } catch (error) {
+      console.error('Failed to fetch all contacts:', error);
+    }
+  };
+
+  const handleAssociateContact = async () => {
+    if (!selectedContactId) {
+      toast.error('Please select a contact');
+      return;
+    }
+
+    try {
+      await contactsAPI.update(selectedContactId, { companyId: id });
+      toast.success('Contact associated successfully');
+      setShowAddContactModal(false);
+      setSelectedContactId('');
+      fetchCompanyContacts();
+      fetchAllContacts();
+    } catch (error: any) {
+      console.error('Failed to associate contact:', error);
+      toast.error(error.response?.data?.message || 'Failed to associate contact');
+    }
+  };
+
+  const handleRemoveContactAssociation = async (contactId: string) => {
+    if (!window.confirm('Remove this contact from the company?')) {
+      return;
+    }
+
+    try {
+      await contactsAPI.update(contactId, { companyId: null });
+      toast.success('Contact removed from company');
+      fetchCompanyContacts();
+      fetchAllContacts();
+    } catch (error: any) {
+      console.error('Failed to remove contact association:', error);
+      toast.error(error.response?.data?.message || 'Failed to remove contact association');
     }
   };
 
@@ -647,12 +697,23 @@ const CompanyDetail: React.FC = () => {
       {/* Related Contacts Section */}
       <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-primary-dark">
-            Related Contacts
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'} associated with this company
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg leading-6 font-medium text-primary-dark">
+                Related Contacts
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'} associated with this company
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddContactModal(true)}
+              className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-primary hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            >
+              <PlusIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+              Add Contact
+            </button>
+          </div>
         </div>
 
         <div className="border-t border-gray-200">
@@ -686,10 +747,18 @@ const CompanyDetail: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleRemoveContactAssociation(contact.id)}
+                        className="text-red-400 hover:text-red-600"
+                        title="Remove from company"
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                      </button>
                       <button
                         onClick={() => navigate(`/contacts/${contact.id}`)}
                         className="text-gray-400 hover:text-gray-600"
+                        title="View contact"
                       >
                         <ArrowLeftIcon className="h-5 w-5 transform rotate-180" />
                       </button>
@@ -779,6 +848,89 @@ const CompanyDetail: React.FC = () => {
           Delete Company
         </button>
       </div>
+
+      {/* Add Contact Modal */}
+      <Transition appear show={showAddContactModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={() => setShowAddContactModal(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-primary-dark"
+                  >
+                    Associate Contact with Company
+                  </Dialog.Title>
+                  <div className="mt-4">
+                    <label htmlFor="contactSelect" className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Contact
+                    </label>
+                    <select
+                      id="contactSelect"
+                      value={selectedContactId}
+                      onChange={(e) => setSelectedContactId(e.target.value)}
+                      className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">Choose a contact...</option>
+                      {allContacts
+                        .filter(c => !c.companyId || c.companyId !== id)
+                        .map((contact) => (
+                          <option key={contact.id} value={contact.id}>
+                            {contact.firstName} {contact.lastName} {contact.email ? `(${contact.email})` : ''}
+                          </option>
+                        ))}
+                    </select>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Select a contact to associate with {company?.name}. Contacts already associated with this company are not shown.
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      onClick={() => {
+                        setShowAddContactModal(false);
+                        setSelectedContactId('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      onClick={handleAssociateContact}
+                    >
+                      Associate Contact
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
 
       <Toaster position="top-right" />
     </div>
