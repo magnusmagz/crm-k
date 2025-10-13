@@ -55,7 +55,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'Website must be a valid URL',
+          args: true
+        },
+        notEmptyString(value) {
+          if (value === '') {
+            throw new Error('Website cannot be an empty string. Use null instead.');
+          }
+        }
+      },
+      set(value) {
+        // Convert empty strings to null
+        this.setDataValue('website', value === '' ? null : value);
       }
     },
     license: {
@@ -67,7 +79,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'linkedin_page',
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'LinkedIn page must be a valid URL',
+          args: true
+        }
+      },
+      set(value) {
+        // Convert empty strings to null
+        this.setDataValue('linkedinPage', value === '' ? null : value);
       }
     },
     companyLink1: {
@@ -75,7 +94,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'company_link_1',
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'Company link 1 must be a valid URL',
+          args: true
+        }
+      },
+      set(value) {
+        this.setDataValue('companyLink1', value === '' ? null : value);
       }
     },
     companyLink2: {
@@ -83,7 +108,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'company_link_2',
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'Company link 2 must be a valid URL',
+          args: true
+        }
+      },
+      set(value) {
+        this.setDataValue('companyLink2', value === '' ? null : value);
       }
     },
     companyLink3: {
@@ -91,7 +122,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'company_link_3',
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'Company link 3 must be a valid URL',
+          args: true
+        }
+      },
+      set(value) {
+        this.setDataValue('companyLink3', value === '' ? null : value);
       }
     },
     companyLink4: {
@@ -99,7 +136,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'company_link_4',
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'Company link 4 must be a valid URL',
+          args: true
+        }
+      },
+      set(value) {
+        this.setDataValue('companyLink4', value === '' ? null : value);
       }
     },
     companyLink5: {
@@ -107,7 +150,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'company_link_5',
       validate: {
-        isUrl: true
+        isUrl: {
+          msg: 'Company link 5 must be a valid URL',
+          args: true
+        }
+      },
+      set(value) {
+        this.setDataValue('companyLink5', value === '' ? null : value);
       }
     },
     notes: {
