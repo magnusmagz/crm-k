@@ -7,6 +7,14 @@ class AutomationEnrollmentService {
   // Handle trigger events and enroll entities
   async handleTrigger(eventType, userId, data) {
     try {
+      console.log('[AutomationEnrollment] Handling trigger:', {
+        eventType,
+        userId,
+        dataKeys: Object.keys(data),
+        contactId: data.contact?.id,
+        contactTags: data.contact?.tags
+      });
+
       // Find all active automations for this user with matching trigger
       const automations = await Automation.findAll({
         where: {
@@ -23,13 +31,18 @@ class AutomationEnrollmentService {
         include: ['steps']
       });
 
+      console.log('[AutomationEnrollment] Found automations:', {
+        count: automations.length,
+        automations: automations.map(a => ({ id: a.id, name: a.name, trigger: a.trigger }))
+      });
+
       const results = [];
-      
+
       for (const automation of automations) {
         const result = await this.processAutomationTrigger(automation, eventType, data);
         results.push(result);
       }
-      
+
       return results;
     } catch (error) {
       console.error('Error handling trigger:', error);
