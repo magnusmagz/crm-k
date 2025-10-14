@@ -1,4 +1,4 @@
-const { Automation, AutomationEnrollment, Contact, Deal } = require('../models');
+const { Automation, AutomationEnrollment, Contact, Deal, sequelize } = require('../models');
 const automationEngineV2 = require('./automationEngineV2');
 const automationDebugger = require('./automationDebugger');
 const { Op } = require('sequelize');
@@ -12,9 +12,13 @@ class AutomationEnrollmentService {
         where: {
           userId,
           isActive: true,
-          trigger: {
-            type: eventType
-          }
+          [Op.and]: [
+            sequelize.where(
+              sequelize.cast(sequelize.col('trigger'), 'jsonb'),
+              Op.contains,
+              { type: eventType }
+            )
+          ]
         },
         include: ['steps']
       });
