@@ -123,6 +123,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
         ...formData,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
         lastContacted: formData.lastContacted || null,
+        companyId: formData.companyId || null,
       };
 
 
