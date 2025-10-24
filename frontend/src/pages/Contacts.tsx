@@ -48,6 +48,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 ];
 
 const STORAGE_KEY = 'contacts-column-preferences';
+const SORT_STORAGE_KEY = 'contacts-sort-preferences';
 
 const Contacts: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -63,8 +64,22 @@ const Contacts: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [customFields, setCustomFields] = useState<any[]>([]);
-  const [sortBy, setSortBy] = useState<string>('lastContacted');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(SORT_STORAGE_KEY);
+      return saved ? JSON.parse(saved).sortBy : 'lastContacted';
+    } catch {
+      return 'lastContacted';
+    }
+  });
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => {
+    try {
+      const saved = localStorage.getItem(SORT_STORAGE_KEY);
+      return saved ? JSON.parse(saved).sortOrder : 'desc';
+    } catch {
+      return 'desc';
+    }
+  });
   const [columns, setColumns] = useState<ColumnConfig[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -79,6 +94,11 @@ const Contacts: React.FC = () => {
     fetchContacts();
     fetchCustomFields();
   }, [search, currentPage, pageSize, sortBy, sortOrder]);
+
+  // Save sort preferences to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify({ sortBy, sortOrder }));
+  }, [sortBy, sortOrder]);
 
   const fetchCustomFields = async () => {
     try {
