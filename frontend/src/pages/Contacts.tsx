@@ -14,6 +14,7 @@ import ContactExport from '../components/ContactExport';
 import Pagination from '../components/Pagination';
 import BulkOperations from '../components/BulkOperations';
 import InlineEditDate from '../components/InlineEditDate';
+import InlineEditTags from '../components/InlineEditTags';
 import ColumnSettings, { ColumnConfig } from '../components/ColumnSettings';
 import { Dialog, Transition } from '@headlessui/react';
 
@@ -172,6 +173,19 @@ const Contacts: React.FC = () => {
     await fetchContacts();
   };
 
+  const handleUpdateTags = async (contactId: string, tags: string[]) => {
+    try {
+      await contactsAPI.update(contactId, { tags });
+      // Update the local state
+      setContacts(prev => prev.map(contact =>
+        contact.id === contactId ? { ...contact, tags } : contact
+      ));
+    } catch (error) {
+      console.error('Failed to update tags:', error);
+      throw error;
+    }
+  };
+
   const toggleContactSelection = (contactId: string) => {
     const newSelected = new Set(selectedContacts);
     if (newSelected.has(contactId)) {
@@ -298,20 +312,11 @@ const Contacts: React.FC = () => {
         return contact.position || '-';
       case 'tags':
         return (
-          <div className="flex flex-wrap gap-1">
-            {contact.tags && contact.tags.length > 0 ? (
-              contact.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary"
-                >
-                  {tag}
-                </span>
-              ))
-            ) : (
-              <span className="text-gray-400">-</span>
-            )}
-          </div>
+          <InlineEditTags
+            value={contact.tags || []}
+            onSave={(tags) => handleUpdateTags(contact.id, tags)}
+            placeholder="Click to add tags"
+          />
         );
       case 'notes':
         return (
