@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
-const { Deal, Contact, Stage, CustomField, sequelize } = require('../models');
+const { Deal, Contact, Stage, CustomField, User, sequelize } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const automationEmitter = require('../services/eventEmitter');
