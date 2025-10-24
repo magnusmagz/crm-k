@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AutomationCondition } from '../../types';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { automationsAPI } from '../../services/api';
+import { automationsAPI, contactsAPI } from '../../services/api';
 
 interface ConditionBuilderProps {
   condition: AutomationCondition;
@@ -28,10 +28,23 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
 }) => {
   const [fields, setFields] = useState<Field[]>([]);
   const [isLoadingFields, setIsLoadingFields] = useState(false);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [tagInputValue, setTagInputValue] = useState('');
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
 
   useEffect(() => {
     fetchFields();
+    fetchAllTags();
   }, [triggerType]);
+
+  const fetchAllTags = async () => {
+    try {
+      const response = await contactsAPI.getTags();
+      setAllTags(response.data.tags || []);
+    } catch (error) {
+      console.error('Failed to fetch tags:', error);
+    }
+  };
 
   const fetchFields = async () => {
     if (!triggerType) return;
@@ -195,6 +208,70 @@ const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
             </option>
           ))}
         </select>
+      );
+    }
+
+    // Tag input with autocomplete for has_tag/not_has_tag operators
+    if ((condition.operator === 'has_tag' || condition.operator === 'not_has_tag') && selectedField.name === 'tags') {
+      const filteredTags = allTags.filter(tag =>
+        tag.toLowerCase().includes((condition.value || '').toLowerCase())
+      );
+
+      return (
+        <div className="relative flex-1">
+          <div className="relative">
+            {condition.value && (
+              <div className="mb-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-medium bg-primary text-white">
+                  {condition.value}
+                  <button
+                    type="button"
+                    onClick={() => onChange({ ...condition, value: '' })}
+                    className="hover:bg-primary-dark rounded-full p-0.5 transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </span>
+              </div>
+            )}
+            <input
+              type="text"
+              value={condition.value || tagInputValue}
+              onChange={(e) => {
+                setTagInputValue(e.target.value);
+                onChange({ ...condition, value: e.target.value });
+                setShowTagSuggestions(true);
+              }}
+              onFocus={() => setShowTagSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowTagSuggestions(false), 200)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+              placeholder="Select or type tag name"
+              disabled={!condition.operator}
+            />
+          </div>
+          {showTagSuggestions && filteredTags.length > 0 && (condition.value || tagInputValue) && (
+            <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+              {filteredTags.map((tag, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => {
+                    onChange({ ...condition, value: tag });
+                    setTagInputValue('');
+                    setShowTagSuggestions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary">
+                    {tag}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       );
     }
 
