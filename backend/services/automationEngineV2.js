@@ -955,9 +955,12 @@ class AutomationEngineV2 {
           lastName: entity.lastName
         } : null
       });
-    
-      // Check conditions
-      if (automation.conditions && automation.conditions.length > 0) {
+
+      // Check conditions - SKIP for simple automations as they were already checked at enrollment
+      // Note: For simple automations (!isMultiStep), conditions were verified in automationEnrollmentService
+      // before enrollment was created. Re-checking here is redundant and can cause issues if data changes
+      // between enrollment and execution. Only re-check for multi-step workflows where state may change.
+      if (automation.conditions && automation.conditions.length > 0 && automation.isMultiStep) {
         const conditionsMet = await this.evaluateConditions(automation.conditions, enrollment);
         if (!conditionsMet.success) {
           automationDebugger.log(debugSessionId, 'LEGACY_CONDITIONS_NOT_MET', {
@@ -967,6 +970,11 @@ class AutomationEngineV2 {
           await enrollment.update({ status: 'completed' });
           return;
         }
+      } else if (automation.conditions && automation.conditions.length > 0) {
+        automationDebugger.log(debugSessionId, 'LEGACY_CONDITIONS_SKIPPED', {
+          reason: 'Conditions already validated at enrollment time for simple automation',
+          conditions: automation.conditions
+        });
       }
       
       automationDebugger.log(debugSessionId, 'LEGACY_EXECUTING_ACTIONS', {
