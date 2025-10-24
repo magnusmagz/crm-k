@@ -17,6 +17,24 @@ class AutomationEnrollmentService {
         changedFields: data.changedFields
       });
 
+      // First, let's see ALL automations for this user to debug
+      const allUserAutomations = await Automation.findAll({
+        where: { userId, isActive: true },
+        attributes: ['id', 'name', 'trigger', 'isActive']
+      });
+
+      console.log('[AutomationEnrollment] ALL active automations for user:', {
+        userId,
+        count: allUserAutomations.length,
+        automations: allUserAutomations.map(a => ({
+          id: a.id,
+          name: a.name,
+          trigger: a.trigger,
+          triggerType: typeof a.trigger,
+          isActive: a.isActive
+        }))
+      });
+
       // Find all active automations for this user with matching trigger
       const automations = await Automation.findAll({
         where: {
@@ -33,7 +51,7 @@ class AutomationEnrollmentService {
         include: ['steps']
       });
 
-      console.log('[AutomationEnrollment] Found automations:', {
+      console.log('[AutomationEnrollment] Found matching automations for event type:', eventType, {
         count: automations.length,
         automations: automations.map(a => ({ id: a.id, name: a.name, trigger: a.trigger }))
       });
