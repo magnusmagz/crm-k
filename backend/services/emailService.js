@@ -1,7 +1,7 @@
 const postmark = require('postmark');
 const crypto = require('crypto');
 const cheerio = require('cheerio');
-const { EmailSend, EmailLink, EmailSuppression, UserProfile } = require('../models');
+const { EmailSend, EmailLink, EmailSuppression, UserProfile, Contact } = require('../models');
 
 class EmailService {
   constructor() {
@@ -629,6 +629,14 @@ Unsubscribe: {{{ pm:unsubscribe_url }}}
       await emailRecord.update({
         postmarkMessageId: response.MessageID
       });
+
+      // Update contact's lastContacted date if contactId is provided
+      if (contactId) {
+        await Contact.update(
+          { lastContacted: new Date() },
+          { where: { id: contactId } }
+        );
+      }
 
       return {
         success: true,
