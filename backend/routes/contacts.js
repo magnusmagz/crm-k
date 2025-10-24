@@ -1422,6 +1422,13 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // Update contact
 router.put('/:id', authMiddleware, validateContactUpdate, async (req, res) => {
   try {
+    console.log('[ContactUpdate] PUT /contacts/:id called:', {
+      contactId: req.params.id,
+      userId: req.user.id,
+      bodyKeys: Object.keys(req.body),
+      tags: req.body.tags
+    });
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -1499,8 +1506,17 @@ router.put('/:id', authMiddleware, validateContactUpdate, async (req, res) => {
 
     // Track changed fields
     const changedFields = Object.keys(req.body);
-    
+
+    console.log('[ContactUpdate] About to update contact:', {
+      contactId: contact.id,
+      changedFields,
+      oldTags: contact.tags,
+      newTags: req.body.tags
+    });
+
     await contact.update(req.body);
+
+    console.log('[ContactUpdate] Contact updated, emitting automation event...');
 
     // Emit event for automations
     automationEmitter.emitContactUpdated(req.user.id, contact.toJSON(), changedFields);
