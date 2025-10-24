@@ -41,17 +41,14 @@ class AutomationEnrollmentService {
       }
 
       // Find all active automations for this user with matching trigger
+      // Simplified JSONB query - the trigger column is already JSONB type
       const automations = await Automation.findAll({
         where: {
           userId,
           isActive: true,
-          [Op.and]: [
-            sequelize.where(
-              sequelize.cast(sequelize.col('trigger'), 'jsonb'),
-              Op.contains,
-              { type: eventType }
-            )
-          ]
+          trigger: {
+            type: eventType
+          }
         },
         include: ['steps']
       });
