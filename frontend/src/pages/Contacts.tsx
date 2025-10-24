@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { contactsAPI } from '../services/api';
 import api from '../services/api';
 import { Contact } from '../types';
-import { PlusIcon, UserGroupIcon, ArrowUpTrayIcon, AdjustmentsHorizontalIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, UserGroupIcon, ArrowUpTrayIcon, AdjustmentsHorizontalIcon, ChevronUpIcon, ChevronDownIcon, AdjustmentsVerticalIcon } from '@heroicons/react/24/outline';
 import ContactForm from '../components/ContactForm';
 import ContactCard from '../components/ContactCard';
 import PullToRefresh from '../components/PullToRefresh';
@@ -14,7 +14,21 @@ import ContactExport from '../components/ContactExport';
 import Pagination from '../components/Pagination';
 import BulkOperations from '../components/BulkOperations';
 import InlineEditDate from '../components/InlineEditDate';
+import ColumnSettings, { ColumnConfig } from '../components/ColumnSettings';
 import { Dialog, Transition } from '@headlessui/react';
+
+const DEFAULT_COLUMNS: ColumnConfig[] = [
+  { id: 'lastContacted', label: 'Last Contacted', visible: true, sortable: true },
+  { id: 'name', label: 'Name', visible: true, sortable: true },
+  { id: 'email', label: 'Email', visible: true, sortable: true },
+  { id: 'phone', label: 'Phone', visible: true },
+  { id: 'company', label: 'Company', visible: true, sortable: true },
+  { id: 'tags', label: 'Tags', visible: true },
+  { id: 'notes', label: 'Notes', visible: true },
+  { id: 'deals', label: 'Deals', visible: true },
+];
+
+const STORAGE_KEY = 'contacts-column-preferences';
 
 const Contacts: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,6 +38,7 @@ const Contacts: React.FC = () => {
   const [showNewContact, setShowNewContact] = useState(searchParams.get('new') === 'true');
   const [showImport, setShowImport] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -31,6 +46,14 @@ const Contacts: React.FC = () => {
   const [customFields, setCustomFields] = useState<any[]>([]);
   const [sortBy, setSortBy] = useState<string>('lastContacted');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_COLUMNS;
+    } catch {
+      return DEFAULT_COLUMNS;
+    }
+  });
 
   useEffect(() => {
     fetchContacts();
@@ -123,6 +146,109 @@ const Contacts: React.FC = () => {
     setSelectedContacts(new Set());
   };
 
+  const handleSaveColumns = (newColumns: ColumnConfig[]) => {
+    setColumns(newColumns);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newColumns));
+  };
+
+  const visibleColumns = columns.filter(col => col.visible);
+
+  const renderHeaderCell = (column: ColumnConfig) => {
+    if (column.sortable) {
+      const sortField = column.id === 'name' ? 'lastName' : column.id;
+      return (
+        <button
+          onClick={() => handleSort(sortField)}
+          className="group inline-flex items-center gap-1 hover:text-primary"
+        >
+          {column.label}
+          <SortIcon field={sortField} />
+        </button>
+      );
+    }
+    return column.label;
+  };
+
+  const renderCellContent = (contact: Contact, columnId: string) => {
+    switch (columnId) {
+      case 'lastContacted':
+        return (
+          <InlineEditDate
+            value={contact.lastContacted}
+            onSave={async (value) => {
+              await contactsAPI.update(contact.id, { lastContacted: value });
+              setContacts(prev => prev.map(c =>
+                c.id === contact.id ? { ...c, lastContacted: value } : c
+              ));
+            }}
+          />
+        );
+      case 'name':
+        return (
+          <Link to={`/contacts/${contact.id}`} className="hover:text-primary font-medium">
+            {contact.firstName} {contact.lastName}
+          </Link>
+        );
+      case 'email':
+        return (
+          <div className="flex items-center gap-2">
+            <span className={contact.isUnsubscribed ? 'line-through text-gray-400' : ''}>
+              {contact.email}
+            </span>
+            {contact.isUnsubscribed && (
+              <span
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                title={`Unsubscribed: ${contact.unsubscribeReason || 'Unknown reason'}`}
+              >
+                Unsubscribed
+              </span>
+            )}
+          </div>
+        );
+      case 'phone':
+        return contact.phone || '-';
+      case 'company':
+        return contact.company || '-';
+      case 'tags':
+        return (
+          <div className="flex flex-wrap gap-1">
+            {contact.tags.map((tag, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        );
+      case 'notes':
+        return (
+          <div className="max-w-xs truncate" title={contact.notes || ''}>
+            {contact.notes && contact.notes.trim() ? contact.notes : '-'}
+          </div>
+        );
+      case 'deals':
+        return contact.dealStats && contact.dealStats.dealCount > 0 ? (
+          <div>
+            <span className="font-medium">{contact.dealStats.openDeals || 0}</span> open
+            <div className="text-xs text-gray-400">
+              ${(isNaN(contact.dealStats.openValue) ? 0 : contact.dealStats.openValue || 0).toLocaleString()}
+            </div>
+            {contact.dealStats.wonDeals > 0 && (
+              <div className="text-xs text-green-600">
+                {contact.dealStats.wonDeals} won
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-gray-400">-</span>
+        );
+      default:
+        return '-';
+    }
+  };
+
   const SortIcon = ({ field }: { field: string }) => {
     if (sortBy !== field) {
       return <ChevronUpIcon className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100" />;
@@ -155,6 +281,14 @@ const Contacts: React.FC = () => {
             <AdjustmentsHorizontalIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Custom Fields
           </Link>
+          <button
+            type="button"
+            onClick={() => setShowColumnSettings(true)}
+            className="hidden md:inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            <AdjustmentsVerticalIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            Columns
+          </button>
           <button
             type="button"
             onClick={() => setShowExport(true)}
@@ -355,54 +489,11 @@ const Contacts: React.FC = () => {
                           className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                         />
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        <button
-                          onClick={() => handleSort('lastContacted')}
-                          className="group inline-flex items-center gap-1 hover:text-primary"
-                        >
-                          Last Contacted
-                          <SortIcon field="lastContacted" />
-                        </button>
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        <button
-                          onClick={() => handleSort('lastName')}
-                          className="group inline-flex items-center gap-1 hover:text-primary"
-                        >
-                          Name
-                          <SortIcon field="lastName" />
-                        </button>
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        <button
-                          onClick={() => handleSort('email')}
-                          className="group inline-flex items-center gap-1 hover:text-primary"
-                        >
-                          Email
-                          <SortIcon field="email" />
-                        </button>
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Phone
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        <button
-                          onClick={() => handleSort('company')}
-                          className="group inline-flex items-center gap-1 hover:text-primary"
-                        >
-                          Company
-                          <SortIcon field="company" />
-                        </button>
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Tags
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Notes
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
-                        Deals
-                      </th>
+                      {visibleColumns.map((column) => (
+                        <th key={column.id} scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-primary-dark">
+                          {renderHeaderCell(column)}
+                        </th>
+                      ))}
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                         <span className="sr-only">Actions</span>
                       </th>
@@ -419,77 +510,14 @@ const Contacts: React.FC = () => {
                             className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <InlineEditDate
-                            value={contact.lastContacted}
-                            onSave={async (value) => {
-                              await contactsAPI.update(contact.id, { lastContacted: value });
-                              setContacts(prev => prev.map(c =>
-                                c.id === contact.id ? { ...c, lastContacted: value } : c
-                              ));
-                            }}
-                          />
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-primary-dark">
-                          <Link to={`/contacts/${contact.id}`} className="hover:text-primary">
-                            {contact.firstName} {contact.lastName}
-                          </Link>
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-2">
-                            <span className={contact.isUnsubscribed ? 'line-through text-gray-400' : ''}>
-                              {contact.email}
-                            </span>
-                            {contact.isUnsubscribed && (
-                              <span 
-                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                title={`Unsubscribed: ${contact.unsubscribeReason || 'Unknown reason'}`}
-                              >
-                                Unsubscribed
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {contact.phone}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {contact.company || '-'}
-                        </td>
-                        <td className="px-3 py-4 text-sm text-gray-500">
-                          <div className="flex flex-wrap gap-1">
-                            {contact.tags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-3 py-4 text-sm text-gray-500">
-                          <div className="max-w-xs truncate" title={contact.notes || ''}>
-                            {contact.notes && contact.notes.trim() ? contact.notes : '-'}
-                          </div>
-                        </td>
-                        <td className="px-3 py-4 text-sm text-gray-500">
-                          {contact.dealStats && contact.dealStats.dealCount > 0 ? (
-                            <div>
-                              <span className="font-medium">{contact.dealStats.openDeals || 0}</span> open
-                              <div className="text-xs text-gray-400">
-                                ${(isNaN(contact.dealStats.openValue) ? 0 : contact.dealStats.openValue || 0).toLocaleString()}
-                              </div>
-                              {contact.dealStats.wonDeals > 0 && (
-                                <div className="text-xs text-green-600">
-                                  {contact.dealStats.wonDeals} won
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </td>
+                        {visibleColumns.map((column) => (
+                          <td
+                            key={column.id}
+                            className={`px-3 py-4 text-sm ${column.id === 'name' ? 'font-medium text-primary-dark' : 'text-gray-500'} ${column.id === 'email' || column.id === 'phone' || column.id === 'company' || column.id === 'lastContacted' ? 'whitespace-nowrap' : ''}`}
+                          >
+                            {renderCellContent(contact, column.id)}
+                          </td>
+                        ))}
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <Link
                             to={`/contacts/${contact.id}`}
@@ -547,6 +575,13 @@ const Contacts: React.FC = () => {
           totalContacts={total}
         />
       )}
+
+      <ColumnSettings
+        isOpen={showColumnSettings}
+        onClose={() => setShowColumnSettings(false)}
+        columns={columns}
+        onSave={handleSaveColumns}
+      />
 
       {/* Bulk Operations */}
       <BulkOperations
