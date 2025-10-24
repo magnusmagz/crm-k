@@ -241,6 +241,10 @@ const Contacts: React.FC = () => {
                 Link
               </a>
             );
+          case 'currency':
+            return typeof value === 'number'
+              ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+              : '-';
           case 'number':
             return typeof value === 'number' ? value.toLocaleString() : value;
           default:

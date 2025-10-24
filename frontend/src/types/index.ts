@@ -135,7 +135,7 @@ export interface CustomField {
   entityType: 'contact' | 'deal';
   name: string;
   label: string;
-  type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'url';
+  type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'url' | 'currency';
   required: boolean;
   options?: string[];
   validation?: Record<string, any>;

@@ -174,6 +174,7 @@ const CustomFieldForm: React.FC<CustomFieldFormProps> = ({ field, onSubmit, onCa
                 <option value="text">Text</option>
                 <option value="textarea">Text Area</option>
                 <option value="number">Number</option>
+                <option value="currency">Currency (Dollar Amount)</option>
                 <option value="date">Date</option>
                 <option value="select">Dropdown</option>
                 <option value="checkbox">Checkbox</option>

@@ -12,7 +12,7 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (field.type === 'checkbox') {
       onChange((e.target as HTMLInputElement).checked);
-    } else if (field.type === 'number') {
+    } else if (field.type === 'number' || field.type === 'currency') {
       onChange(e.target.value ? Number(e.target.value) : '');
     } else {
       onChange(e.target.value);
@@ -125,6 +125,26 @@ const CustomFieldInput: React.FC<CustomFieldInputProps> = ({ field, value, onCha
           className={inputClasses}
           placeholder="https://example.com"
         />
+      )}
+
+      {field.type === 'currency' && (
+        <div className="relative mt-1">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <span className="text-gray-500 sm:text-sm">$</span>
+          </div>
+          <input
+            id={`custom_${field.name}`}
+            name={`custom_${field.name}`}
+            type="number"
+            step="0.01"
+            min="0"
+            value={value || ''}
+            onChange={handleChange}
+            required={field.required}
+            className="block w-full pl-9 pr-4 py-3 rounded-md shadow-sm sm:text-sm border-gray-300 focus:border-primary focus:ring-primary"
+            placeholder="0.00"
+          />
+        </div>
       )}
 
       {error && (
