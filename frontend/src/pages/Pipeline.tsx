@@ -415,26 +415,6 @@ const Pipeline: React.FC = () => {
     }).format(numValue);
   };
 
-  // Calculate won/lost totals from actual deals in view
-  const calculateDisplayedAnalytics = () => {
-    const wonDeals = deals.filter(d => d.status === 'won');
-    const lostDeals = deals.filter(d => d.status === 'lost');
-    const openDeals = deals.filter(d => d.status === 'open');
-    
-    const wonValue = wonDeals.reduce((sum, deal) => sum + (parseFloat(String(deal.value)) || 0), 0);
-    const lostValue = lostDeals.reduce((sum, deal) => sum + (parseFloat(String(deal.value)) || 0), 0);
-    const openValue = openDeals.reduce((sum, deal) => sum + (parseFloat(String(deal.value)) || 0), 0);
-    
-    return {
-      won: wonDeals.length,
-      wonValue,
-      lost: lostDeals.length,
-      lostValue,
-      open: openDeals.length,
-      openValue
-    };
-  };
-
   // Bulk selection functions
   const toggleDealSelection = (dealId: string) => {
     const newSelected = new Set(selectedDeals);
@@ -457,8 +437,9 @@ const Pipeline: React.FC = () => {
   const clearSelection = () => {
     setSelectedDeals(new Set());
   };
-  
-  const displayedAnalytics = calculateDisplayedAnalytics();
+
+  // Use API analytics for accurate totals, not just visible deals
+  // calculateDisplayedAnalytics would only count filtered deals, missing won/lost deals when filtered
 
   if (isLoading) {
     return (
@@ -636,10 +617,10 @@ const Pipeline: React.FC = () => {
                   <div className="space-y-1">
                     <p className="text-mobile-xs sm:text-sm text-gray-600">Total Pipeline</p>
                     <p className="text-mobile-xl sm:text-2xl font-bold text-primary-dark">
-                      {formatCurrency(displayedAnalytics.openValue)}
+                      {formatCurrency(analytics.openValue || 0)}
                     </p>
                     <p className="text-mobile-xs sm:text-sm text-gray-500">
-                      {displayedAnalytics.open} open {displayedAnalytics.open === 1 ? 'deal' : 'deals'}
+                      {analytics.open || 0} open {analytics.open === 1 ? 'deal' : 'deals'}
                     </p>
                   </div>
                 </div>
@@ -654,7 +635,7 @@ const Pipeline: React.FC = () => {
               <div className="space-y-1">
                 <p className="text-mobile-xs sm:text-sm text-gray-600">Open Deals</p>
                 <p className="text-mobile-xl sm:text-2xl font-bold text-primary-dark">
-                  {displayedAnalytics.open}
+                  {analytics.open || 0}
                 </p>
                 <p className="text-mobile-xs sm:text-sm text-gray-500">
                   Active opportunities
@@ -672,10 +653,10 @@ const Pipeline: React.FC = () => {
               <div className="space-y-1">
                 <p className="text-mobile-xs sm:text-sm text-gray-600">Won Deals</p>
                 <p className="text-mobile-xl sm:text-2xl font-bold text-green-600">
-                  {displayedAnalytics.won}
+                  {analytics.won || 0}
                 </p>
                 <p className="text-mobile-xs sm:text-sm text-gray-500">
-                  {formatCurrency(displayedAnalytics.wonValue)}
+                  {formatCurrency(analytics.wonValue || 0)}
                 </p>
               </div>
             </div>
@@ -690,10 +671,10 @@ const Pipeline: React.FC = () => {
                   <div className="space-y-1">
                     <p className="text-mobile-xs sm:text-sm text-gray-600">Lost Deals</p>
                     <p className="text-mobile-xl sm:text-2xl font-bold text-red-600">
-                      {displayedAnalytics.lost}
+                      {analytics.lost || 0}
                     </p>
                     <p className="text-mobile-xs sm:text-sm text-gray-500">
-                      {formatCurrency(displayedAnalytics.lostValue)}
+                      {formatCurrency(analytics.lostValue || 0)}
                     </p>
                   </div>
                 </div>
