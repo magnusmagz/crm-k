@@ -9,6 +9,7 @@ const router = express.Router();
 const validateProfileUpdate = [
   body('firstName').optional().notEmpty().trim(),
   body('lastName').optional().notEmpty().trim(),
+  body('email').optional().isEmail().normalizeEmail().withMessage('Invalid email format'),
   body('companyName').optional().trim(),
   body('phone').optional({ checkFalsy: true }).matches(/^[\d\s\-\+\(\)]+$/),
   body('website').optional({ checkFalsy: true }).isURL(),
@@ -66,6 +67,37 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
       return res.status(404).json({ error: 'Profile not found' });
     }
 
+    // Handle email change separately - updates User table
+    if (req.body.email !== undefined) {
+      const newEmail = req.body.email.toLowerCase();
+
+      // Get current user
+      const user = await User.findByPk(req.user.id);
+
+      // Only update if email actually changed
+      if (user.email !== newEmail) {
+        // Check if new email is already taken by another user
+        const existingUser = await User.findOne({
+          where: {
+            email: newEmail,
+            id: { [require('sequelize').Op.ne]: req.user.id }
+          }
+        });
+
+        if (existingUser) {
+          return res.status(400).json({
+            error: 'Email already in use',
+            field: 'email'
+          });
+        }
+
+        // Update user's email (login email)
+        await user.update({ email: newEmail });
+        console.log('User email updated from', user.email, 'to', newEmail);
+      }
+    }
+
+    // Update profile fields
     const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address', 'profilePhoto', 'companyLogo', 'primaryColor', 'crmName', 'emailSignature', 'nmlsId', 'stateLicenses'];
     const updates = {};
 
@@ -79,11 +111,17 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
 
     await profile.update(updates);
 
+    // Fetch updated user with profile to return
+    const updatedUser = await User.findByPk(req.user.id, {
+      include: [{ model: UserProfile, as: 'profile' }]
+    });
+
     console.log('Profile updated successfully:', profile.toJSON());
 
-    res.json({ 
+    res.json({
       message: 'Profile updated successfully',
-      profile 
+      profile: updatedUser.profile,
+      user: updatedUser
     });
   } catch (error) {
     console.error('Update profile error:', error);

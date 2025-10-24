@@ -503,35 +503,34 @@ class AutomationEngine {
   }
 
   // Email automation action
-  async sendEmailAction(data, action, userId) {
+  async sendEmailAction(config, eventData, userId) {
     const debugMode = process.env.AUTOMATION_DEBUG === 'true';
-    
+
     if (debugMode) {
       console.log('🔧 [DEBUG] Email action triggered:', {
-        actionType: action.type,
-        triggerData: data,
-        actionConfig: action.config
+        triggerData: eventData,
+        actionConfig: config
       });
     }
 
-    let emailSubject = action.config.subject || 'Notification';
-    let emailBody = action.config.body || 'This is an automated message.';
+    let emailSubject = config.subject || 'Notification';
+    let emailBody = config.body || 'This is an automated message.';
 
     // If a template is selected, use it as base content
-    if (action.config.templateId) {
+    if (config.templateId) {
       try {
         const { EmailTemplate } = require('../models');
-        const template = await EmailTemplate.findByPk(action.config.templateId);
+        const template = await EmailTemplate.findByPk(config.templateId);
         
         if (template) {
           // Use template content if custom subject/body are empty
-          if (!action.config.subject && template.subject) {
+          if (!config.subject && template.subject) {
             emailSubject = template.subject;
           }
-          if (!action.config.body && template.htmlOutput) {
+          if (!config.body && template.htmlOutput) {
             emailBody = template.htmlOutput;
           }
-          
+
           if (debugMode) {
             console.log('🔧 [DEBUG] Using email template:', {
               templateId: template.id,
@@ -548,8 +547,8 @@ class AutomationEngine {
 
     try {
       // Get recipient email based on trigger type
-      const recipientEmail = this.extractRecipientEmail(data);
-      
+      const recipientEmail = this.extractRecipientEmail(eventData);
+
       if (!recipientEmail) {
         throw new Error('No recipient email found in trigger data');
       }
@@ -559,14 +558,14 @@ class AutomationEngine {
       }
 
       // Process email template with variables
-      const processedSubject = this.replaceVariables(emailSubject, data, debugMode);
-      const processedBody = this.replaceVariables(emailBody, data, debugMode);
+      const processedSubject = this.replaceVariables(emailSubject, eventData, debugMode);
+      const processedBody = this.replaceVariables(emailBody, eventData, debugMode);
 
       if (debugMode) {
         console.log('🔧 [DEBUG] Email template processed:', {
-          originalSubject: action.config.subject,
+          originalSubject: config.subject,
           processedSubject,
-          originalBody: action.config.body,
+          originalBody: config.body,
           processedBody
         });
       }
@@ -598,8 +597,8 @@ class AutomationEngine {
       console.error('❌ [ERROR] Email automation failed:', {
         error: error.message,
         stack: error.stack,
-        actionConfig: action.config,
-        triggerData: data
+        actionConfig: config,
+        triggerData: eventData
       });
       
       throw error;

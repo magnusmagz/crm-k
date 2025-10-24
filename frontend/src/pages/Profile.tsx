@@ -17,6 +17,7 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || '',
     lastName: profile?.lastName || '',
+    email: user?.email || '',
     title: profile?.title || '',
     companyName: profile?.companyName || '',
     phone: profile?.phone || '',
@@ -162,10 +163,17 @@ const Profile: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
-    
+
     try {
       const response = await userAPI.updateProfile(formData);
       updateProfile(response.data.profile);
+
+      // If user data was updated (email changed), update the auth context
+      if (response.data.user) {
+        // Refresh the page or update auth context to reflect new email
+        window.location.reload(); // Simple approach to refresh user data
+      }
+
       setIsEditing(false);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error: any) {
@@ -176,6 +184,8 @@ const Profile: React.FC = () => {
         errorMessage = 'Image too large. Please choose a smaller image (under 5MB).';
       } else if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
+      } else if (error.response?.data?.field === 'email') {
+        errorMessage = 'This email is already in use by another account';
       }
 
       setMessage({
@@ -379,6 +389,24 @@ const Profile: React.FC = () => {
                         required
                         className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                       />
+                    </div>
+
+                    <div className="col-span-6">
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm text-primary-dark placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                      />
+                      <p className="mt-2 text-xs text-gray-500">
+                        This email will be used for logging in to your account.
+                      </p>
                     </div>
 
                     <div className="col-span-6 sm:col-span-3">
