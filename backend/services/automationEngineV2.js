@@ -430,11 +430,17 @@ class AutomationEngineV2 {
           throw new Error('Invalid send_email config: missing subject or body');
         }
 
-        // Get user info for email sending
-        const user = await User.findByPk(enrollment.userId);
+        // Get user info for email sending (include profile for name)
+        const user = await User.findByPk(enrollment.userId, {
+          include: ['profile']
+        });
         if (!user) {
           throw new Error('User not found for email sending');
         }
+
+        // Get user's name from profile or fallback to email prefix
+        const userFirstName = user.profile?.firstName || user.email.split('@')[0];
+        const userFullName = user.profile ? `${user.profile.firstName} ${user.profile.lastName}`.trim() : user.email.split('@')[0];
 
         // Determine recipient email based on entity type
         let recipientEmail;
@@ -466,9 +472,9 @@ class AutomationEngineV2 {
             contactId: contactId,
             subject: action.config.subject,
             message: action.config.body,
-            userName: `${user.firstName} ${user.lastName}`,
+            userName: userFullName,
             userEmail: user.email,
-            userFirstName: user.firstName,
+            userFirstName: userFirstName.toLowerCase(),
             contactEmail: recipientEmail,
             contactData: contactData,
             enableTracking: true,
