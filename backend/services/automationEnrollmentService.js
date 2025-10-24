@@ -12,7 +12,9 @@ class AutomationEnrollmentService {
         userId,
         dataKeys: Object.keys(data),
         contactId: data.contact?.id,
-        contactTags: data.contact?.tags
+        contactName: `${data.contact?.firstName} ${data.contact?.lastName}`,
+        contactTags: data.contact?.tags,
+        changedFields: data.changedFields
       });
 
       // Find all active automations for this user with matching trigger

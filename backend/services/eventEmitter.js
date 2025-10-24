@@ -37,6 +37,15 @@ class AutomationEventEmitter extends EventEmitter {
   }
 
   emitContactUpdated(userId, contact, changedFields) {
+    console.log('[AutomationEmitter] emitContactUpdated called:', {
+      userId,
+      contactId: contact?.id,
+      contactName: `${contact?.firstName} ${contact?.lastName}`,
+      contactTags: contact?.tags,
+      changedFields,
+      timestamp: new Date()
+    });
+
     this.emit('automation:trigger', {
       type: 'contact_updated',
       userId,
