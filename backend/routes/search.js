@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { Contact, Deal, Stage, Note } = require('../models');
+const { Contact, Deal, Stage, Note, User } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -9,17 +9,30 @@ const router = express.Router();
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { q, limit = 5 } = req.query;
-    
+
     if (!q || q.trim().length === 0) {
       return res.json({ contacts: [], deals: [] });
     }
 
     const searchTerm = q.trim();
 
+    // Get current user and check if manager
+    const currentUser = await User.findByPk(req.user.id);
+    let userIdsToSearch = [req.user.id];
+
+    // If manager with organization, search all team members' data
+    if (currentUser.isManager && currentUser.organizationId) {
+      const teamUsers = await User.findAll({
+        where: { organizationId: currentUser.organizationId },
+        attributes: ['id']
+      });
+      userIdsToSearch = teamUsers.map(u => u.id);
+    }
+
     // Search contacts - including notes from Notes table
     const contactsPromise = Contact.findAll({
       where: {
-        userId: req.user.id,
+        userId: { [Op.in]: userIdsToSearch },
         [Op.or]: [
           { firstName: { [Op.iLike]: `%${searchTerm}%` } },
           { lastName: { [Op.iLike]: `%${searchTerm}%` } },
@@ -44,7 +57,7 @@ router.get('/', authMiddleware, async (req, res) => {
     // Search deals (including contact info) - using proper Sequelize field names
     const dealsPromise = Deal.findAll({
       where: {
-        userId: req.user.id,
+        userId: { [Op.in]: userIdsToSearch },
         [Op.or]: [
           { name: { [Op.iLike]: `%${searchTerm}%` } },
           { notes: { [Op.iLike]: `%${searchTerm}%` } },
