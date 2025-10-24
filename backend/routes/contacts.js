@@ -83,10 +83,47 @@ router.get('/', authMiddleware, async (req, res) => {
       sortBy = 'createdAt',
       sortOrder = 'DESC',
       limit = 50,
-      offset = 0
+      offset = 0,
+      ownerId // Filter by specific user (for managers)
     } = req.query;
 
-    const where = { userId: req.user.id };
+    // Build where clause based on manager permissions
+    let where = {};
+
+    if (ownerId) {
+      // If filtering by specific owner, check manager permissions
+      const currentUser = await User.findByPk(req.user.id);
+      if (currentUser.isManager && currentUser.organizationId) {
+        // Verify the owner is in the same organization
+        const ownerUser = await User.findOne({
+          where: {
+            id: ownerId,
+            organizationId: currentUser.organizationId
+          }
+        });
+        if (ownerUser) {
+          where.userId = ownerId;
+        } else {
+          return res.status(403).json({ error: 'Cannot view contacts from users outside your organization' });
+        }
+      } else {
+        return res.status(403).json({ error: 'Only managers can view other users\' contacts' });
+      }
+    } else {
+      // Default: show user's own contacts, or all team contacts if manager
+      const currentUser = await User.findByPk(req.user.id);
+      if (currentUser.isManager && currentUser.organizationId) {
+        // Manager: show all contacts from organization
+        const teamUsers = await User.findAll({
+          where: { organizationId: currentUser.organizationId },
+          attributes: ['id']
+        });
+        where.userId = { [Op.in]: teamUsers.map(u => u.id) };
+      } else {
+        // Regular user: show only own contacts
+        where.userId = req.user.id;
+      }
+    }
 
     // Search functionality
     if (search) {
@@ -123,11 +160,15 @@ router.get('/', authMiddleware, async (req, res) => {
     
     // Then get deal counts and values in a single query
     const contactIds = contacts.rows.map(c => c.id);
+    const dealStatsWhere = { contactId: contactIds };
+
+    // Apply same user filtering to deals
+    if (where.userId) {
+      dealStatsWhere.userId = where.userId;
+    }
+
     const dealStats = await Deal.findAll({
-      where: { 
-        contactId: contactIds,
-        userId: req.user.id 
-      },
+      where: dealStatsWhere,
       attributes: [
         'contactId',
         [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'dealCount'],

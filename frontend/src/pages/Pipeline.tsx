@@ -16,10 +16,12 @@ import DealImport from '../components/DealImport';
 import BulkOperations from '../components/BulkOperations';
 import useDebounce from '../hooks/useDebounce';
 import { useAppMode } from '../contexts/AppModeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { CogIcon, PlusIcon, ArrowUpTrayIcon, FunnelIcon, CurrencyDollarIcon, ChartBarIcon, TrophyIcon, XCircleIcon, BriefcaseIcon, UserGroupIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 const Pipeline: React.FC = () => {
   const { mode } = useAppMode();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [stages, setStages] = useState<Stage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -43,6 +45,9 @@ const Pipeline: React.FC = () => {
   const searchQuery = searchParams.get('search') || '';
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'won' | 'lost'>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [ownerFilter, setOwnerFilter] = useState<string>('all'); // 'all', 'me', or specific user ID
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [isManager, setIsManager] = useState(false);
   
   // Debounce search query to avoid too many API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -62,9 +67,13 @@ const Pipeline: React.FC = () => {
   const [customFields, setCustomFields] = useState<any[]>([]);
 
   useEffect(() => {
+    fetchTeamMembers();
+  }, []); // Fetch team members on mount
+
+  useEffect(() => {
     loadPipelineData();
     fetchCustomFields();
-  }, [debouncedSearchQuery, statusFilter, mode, selectedPosition]); // Reload when mode or position changes
+  }, [debouncedSearchQuery, statusFilter, mode, selectedPosition, ownerFilter]); // Reload when filters change
 
   const fetchCustomFields = async () => {
     try {
@@ -74,6 +83,19 @@ const Pipeline: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch custom fields:', error);
       setCustomFields([]);
+    }
+  };
+
+  const fetchTeamMembers = async () => {
+    try {
+      const response = await api.get('/users/team-members');
+      setTeamMembers(response.data.teamMembers || []);
+      setIsManager(true); // User is a manager if they can fetch team members
+    } catch (error: any) {
+      // Not a manager or error fetching team members
+      console.log('Not a manager or failed to fetch team members');
+      setIsManager(false);
+      setTeamMembers([]);
     }
   };
 
@@ -146,15 +168,25 @@ const Pipeline: React.FC = () => {
         setStages(stagesData);
 
         // Load deals with filters
-        const params: any = { 
+        const params: any = {
           status: statusFilter,
           limit: 500
         };
-        
+
         if (debouncedSearchQuery) {
           params.search = debouncedSearchQuery;
         }
-        
+
+        // Add owner filter if not 'all'
+        if (ownerFilter === 'me' && user?.id) {
+          // Filter to show only my deals
+          params.ownerId = user.id;
+        } else if (ownerFilter !== 'all' && ownerFilter !== 'me') {
+          // Filter to specific team member
+          params.ownerId = ownerFilter;
+        }
+        // If 'all', don't send ownerId (backend will show all team deals for managers)
+
         const dealsResponse = await dealsAPI.getAll(params);
         const filteredDeals = dealsResponse.data.deals;
         setDeals(filteredDeals);
@@ -473,7 +505,24 @@ const Pipeline: React.FC = () => {
                   <option value="lost">Lost Deals</option>
                 </select>
               )}
-              
+
+              {/* Owner Filter - Only show in sales mode for managers */}
+              {mode === 'sales' && isManager && teamMembers.length > 0 && (
+                <select
+                  value={ownerFilter}
+                  onChange={(e) => setOwnerFilter(e.target.value)}
+                  className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                >
+                  <option value="all">All Team Members</option>
+                  <option value="me">My Deals Only</option>
+                  {teamMembers.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.fullName}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               {/* Filter Toggle Button */}
               <button
                 onClick={() => setShowFilters(!showFilters)}

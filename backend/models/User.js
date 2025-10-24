@@ -85,6 +85,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false,
       field: 'is_super_admin'
+    },
+    // Manager field for team data access
+    isManager: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+      field: 'is_manager'
     }
   }, {
     tableName: 'users',

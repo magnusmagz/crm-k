@@ -177,6 +177,48 @@ router.delete('/account', authMiddleware, async (req, res) => {
   }
 });
 
+// Get team members (for managers only)
+router.get('/team-members', authMiddleware, async (req, res) => {
+  try {
+    const currentUser = await User.findByPk(req.user.id);
+
+    // Only managers can view team members
+    if (!currentUser.isManager || !currentUser.organizationId) {
+      return res.status(403).json({ error: 'Only managers can view team members' });
+    }
+
+    // Get all users in the same organization
+    const teamMembers = await User.findAll({
+      where: {
+        organizationId: currentUser.organizationId,
+        isActive: true
+      },
+      attributes: ['id', 'email', 'isManager', 'isAdmin'],
+      include: [{
+        model: UserProfile,
+        attributes: ['firstName', 'lastName']
+      }],
+      order: [['email', 'ASC']]
+    });
+
+    // Format the response
+    const formattedMembers = teamMembers.map(user => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.UserProfile?.firstName || '',
+      lastName: user.UserProfile?.lastName || '',
+      fullName: `${user.UserProfile?.firstName || ''} ${user.UserProfile?.lastName || ''}`.trim() || user.email,
+      isManager: user.isManager,
+      isAdmin: user.isAdmin
+    }));
+
+    res.json({ teamMembers: formattedMembers });
+  } catch (error) {
+    console.error('Get team members error:', error);
+    res.status(500).json({ error: 'Failed to get team members' });
+  }
+});
+
 // Get email signature
 router.get('/email-signature', authMiddleware, async (req, res) => {
   try {

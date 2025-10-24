@@ -30,10 +30,47 @@ router.get('/', authMiddleware, async (req, res) => {
       sortBy = 'createdAt',
       sortOrder = 'DESC',
       limit = 100,
-      offset = 0
+      offset = 0,
+      ownerId // Filter by specific user (for managers)
     } = req.query;
 
-    const where = { userId: req.user.id };
+    // Build where clause based on manager permissions
+    let where = {};
+
+    if (ownerId) {
+      // If filtering by specific owner, check manager permissions
+      const currentUser = await User.findByPk(req.user.id);
+      if (currentUser.isManager && currentUser.organizationId) {
+        // Verify the owner is in the same organization
+        const ownerUser = await User.findOne({
+          where: {
+            id: ownerId,
+            organizationId: currentUser.organizationId
+          }
+        });
+        if (ownerUser) {
+          where.userId = ownerId;
+        } else {
+          return res.status(403).json({ error: 'Cannot view deals from users outside your organization' });
+        }
+      } else {
+        return res.status(403).json({ error: 'Only managers can view other users\' deals' });
+      }
+    } else {
+      // Default: show user's own deals, or all team deals if manager
+      const currentUser = await User.findByPk(req.user.id);
+      if (currentUser.isManager && currentUser.organizationId) {
+        // Manager: show all deals from organization
+        const teamUsers = await User.findAll({
+          where: { organizationId: currentUser.organizationId },
+          attributes: ['id']
+        });
+        where.userId = { [Op.in]: teamUsers.map(u => u.id) };
+      } else {
+        // Regular user: show only own deals
+        where.userId = req.user.id;
+      }
+    }
 
     // Status filter
     if (status !== 'all') {
@@ -87,9 +124,10 @@ router.get('/', authMiddleware, async (req, res) => {
       offset: parseInt(offset)
     });
 
-    // Calculate analytics
+    // Calculate analytics using the same user filter
+    const analyticsWhere = where.userId ? { userId: where.userId } : {};
     const analytics = await Deal.findAll({
-      where: { userId: req.user.id },
+      where: analyticsWhere,
       attributes: [
         'status',
         [Deal.sequelize.fn('COUNT', Deal.sequelize.col('id')), 'count'],
