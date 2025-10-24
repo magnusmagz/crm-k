@@ -584,7 +584,7 @@ Unsubscribe: {{{ pm:unsubscribe_url }}}
 
       // Prepare email data
       const emailData = {
-        From: `${userName} <${userFirstName}@${this.emailDomain}>`,
+        From: `${userName} <${userEmail}>`,
         To: contactEmail,
         Subject: processedSubject,
         HtmlBody: htmlBody,
