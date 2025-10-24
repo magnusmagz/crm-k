@@ -297,11 +297,11 @@ const Layout: React.FC = () => {
                 </div>
 
                 {/* Second Row - Search Bar (Desktop Only) */}
-                <div className="hidden md:block border-t border-white border-opacity-10">
-                  <div className="py-3">
-                    <div className="max-w-3xl mx-auto" ref={searchRefDesktop}>
+                <div className="hidden md:block border-t border-white border-opacity-10 relative">
+                  <div className="py-3 overflow-visible">
+                    <div className="max-w-3xl mx-auto relative" ref={searchRefDesktop}>
                       {/* Global Search Bar */}
-                      <div className="relative">
+                      <div>
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                         </div>
