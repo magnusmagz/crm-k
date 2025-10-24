@@ -3,6 +3,7 @@ import { Contact, CustomField, Company } from '../types';
 import { contactsAPI, customFieldsAPI, companiesAPI } from '../services/api';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { FormField, FormSelect, FormTextarea } from './ui/FormField';
+import TagInput from './TagInput';
 
 interface ContactFormProps {
   contact?: Contact;
@@ -21,7 +22,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
     company: contact?.company || '',
     companyId: contact?.companyId || '',
     position: contact?.position || '',
-    tags: contact?.tags?.join(', ') || '',
+    tags: contact?.tags || [],
     notes: contact?.notes || '',
     lastContacted: contact?.lastContacted || '',
     customFields: contact?.customFields || {},
@@ -121,7 +122,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
     try {
       const data = {
         ...formData,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        tags: formData.tags, // Already an array from TagInput
         lastContacted: formData.lastContacted || null,
         companyId: formData.companyId || null,
       };
@@ -356,13 +357,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ contact, onSubmit, onCancel }
           <div className="bg-gray-50 px-6 py-5 rounded-lg">
             <h4 className="text-sm font-medium text-primary-dark mb-4">Additional Information</h4>
             <div className="space-y-6">
-              <FormField
-                label="Tags (comma-separated)"
-                id="tags"
-                name="tags"
+              <TagInput
                 value={formData.tags}
-                onChange={handleChange}
+                onChange={(tags) => setFormData({ ...formData, tags })}
                 placeholder="customer, vip, lead"
+                error={errors.tags}
               />
               
               <FormTextarea
