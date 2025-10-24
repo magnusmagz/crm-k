@@ -18,14 +18,32 @@ import ColumnSettings, { ColumnConfig } from '../components/ColumnSettings';
 import { Dialog, Transition } from '@headlessui/react';
 
 const DEFAULT_COLUMNS: ColumnConfig[] = [
+  // Core fields
   { id: 'lastContacted', label: 'Last Contacted', visible: true, sortable: true },
   { id: 'name', label: 'Name', visible: true, sortable: true },
   { id: 'email', label: 'Email', visible: true, sortable: true },
   { id: 'phone', label: 'Phone', visible: true },
   { id: 'company', label: 'Company', visible: true, sortable: true },
+  { id: 'position', label: 'Position', visible: false },
   { id: 'tags', label: 'Tags', visible: true },
   { id: 'notes', label: 'Notes', visible: true },
   { id: 'deals', label: 'Deals', visible: true },
+
+  // Metadata fields
+  { id: 'createdAt', label: 'Created At', visible: false, sortable: true },
+  { id: 'updatedAt', label: 'Updated At', visible: false, sortable: true },
+  { id: 'isUnsubscribed', label: 'Unsubscribed', visible: false },
+
+  // Recruiting fields
+  { id: 'contactType', label: 'Contact Type', visible: false },
+  { id: 'resumeUrl', label: 'Resume', visible: false },
+  { id: 'linkedinUrl', label: 'LinkedIn', visible: false },
+  { id: 'githubUrl', label: 'GitHub', visible: false },
+  { id: 'skills', label: 'Skills', visible: false },
+  { id: 'experienceYears', label: 'Years of Experience', visible: false },
+  { id: 'availability', label: 'Availability', visible: false },
+  { id: 'currentEmployer', label: 'Current Employer', visible: false },
+  { id: 'currentRole', label: 'Current Role', visible: false },
 ];
 
 const STORAGE_KEY = 'contacts-column-preferences';
@@ -54,6 +72,7 @@ const Contacts: React.FC = () => {
       return DEFAULT_COLUMNS;
     }
   });
+  const [availableColumns, setAvailableColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS);
 
   useEffect(() => {
     fetchContacts();
@@ -63,7 +82,36 @@ const Contacts: React.FC = () => {
   const fetchCustomFields = async () => {
     try {
       const response = await api.get('/custom-fields');
-      setCustomFields(response.data.fields.filter((field: any) => field.entityType === 'contact'));
+      const contactCustomFields = response.data.fields.filter((field: any) => field.entityType === 'contact');
+      setCustomFields(contactCustomFields);
+
+      // Add custom fields to available columns
+      const customFieldColumns: ColumnConfig[] = contactCustomFields.map((field: any) => ({
+        id: `customFields.${field.name}`,
+        label: field.label,
+        visible: false,
+      }));
+
+      // Merge with default columns
+      const allColumns = [...DEFAULT_COLUMNS, ...customFieldColumns];
+      setAvailableColumns(allColumns);
+
+      // Update current columns to include new custom fields if they don't exist
+      setColumns(prevColumns => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const savedColumns = JSON.parse(saved);
+            // Merge saved columns with any new custom fields
+            const existingIds = new Set(savedColumns.map((col: ColumnConfig) => col.id));
+            const newCustomFields = customFieldColumns.filter(col => !existingIds.has(col.id));
+            return [...savedColumns, ...newCustomFields];
+          }
+        } catch {
+          // If error, just return merged columns
+        }
+        return allColumns;
+      });
     } catch (error) {
       console.error('Failed to fetch custom fields:', error);
     }
@@ -170,6 +218,39 @@ const Contacts: React.FC = () => {
   };
 
   const renderCellContent = (contact: Contact, columnId: string) => {
+    // Handle custom fields
+    if (columnId.startsWith('customFields.')) {
+      const fieldName = columnId.replace('customFields.', '');
+      const value = contact.customFields?.[fieldName];
+
+      if (value === null || value === undefined || value === '') {
+        return '-';
+      }
+
+      // Handle different custom field types
+      const field = customFields.find(f => f.name === fieldName);
+      if (field) {
+        switch (field.type) {
+          case 'date':
+            return new Date(value).toLocaleDateString();
+          case 'checkbox':
+            return value ? 'Yes' : 'No';
+          case 'url':
+            return (
+              <a href={value} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                Link
+              </a>
+            );
+          case 'number':
+            return typeof value === 'number' ? value.toLocaleString() : value;
+          default:
+            return String(value);
+        }
+      }
+      return String(value);
+    }
+
+    // Handle standard fields
     switch (columnId) {
       case 'lastContacted':
         return (
@@ -193,7 +274,7 @@ const Contacts: React.FC = () => {
         return (
           <div className="flex items-center gap-2">
             <span className={contact.isUnsubscribed ? 'line-through text-gray-400' : ''}>
-              {contact.email}
+              {contact.email || '-'}
             </span>
             {contact.isUnsubscribed && (
               <span
@@ -209,17 +290,23 @@ const Contacts: React.FC = () => {
         return contact.phone || '-';
       case 'company':
         return contact.company || '-';
+      case 'position':
+        return contact.position || '-';
       case 'tags':
         return (
           <div className="flex flex-wrap gap-1">
-            {contact.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary"
-              >
-                {tag}
-              </span>
-            ))}
+            {contact.tags && contact.tags.length > 0 ? (
+              contact.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary"
+                >
+                  {tag}
+                </span>
+              ))
+            ) : (
+              <span className="text-gray-400">-</span>
+            )}
           </div>
         );
       case 'notes':
@@ -244,6 +331,63 @@ const Contacts: React.FC = () => {
         ) : (
           <span className="text-gray-400">-</span>
         );
+      case 'createdAt':
+        return new Date(contact.createdAt).toLocaleDateString();
+      case 'updatedAt':
+        return new Date(contact.updatedAt).toLocaleDateString();
+      case 'isUnsubscribed':
+        return contact.isUnsubscribed ? (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            Yes
+          </span>
+        ) : (
+          <span className="text-gray-400">No</span>
+        );
+      case 'contactType':
+        return contact.contactType ? (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-primary-dark">
+            {contact.contactType}
+          </span>
+        ) : '-';
+      case 'resumeUrl':
+        return contact.resumeUrl ? (
+          <a href={contact.resumeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            View
+          </a>
+        ) : '-';
+      case 'linkedinUrl':
+        return contact.linkedinUrl ? (
+          <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            Profile
+          </a>
+        ) : '-';
+      case 'githubUrl':
+        return contact.githubUrl ? (
+          <a href={contact.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            Profile
+          </a>
+        ) : '-';
+      case 'skills':
+        return contact.skills && contact.skills.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {contact.skills.map((skill, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        ) : '-';
+      case 'experienceYears':
+        return contact.experienceYears ? `${contact.experienceYears} years` : '-';
+      case 'availability':
+        return contact.availability || '-';
+      case 'currentEmployer':
+        return contact.currentEmployer || '-';
+      case 'currentRole':
+        return contact.currentRole || '-';
       default:
         return '-';
     }
@@ -580,6 +724,7 @@ const Contacts: React.FC = () => {
         isOpen={showColumnSettings}
         onClose={() => setShowColumnSettings(false)}
         columns={columns}
+        availableColumns={availableColumns}
         onSave={handleSaveColumns}
       />
 
