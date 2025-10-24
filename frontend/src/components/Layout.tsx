@@ -39,7 +39,8 @@ const Layout: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any>({ contacts: [], deals: [] });
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const searchRefDesktop = useRef<HTMLDivElement>(null);
+  const searchRefMobile = useRef<HTMLDivElement>(null);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Fetch search results
@@ -71,7 +72,10 @@ const Layout: React.FC = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        (searchRefDesktop.current && !searchRefDesktop.current.contains(event.target as Node)) &&
+        (searchRefMobile.current && !searchRefMobile.current.contains(event.target as Node))
+      ) {
         setShowSearchDropdown(false);
       }
     };
@@ -175,122 +179,6 @@ const Layout: React.FC = () => {
                           </Transition>
                         </Menu>
                       </div>
-                    </div>
-                  </div>
-                  <div className="hidden md:block flex-1 max-w-md mx-4" ref={searchRef}>
-                    {/* Global Search Bar */}
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onFocus={() => debouncedSearchQuery && setShowSearchDropdown(true)}
-                        placeholder="Search everything..."
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md leading-5 bg-gray-700 bg-opacity-50 text-gray-100 placeholder-gray-400 focus:outline-none focus:bg-white focus:bg-opacity-100 focus:ring-1 focus:ring-primary focus:border-primary focus:text-gray-900 focus:placeholder-gray-500 sm:text-sm transition-colors"
-                      />
-                      {/* Search indicator */}
-                      {isSearching && (
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                        </div>
-                      )}
-                      
-                      {/* Search Results Dropdown */}
-                      {showSearchDropdown && (searchResults.contacts.length > 0 || searchResults.deals.length > 0) && (
-                        <div className="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-96 overflow-auto">
-                          {/* Contacts Section */}
-                          {searchResults.contacts.length > 0 && (
-                            <div>
-                              <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-                                <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                  Contacts ({searchResults.contacts.length})
-                                </h3>
-                              </div>
-                              {searchResults.contacts.map((contact: any) => (
-                                <button
-                                  key={contact.id}
-                                  onClick={() => handleResultClick('contact', contact.id)}
-                                  className="w-full px-4 py-3 hover:bg-gray-50 flex items-start text-left border-b border-gray-100 last:border-b-0"
-                                >
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {contact.firstName} {contact.lastName}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      {contact.company && <span>{contact.company} • </span>}
-                                      {contact.email || contact.phone}
-                                    </div>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* Deals Section */}
-                          {searchResults.deals.length > 0 && (
-                            <div>
-                              <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-                                <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                  Deals ({searchResults.deals.length})
-                                </h3>
-                              </div>
-                              {searchResults.deals.map((deal: any) => (
-                                <button
-                                  key={deal.id}
-                                  onClick={() => handleResultClick('deal', deal.id)}
-                                  className="w-full px-4 py-3 hover:bg-gray-50 flex items-start text-left border-b border-gray-100 last:border-b-0"
-                                >
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {deal.name}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      {deal.Contact && (
-                                        <span>{deal.Contact.firstName} {deal.Contact.lastName} • </span>
-                                      )}
-                                      {formatCurrency(deal.value)}
-                                      {deal.Stage && (
-                                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" 
-                                              style={{ backgroundColor: `${deal.Stage.color}20`, color: deal.Stage.color }}>
-                                          {deal.Stage.name}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                          
-                          {/* View All Links - Stacked */}
-                          <div className="bg-gray-50 border-t border-gray-200">
-                            <Link
-                              to={`/contacts?search=${encodeURIComponent(searchQuery)}`}
-                              onClick={() => setShowSearchDropdown(false)}
-                              className="block px-4 py-2 text-xs text-primary hover:text-primary-dark hover:bg-gray-100 font-medium transition-colors"
-                            >
-                              View all contacts →
-                            </Link>
-                            <Link
-                              to={`/pipeline?search=${encodeURIComponent(searchQuery)}`}
-                              onClick={() => setShowSearchDropdown(false)}
-                              className="block px-4 py-2 text-xs text-primary hover:text-primary-dark hover:bg-gray-100 font-medium border-t border-gray-200 transition-colors"
-                            >
-                              View all deals →
-                            </Link>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* No Results Message */}
-                      {showSearchDropdown && debouncedSearchQuery && searchResults.contacts.length === 0 && searchResults.deals.length === 0 && !isSearching && (
-                        <div className="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 px-4 py-3">
-                          <p className="text-sm text-gray-500 text-center">No results found for "{debouncedSearchQuery}"</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className="hidden md:block">
@@ -407,13 +295,135 @@ const Layout: React.FC = () => {
                     </Disclosure.Button>
                   </div>
                 </div>
+
+                {/* Second Row - Search Bar (Desktop Only) */}
+                <div className="hidden md:block border-t border-white border-opacity-10">
+                  <div className="py-3">
+                    <div className="max-w-3xl mx-auto" ref={searchRefDesktop}>
+                      {/* Global Search Bar */}
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onFocus={() => debouncedSearchQuery && setShowSearchDropdown(true)}
+                          placeholder="Search everything..."
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md leading-5 bg-gray-700 bg-opacity-50 text-gray-100 placeholder-gray-400 focus:outline-none focus:bg-white focus:bg-opacity-100 focus:ring-1 focus:ring-primary focus:border-primary focus:text-gray-900 focus:placeholder-gray-500 sm:text-sm transition-colors"
+                        />
+                        {/* Search indicator */}
+                        {isSearching && (
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                          </div>
+                        )}
+
+                        {/* Search Results Dropdown */}
+                        {showSearchDropdown && (searchResults.contacts.length > 0 || searchResults.deals.length > 0) && (
+                          <div className="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-96 overflow-auto">
+                            {/* Contacts Section */}
+                            {searchResults.contacts.length > 0 && (
+                              <div>
+                                <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                  <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Contacts ({searchResults.contacts.length})
+                                  </h3>
+                                </div>
+                                {searchResults.contacts.map((contact: any) => (
+                                  <button
+                                    key={contact.id}
+                                    onClick={() => handleResultClick('contact', contact.id)}
+                                    className="w-full px-4 py-3 hover:bg-gray-50 flex items-start text-left border-b border-gray-100 last:border-b-0"
+                                  >
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {contact.firstName} {contact.lastName}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {contact.company && <span>{contact.company} • </span>}
+                                        {contact.email || contact.phone}
+                                      </div>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Deals Section */}
+                            {searchResults.deals.length > 0 && (
+                              <div>
+                                <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                  <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Deals ({searchResults.deals.length})
+                                  </h3>
+                                </div>
+                                {searchResults.deals.map((deal: any) => (
+                                  <button
+                                    key={deal.id}
+                                    onClick={() => handleResultClick('deal', deal.id)}
+                                    className="w-full px-4 py-3 hover:bg-gray-50 flex items-start text-left border-b border-gray-100 last:border-b-0"
+                                  >
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {deal.name}
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {deal.Contact && (
+                                          <span>{deal.Contact.firstName} {deal.Contact.lastName} • </span>
+                                        )}
+                                        {formatCurrency(deal.value)}
+                                        {deal.Stage && (
+                                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                                style={{ backgroundColor: `${deal.Stage.color}20`, color: deal.Stage.color }}>
+                                            {deal.Stage.name}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* View All Links - Stacked */}
+                            <div className="bg-gray-50 border-t border-gray-200">
+                              <Link
+                                to={`/contacts?search=${encodeURIComponent(searchQuery)}`}
+                                onClick={() => setShowSearchDropdown(false)}
+                                className="block px-4 py-2 text-xs text-primary hover:text-primary-dark hover:bg-gray-100 font-medium transition-colors"
+                              >
+                                View all contacts →
+                              </Link>
+                              <Link
+                                to={`/pipeline?search=${encodeURIComponent(searchQuery)}`}
+                                onClick={() => setShowSearchDropdown(false)}
+                                className="block px-4 py-2 text-xs text-primary hover:text-primary-dark hover:bg-gray-100 font-medium border-t border-gray-200 transition-colors"
+                              >
+                                View all deals →
+                              </Link>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* No Results Message */}
+                        {showSearchDropdown && debouncedSearchQuery && searchResults.contacts.length === 0 && searchResults.deals.length === 0 && !isSearching && (
+                          <div className="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 px-4 py-3">
+                            <p className="text-sm text-gray-500 text-center">No results found for "{debouncedSearchQuery}"</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <Disclosure.Panel className="md:hidden">
                 {({ close }) => (
                 <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                   {/* Mobile Search Bar */}
-                  <div className="px-1 pb-3" ref={searchRef}>
+                  <div className="px-1 pb-3" ref={searchRefMobile}>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
