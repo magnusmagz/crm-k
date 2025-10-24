@@ -1,7 +1,8 @@
-const { Automation, AutomationLog, AutomationStep, AutomationEnrollment, Contact, Deal, Stage, sequelize } = require('../models');
+const { Automation, AutomationLog, AutomationStep, AutomationEnrollment, Contact, Deal, Stage, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const cron = require('node-cron');
 const automationDebugger = require('./automationDebugger');
+const emailService = require('./emailService');
 
 class AutomationEngineV2 {
   constructor() {
@@ -422,7 +423,71 @@ class AutomationEngineV2 {
           await entity.update({ stageId: action.config.stageId });
         }
         break;
-      
+
+      case 'send_email':
+        // Send email action
+        if (!action.config.subject || !action.config.body) {
+          throw new Error('Invalid send_email config: missing subject or body');
+        }
+
+        // Get user info for email sending
+        const user = await User.findByPk(enrollment.userId);
+        if (!user) {
+          throw new Error('User not found for email sending');
+        }
+
+        // Determine recipient email based on entity type
+        let recipientEmail;
+        let contactData;
+        let contactId;
+
+        if (enrollment.entityType === 'contact') {
+          recipientEmail = entity.email;
+          contactData = entity;
+          contactId = entity.id;
+        } else if (enrollment.entityType === 'deal' && entity.Contact) {
+          recipientEmail = entity.Contact.email;
+          contactData = entity.Contact;
+          contactId = entity.Contact.id;
+        }
+
+        if (!recipientEmail) {
+          automationDebugger.log(debugSessionId, 'SEND_EMAIL_NO_RECIPIENT', {
+            entityType: enrollment.entityType,
+            entityId: entity.id,
+            message: 'No email address available for recipient'
+          }, 'warn');
+          break;
+        }
+
+        try {
+          await emailService.sendEmail({
+            userId: user.id,
+            contactId: contactId,
+            subject: action.config.subject,
+            message: action.config.body,
+            userName: `${user.firstName} ${user.lastName}`,
+            userEmail: user.email,
+            userFirstName: user.firstName,
+            contactEmail: recipientEmail,
+            contactData: contactData,
+            enableTracking: true,
+            appendSignature: true
+          });
+
+          automationDebugger.log(debugSessionId, 'EMAIL_SENT', {
+            to: recipientEmail,
+            subject: action.config.subject
+          });
+        } catch (emailError) {
+          automationDebugger.log(debugSessionId, 'EMAIL_SEND_ERROR', {
+            error: emailError.message,
+            to: recipientEmail
+          }, 'error');
+          throw emailError;
+        }
+        break;
+
       case 'create_task':
         // Future: Create a task
         automationDebugger.log(debugSessionId, 'ACTION_NOT_IMPLEMENTED', {
