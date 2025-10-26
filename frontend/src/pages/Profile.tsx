@@ -4,7 +4,6 @@ import { userAPI } from '../services/api';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid';
 import { PhotoIcon, BuildingOfficeIcon, BellIcon, BellSlashIcon, CheckIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
 import { FormField } from '../components/ui/FormField';
-import EmailSignatureEditor from '../components/EmailSignatureEditor';
 import StateLicenseManager from '../components/StateLicenseManager';
 import { StateLicense } from '../types';
 import { pushNotificationService, PushSubscriptionStatus } from '../services/pushNotificationService';
@@ -846,18 +845,6 @@ const Profile: React.FC = () => {
             )}
         </div>
 
-        {/* Email Signature Section */}
-        <div className="">
-          <div className="border-t border-gray-200 pt-8 mb-6">
-            <h3 className="text-xl font-semibold text-primary-dark">Email Signature</h3>
-            <p className="text-sm text-gray-600 mt-1">Customize your email signature for all outgoing emails</p>
-          </div>
-          <div className="shadow overflow-hidden sm:rounded-md">
-            <div className="px-4 py-5 bg-white sm:p-6">
-              <EmailSignatureEditor profile={profile} user={user} />
-            </div>
-          </div>
-        </div>
 
         {/* Notification Settings Section */}
         <div className="">

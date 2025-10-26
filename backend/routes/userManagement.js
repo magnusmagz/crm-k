@@ -204,8 +204,7 @@ router.post('/',
             lastName: lastName,
             email: email
           },
-          enableTracking: false,
-          appendSignature: false
+          enableTracking: false
         });
       } catch (emailError) {
         console.error('Failed to send invitation email:', emailError);
@@ -498,8 +497,7 @@ router.post('/:id/reset-password',
           userName: 'CRM System',
           userEmail: 'noreply@crm.com',
           userFirstName: 'CRM',
-          enableTracking: false,
-          appendSignature: false
+          enableTracking: false
         });
         console.log('Email send result:', emailResult);
       } catch (emailError) {

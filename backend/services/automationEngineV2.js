@@ -477,8 +477,7 @@ class AutomationEngineV2 {
             userFirstName: userFirstName.toLowerCase(),
             contactEmail: recipientEmail,
             contactData: contactData,
-            enableTracking: true,
-            appendSignature: true
+            enableTracking: true
           });
 
           automationDebugger.log(debugSessionId, 'EMAIL_SENT', {
