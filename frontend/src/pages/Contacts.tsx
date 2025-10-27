@@ -49,6 +49,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 
 const STORAGE_KEY = 'contacts-column-preferences';
 const SORT_STORAGE_KEY = 'contacts-sort-preferences';
+const PAGE_SIZE_STORAGE_KEY = 'contacts-pageSize';
 
 const Contacts: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,8 +61,15 @@ const Contacts: React.FC = () => {
   const [showExport, setShowExport] = useState(false);
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+
+  // Read pagination state from URL params (with fallbacks to localStorage and defaults)
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = parseInt(
+    searchParams.get('pageSize') ||
+    localStorage.getItem(PAGE_SIZE_STORAGE_KEY) ||
+    '25',
+    10
+  );
   const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
   const [customFields, setCustomFields] = useState<any[]>([]);
   const [sortBy, setSortBy] = useState<string>(() => {
@@ -89,6 +97,23 @@ const Contacts: React.FC = () => {
     }
   });
   const [availableColumns, setAvailableColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS);
+
+  // Helper function to update URL params while preserving existing ones
+  const updatePaginationParams = (updates: { page?: number; pageSize?: number }) => {
+    const newParams = new URLSearchParams(searchParams);
+
+    if (updates.page !== undefined) {
+      newParams.set('page', updates.page.toString());
+    }
+
+    if (updates.pageSize !== undefined) {
+      newParams.set('pageSize', updates.pageSize.toString());
+      // Also save to localStorage for future sessions
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, updates.pageSize.toString());
+    }
+
+    setSearchParams(newParams);
+  };
 
   useEffect(() => {
     fetchContacts();
@@ -165,7 +190,7 @@ const Contacts: React.FC = () => {
       setSortBy(field);
       setSortOrder('desc');
     }
-    setCurrentPage(1);
+    updatePaginationParams({ page: 1 });
   };
 
   const handleContactCreated = (contact: Contact) => {
@@ -499,8 +524,17 @@ const Contacts: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => {
-              setSearchParams(e.target.value ? { search: e.target.value } : {});
-              setCurrentPage(1);
+              const newParams = new URLSearchParams();
+              if (e.target.value) {
+                newParams.set('search', e.target.value);
+              }
+              // Reset to page 1 when searching
+              newParams.set('page', '1');
+              // Preserve pageSize if set
+              if (searchParams.get('pageSize')) {
+                newParams.set('pageSize', searchParams.get('pageSize')!);
+              }
+              setSearchParams(newParams);
             }}
             placeholder="Search contacts..."
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-base"
@@ -556,11 +590,10 @@ const Contacts: React.FC = () => {
           <Pagination
             currentPage={currentPage}
             totalPages={Math.ceil(total / pageSize)}
-            onPageChange={setCurrentPage}
+            onPageChange={(page) => updatePaginationParams({ page })}
             pageSize={pageSize}
             onPageSizeChange={(newSize) => {
-              setPageSize(newSize);
-              setCurrentPage(1);
+              updatePaginationParams({ page: 1, pageSize: newSize });
             }}
             totalItems={total}
             startItem={(currentPage - 1) * pageSize + 1}
@@ -608,7 +641,7 @@ const Contacts: React.FC = () => {
                   const [field, order] = e.target.value.split('-');
                   setSortBy(field);
                   setSortOrder(order as 'asc' | 'desc');
-                  setCurrentPage(1);
+                  updatePaginationParams({ page: 1 });
                 }}
                 className="flex-1 rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-primary focus:ring-primary"
               >
@@ -721,11 +754,10 @@ const Contacts: React.FC = () => {
           <Pagination
             currentPage={currentPage}
             totalPages={Math.ceil(total / pageSize)}
-            onPageChange={setCurrentPage}
+            onPageChange={(page) => updatePaginationParams({ page })}
             pageSize={pageSize}
             onPageSizeChange={(newSize) => {
-              setPageSize(newSize);
-              setCurrentPage(1); // Reset to first page when page size changes
+              updatePaginationParams({ page: 1, pageSize: newSize });
             }}
             totalItems={total}
             startItem={(currentPage - 1) * pageSize + 1}

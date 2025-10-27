@@ -180,7 +180,7 @@ const ContactDetail: React.FC = () => {
     <div>
       <div className="mb-4">
         <button
-          onClick={() => navigate('/contacts')}
+          onClick={() => navigate(-1)}
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
