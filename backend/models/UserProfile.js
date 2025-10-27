@@ -187,6 +187,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: true,
       field: 'enable_auto_reminders'
+    },
+    emailSignature: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'email_signature',
+      comment: 'Rich text HTML email signature'
     }
   }, {
     tableName: 'user_profiles',

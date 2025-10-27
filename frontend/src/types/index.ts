@@ -50,6 +50,7 @@ export interface UserProfile {
   crmName?: string;
   nmlsId?: string;
   stateLicenses?: StateLicense[];
+  emailSignature?: string;
   createdAt: Date;
   updatedAt: Date;
 }

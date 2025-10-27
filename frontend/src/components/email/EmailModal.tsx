@@ -3,6 +3,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { emailAPI, SendEmailData } from '../../services/emailAPI';
 import { Contact } from '../../types';
 import VariablePicker from './VariablePicker';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EmailModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface EmailModalProps {
 }
 
 const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, contact, onSuccess }) => {
+  const { profile } = useAuth();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -51,10 +53,16 @@ const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, contact, onSuc
     setError(null);
 
     try {
+      // Convert plain text message to HTML and append signature
+      const messageHtml = message.trim().replace(/\n/g, '<br/>');
+      const fullMessage = profile?.emailSignature
+        ? `${messageHtml}<br/><br/>---<br/>${profile.emailSignature}`
+        : messageHtml;
+
       const data: SendEmailData = {
         contactId: contact.id,
         subject: subject.trim(),
-        message: message.trim(),
+        message: fullMessage,
       };
 
       await emailAPI.send(data);
@@ -161,6 +169,15 @@ const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, contact, onSuc
                 <span className="ml-2 text-primary">• Contains variables</span>
               )}
             </p>
+            {profile?.emailSignature && (
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                <p className="text-xs font-medium text-gray-700 mb-2">Your email signature will be automatically appended:</p>
+                <div
+                  className="text-xs text-gray-600 border-t border-gray-300 pt-2"
+                  dangerouslySetInnerHTML={{ __html: profile.emailSignature }}
+                />
+              </div>
+            )}
           </div>
         </div>
 

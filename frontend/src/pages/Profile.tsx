@@ -7,12 +7,25 @@ import { FormField } from '../components/ui/FormField';
 import StateLicenseManager from '../components/StateLicenseManager';
 import { StateLicense } from '../types';
 import { pushNotificationService, PushSubscriptionStatus } from '../services/pushNotificationService';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const Profile: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Generate default signature from profile data
+  const generateDefaultSignature = () => {
+    const firstName = profile?.firstName || '';
+    const lastName = profile?.lastName || '';
+    const email = user?.email || '';
+    const companyName = profile?.companyName || '';
+    const website = profile?.website || '';
+
+    return `<p><strong>${firstName} ${lastName}</strong><br/>${companyName}<br/><a href="mailto:${email}">${email}</a>${website ? `<br/><a href="${website}">${website}</a>` : ''}</p>`;
+  };
+
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || '',
     lastName: profile?.lastName || '',
@@ -33,6 +46,7 @@ const Profile: React.FC = () => {
     crmName: profile?.crmName || 'CRM Killer',
     nmlsId: profile?.nmlsId || '',
     stateLicenses: profile?.stateLicenses || [],
+    emailSignature: profile?.emailSignature || generateDefaultSignature(),
   });
   const profilePhotoRef = useRef<HTMLInputElement>(null);
   const companyLogoRef = useRef<HTMLInputElement>(null);
@@ -601,6 +615,30 @@ const Profile: React.FC = () => {
                     </>
                   )}
                   </div>
+
+                  {/* Email Signature */}
+                  <div className="border-t pt-6">
+                    <h4 className="text-base font-medium text-gray-900 mb-4">Email Signature</h4>
+                    <p className="text-sm text-gray-500 mb-4">
+                      This signature will be automatically added to your emails.
+                    </p>
+                    <div className="border border-gray-300 rounded-md overflow-hidden">
+                      <ReactQuill
+                        theme="snow"
+                        value={formData.emailSignature}
+                        onChange={(value) => setFormData(prev => ({ ...prev, emailSignature: value }))}
+                        modules={{
+                          toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            ['link'],
+                            [{ 'list': 'bullet' }],
+                            ['clean']
+                          ]
+                        }}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                   <button
@@ -740,6 +778,18 @@ const Profile: React.FC = () => {
                     </dl>
                   </div>
                 )}
+
+                {/* Email Signature Display */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h4 className="text-base font-medium text-gray-900 mb-4">Email Signature</h4>
+                  <div className="text-sm text-gray-700 border border-gray-200 rounded-md p-4 bg-gray-50">
+                    {profile?.emailSignature ? (
+                      <div dangerouslySetInnerHTML={{ __html: profile.emailSignature }} />
+                    ) : (
+                      <p className="text-gray-500 italic">No email signature set</p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="mt-6">
                   <button

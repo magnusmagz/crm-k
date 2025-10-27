@@ -98,7 +98,7 @@ router.put('/profile', authMiddleware, validateProfileUpdate, async (req, res) =
     }
 
     // Update profile fields
-    const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address', 'profilePhoto', 'companyLogo', 'primaryColor', 'crmName', 'nmlsId', 'stateLicenses'];
+    const allowedFields = ['firstName', 'lastName', 'companyName', 'phone', 'website', 'address', 'profilePhoto', 'companyLogo', 'primaryColor', 'crmName', 'nmlsId', 'stateLicenses', 'emailSignature'];
     const updates = {};
 
     allowedFields.forEach(field => {
