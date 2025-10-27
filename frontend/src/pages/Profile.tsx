@@ -7,8 +7,9 @@ import { FormField } from '../components/ui/FormField';
 import StateLicenseManager from '../components/StateLicenseManager';
 import { StateLicense } from '../types';
 import { pushNotificationService, PushSubscriptionStatus } from '../services/pushNotificationService';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
 
 const Profile: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -61,6 +62,27 @@ const Profile: React.FC = () => {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
+
+  // TipTap editor for email signature
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+      }),
+    ],
+    content: formData.emailSignature,
+    onUpdate: ({ editor }) => {
+      setFormData(prev => ({ ...prev, emailSignature: editor.getHTML() }));
+    },
+  });
+
+  // Update editor content when form data changes externally
+  useEffect(() => {
+    if (editor && editor.getHTML() !== formData.emailSignature) {
+      editor.commands.setContent(formData.emailSignature);
+    }
+  }, [formData.emailSignature, editor]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -623,19 +645,65 @@ const Profile: React.FC = () => {
                       This signature will be automatically added to your emails.
                     </p>
                     <div className="border border-gray-300 rounded-md overflow-hidden">
-                      <ReactQuill
-                        theme="snow"
-                        value={formData.emailSignature}
-                        onChange={(value) => setFormData(prev => ({ ...prev, emailSignature: value }))}
-                        modules={{
-                          toolbar: [
-                            ['bold', 'italic', 'underline'],
-                            ['link'],
-                            [{ 'list': 'bullet' }],
-                            ['clean']
-                          ]
-                        }}
-                        className="bg-white"
+                      {/* Toolbar */}
+                      {editor && (
+                        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-300 bg-gray-50">
+                          <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleBold().run()}
+                            className={`px-3 py-1 text-sm font-medium rounded ${
+                              editor.isActive('bold') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            Bold
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleItalic().run()}
+                            className={`px-3 py-1 text-sm font-medium rounded ${
+                              editor.isActive('italic') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            Italic
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleStrike().run()}
+                            className={`px-3 py-1 text-sm font-medium rounded ${
+                              editor.isActive('strike') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            Underline
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const url = window.prompt('Enter URL:');
+                              if (url) {
+                                editor.chain().focus().setLink({ href: url }).run();
+                              }
+                            }}
+                            className={`px-3 py-1 text-sm font-medium rounded ${
+                              editor.isActive('link') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            Link
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => editor.chain().focus().toggleBulletList().run()}
+                            className={`px-3 py-1 text-sm font-medium rounded ${
+                              editor.isActive('bulletList') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            Bullet List
+                          </button>
+                        </div>
+                      )}
+                      {/* Editor Content */}
+                      <EditorContent
+                        editor={editor}
+                        className="prose max-w-none p-4 min-h-[200px] bg-white"
                       />
                     </div>
                   </div>
