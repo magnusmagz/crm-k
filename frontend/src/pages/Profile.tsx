@@ -47,7 +47,7 @@ const Profile: React.FC = () => {
     crmName: profile?.crmName || 'CRM Killer',
     nmlsId: profile?.nmlsId || '',
     stateLicenses: profile?.stateLicenses || [],
-    emailSignature: profile?.emailSignature || generateDefaultSignature(),
+    emailSignature: profile?.emailSignature || '',
   });
   const profilePhotoRef = useRef<HTMLInputElement>(null);
   const companyLogoRef = useRef<HTMLInputElement>(null);
@@ -76,6 +76,23 @@ const Profile: React.FC = () => {
       setFormData(prev => ({ ...prev, emailSignature: editor.getHTML() }));
     },
   });
+
+  // Initialize signature when profile loads
+  useEffect(() => {
+    if (profile && user) {
+      // Check if signature is missing or corrupted (contains [object])
+      const currentSig = formData.emailSignature;
+      const needsDefault = !currentSig || currentSig.includes('[object]') || currentSig === '<p></p>';
+
+      if (needsDefault) {
+        const defaultSig = generateDefaultSignature();
+        setFormData(prev => ({ ...prev, emailSignature: defaultSig }));
+        if (editor) {
+          editor.commands.setContent(defaultSig);
+        }
+      }
+    }
+  }, [profile, user]);
 
   // Update editor content when form data changes externally
   useEffect(() => {
@@ -650,50 +667,65 @@ const Profile: React.FC = () => {
                         <div className="flex flex-wrap gap-1 p-2 border-b border-gray-300 bg-gray-50">
                           <button
                             type="button"
-                            onClick={() => editor.chain().focus().toggleBold().run()}
-                            className={`px-3 py-1 text-sm font-medium rounded ${
-                              editor.isActive('bold') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              editor.chain().focus().toggleBold().run();
+                            }}
+                            className={`px-3 py-1 text-sm font-medium rounded border ${
+                              editor.isActive('bold') ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                             }`}
                           >
                             Bold
                           </button>
                           <button
                             type="button"
-                            onClick={() => editor.chain().focus().toggleItalic().run()}
-                            className={`px-3 py-1 text-sm font-medium rounded ${
-                              editor.isActive('italic') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              editor.chain().focus().toggleItalic().run();
+                            }}
+                            className={`px-3 py-1 text-sm font-medium rounded border ${
+                              editor.isActive('italic') ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                             }`}
                           >
                             Italic
                           </button>
                           <button
                             type="button"
-                            onClick={() => editor.chain().focus().toggleStrike().run()}
-                            className={`px-3 py-1 text-sm font-medium rounded ${
-                              editor.isActive('strike') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              editor.chain().focus().toggleStrike().run();
+                            }}
+                            className={`px-3 py-1 text-sm font-medium rounded border ${
+                              editor.isActive('strike') ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                             }`}
                           >
-                            Underline
+                            Strikethrough
                           </button>
                           <button
                             type="button"
-                            onClick={() => {
+                            onMouseDown={(e) => {
+                              e.preventDefault();
                               const url = window.prompt('Enter URL:');
                               if (url) {
                                 editor.chain().focus().setLink({ href: url }).run();
+                              } else {
+                                editor.chain().focus().run();
                               }
                             }}
-                            className={`px-3 py-1 text-sm font-medium rounded ${
-                              editor.isActive('link') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            className={`px-3 py-1 text-sm font-medium rounded border ${
+                              editor.isActive('link') ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                             }`}
                           >
                             Link
                           </button>
                           <button
                             type="button"
-                            onClick={() => editor.chain().focus().toggleBulletList().run()}
-                            className={`px-3 py-1 text-sm font-medium rounded ${
-                              editor.isActive('bulletList') ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              editor.chain().focus().toggleBulletList().run();
+                            }}
+                            className={`px-3 py-1 text-sm font-medium rounded border ${
+                              editor.isActive('bulletList') ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                             }`}
                           >
                             Bullet List
