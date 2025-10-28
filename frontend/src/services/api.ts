@@ -243,18 +243,24 @@ export const automationsAPI = {
 export const analyticsAPI = {
   getOverview: (params?: { startDate?: string; endDate?: string }) =>
     api.get('/analytics/overview', { params }),
-  
+
   getContactAnalytics: (contactId: string) =>
     api.get(`/analytics/contact/${contactId}`),
-  
+
   getCampaignPerformance: (period: '24h' | '7d' | '30d' | '90d' = '7d') =>
     api.get('/analytics/campaign-performance', { params: { period } }),
-  
+
   getLinkAnalytics: (limit: number = 20) =>
     api.get('/analytics/links', { params: { limit } }),
-  
+
   getUnsubscribeAnalytics: (params?: { startDate?: string; endDate?: string; limit?: number }) =>
     api.get('/analytics/unsubscribes', { params }),
+
+  getDashboard: () =>
+    api.get('/analytics/dashboard'),
+
+  getActivityReports: (params?: { startDate?: string; endDate?: string; activityType?: string }) =>
+    api.get('/analytics/activities', { params }),
 };
 
 // Notes API

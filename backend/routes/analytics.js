@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { sequelize, EmailSend, EmailEvent, EmailLink, Contact, EmailSuppression } = require('../models');
+const { sequelize, EmailSend, EmailEvent, EmailLink, Contact, EmailSuppression, Note } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -416,6 +416,247 @@ router.get('/unsubscribes', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching unsubscribe analytics:', error);
     res.status(500).json({ message: 'Error fetching unsubscribe analytics' });
+  }
+});
+
+// Get dashboard metrics
+router.get('/dashboard', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get total contacts
+    const totalContacts = await Contact.count({
+      where: { userId }
+    });
+
+    // Get contact growth over last 30 days (grouped by day)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const contactGrowth = await sequelize.query(`
+      SELECT
+        DATE_TRUNC('day', created_at) as date,
+        COUNT(*) as count
+      FROM contacts
+      WHERE user_id = :userId
+        AND created_at >= :startDate
+      GROUP BY DATE_TRUNC('day', created_at)
+      ORDER BY date ASC
+    `, {
+      replacements: { userId, startDate: thirtyDaysAgo },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    // Get activities this week
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const activitiesThisWeek = await Note.count({
+      where: {
+        userId,
+        createdAt: { [Op.gte]: oneWeekAgo }
+      }
+    });
+
+    // Get activity breakdown (parse activities array from notes)
+    const activityBreakdown = await sequelize.query(`
+      SELECT
+        activity::text as activity,
+        COUNT(*) as count
+      FROM notes,
+      LATERAL jsonb_array_elements_text(activities::jsonb) as activity
+      WHERE user_id = :userId
+        AND created_at >= :startDate
+      GROUP BY activity
+      ORDER BY count DESC
+    `, {
+      replacements: { userId, startDate: oneWeekAgo },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    res.json({
+      contacts: {
+        total: totalContacts,
+        growth: contactGrowth.map(row => ({
+          date: row.date,
+          count: parseInt(row.count)
+        }))
+      },
+      activities: {
+        thisWeek: activitiesThisWeek,
+        breakdown: activityBreakdown.map(row => ({
+          type: row.activity,
+          count: parseInt(row.count)
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching dashboard analytics:', error);
+    res.status(500).json({ message: 'Error fetching dashboard analytics' });
+  }
+});
+
+// Get detailed activity reports
+router.get('/activities', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { startDate, endDate, activityType } = req.query;
+
+    // Build date filter
+    const dateFilter = { userId };
+    if (startDate) {
+      dateFilter.createdAt = { [Op.gte]: new Date(startDate) };
+    }
+    if (endDate) {
+      dateFilter.createdAt = { ...dateFilter.createdAt, [Op.lte]: new Date(endDate) };
+    }
+
+    // Get total activity counts by type
+    let activityQuery = `
+      SELECT
+        activity::text as activity,
+        COUNT(*) as count
+      FROM notes,
+      LATERAL jsonb_array_elements_text(activities::jsonb) as activity
+      WHERE user_id = :userId
+    `;
+
+    const replacements = { userId };
+
+    if (startDate) {
+      activityQuery += ' AND created_at >= :startDate';
+      replacements.startDate = new Date(startDate);
+    }
+    if (endDate) {
+      activityQuery += ' AND created_at <= :endDate';
+      replacements.endDate = new Date(endDate);
+    }
+    if (activityType) {
+      activityQuery += ' AND activity = :activityType';
+      replacements.activityType = activityType;
+    }
+
+    activityQuery += ' GROUP BY activity ORDER BY count DESC';
+
+    const activityCounts = await sequelize.query(activityQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    // Get activity timeline (daily breakdown)
+    let timelineQuery = `
+      SELECT
+        DATE_TRUNC('day', n.created_at) as date,
+        activity::text as activity,
+        COUNT(*) as count
+      FROM notes n,
+      LATERAL jsonb_array_elements_text(n.activities::jsonb) as activity
+      WHERE n.user_id = :userId
+    `;
+
+    if (startDate) {
+      timelineQuery += ' AND n.created_at >= :startDate';
+    }
+    if (endDate) {
+      timelineQuery += ' AND n.created_at <= :endDate';
+    }
+    if (activityType) {
+      timelineQuery += ' AND activity = :activityType';
+    }
+
+    timelineQuery += ' GROUP BY DATE_TRUNC(\'day\', n.created_at), activity ORDER BY date ASC, activity';
+
+    const timeline = await sequelize.query(timelineQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    // Get top contacts by activity
+    let topContactsQuery = `
+      SELECT
+        c.id,
+        c.first_name,
+        c.last_name,
+        c.email,
+        COUNT(DISTINCT n.id) as activity_count,
+        array_agg(DISTINCT activity::text) as activities
+      FROM notes n
+      JOIN contacts c ON n.contact_id = c.id
+      CROSS JOIN LATERAL jsonb_array_elements_text(n.activities::jsonb) as activity
+      WHERE n.user_id = :userId
+        AND n.contact_id IS NOT NULL
+    `;
+
+    if (startDate) {
+      topContactsQuery += ' AND n.created_at >= :startDate';
+    }
+    if (endDate) {
+      topContactsQuery += ' AND n.created_at <= :endDate';
+    }
+    if (activityType) {
+      topContactsQuery += ' AND activity = :activityType';
+    }
+
+    topContactsQuery += ' GROUP BY c.id, c.first_name, c.last_name, c.email ORDER BY activity_count DESC LIMIT 10';
+
+    const topContacts = await sequelize.query(topContactsQuery, {
+      replacements,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    // Get recent activities with contact info
+    const recentActivities = await Note.findAll({
+      where: dateFilter,
+      include: [{
+        model: Contact,
+        attributes: ['id', 'firstName', 'lastName', 'email']
+      }],
+      order: [['createdAt', 'DESC']],
+      limit: 20,
+      attributes: ['id', 'content', 'activities', 'createdAt', 'contactId']
+    });
+
+    // Calculate total activities
+    const totalActivities = activityCounts.reduce((sum, item) => sum + parseInt(item.count), 0);
+
+    res.json({
+      summary: {
+        totalActivities,
+        byType: activityCounts.map(row => ({
+          type: row.activity,
+          count: parseInt(row.count),
+          percentage: totalActivities > 0 ? ((parseInt(row.count) / totalActivities) * 100).toFixed(1) : 0
+        }))
+      },
+      timeline: timeline.map(row => ({
+        date: row.date,
+        activityType: row.activity,
+        count: parseInt(row.count)
+      })),
+      topContacts: topContacts.map(row => ({
+        id: row.id,
+        name: `${row.first_name} ${row.last_name}`.trim() || row.email,
+        email: row.email,
+        activityCount: parseInt(row.activity_count),
+        activities: row.activities
+      })),
+      recent: recentActivities.map(note => ({
+        id: note.id,
+        content: note.content,
+        activities: note.activities,
+        createdAt: note.createdAt,
+        contact: note.Contact ? {
+          id: note.Contact.id,
+          name: `${note.Contact.firstName} ${note.Contact.lastName}`.trim() || note.Contact.email,
+          email: note.Contact.email
+        } : null
+      }))
+    });
+
+  } catch (error) {
+    console.error('Error fetching activity reports:', error);
+    res.status(500).json({ message: 'Error fetching activity reports' });
   }
 });
 
