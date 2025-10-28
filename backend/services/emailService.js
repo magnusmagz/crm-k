@@ -1,7 +1,7 @@
 const postmark = require('postmark');
 const crypto = require('crypto');
 const cheerio = require('cheerio');
-const { EmailSend, EmailLink, EmailSuppression, Contact } = require('../models');
+const { EmailSend, EmailLink, EmailSuppression, Contact, Note } = require('../models');
 
 class EmailService {
   constructor() {
@@ -231,6 +231,23 @@ Unsubscribe: {{{ pm:unsubscribe_url }}}
           { lastContacted: new Date() },
           { where: { id: contactId } }
         );
+
+        // Automatically create a note with Email activity
+        try {
+          await Note.create({
+            userId,
+            contactId,
+            content: `Sent email: ${subject}`,
+            activities: ['Email'],
+            isPinned: false,
+            createdAt: emailRecord.sentAt,
+            updatedAt: emailRecord.sentAt
+          });
+          console.log('Auto-created note for email send');
+        } catch (noteError) {
+          // Don't fail the email send if note creation fails
+          console.error('Failed to create note for email:', noteError);
+        }
       }
 
       return {

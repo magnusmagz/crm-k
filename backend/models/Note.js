@@ -32,6 +32,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       field: 'is_pinned'
+    },
+    activities: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+      allowNull: true
     }
   }, {
     tableName: 'notes',

@@ -56,7 +56,8 @@ router.get('/contact/:contactId', authMiddleware, [
 // Create a note
 router.post('/', authMiddleware, [
   body('contactId').isUUID(),
-  body('content').notEmpty().trim()
+  body('content').notEmpty().trim(),
+  body('activities').optional().isArray()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -64,7 +65,7 @@ router.post('/', authMiddleware, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { contactId, content } = req.body;
+    const { contactId, content, activities } = req.body;
     const userId = req.user.id;
 
     // Verify contact belongs to user
@@ -80,7 +81,8 @@ router.post('/', authMiddleware, [
     const note = await Note.create({
       userId,
       contactId,
-      content
+      content,
+      activities: activities || []
     });
 
     // Fetch the created note with user info
@@ -108,7 +110,8 @@ router.post('/', authMiddleware, [
 router.put('/:id', authMiddleware, [
   param('id').isUUID(),
   body('content').optional().trim(),
-  body('isPinned').optional().isBoolean()
+  body('isPinned').optional().isBoolean(),
+  body('activities').optional().isArray()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

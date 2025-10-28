@@ -6,7 +6,6 @@ import ContactForm from '../components/ContactForm';
 import DealForm from '../components/DealForm';
 import EntityDebugView from '../components/automation/EntityDebugView';
 import EmailModal from '../components/email/EmailModal';
-import EmailHistory from '../components/email/EmailHistory';
 import ContactEmailEngagement from '../components/email/ContactEmailEngagement';
 import NoteWidget from '../components/notes/NoteWidget';
 import ActivityTimeline from '../components/ActivityTimeline';
@@ -439,23 +438,6 @@ const ContactDetail: React.FC = () => {
       {contact.email && (
         <div className="mt-8">
           <ContactEmailEngagement contactId={contact.id} />
-        </div>
-      )}
-
-      {/* Email History Section */}
-      {contact.email && (
-        <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-primary-dark">
-              Email History
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              View all emails sent to this contact
-            </p>
-          </div>
-          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-            <EmailHistory contactId={contact.id} refresh={emailRefresh} />
-          </div>
         </div>
       )}
 

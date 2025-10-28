@@ -261,13 +261,13 @@ export const analyticsAPI = {
 export const notesAPI = {
   getContactNotes: (contactId: string) =>
     api.get(`/notes/contact/${contactId}`),
-  
-  createNote: (data: { contactId: string; content: string }) =>
+
+  createNote: (data: { contactId: string; content: string; activities?: string[] }) =>
     api.post('/notes', data),
-  
-  updateNote: (id: string, data: { content?: string; isPinned?: boolean }) =>
+
+  updateNote: (id: string, data: { content?: string; isPinned?: boolean; activities?: string[] }) =>
     api.put(`/notes/${id}`, data),
-  
+
   deleteNote: (id: string) =>
     api.delete(`/notes/${id}`),
 };
