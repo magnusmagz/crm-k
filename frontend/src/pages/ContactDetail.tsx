@@ -334,21 +334,21 @@ const ContactDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Notes Section */}
+      <div className="mt-8">
+        <NoteWidget contactId={contact.id} />
+      </div>
+
       {/* Activity Timeline */}
       <div className="mt-8">
-        <ActivityTimeline 
-          contactId={contact.id} 
+        <ActivityTimeline
+          contactId={contact.id}
           onRefresh={() => {
             fetchContact();
             fetchContactDeals();
             setEmailRefresh(!emailRefresh);
           }}
         />
-      </div>
-
-      {/* Notes Section */}
-      <div className="mt-8">
-        <NoteWidget contactId={contact.id} />
       </div>
 
       {/* Deals Section */}
