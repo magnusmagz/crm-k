@@ -51,9 +51,17 @@ async function checkAndSendReminders() {
     // Process each reminder
     for (const reminder of dueReminders) {
       try {
+        // Prepare notification title with contact first name if applicable
+        let notificationTitle = reminder.title;
+        if (reminder.entityName && reminder.entityType === 'contact') {
+          // Extract first name from "FirstName LastName" format
+          const firstName = reminder.entityName.split(' ')[0];
+          notificationTitle = `${reminder.title} ${firstName}`;
+        }
+
         // Prepare notification payload
         const payload = {
-          title: reminder.title,
+          title: notificationTitle,
           body: reminder.entityName
             ? `Reminder for ${reminder.entityName}`
             : reminder.description || 'You have a reminder due',

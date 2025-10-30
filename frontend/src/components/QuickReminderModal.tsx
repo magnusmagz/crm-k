@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { remindersAPI } from '../services/api';
+import { remindersAPI, contactsAPI } from '../services/api';
 
 interface QuickReminderModalProps {
   isOpen: boolean;
@@ -8,6 +8,13 @@ interface QuickReminderModalProps {
   entityType?: 'contact' | 'deal';
   entityId?: string;
   entityName?: string;
+}
+
+interface Contact {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
 }
 
 export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
@@ -24,15 +31,38 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedContactId, setSelectedContactId] = useState<string>('');
+  const [loadingContacts, setLoadingContacts] = useState(false);
+
+  // Fetch contacts when modal opens (only if no entity is pre-selected)
+  useEffect(() => {
+    const fetchContacts = async () => {
+      if (isOpen && !entityId) {
+        setLoadingContacts(true);
+        try {
+          const response = await contactsAPI.getAll({ limit: 1000 });
+          setContacts(response.data.contacts || []);
+        } catch (error) {
+          console.error('Failed to fetch contacts:', error);
+        } finally {
+          setLoadingContacts(false);
+        }
+      }
+    };
+
+    fetchContacts();
+  }, [isOpen, entityId]);
 
   // Reset form when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setFormData({
         title: entityName ? `Follow up with ${entityName}` : 'Follow up reminder',
         description: '',
         remindAt: ''
       });
+      setSelectedContactId('');
       setError(null);
     }
   }, [isOpen, entityName]);
@@ -43,6 +73,28 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleContactSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const contactId = e.target.value;
+    setSelectedContactId(contactId);
+
+    // Update title if a contact is selected
+    if (contactId) {
+      const contact = contacts.find(c => c.id === contactId);
+      if (contact) {
+        setFormData(prev => ({
+          ...prev,
+          title: `Follow up with ${contact.firstName} ${contact.lastName}`
+        }));
+      }
+    } else {
+      // Reset to default title if no contact selected
+      setFormData(prev => ({
+        ...prev,
+        title: 'Follow up reminder'
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,11 +112,20 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
         remindAt: remindAtISO
       };
 
-      // Add entity information if provided
+      // Add entity information if provided via props (from contact detail page)
       if (entityType && entityId && entityName) {
         reminderData.entityType = entityType;
         reminderData.entityId = entityId;
         reminderData.entityName = entityName;
+      }
+      // Or if a contact was selected from the dropdown
+      else if (selectedContactId) {
+        const selectedContact = contacts.find(c => c.id === selectedContactId);
+        if (selectedContact) {
+          reminderData.entityType = 'contact';
+          reminderData.entityId = selectedContact.id;
+          reminderData.entityName = `${selectedContact.firstName} ${selectedContact.lastName}`;
+        }
       }
 
       await remindersAPI.create(reminderData);
@@ -133,6 +194,40 @@ export const QuickReminderModal: React.FC<QuickReminderModalProps> = ({
               <p className="text-sm text-gray-600">
                 Setting reminder for: <span className="font-medium text-primary-dark">{entityName}</span>
               </p>
+            </div>
+          )}
+
+          {/* Contact Selector - only show if no entity is pre-selected */}
+          {!entityId && (
+            <div className="mb-4">
+              <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-2">
+                Link to Contact (Optional)
+              </label>
+              <select
+                id="contact"
+                value={selectedContactId}
+                onChange={handleContactSelect}
+                disabled={loadingContacts}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">No contact (general reminder)</option>
+                {loadingContacts ? (
+                  <option disabled>Loading contacts...</option>
+                ) : (
+                  contacts
+                    .sort((a, b) => {
+                      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+                      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+                      return nameA.localeCompare(nameB);
+                    })
+                    .map(contact => (
+                      <option key={contact.id} value={contact.id}>
+                        {contact.firstName} {contact.lastName}
+                        {contact.email ? ` (${contact.email})` : ''}
+                      </option>
+                    ))
+                )}
+              </select>
             </div>
           )}
 

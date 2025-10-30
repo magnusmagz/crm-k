@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { BellIcon, CheckIcon, TrashIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { remindersAPI } from '../services/api';
 import { QuickReminderModal } from '../components/QuickReminderModal';
@@ -329,10 +330,16 @@ export const Reminders: React.FC = () => {
                       )}
                     </div>
 
-                    {reminder.entityName && (
+                    {reminder.entityName && reminder.entityType && reminder.entityId && (
                       <div className="flex items-center">
                         <span className="text-gray-400">•</span>
-                        <span className="ml-1">{reminder.entityName}</span>
+                        <Link
+                          to={`/${reminder.entityType}s/${reminder.entityId}`}
+                          className="ml-1 text-primary hover:text-primary-dark hover:underline font-medium"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {reminder.entityName}
+                        </Link>
                       </div>
                     )}
                   </div>
