@@ -517,9 +517,9 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
 
             {/* Preview */}
             {action.config.title && (
-              <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
-                <h4 className="text-sm font-medium text-blue-900 mb-1">Preview</h4>
-                <div className="text-xs text-blue-800">
+              <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                <h4 className="text-sm font-medium text-gray-900 mb-1">Preview</h4>
+                <div className="text-xs text-primary-dark">
                   <div><strong>Title:</strong> {action.config.title}</div>
                   {action.config.description && (
                     <div><strong>Description:</strong> {action.config.description}</div>
