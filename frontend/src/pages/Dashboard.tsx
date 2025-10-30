@@ -10,7 +10,7 @@ import {
   ArrowTrendingUpIcon,
   CalendarDaysIcon
 } from '@heroicons/react/24/outline';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 
 interface DashboardData {
@@ -20,6 +20,7 @@ interface DashboardData {
   };
   activities: {
     thisWeek: number;
+    weeklyGoal: number;
     breakdown: Array<{ type: string; count: number }>;
   };
 }
@@ -28,6 +29,8 @@ const Dashboard: React.FC = () => {
   const { profile } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState('');
 
   useEffect(() => {
     fetchDashboard();
@@ -38,10 +41,31 @@ const Dashboard: React.FC = () => {
       setIsLoading(true);
       const response = await analyticsAPI.getDashboard();
       setDashboardData(response.data);
+      setGoalInput(response.data.activities.weeklyGoal.toString());
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdateGoal = async () => {
+    const newGoal = parseInt(goalInput);
+    if (isNaN(newGoal) || newGoal < 1 || newGoal > 1000) {
+      alert('Please enter a valid goal between 1 and 1000');
+      return;
+    }
+
+    try {
+      await analyticsAPI.updateWeeklyGoal(newGoal);
+      setDashboardData(prev => prev ? {
+        ...prev,
+        activities: { ...prev.activities, weeklyGoal: newGoal }
+      } : null);
+      setIsEditingGoal(false);
+    } catch (error) {
+      console.error('Failed to update goal:', error);
+      alert('Failed to update goal');
     }
   };
 
@@ -107,27 +131,40 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-mobile">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ClipboardDocumentListIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Activities This Week</dt>
-                  <dd className="text-3xl font-bold text-primary-dark">
-                    {dashboardData?.activities.thisWeek || 0}
-                  </dd>
-                </dl>
-              </div>
-            </div>
+        {/* Contact Growth Chart */}
+        <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+          <div className="flex items-center mb-4">
+            <ArrowTrendingUpIcon className="h-6 w-6 text-primary mr-2" />
+            <h2 className="text-lg font-semibold text-primary-dark">Contact Growth (Last 30 Days)</h2>
           </div>
-          <div className="bg-gray-50 px-mobile py-2 sm:py-3">
-            <div className="text-mobile-sm">
-              <span className="text-gray-600">Calls, meetings, emails & more</span>
+          {cumulativeGrowthData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={cumulativeGrowthData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={50}
+                />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#4F46E5"
+                  strokeWidth={2}
+                  dot={{ fill: '#4F46E5' }}
+                  name="Total Contacts"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-48 text-gray-500">
+              No contact growth data yet
             </div>
-          </div>
+          )}
         </div>
 
         <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -156,38 +193,82 @@ const Dashboard: React.FC = () => {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Contact Growth Chart */}
+        {/* Weekly Activity Goal */}
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center mb-4">
-            <ArrowTrendingUpIcon className="h-6 w-6 text-primary mr-2" />
-            <h2 className="text-lg font-semibold text-primary-dark">Contact Growth (Last 30 Days)</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <ClipboardDocumentListIcon className="h-6 w-6 text-primary mr-2" />
+              <h2 className="text-lg font-semibold text-primary-dark">Weekly Activity Goal</h2>
+            </div>
+            {!isEditingGoal && (
+              <button
+                onClick={() => setIsEditingGoal(true)}
+                className="text-xs text-primary hover:text-primary-dark font-medium"
+              >
+                Edit
+              </button>
+            )}
           </div>
-          {cumulativeGrowthData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={cumulativeGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 12 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="total"
-                  stroke="#4F46E5"
-                  strokeWidth={2}
-                  dot={{ fill: '#4F46E5' }}
-                  name="Total Contacts"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+
+          {isEditingGoal ? (
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm text-gray-600">Goal:</span>
+              <input
+                type="number"
+                value={goalInput}
+                onChange={(e) => setGoalInput(e.target.value)}
+                className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary focus:border-primary"
+                min="1"
+                max="1000"
+              />
+              <button
+                onClick={handleUpdateGoal}
+                className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary-dark"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditingGoal(false);
+                  setGoalInput(dashboardData?.activities.weeklyGoal.toString() || '50');
+                }}
+                className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-64 text-gray-500">
-              No contact growth data yet
+            <div className="space-y-4">
+              {/* Large numbers display */}
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-bold text-primary-dark">
+                  {dashboardData?.activities.thisWeek || 0}
+                </span>
+                <span className="text-2xl text-gray-400">/</span>
+                <span className="text-3xl font-semibold text-gray-600">
+                  {dashboardData?.activities.weeklyGoal || 50}
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div>
+                    <span className="text-sm font-semibold inline-block text-primary">
+                      {Math.round(((dashboardData?.activities.thisWeek || 0) / (dashboardData?.activities.weeklyGoal || 50)) * 100)}% Complete
+                    </span>
+                  </div>
+                </div>
+                <div className="overflow-hidden h-4 text-xs flex rounded-full bg-gray-200">
+                  <div
+                    style={{
+                      width: `${Math.min(100, ((dashboardData?.activities.thisWeek || 0) / (dashboardData?.activities.weeklyGoal || 50)) * 100)}%`
+                    }}
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-500"
+                  ></div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Calls, meetings, emails & more</p>
             </div>
           )}
         </div>
@@ -199,17 +280,24 @@ const Dashboard: React.FC = () => {
             <h2 className="text-lg font-semibold text-primary-dark">Activity Breakdown (This Week)</h2>
           </div>
           {dashboardData?.activities.breakdown && dashboardData.activities.breakdown.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={dashboardData.activities.breakdown}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="type" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#4F46E5" name="Activities" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {dashboardData.activities.breakdown.map((activity) => (
+                <div key={activity.type} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <span className="text-sm font-medium text-gray-700 capitalize">
+                    {activity.type.replace(/_/g, ' ')}
+                  </span>
+                  <span className="text-lg font-bold text-primary-dark">{activity.count}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-3 border-t-2 border-gray-300">
+                <span className="text-base font-semibold text-gray-900">Total Activities</span>
+                <span className="text-xl font-bold text-primary">
+                  {dashboardData.activities.breakdown.reduce((sum, activity) => sum + activity.count, 0)}
+                </span>
+              </div>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-64 text-gray-500">
+            <div className="flex items-center justify-center h-32 text-gray-500">
               No activities logged this week
             </div>
           )}

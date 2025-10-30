@@ -92,6 +92,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: false,
       field: 'is_manager'
+    },
+    // Weekly activity goal for dashboard
+    weeklyActivityGoal: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 50,
+      field: 'weekly_activity_goal'
     }
   }, {
     tableName: 'users',

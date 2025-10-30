@@ -261,6 +261,9 @@ export const analyticsAPI = {
 
   getActivityReports: (params?: { startDate?: string; endDate?: string; activityType?: string }) =>
     api.get('/analytics/activities', { params }),
+
+  updateWeeklyGoal: (goal: number) =>
+    api.put('/analytics/weekly-goal', { goal }),
 };
 
 // Notes API

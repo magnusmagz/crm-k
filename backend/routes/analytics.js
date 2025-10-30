@@ -424,6 +424,13 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
 
+    // Get user's weekly activity goal
+    const { User } = require('../models');
+    const user = await User.findByPk(userId, {
+      attributes: ['weeklyActivityGoal']
+    });
+    const weeklyGoal = user?.weeklyActivityGoal || 50;
+
     // Get total contacts
     const totalContacts = await Contact.count({
       where: { userId }
@@ -484,6 +491,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
       },
       activities: {
         thisWeek: activitiesThisWeek,
+        weeklyGoal: weeklyGoal,
         breakdown: activityBreakdown.map(row => ({
           type: row.activity,
           count: parseInt(row.count)
@@ -657,6 +665,35 @@ router.get('/activities', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching activity reports:', error);
     res.status(500).json({ message: 'Error fetching activity reports' });
+  }
+});
+
+// Update weekly activity goal
+router.put('/weekly-goal', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { goal } = req.body;
+
+    // Validate goal
+    if (!goal || typeof goal !== 'number' || goal < 1 || goal > 1000) {
+      return res.status(400).json({ message: 'Goal must be a number between 1 and 1000' });
+    }
+
+    // Update user's goal
+    const { User } = require('../models');
+    await User.update(
+      { weeklyActivityGoal: goal },
+      { where: { id: userId } }
+    );
+
+    res.json({
+      message: 'Weekly activity goal updated successfully',
+      weeklyGoal: goal
+    });
+
+  } catch (error) {
+    console.error('Error updating weekly activity goal:', error);
+    res.status(500).json({ message: 'Error updating goal' });
   }
 });
 
