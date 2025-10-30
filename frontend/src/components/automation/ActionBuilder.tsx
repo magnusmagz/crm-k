@@ -120,6 +120,10 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
       { value: 'send_email', label: 'Send Email' },
     ];
 
+    const utilityActions = [
+      { value: 'create_reminder', label: 'Create Reminder' },
+    ];
+
     const contactActions = [
       { value: 'update_contact_field', label: 'Update Contact Field' },
       { value: 'add_contact_tag', label: 'Add Tag to Contact' },
@@ -144,13 +148,13 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
     ];
 
     if (triggerType.includes('candidate') || triggerType.includes('position') || triggerType.includes('interview')) {
-      return [...emailActions, ...recruitingActions, ...customFieldAction];
+      return [...utilityActions, ...emailActions, ...recruitingActions, ...customFieldAction];
     } else if (triggerType.includes('contact')) {
-      return [...emailActions, ...contactActions, ...customFieldAction];
+      return [...utilityActions, ...emailActions, ...contactActions, ...customFieldAction];
     } else if (triggerType.includes('deal')) {
-      return [...emailActions, ...dealActions, ...contactActions, ...customFieldAction];
+      return [...utilityActions, ...emailActions, ...dealActions, ...contactActions, ...customFieldAction];
     }
-    return [...emailActions];
+    return [...utilityActions, ...emailActions];
   };
 
   const getFieldValue = () => {
@@ -353,6 +357,180 @@ const ActionBuilder: React.FC<ActionBuilderProps> = ({
                   <div><strong>Subject:</strong> "{action.config.subject || '[Empty]'}"</div>
                   <div><strong>Body:</strong> "{(action.config.body?.substring(0, 100) || '[Empty]') + '...'}"</div>
                   <div><strong>Variables:</strong> {availableVariables.join(', ')}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'create_reminder':
+        const reminderVariables = getVariablesByTrigger();
+
+        return (
+          <div className="space-y-4">
+            {/* Reminder Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Reminder Title
+              </label>
+              <input
+                type="text"
+                value={action.config.title || ''}
+                onChange={(e) => onChange({
+                  ...action,
+                  config: { ...action.config, title: e.target.value }
+                })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                placeholder="e.g., Follow up with {{firstName}}"
+              />
+            </div>
+
+            {/* Reminder Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description (Optional)
+              </label>
+              <textarea
+                value={action.config.description || ''}
+                onChange={(e) => onChange({
+                  ...action,
+                  config: { ...action.config, description: e.target.value }
+                })}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                placeholder="Additional details about this reminder..."
+              />
+            </div>
+
+            {/* Time Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Remind me...
+              </label>
+              <div className="space-y-2">
+                {/* Quick relative time options */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { label: '1 hour', value: '1h' },
+                    { label: '1 day', value: '1d' },
+                    { label: '1 week', value: '1w' },
+                    { label: '1 month', value: '30d' },
+                  ].map(option => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => onChange({
+                        ...action,
+                        config: { ...action.config, relativeTime: option.value, absoluteTime: '' }
+                      })}
+                      className={`px-3 py-2 text-sm rounded-md border transition-colors ${
+                        action.config.relativeTime === option.value
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom relative time */}
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm text-gray-600">or in</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={action.config.relativeTime?.match(/^(\d+)/)?.[1] || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const unit = action.config.relativeTime?.match(/[mhdw]$/)?.[0] || 'd';
+                      onChange({
+                        ...action,
+                        config: { ...action.config, relativeTime: value ? `${value}${unit}` : '', absoluteTime: '' }
+                      });
+                    }}
+                    className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                    placeholder="1"
+                  />
+                  <select
+                    value={action.config.relativeTime?.match(/[mhdw]$/)?.[0] || 'd'}
+                    onChange={(e) => {
+                      const value = action.config.relativeTime?.match(/^(\d+)/)?.[1] || '1';
+                      onChange({
+                        ...action,
+                        config: { ...action.config, relativeTime: `${value}${e.target.value}`, absoluteTime: '' }
+                      });
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                  >
+                    <option value="m">minutes</option>
+                    <option value="h">hours</option>
+                    <option value="d">days</option>
+                    <option value="w">weeks</option>
+                  </select>
+                </div>
+
+                {/* Absolute date/time */}
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm text-gray-600">or on</span>
+                  <input
+                    type="datetime-local"
+                    value={action.config.absoluteTime || ''}
+                    onChange={(e) => onChange({
+                      ...action,
+                      config: { ...action.config, absoluteTime: e.target.value, relativeTime: '' }
+                    })}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-primary focus:border-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Variable Helper */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Insert Variables
+              </label>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                {reminderVariables.slice(0, 6).map(variable => (
+                  <button
+                    key={variable}
+                    type="button"
+                    onClick={() => {
+                      const currentTitle = action.config.title || '';
+                      onChange({
+                        ...action,
+                        config: { ...action.config, title: currentTitle + `{{${variable}}}` }
+                      });
+                    }}
+                    className="px-2 py-1 bg-gray-100 text-primary-dark rounded hover:bg-gray-200"
+                    title={`Add {{${variable}}} to title`}
+                  >
+                    {variable}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Reminder will be automatically linked to the contact/deal that triggered this automation
+              </p>
+            </div>
+
+            {/* Preview */}
+            {action.config.title && (
+              <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
+                <h4 className="text-sm font-medium text-blue-900 mb-1">Preview</h4>
+                <div className="text-xs text-blue-800">
+                  <div><strong>Title:</strong> {action.config.title}</div>
+                  {action.config.description && (
+                    <div><strong>Description:</strong> {action.config.description}</div>
+                  )}
+                  <div><strong>Time:</strong> {
+                    action.config.relativeTime
+                      ? `In ${action.config.relativeTime.replace(/(\d+)([mhdw])/, '$1 $2').replace('m', 'minute(s)').replace('h', 'hour(s)').replace('d', 'day(s)').replace('w', 'week(s)')}`
+                      : action.config.absoluteTime
+                        ? new Date(action.config.absoluteTime).toLocaleString()
+                        : '1 day (default)'
+                  }</div>
                 </div>
               </div>
             )}

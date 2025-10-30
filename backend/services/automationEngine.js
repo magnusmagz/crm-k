@@ -1,4 +1,4 @@
-const { Automation, AutomationLog, Contact, Deal, Stage, RecruitingPipeline, Position } = require('../models');
+const { Automation, AutomationLog, Contact, Deal, Stage, RecruitingPipeline, Position, Reminder } = require('../models');
 const emailService = require('./emailService');
 const { Op } = require('sequelize');
 
@@ -11,6 +11,7 @@ class AutomationEngine {
       'move_deal_to_stage': this.moveDealToStage.bind(this),
       'update_custom_field': this.updateCustomField.bind(this),
       'send_email': this.sendEmailAction ? this.sendEmailAction.bind(this) : null,
+      'create_reminder': this.createReminder.bind(this),
       // Recruiting actions
       'update_candidate_status': this.updateCandidateStatus.bind(this),
       'move_candidate_to_stage': this.moveCandidateToStage.bind(this),
@@ -500,6 +501,97 @@ class AutomationEngine {
     }
 
     await pipeline.update({ positionId });
+  }
+
+  // Create Reminder Action
+  async createReminder(config, eventData, userId) {
+    const { title, description, relativeTime, absoluteTime } = config;
+
+    if (!title) {
+      throw new Error('Reminder title is required');
+    }
+
+    // Process title and description with variable replacement
+    const processedTitle = this.replaceVariables(title, eventData);
+    const processedDescription = description ? this.replaceVariables(description, eventData) : null;
+
+    // Calculate remind date
+    let remindAt;
+    if (relativeTime) {
+      // Relative time format: "1h", "1d", "1w", "30m"
+      const match = relativeTime.match(/^(\d+)(m|h|d|w)$/);
+      if (!match) {
+        throw new Error('Invalid relative time format. Use format like: 30m, 1h, 1d, 1w');
+      }
+
+      const value = parseInt(match[1]);
+      const unit = match[2];
+
+      const now = new Date();
+      switch (unit) {
+        case 'm': // minutes
+          remindAt = new Date(now.getTime() + value * 60 * 1000);
+          break;
+        case 'h': // hours
+          remindAt = new Date(now.getTime() + value * 60 * 60 * 1000);
+          break;
+        case 'd': // days
+          remindAt = new Date(now.getTime() + value * 24 * 60 * 60 * 1000);
+          break;
+        case 'w': // weeks
+          remindAt = new Date(now.getTime() + value * 7 * 24 * 60 * 60 * 1000);
+          break;
+      }
+    } else if (absoluteTime) {
+      remindAt = new Date(absoluteTime);
+    } else {
+      // Default to 1 day from now if no time specified
+      remindAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    }
+
+    // Validate remind date is in the future
+    if (remindAt <= new Date()) {
+      // Add 1 minute to make it valid
+      remindAt = new Date(Date.now() + 60 * 1000);
+    }
+
+    // Extract entity information from trigger data
+    let entityType = null;
+    let entityId = null;
+    let entityName = null;
+
+    if (eventData.contact) {
+      entityType = 'contact';
+      entityId = eventData.contact.id;
+      entityName = `${eventData.contact.firstName || ''} ${eventData.contact.lastName || ''}`.trim();
+    } else if (eventData.deal) {
+      entityType = 'deal';
+      entityId = eventData.deal.id;
+      entityName = eventData.deal.name || eventData.deal.title;
+
+      // If deal has associated contact, prefer contact entity
+      if (eventData.deal.Contact) {
+        entityType = 'contact';
+        entityId = eventData.deal.Contact.id;
+        entityName = `${eventData.deal.Contact.firstName || ''} ${eventData.deal.Contact.lastName || ''}`.trim();
+      }
+    }
+
+    // Create the reminder
+    const reminder = await Reminder.create({
+      userId,
+      title: processedTitle,
+      description: processedDescription,
+      remindAt,
+      entityType,
+      entityId,
+      entityName,
+      isCompleted: false
+    });
+
+    console.log(`[AutomationEngine] Created reminder: "${processedTitle}" for ${remindAt.toISOString()}`);
+
+    return reminder;
   }
 
   // Email automation action
