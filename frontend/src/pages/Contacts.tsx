@@ -75,9 +75,9 @@ const Contacts: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>(() => {
     try {
       const saved = localStorage.getItem(SORT_STORAGE_KEY);
-      return saved ? JSON.parse(saved).sortBy : 'lastContacted';
+      return saved ? JSON.parse(saved).sortBy : 'createdAt';
     } catch {
-      return 'lastContacted';
+      return 'createdAt';
     }
   });
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => {
@@ -677,6 +677,8 @@ const Contacts: React.FC = () => {
               >
                 <option value="lastContacted-desc">Last Contacted (Newest)</option>
                 <option value="lastContacted-asc">Last Contacted (Oldest)</option>
+                <option value="createdAt-desc">Creation Date (Newest)</option>
+                <option value="createdAt-asc">Creation Date (Oldest)</option>
                 <option value="lastName-asc">Name (A-Z)</option>
                 <option value="lastName-desc">Name (Z-A)</option>
                 <option value="email-asc">Email (A-Z)</option>
