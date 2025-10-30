@@ -12,17 +12,18 @@ import useDebounce from '../hooks/useDebounce';
 import api from '../services/api';
 
 const navigation = [
+  { name: 'Dashboard', href: '/dashboard' },
   { name: 'Contacts', href: '/contacts' },
   { name: 'Companies', href: '/companies' },
   { name: 'Pipeline', href: '/pipeline' },
   { name: 'Reminders', href: '/reminders' },
-  { name: 'Round-Robin', href: '/round-robin' },
 ];
 
 const marketingNavigation = [
   { name: 'Templates', href: '/email-templates' },
   { name: 'Actions', href: '/automations' },
   { name: 'Metrics', href: '/email-analytics' },
+  { name: 'Activity Reports', href: '/activity-reports' },
 ];
 
 function classNames(...classes: string[]) {

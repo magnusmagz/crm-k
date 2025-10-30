@@ -5,7 +5,6 @@ import { analyticsAPI } from '../services/api';
 import {
   UserGroupIcon,
   CogIcon,
-  PlusIcon,
   ClipboardDocumentListIcon,
   ArrowTrendingUpIcon,
   CalendarDaysIcon
@@ -105,7 +104,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="p-mobile">
             <div className="flex items-center">
@@ -123,9 +122,12 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="bg-gray-50 px-mobile py-2 sm:py-3">
-            <div className="text-mobile-sm">
+            <div className="text-mobile-sm flex items-center justify-between">
               <Link to="/contacts" className="font-medium text-primary hover:text-gray-700">
                 View all
+              </Link>
+              <Link to="/contacts?new=true" className="font-medium text-primary hover:text-gray-700">
+                Create new
               </Link>
             </div>
           </div>
@@ -165,29 +167,6 @@ const Dashboard: React.FC = () => {
               No contact growth data yet
             </div>
           )}
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-mobile">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <PlusIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Quick Actions</dt>
-                  <dd className="text-lg font-medium text-primary-dark">Add Contact</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 px-mobile py-2 sm:py-3">
-            <div className="text-mobile-sm">
-              <Link to="/contacts?new=true" className="font-medium text-primary hover:text-gray-700">
-                Create new
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -250,25 +229,13 @@ const Dashboard: React.FC = () => {
                 </span>
               </div>
 
-              {/* Progress bar */}
-              <div className="relative pt-1">
-                <div className="flex mb-2 items-center justify-between">
-                  <div>
-                    <span className="text-sm font-semibold inline-block text-primary">
-                      {Math.round(((dashboardData?.activities.thisWeek || 0) / (dashboardData?.activities.weeklyGoal || 50)) * 100)}% Complete
-                    </span>
-                  </div>
-                </div>
-                <div className="overflow-hidden h-4 text-xs flex rounded-full bg-gray-200">
-                  <div
-                    style={{
-                      width: `${Math.min(100, ((dashboardData?.activities.thisWeek || 0) / (dashboardData?.activities.weeklyGoal || 50)) * 100)}%`
-                    }}
-                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-500"
-                  ></div>
-                </div>
+              {/* Percentage display */}
+              <div>
+                <span className="text-sm font-semibold inline-block text-primary">
+                  {Math.round(((dashboardData?.activities.thisWeek || 0) / (dashboardData?.activities.weeklyGoal || 50)) * 100)}% Complete
+                </span>
               </div>
-              <p className="text-sm text-gray-600 mt-2">Calls, meetings, emails & more</p>
+              <p className="text-sm text-gray-600">Calls, meetings, emails & more</p>
             </div>
           )}
         </div>

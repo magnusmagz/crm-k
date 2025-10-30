@@ -458,12 +458,19 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    const activitiesThisWeek = await Note.count({
-      where: {
-        userId,
-        createdAt: { [Op.gte]: oneWeekAgo }
-      }
+    // Count actual activities from the activities JSON array, not just notes
+    const activitiesCountResult = await sequelize.query(`
+      SELECT COUNT(*) as count
+      FROM notes,
+      LATERAL jsonb_array_elements_text(activities::jsonb) as activity
+      WHERE user_id = :userId
+        AND created_at >= :startDate
+    `, {
+      replacements: { userId, startDate: oneWeekAgo },
+      type: sequelize.QueryTypes.SELECT
     });
+
+    const activitiesThisWeek = parseInt(activitiesCountResult[0]?.count || 0);
 
     // Get activity breakdown (parse activities array from notes)
     const activityBreakdown = await sequelize.query(`
