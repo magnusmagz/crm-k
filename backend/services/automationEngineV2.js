@@ -1,4 +1,4 @@
-const { Automation, AutomationLog, AutomationStep, AutomationEnrollment, Contact, Deal, Stage, User, sequelize } = require('../models');
+const { Automation, AutomationLog, AutomationStep, AutomationEnrollment, Contact, Deal, Stage, User, Reminder, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const cron = require('node-cron');
 const automationDebugger = require('./automationDebugger');
@@ -536,7 +536,125 @@ class AutomationEngineV2 {
           }
         }
         break;
-        
+
+      case 'create_reminder':
+        const { title, description, relativeTime, absoluteTime } = action.config;
+
+        if (!title) {
+          throw new Error('Reminder title is required');
+        }
+
+        // Replace variables in title and description
+        const replaceVariables = (text, entity) => {
+          if (!text) return text;
+
+          let result = text;
+
+          // Contact fields
+          if (entity.firstName) result = result.replace(/\{\{firstName\}\}/g, entity.firstName);
+          if (entity.lastName) result = result.replace(/\{\{lastName\}\}/g, entity.lastName);
+          if (entity.email) result = result.replace(/\{\{email\}\}/g, entity.email);
+          if (entity.phone) result = result.replace(/\{\{phone\}\}/g, entity.phone);
+          if (entity.company) result = result.replace(/\{\{company\}\}/g, entity.company);
+          if (entity.position) result = result.replace(/\{\{position\}\}/g, entity.position);
+
+          // Deal fields
+          if (entity.name) result = result.replace(/\{\{dealName\}\}/g, entity.name);
+          if (entity.value) result = result.replace(/\{\{dealValue\}\}/g, entity.value);
+
+          // Contact from deal
+          if (entity.Contact) {
+            if (entity.Contact.firstName) result = result.replace(/\{\{firstName\}\}/g, entity.Contact.firstName);
+            if (entity.Contact.lastName) result = result.replace(/\{\{lastName\}\}/g, entity.Contact.lastName);
+            if (entity.Contact.email) result = result.replace(/\{\{email\}\}/g, entity.Contact.email);
+          }
+
+          return result;
+        };
+
+        const processedTitle = replaceVariables(title, entity);
+        const processedDescription = description ? replaceVariables(description, entity) : null;
+
+        // Calculate remind date
+        let remindAt;
+        if (relativeTime) {
+          // Relative time format: "1h", "1d", "1w", "30m"
+          const match = relativeTime.match(/^(\d+)(m|h|d|w)$/);
+          if (!match) {
+            throw new Error('Invalid relative time format. Use format like: 30m, 1h, 1d, 1w');
+          }
+
+          const value = parseInt(match[1]);
+          const unit = match[2];
+
+          const now = new Date();
+          switch (unit) {
+            case 'm': // minutes
+              remindAt = new Date(now.getTime() + value * 60 * 1000);
+              break;
+            case 'h': // hours
+              remindAt = new Date(now.getTime() + value * 60 * 60 * 1000);
+              break;
+            case 'd': // days
+              remindAt = new Date(now.getTime() + value * 24 * 60 * 60 * 1000);
+              break;
+            case 'w': // weeks
+              remindAt = new Date(now.getTime() + value * 7 * 24 * 60 * 60 * 1000);
+              break;
+          }
+        } else if (absoluteTime) {
+          remindAt = new Date(absoluteTime);
+        } else {
+          // Default to 1 day from now if no time specified
+          remindAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        }
+
+        // Validate remind date is in the future
+        if (remindAt <= new Date()) {
+          // Add 1 minute to make it valid
+          remindAt = new Date(Date.now() + 60 * 1000);
+        }
+
+        // Extract entity information
+        let entityType = enrollment.entityType;
+        let entityId = enrollment.entityId;
+        let entityName = null;
+
+        if (entityType === 'contact') {
+          entityName = `${entity.firstName || ''} ${entity.lastName || ''}`.trim();
+        } else if (entityType === 'deal') {
+          entityName = entity.name || entity.title;
+          // If deal has associated contact, prefer contact entity
+          if (entity.Contact) {
+            entityType = 'contact';
+            entityId = entity.Contact.id;
+            entityName = `${entity.Contact.firstName || ''} ${entity.Contact.lastName || ''}`.trim();
+          }
+        }
+
+        // Create the reminder
+        const reminder = await Reminder.create({
+          userId: enrollment.userId,
+          title: processedTitle,
+          description: processedDescription,
+          remindAt,
+          entityType,
+          entityId,
+          entityName,
+          isCompleted: false
+        });
+
+        automationDebugger.log(debugSessionId, 'REMINDER_CREATED', {
+          reminderId: reminder.id,
+          title: processedTitle,
+          originalTitle: title,
+          remindAt: remindAt.toISOString(),
+          entityType,
+          entityId,
+          entityName
+        });
+        break;
+
       default:
         throw new Error(`Unknown action type: ${action.type}`);
     }
